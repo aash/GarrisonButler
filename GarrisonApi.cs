@@ -79,12 +79,9 @@ namespace GarrisonButler
         }
         public static bool IsGarrisonMissionVisibleAndValid(string missionId)
         {
-            string lua = string.Format("return tostring(" +
-                                       "GarrisonMissionFrame.MissionTab.MissionPage and " +
-                                       "GarrisonMissionFrame.MissionTab.MissionPage:IsShown() and " +
-                                       "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0}" +
-                                       ")", missionId);
-            string t = Lua.GetReturnValues(lua).First();
+            string lua = string.Format("if not GarrisonMissionFrame.MissionTab.MissionPage or not GarrisonMissionFrame.MissionTab.MissionPage.missionInfo or not GarrisonMissionFrame.MissionTab.MissionPage:IsShown() then return false;end;" +
+                                       "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )", missionId);
+            string t = Lua.GetReturnValues(lua)[0];
             return t.ToBoolean();
         }
 
@@ -101,7 +98,6 @@ namespace GarrisonButler
                 String.Format(
                 "for idx = 1, #am do " +
                     "if am[idx].missionID == {0} then " +
-                        "print(\"Found mission\");" +
                         "mission = am[idx];" +
                     "end;" +
                 "end;" +
@@ -132,7 +128,6 @@ namespace GarrisonButler
         public static void AddFollowersToMissionOld(string missionId, List<string> followersId)
         {
             GarrisonButler.Debug("Cleaning mission Followers");
-            Lua.DoString("print(\"ULTIMATE TEST\")");
             String luaClear = String.Format(
                 "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
                 "for idx = 1, #MissionPageFollowers do " +
@@ -178,7 +173,7 @@ namespace GarrisonButler
                     "local am = {}; C_Garrison.GetAvailableMissions(am);" +
                     "local missionID;" +
                     "for idx = 1, #am do " +
-        string.Format("if am[idx].missionID == {0} then print(1000000); missionID = am[idx].missionID;" +
+        string.Format("if am[idx].missionID == {0} then missionID = am[idx].missionID;" +
                       "end;", missionId) +
                     "end;" +
                     "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +

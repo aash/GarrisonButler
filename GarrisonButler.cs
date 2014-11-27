@@ -281,7 +281,7 @@ namespace GarrisonButler
             Lua.Events.AttachEvent("GARRISON_MISSION_LIST_UPDATE", GARRISON_MISSION_LIST_UPDATE);
             Lua.Events.AttachEvent("GARRISON_MISSION_NPC_CLOSED", GARRISON_MISSION_NPC_CLOSED);
             Lua.Events.AttachEvent("GARRISON_MISSION_NPC_OPENED", GARRISON_MISSION_NPC_OPENED);
-            Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", GARRISON_MISSION_STARTED);
+            Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
             Lua.Events.AttachEvent("GARRISON_MONUMENT_CLOSE_UI", GARRISON_MONUMENT_CLOSE_UI);
             Lua.Events.AttachEvent("GARRISON_MONUMENT_LIST_LOADED", GARRISON_MONUMENT_LIST_LOADED);
             Lua.Events.AttachEvent("GARRISON_MONUMENT_REPLACED", GARRISON_MONUMENT_REPLACED);
@@ -354,10 +354,6 @@ namespace GarrisonButler
             Logging.Write("LuaEvent: GARRISON_MISSION_NPC_OPENED ");
         }
 
-        private void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
-        {
-            Logging.Write("LuaEvent: GARRISON_MISSION_STARTED ");
-        }
 
         private void GARRISON_MONUMENT_CLOSE_UI(object sender, LuaEventArgs args)
         {

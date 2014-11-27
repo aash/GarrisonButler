@@ -28,8 +28,6 @@ namespace GarrisonButler
         private static readonly WaitTimer LootTimer = WaitTimer.FiveSeconds;
         private static WoWPoint _lastMoveTo;
         private static readonly WaitTimer MoveToLogTimer = WaitTimer.OneSecond;
-        public static List<Follower> Followers;
-        public static List<Mission> Missions;
         public static List<Building> Buildings;
 
         private static LocalPlayer Me
@@ -64,8 +62,8 @@ namespace GarrisonButler
         {
             try
             {
-                Missions = GarrisonApi.GetAllAvailableMissions();
-                Followers = GarrisonApi.GetAllFollowers();
+                GarrisonApi.GetAllAvailableMissions();
+                GarrisonApi.GetAllFollowers();
                 Buildings = GarrisonApi.GetAllBuildings();
                 Check = true;
             }
@@ -179,7 +177,7 @@ namespace GarrisonButler
 
         public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
 
-        private void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
+        public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
         {
             GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED");
             string missionId = args.Args[0].ToString();
@@ -198,8 +196,9 @@ namespace GarrisonButler
             // Is there mission to turn in?
             if (GarrisonApi.GetNumberAvailableMissions() == 0)
                 return false;
+
             GarrisonButler.Log("Found " + GarrisonApi.GetNumberAvailableMissions()  + " available missions to complete.");
-            var tempFollowers = Followers.Select(x => x).ToList();
+            var tempFollowers = GarrisonApi.GetAllFollowers().Select(x => x).ToList();
             var temp = new List<KeyValuePair<Mission, Follower[]>>();
             foreach (Mission mission in GarrisonApi.GetAllAvailableMissions())
             {
@@ -244,29 +243,40 @@ namespace GarrisonButler
             {
                 GarrisonButler.Debug("Mission tab not visible, clicking.");
                 GarrisonApi.ClickTabMission();
-                return true;
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, GarrisonApi.IsGarrisonMissionTabVisible))
+                {
+                    GarrisonButler.Err("Couldn't display GarrisonMissionTab.");
+                    return false;
+                }
             }
             if (!GarrisonApi.IsGarrisonMissionVisible())
             {
                 GarrisonButler.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
                 GarrisonApi.OpenMission(match.Key);
-                return true;
-
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, GarrisonApi.IsGarrisonMissionVisible))
+                {
+                    GarrisonButler.Err("Couldn't display GarrisonMissionFrame.");
+                    return false;
+                }
             }
             else if (!GarrisonApi.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
             {
                 GarrisonButler.Debug("Mission not visible or not valid, close and then opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
                 GarrisonApi.ClickCloseMission();
                 GarrisonApi.OpenMission(match.Key);
-                return true;
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, () => GarrisonApi.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
+                {
+                    GarrisonButler.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                    return false;
+                }
             }
             //GarrisonButler.Debug("Wait for 1 seconds");
             //await Buddy.Coroutines.Coroutine.Sleep(1000);
-            match.Key.AddFollowersToMission(match.Value.ToList());
             //GarrisonButler.Debug("Wait for 1 seconds");
+
+            match.Key.AddFollowersToMission(match.Value.ToList());
             GarrisonApi.StartMission(match.Key.MissionId);
             GarrisonApi.ClickCloseMission();
-            await Buddy.Coroutines.Coroutine.Sleep(1500);
             return true;
         }
         public static async Task<bool> MoveToTable()
