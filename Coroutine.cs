@@ -178,7 +178,15 @@ namespace GarrisonButler
         }
 
         public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
-        
+
+        private void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
+        {
+            GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED");
+            string missionId = args.Args[0].ToString();
+            GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            ToStart.RemoveAll(m => m.Key.MissionId == missionId);
+        }
+
 
         public static bool Check = true;
         public static async Task<bool> DoCheckAvailableMissions()
@@ -258,7 +266,6 @@ namespace GarrisonButler
             //GarrisonButler.Debug("Wait for 1 seconds");
             GarrisonApi.StartMission(match.Key.MissionId);
             GarrisonApi.ClickCloseMission();
-            ToStart.Remove(match);
             await Buddy.Coroutines.Coroutine.Sleep(1500);
             return true;
         }
