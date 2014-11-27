@@ -11,6 +11,7 @@ using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
+using GarrisonLua;
 
 namespace GarrisonButler
 {
@@ -106,7 +107,7 @@ namespace GarrisonButler
                     var canComplete = Lua.ParseLuaValue<Boolean>(args.Args[1].ToString());
                     var Success = Lua.ParseLuaValue<Boolean>(args.Args[1].ToString());
 
-                    Mission mission = GarrisonApi.GetCompletedMissionById(args.Args[0].ToString());
+                    Mission mission = MissionLua.GetCompletedMissionById(args.Args[0].ToString());
                     // Update sucess
                     String lua =
                         "local cm = C_Garrison.GetCompleteMissions(); local RetInfo; local success;" +

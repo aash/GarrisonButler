@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
 using CommonBehaviors.Actions;
+using GarrisonLua;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
@@ -15,9 +16,9 @@ using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonButler
+namespace GarrisonBuddy
 {
-    internal class Coroutine
+    partial class Coroutine
     {
         private static Composite _deathBehavior;
         private static Composite _lootBehavior;
@@ -62,9 +63,9 @@ namespace GarrisonButler
         {
             try
             {
-                GarrisonApi.GetAllAvailableMissions();
-                GarrisonApi.GetAllFollowers();
-                Buildings = GarrisonApi.GetAllBuildings();
+                MissionLua.GetAllAvailableMissions();
+                FollowersLua.GetAllFollowers();
+                Buildings = BuildingsLua.GetAllBuildings();
                 Check = true;
             }
             catch (Exception e)
@@ -75,7 +76,6 @@ namespace GarrisonButler
 
         internal static void OnStop()
         {
-            //Gear_OnStop();
         }
 
         public static async Task<bool> RootLogic()
@@ -84,14 +84,12 @@ namespace GarrisonButler
             AnitAfk();
             if (await RestoreUiIfNeeded())
                 return true;
-            // Is bot dead? if so, release and run back to corpse
+
             if (await DeathBehavior.ExecuteCoroutine())
                 return true;
 
             if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
             {
-                // reset the autoBlacklist timer 
-                //MoveToPoolTimer.Reset();
                 return true;
             }
 
@@ -100,25 +98,6 @@ namespace GarrisonButler
 
             if (!StyxWoW.Me.IsAlive || StyxWoW.Me.Combat || RoutineManager.Current.NeedRest)
                 return false;
-
-            //if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
-            //    SetLootPoi(LootTargeting.Instance.FirstObject);
-
-            // Fishing Logic
-
-            //if (await DoFishing())
-            //    return true;
-
-            //var poiGameObject = BotPoi.Current.AsObject as WoWGameObject;
-
-            //// only loot when POI is not set to a fishing pool.
-            //if (!StyxWoW.Me.IsFlying
-            //    && (BotPoi.Current.Type != PoiType.Harvest
-            //    || (poiGameObject != null && poiGameObject.SubType != WoWGameObjectType.FishingHole))
-            //    && await LootBehavior.ExecuteCoroutine())
-            //{
-            //    return true;
-            //}
 
             if (await DoTurnInCompletedMissions())
                 return true;
@@ -141,7 +120,7 @@ namespace GarrisonButler
         public static DateTime nextCheck = DateTime.Now;
         public static async Task<bool> RestoreUiIfNeeded()
         {
-            if (RestoreCompletedMission && GarrisonApi.GetNumberCompletedMissions() == 0)
+            if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
             {
                 GarrisonButler.Debug("RestoreUiIfNeeded RestoreCompletedMission called");
                 // Restore UI
@@ -159,17 +138,16 @@ namespace GarrisonButler
 
         public static async Task<bool> DoTurnInCompletedMissions()
         {
-            //GarrisonButler.Debug("DoTurnInCompletedMissions");
             // Is there mission to turn in?
-            if (GarrisonApi.GetNumberCompletedMissions() == 0)
+            if (MissionLua.GetNumberCompletedMissions() == 0)
                 return false;
-            GarrisonButler.Log("Found " + GarrisonApi.GetNumberCompletedMissions() + "completed missions to turn in.");
+            GarrisonButler.Log("Found " + MissionLua.GetNumberCompletedMissions() + "completed missions to turn in.");
 
             // are we at the action table?
             if (await MoveToTable())
                 return true;
 
-            GarrisonApi.TurnInAllCompletedMissions();
+            MissionLua.TurnInAllCompletedMissions();
             RestoreCompletedMission = true;
             await CommonCoroutines.SleepForLagDuration();
             return true;
@@ -183,123 +161,6 @@ namespace GarrisonButler
             string missionId = args.Args[0].ToString();
             GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             ToStart.RemoveAll(m => m.Key.MissionId == missionId);
-        }
-
-
-        public static bool Check = true;
-        public static async Task<bool> DoCheckAvailableMissions()
-        {
-            //GarrisonButler.Debug("DoCheckAvailableMissions");
-            if (!Check)
-                return false;
-
-            // Is there mission to turn in?
-            if (GarrisonApi.GetNumberAvailableMissions() == 0)
-                return false;
-
-            GarrisonButler.Log("Found " + GarrisonApi.GetNumberAvailableMissions()  + " available missions to complete.");
-            var tempFollowers = GarrisonApi.GetAllFollowers().Select(x => x).ToList();
-            var temp = new List<KeyValuePair<Mission, Follower[]>>();
-            foreach (Mission mission in GarrisonApi.GetAllAvailableMissions())
-            {
-                Follower[] match =
-                    mission.FindMatch(tempFollowers.Where(f => f.IsCollected && f.Status == "nil").ToList());
-                if (match != null)
-                {
-                    GarrisonButler.Log("Found a match for mission: " + mission.MissionId + " - " + mission.Name);
-                    temp.Add(new KeyValuePair<Mission, Follower[]>(mission, match));
-                    foreach (string ability in mission.Enemies)
-                    {
-                        GarrisonButler.Log("    Ability: " + ability);
-                    }
-                    foreach (Follower follower in match)
-                    {
-                        GarrisonButler.Log("    Match: " + follower.FollowerId + " - " + follower.Name);
-                        foreach (string ability in follower.Counters)
-                        {
-                            GarrisonButler.Log("        Ability: " + ability);
-                        }
-                    }
-                    tempFollowers.RemoveAll(match.Contains);
-                }
-            }
-            ToStart.AddRange(temp.Where(x => ToStart.All(y => y.Key.MissionId != x.Key.MissionId)));
-            GarrisonButler.Log("Can succesfully complete: " + ToStart.Count + " missions.");
-            Check = false;
-            return true;
-        }
-
-        public static async Task<bool> DoStartMissions()
-        {
-            //GarrisonButler.Debug("DoStartMissions");
-            if (ToStart.Count <= 0)
-                return false;
-            var match = ToStart.First();
-
-            if (await MoveToTable())
-                return true;
-
-            if (!GarrisonApi.IsGarrisonMissionTabVisible())
-            {
-                GarrisonButler.Debug("Mission tab not visible, clicking.");
-                GarrisonApi.ClickTabMission();
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, GarrisonApi.IsGarrisonMissionTabVisible))
-                {
-                    GarrisonButler.Err("Couldn't display GarrisonMissionTab.");
-                    return false;
-                }
-            }
-            if (!GarrisonApi.IsGarrisonMissionVisible())
-            {
-                GarrisonButler.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
-                GarrisonApi.OpenMission(match.Key);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, GarrisonApi.IsGarrisonMissionVisible))
-                {
-                    GarrisonButler.Err("Couldn't display GarrisonMissionFrame.");
-                    return false;
-                }
-            }
-            else if (!GarrisonApi.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
-            {
-                GarrisonButler.Debug("Mission not visible or not valid, close and then opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
-                GarrisonApi.ClickCloseMission();
-                GarrisonApi.OpenMission(match.Key);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, () => GarrisonApi.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
-                {
-                    GarrisonButler.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
-                    return false;
-                }
-            }
-            //GarrisonButler.Debug("Wait for 1 seconds");
-            //await Buddy.Coroutines.Coroutine.Sleep(1000);
-            //GarrisonButler.Debug("Wait for 1 seconds");
-
-            match.Key.AddFollowersToMission(match.Value.ToList());
-            GarrisonApi.StartMission(match.Key.MissionId);
-            GarrisonApi.ClickCloseMission();
-            return true;
-        }
-        public static async Task<bool> MoveToTable()
-        {
-            //move to table
-
-            // TO DO
-
-            //
-            if (GarrisonApi.IsGarrisonMissionFrameOpen())
-                return false;
-
-            WoWObject table = GarrisonApi.GetCommandTableOrDefault();
-            try
-            {
-                table.Interact();
-                await CommonCoroutines.SleepForLagDuration();
-            }
-            catch (Exception e)
-            {
-                GarrisonButler.Err(e.ToString());
-            }
-            return true;
         }
 
 
