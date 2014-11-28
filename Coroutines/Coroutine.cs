@@ -18,7 +18,7 @@ using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
 {
-    partial class Coroutine
+   partial class Coroutine
     {
         private static Composite _deathBehavior;
         private static Composite _lootBehavior;
@@ -63,10 +63,10 @@ namespace GarrisonBuddy
         {
             try
             {
-                MissionLua.GetAllAvailableMissions();
-                FollowersLua.GetAllFollowers();
                 Buildings = BuildingsLua.GetAllBuildings();
                 Check = true;
+
+                InitializationMove();
             }
             catch (Exception e)
             {
@@ -163,22 +163,39 @@ namespace GarrisonBuddy
             ToStart.RemoveAll(m => m.Key.MissionId == missionId);
         }
 
-
+       private static List<WoWPoint> waypoints = new List<WoWPoint>(); 
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
-            if (destination.DistanceSqr(_lastMoveTo) > 5*5)
+            if (waypoints.Count == 0)
             {
-                if (MoveToLogTimer.IsFinished)
+                GarrisonButler.Debug("Generating path to " + destinationName);
+                waypoints = Dijkstra.GetPath(Me.Location, destination);
+                GarrisonButler.Debug("Path");
+                foreach (var woWPoint in waypoints)
                 {
-                    if (string.IsNullOrEmpty(destinationName))
-                        destinationName = destination.ToString();
-                    //AutoAnglerBot.Log("Moving to {0}", destinationName);
-                    MoveToLogTimer.Reset();
+                    GarrisonButler.Debug(woWPoint.ToString());
                 }
-                _lastMoveTo = destination;
+                _lastMoveTo = waypoints.First();
             }
-            MoveResult moveResult = Navigator.MoveTo(destination);
-            return moveResult != MoveResult.Failed && moveResult != MoveResult.PathGenerationFailed;
+            WoWPoint waypoint = new WoWPoint();
+            if (Me.Location.Distance(destination) > 5)
+            {
+                if(Me.Location.Distance(_lastMoveTo) < 3 && waypoints.Count > 0)
+                {
+                    waypoint = waypoints.First();
+                    waypoints.Remove(waypoint);
+                    GarrisonButler.Debug("Loading next waypoint to " + destinationName + ": " + waypoint);
+                }
+                else
+                {
+                    waypoint = _lastMoveTo;
+                    GarrisonButler.Debug("Keeping next waypoint to " + destinationName + ": " + waypoint);
+                }
+                _lastMoveTo = waypoint;
+                WoWMovement.ClickToMove(waypoint);
+                return true; //moveResult != MoveResult.Failed && moveResult != MoveResult.PathGenerationFailed;
+            }
+            else return false;
         }
 
         public static async Task<bool> FlyTo(WoWPoint destination, string destinationName = null)

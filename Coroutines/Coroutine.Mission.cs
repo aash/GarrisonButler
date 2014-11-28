@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GarrisonLua;
+using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals.WoWObjects;
 
@@ -19,13 +20,13 @@ namespace GarrisonBuddy
                 return false;
 
             // Is there mission to turn in?
-            if (GarrisonLua.GetNumberAvailableMissions() == 0)
+            if (MissionLua.GetNumberAvailableMissions() == 0)
                 return false;
 
-            GarrisonButler.Log("Found " + GarrisonLua.GetNumberAvailableMissions() + " available missions to complete.");
+            GarrisonButler.Log("Found " + MissionLua.GetNumberAvailableMissions() + " available missions to complete.");
             var tempFollowers = FollowersLua.GetAllFollowers().Select(x => x).ToList();
             var temp = new List<KeyValuePair<Mission, Follower[]>>();
-            foreach (Mission mission in GarrisonLua.GetAllAvailableMissions())
+            foreach (Mission mission in MissionLua.GetAllAvailableMissions())
             {
                 Follower[] match =
                     mission.FindMatch(tempFollowers.Where(f => f.IsCollected && f.Status == "nil").ToList());
@@ -88,14 +89,15 @@ namespace GarrisonBuddy
         public static async Task<bool> MoveToTable()
         {
             //move to table
-
+            if (await MoveTo(new WoWPoint(1933, 346, 91), "Command table"))
+                return true;
             // TO DO
 
             //
             if (InterfaceLua.IsGarrisonMissionFrameOpen())
                 return false;
 
-            WoWObject table = GarrisonLua.GetCommandTableOrDefault();
+            WoWObject table = MissionLua.GetCommandTableOrDefault();
             try
             {
                 table.Interact();
