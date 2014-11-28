@@ -13,7 +13,7 @@ using Styx.TreeSharp;
 using Styx.WoWInternals;
 using GarrisonLua;
 
-namespace GarrisonButler
+namespace GarrisonBuddy
 {
     public enum PathingType
     {

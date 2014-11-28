@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GarrisonLua;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonButler
+namespace GarrisonBuddy
 {
     partial class Coroutine
     {
@@ -18,13 +19,13 @@ namespace GarrisonButler
                 return false;
 
             // Is there mission to turn in?
-            if (GarrisonApi.GetNumberAvailableMissions() == 0)
+            if (GarrisonLua.GetNumberAvailableMissions() == 0)
                 return false;
 
-            GarrisonButler.Log("Found " + GarrisonApi.GetNumberAvailableMissions() + " available missions to complete.");
-            var tempFollowers = GarrisonApi.GetAllFollowers().Select(x => x).ToList();
+            GarrisonButler.Log("Found " + GarrisonLua.GetNumberAvailableMissions() + " available missions to complete.");
+            var tempFollowers = FollowersLua.GetAllFollowers().Select(x => x).ToList();
             var temp = new List<KeyValuePair<Mission, Follower[]>>();
-            foreach (Mission mission in GarrisonApi.GetAllAvailableMissions())
+            foreach (Mission mission in GarrisonLua.GetAllAvailableMissions())
             {
                 Follower[] match =
                     mission.FindMatch(tempFollowers.Where(f => f.IsCollected && f.Status == "nil").ToList());
@@ -48,40 +49,40 @@ namespace GarrisonButler
             if (await MoveToTable())
                 return true;
 
-            if (!GarrisonApi.IsGarrisonMissionTabVisible())
+            if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
                 GarrisonButler.Debug("Mission tab not visible, clicking.");
-                GarrisonApi.ClickTabMission();
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, GarrisonApi.IsGarrisonMissionTabVisible))
+                InterfaceLua.ClickTabMission();
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
                 {
                     GarrisonButler.Err("Couldn't display GarrisonMissionTab.");
                     return false;
                 }
             }
-            if (!GarrisonApi.IsGarrisonMissionVisible())
+            if (!InterfaceLua.IsGarrisonMissionVisible())
             {
                 GarrisonButler.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
-                GarrisonApi.OpenMission(match.Key);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, GarrisonApi.IsGarrisonMissionVisible))
+                InterfaceLua.OpenMission(match.Key);
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
                     GarrisonButler.Err("Couldn't display GarrisonMissionFrame.");
                     return false;
                 }
             }
-            else if (!GarrisonApi.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
+            else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
             {
                 GarrisonButler.Debug("Mission not visible or not valid, close and then opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
-                GarrisonApi.ClickCloseMission();
-                GarrisonApi.OpenMission(match.Key);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, () => GarrisonApi.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
+                InterfaceLua.ClickCloseMission();
+                InterfaceLua.OpenMission(match.Key);
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
                 {
                     GarrisonButler.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
                     return false;
                 }
             }
             match.Key.AddFollowersToMission(match.Value.ToList());
-            GarrisonApi.StartMission(match.Key.MissionId);
-            GarrisonApi.ClickCloseMission();
+            InterfaceLua.StartMission(match.Key.MissionId);
+            InterfaceLua.ClickCloseMission();
             return true;
         }
         public static async Task<bool> MoveToTable()
@@ -91,10 +92,10 @@ namespace GarrisonButler
             // TO DO
 
             //
-            if (GarrisonApi.IsGarrisonMissionFrameOpen())
+            if (InterfaceLua.IsGarrisonMissionFrameOpen())
                 return false;
 
-            WoWObject table = GarrisonApi.GetCommandTableOrDefault();
+            WoWObject table = GarrisonLua.GetCommandTableOrDefault();
             try
             {
                 table.Interact();

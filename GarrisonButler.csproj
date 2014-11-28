@@ -36,10 +36,19 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="API\GarrisonLua.Building.cs" />
+    <Compile Include="API\GarrisonLua.Follower.cs" />
+    <Compile Include="API\GarrisonLua.InterfaceLua.cs" />
+    <Compile Include="API\GarrisonLua.Mission.cs" />
+    <Compile Include="Coroutines\Coroutine.Mission.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Objects\Building.cs" />
     <Compile Include="Coroutine.cs" />
+    <Compile Include="Objects\Follower.cs" />
+    <Compile Include="GarrisonLua.cs" />
     <Compile Include="GarrisonButler.cs" />
+    <Compile Include="Objects\Mission.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="GreyMagic">
@@ -54,6 +63,7 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="RemoteASM">
       <HintPath>..\..\RemoteASM.dll</HintPath>
     </Reference>

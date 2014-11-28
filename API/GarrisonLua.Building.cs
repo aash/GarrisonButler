@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonButler;
+using GarrisonBuddy;
 using Styx.WoWInternals;
 
 namespace GarrisonLua
@@ -12,7 +12,7 @@ namespace GarrisonLua
 
         public static Building GetBuildingById(String buildingId)
         {
-            GarrisonButler.GarrisonButler.Debug("GetBuildingById");
+            GarrisonBuddy.GarrisonButler.Debug("GetBuildingById");
             String lua =
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
@@ -75,7 +75,7 @@ namespace GarrisonLua
 
         public static List<string> GetListBuildingsId()
         {
-            GarrisonButler.GarrisonButler.Debug("GetListBuildingsId");
+            GarrisonBuddy.GarrisonButler.Debug("GetListBuildingsId");
             String lua =
                 "local RetInfo = {}; local buildings = C_Garrison.GetBuildings();" +
                 "for i = 1, #buildings do " +

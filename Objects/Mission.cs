@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GarrisonLua;
 using Styx.Helpers;
 
-namespace GarrisonButler
+namespace GarrisonBuddy
 {
     public class Mission
     {
@@ -193,7 +194,7 @@ namespace GarrisonButler
 
         public void AddFollowersToMission(List<Follower> followers)
         {
-            GarrisonApi.AddFollowersToMission(MissionId, followers.Select(f => f.FollowerId).ToList());
+            InterfaceLua.AddFollowersToMission(MissionId, followers.Select(f => f.FollowerId).ToList());
         }
 
         public class CompletedMission
