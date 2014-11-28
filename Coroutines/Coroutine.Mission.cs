@@ -26,7 +26,7 @@ namespace GarrisonBuddy
             GarrisonButler.Log("Found " + MissionLua.GetNumberAvailableMissions() + " available missions to complete.");
             var tempFollowers = FollowersLua.GetAllFollowers().Select(x => x).ToList();
             var temp = new List<KeyValuePair<Mission, Follower[]>>();
-            foreach (Mission mission in MissionLua.GetAllAvailableMissions())
+            foreach (Mission mission in MissionLua.GetAllAvailableMissionsReport())
             {
                 Follower[] match =
                     mission.FindMatch(tempFollowers.Where(f => f.IsCollected && f.Status == "nil").ToList());

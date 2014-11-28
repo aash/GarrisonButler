@@ -71,7 +71,6 @@ namespace GarrisonLua
             String lua = "local am = {}; C_Garrison.GetAvailableMissions(am); return tostring(#am);";
             return Lua.GetReturnValues(lua)[0].ToInt32();
         }
-
         public static List<Mission> GetAllCompletedMissions()
         {
             return GetListCompletedMissionsId().Select(GetCompletedMissionById).ToList();
@@ -79,6 +78,10 @@ namespace GarrisonLua
 
         // Return list of all available missions
         public static List<Mission> GetAllAvailableMissions()
+        {
+            return GetListMissionsId().Select(GetMissionById).ToList();
+        }
+        public static List<Mission> GetAllAvailableMissionsReport()
         {
             return GetListMissionsId().Select(GetMissionById).ToList();
         }
@@ -100,7 +103,68 @@ namespace GarrisonLua
             List<string> enemies = Lua.GetReturnValues(lua);
             return enemies ?? new List<string>();
         }
+        
+        
+        public static Mission GetMissionReportById(String missionId)
+        {
+            String lua =
+                "local b = {}; local am = GarrisonLandingPageReport.List.AvailableItems; local RetInfo = {}; local cpt = 0;" +
+                String.Format(
+                    "local location, xp, environment, environmentDesc, environmentTexture, locPrefix, isExhausting, enemies = C_Garrison.GetMissionInfo(\"{0}\");" +
+                    "for idx = 1, #am do " +
+                    "if am[idx].missionID == {0} then " +
+                    "b[0] = am[idx].description;" +
+                    "b[1] = am[idx].cost;" +
+                    "b[2] = am[idx].duration;" +
+                    "b[3] = am[idx].durationSeconds;" +
+                    "b[4] = am[idx].level;" +
+                    "b[5] = am[idx].type;" +
+                    "b[6] = am[idx].locPrefix;" +
+                    "b[7] = am[idx].state;" +
+                    "b[8] = am[idx].iLevel;" +
+                    "b[9] = am[idx].name;" +
+                    "b[10] = am[idx].location;" +
+                    "b[11] = am[idx].isRare;" +
+                    "b[12] = am[idx].typeAtlas;" +
+                    "b[13] = am[idx].missionID;" +
+                    "b[14] = am[idx].numFollowers;" +
+                    "b[15] = xp;" +
+                    "b[16] = am[idx].numRewards;" +
+                    "b[17] = environment;" +
+                    "cpt = 17;" +
+                    "end;" +
+                    "end;"
+                    , missionId) +
+                "for j_=0,cpt do table.insert(RetInfo,tostring(b[j_]));end; " +
+                "return unpack(RetInfo)";
+            List<string> mission = Lua.GetReturnValues(lua);
 
+            List<string> enemies = GetEnemies(missionId);
+            string description = mission[0];
+            int cost = mission[1].ToInt32();
+            //mission[2] = this.duration;
+            int durationSeconds = mission[3].ToInt32();
+            int level = mission[4].ToInt32();
+            string type = mission[5];
+            //mission[6] = this.locPrefix; 
+            int state = mission[7].ToInt32();
+            int ilevel = mission[8].ToInt32();
+            string name = mission[9];
+            string location = mission[10];
+            bool isRare = mission[11].ToBoolean();
+            //mission[12] = this.typeAtlas; 
+            string missionID = mission[13];
+            int numFollowers = mission[14].ToInt32();
+            string xp = mission[15];
+            int numRewards = mission[16].ToInt32();
+            string environment = mission[17];
+
+            return new Mission(cost, description,
+                durationSeconds, enemies, level, ilevel,
+                isRare, location, missionID,
+                name, numFollowers, numRewards,
+                state, type, xp, environment);
+        }
         public static Mission GetMissionById(String missionId)
         {
             String lua =
