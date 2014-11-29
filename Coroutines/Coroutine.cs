@@ -26,7 +26,7 @@ namespace GarrisonBuddy
         private static Composite _vendorBehavior;
         private static DateTime _pulseTimestamp;
         private static readonly WaitTimer AntiAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
-        private static readonly WaitTimer LootTimer = WaitTimer.FiveSeconds;
+        private static readonly WaitTimer HarvestingTimer = WaitTimer.OneSecond;
         private static WoWPoint _lastMoveTo;
         private static readonly WaitTimer MoveToLogTimer = WaitTimer.OneSecond;
         public static List<Building> Buildings;
@@ -99,6 +99,9 @@ namespace GarrisonBuddy
             if (!StyxWoW.Me.IsAlive || StyxWoW.Me.Combat || RoutineManager.Current.NeedRest)
                 return false;
 
+            if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
+                SetLootPoi(LootTargeting.Instance.FirstObject);
+
             if (await DoTurnInCompletedMissions())
                 return true;
 
@@ -113,9 +116,23 @@ namespace GarrisonBuddy
 
             if(await DoStartMissions())
                 return true;
-            
+
+            if(await PickUpGarrisonCache())
+                return true;
+
+            if (await CleanMine())
+                return true;
+            //if(test)
+            //if (await MoveTo(new WoWPoint(1948.035, 284.513, 88.96583))) // testing purpose
+            //    return true; // testing purpose
+            //test = false;
+            //if (await MoveToTable()) // testing purpose
+            //    return true; // testing purpose
+
             return false;
         }
+
+       private static bool test = true;
 
         public static DateTime nextCheck = DateTime.Now;
         public static async Task<bool> RestoreUiIfNeeded()
@@ -161,41 +178,6 @@ namespace GarrisonBuddy
             string missionId = args.Args[0].ToString();
             GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             ToStart.RemoveAll(m => m.Key.MissionId == missionId);
-        }
-
-       private static List<WoWPoint> waypoints = new List<WoWPoint>(); 
-        public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
-        {
-            if (waypoints.Count == 0)
-            {
-                GarrisonButler.Debug("Generating path to " + destinationName);
-                waypoints = Dijkstra.GetPath(Me.Location, destination);
-                GarrisonButler.Debug("Path");
-                foreach (var woWPoint in waypoints)
-                {
-                    GarrisonButler.Debug(woWPoint.ToString());
-                }
-                _lastMoveTo = waypoints.First();
-            }
-            WoWPoint waypoint = new WoWPoint();
-            if (Me.Location.Distance(destination) > 5)
-            {
-                if(Me.Location.Distance(_lastMoveTo) < 3 && waypoints.Count > 0)
-                {
-                    waypoint = waypoints.First();
-                    waypoints.Remove(waypoint);
-                    GarrisonButler.Debug("Loading next waypoint to " + destinationName + ": " + waypoint);
-                }
-                else
-                {
-                    waypoint = _lastMoveTo;
-                    GarrisonButler.Debug("Keeping next waypoint to " + destinationName + ": " + waypoint);
-                }
-                _lastMoveTo = waypoint;
-                WoWMovement.ClickToMove(waypoint);
-                return true; //moveResult != MoveResult.Failed && moveResult != MoveResult.PathGenerationFailed;
-            }
-            else return false;
         }
 
         public static async Task<bool> FlyTo(WoWPoint destination, string destinationName = null)
