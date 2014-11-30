@@ -40,6 +40,13 @@
     <Compile Include="API\GarrisonLua.Follower.cs" />
     <Compile Include="API\GarrisonLua.InterfaceLua.cs" />
     <Compile Include="API\GarrisonLua.Mission.cs" />
+    <Compile Include="Config\ConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\ConfigForm.Designer.cs">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\GaBSettings.cs" />
     <Compile Include="Coroutines\Coroutine.Guarden.cs" />
     <Compile Include="Coroutines\Coroutine.Mine.cs" />
     <Compile Include="Coroutines\Coroutine.Move.data.cs" />
@@ -75,15 +82,24 @@
       <HintPath>..\..\RemoteASMNative.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
       <HintPath>..\..\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
     <Reference Include="Tripper.RecastManaged">
       <HintPath>..\..\Tripper.RecastManaged.dll</HintPath>
     </Reference>
     <Reference Include="Tripper.Tools">
       <HintPath>..\..\Tripper.Tools.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Config\ConfigForm.resx">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

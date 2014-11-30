@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx;
 using Styx.Common.Helpers;
@@ -197,9 +198,6 @@ namespace GarrisonBuddy
             if (await DoTurnInCompletedMissions())
                 return true;
 
-            if (await DoCheckAvailableMissions())
-                return true;
-
             if (await DoStartMissions())
                 return true;
 
@@ -257,6 +255,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> DoTurnInCompletedMissions()
         {
+            if (!GaBSettings.Mono.CompletedMissions)
+                return false;
+
             // Is there mission to turn in?
             if (MissionLua.GetNumberCompletedMissions() == 0)
                 return false;

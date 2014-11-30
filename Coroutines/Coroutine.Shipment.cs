@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -35,6 +36,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> PickUpGarrisonCache()
         {
+            if (!GaBSettings.Mono.GarrisonCache)
+                return false;
+
             WoWGameObject cache =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
             if (cache == null)
@@ -49,6 +53,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> PickUpMineWorkOrders()
         {
+            if (!GaBSettings.Mono.ShipmentsMine)
+                return false;
+
             Building mine = _buildings.FirstOrDefault(b => MinesId.Contains(b.id));
             if (mine == null)
                 return false;
@@ -74,6 +81,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> PickUpGardenWorkOrders()
         {
+            if (!GaBSettings.Mono.ShipmentsGarden)
+                return false;
+
             Building garden = _buildings.FirstOrDefault(b => GardensId.Contains(b.id));
             if (garden == null)
                 return false;
@@ -98,6 +108,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> ActivateFinishedBuildings()
         {
+            if (!GaBSettings.Mono.ActivateBuildings)
+                return false;
+
             IOrderedEnumerable<WoWGameObject> toActivate =
                 ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))

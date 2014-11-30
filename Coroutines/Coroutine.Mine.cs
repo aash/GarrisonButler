@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -25,6 +26,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> CleanMine()
         {
+            if (!GaBSettings.Mono.HarvestMine)
+                return false;
+
             // Do i have a mine?
             if (!_buildings.Any(b => MinesId.Contains(b.id)))
                 return false;

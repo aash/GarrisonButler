@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
+using System.Windows.Forms;
 
 namespace GarrisonBuddy
 {
@@ -89,17 +91,6 @@ namespace GarrisonBuddy
             }
         }
 
-        private WoWSpell GetWoWSpellFromSpellCastFailedArgs(LuaEventArgs args)
-        {
-            if (args.Args.Length < 5)
-                return null;
-            return WoWSpell.FromId((int) ((double) args.Args[4]));
-        }
-
-
-        // scans bags for offhand weapon if mainhand isn't 2h and none are equipped and uses the highest ilvl one
-
-
         internal static void Log(string message, params object[] args)
         {
             Logging.Write(Colors.DarkGreen, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
@@ -112,7 +103,7 @@ namespace GarrisonBuddy
 
         internal static void Diagnostic(string message, params object[] args)
         {
-            Logging.WriteDiagnostic(Colors.DarkViolet, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
+            Logging.WriteDiagnostic(Colors.DeepPink, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
         }
 
         #region overrides
@@ -178,6 +169,10 @@ namespace GarrisonBuddy
             Lua.Events.AttachEvent("GARRISON_TRADESKILL_NPC_CLOSED", GARRISON_TRADESKILL_NPC_CLOSED);
             Lua.Events.AttachEvent("GARRISON_UPDATE", GARRISON_UPDATE);
             Coroutine.OnStart();
+        }
+        public override Form ConfigurationForm
+        {
+            get { return new ConfigForm(); }
         }
 
         #endregion

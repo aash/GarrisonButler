@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -20,6 +21,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> CleanGarden()
         {
+            if (!GaBSettings.Mono.HarvestGarden)
+                return false;
+
             // Do i have a garden?
             if (!_buildings.Any(b => GardensId.Contains(b.id)))
                 return false;

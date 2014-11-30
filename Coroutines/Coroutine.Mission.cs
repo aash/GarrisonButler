@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx;
 using Styx.CommonBot.Coroutines;
@@ -15,6 +16,9 @@ namespace GarrisonBuddy
 
         public static async Task<bool> DoCheckAvailableMissions()
         {
+            if (!GaBSettings.Mono.DoMissions)
+                return false;
+
             if (!Check)
                 return false;
 
@@ -43,6 +47,12 @@ namespace GarrisonBuddy
 
         public static async Task<bool> DoStartMissions()
         {
+            if (!GaBSettings.Mono.DoMissions)
+                return false;
+
+            if (await DoCheckAvailableMissions())
+                return true;
+
             if (ToStart.Count <= 0)
                 return false;
             KeyValuePair<Mission, Follower[]> match = ToStart.First();
