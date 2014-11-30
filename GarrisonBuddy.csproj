@@ -7,8 +7,8 @@
     <ProjectGuid>{1441053B-4D09-45A3-9602-087A7F143AEE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GarrisonButler</RootNamespace>
-    <AssemblyName>GarrisonButler</AssemblyName>
+    <RootNamespace>GarrisonBuddy</RootNamespace>
+    <AssemblyName>GarrisonBuddy</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
