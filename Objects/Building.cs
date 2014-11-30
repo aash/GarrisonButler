@@ -51,7 +51,7 @@ namespace GarrisonBuddy
             this.itemQuality = itemQuality;
             itemID = itemId ?? "None";
 
-            //GarrisonBuddy.Debug(ToString());
+            //GarrisonBuddy.Diagnostic(ToString());
         }
 
         public override string ToString()

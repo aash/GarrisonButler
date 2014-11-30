@@ -5768,18 +5768,18 @@ namespace GarrisonBuddy
         internal static List<WoWPoint> GetGarrisonPoints()
         {
             var points = new List<WoWPoint>();
-            GarrisonBuddy.Debug("Generating Custom points for movement in Garrison.");
+            GarrisonBuddy.Diagnostic("Generating Custom points for movement in Garrison.");
 
             // Adding Town Hall
             int TownHallLvl = BuildingsLua.GetTownHallLevel();
-            GarrisonBuddy.Debug("Generating Custom points: Town Hall level " + TownHallLvl + " detected.");
+            GarrisonBuddy.Diagnostic("Generating Custom points: Town Hall level " + TownHallLvl + " detected.");
             points.AddRange(Me.IsAlliance ? AllianceTownHall[TownHallLvl - 1]() : HordeTownHall[TownHallLvl - 1]());
 
             // Adding Mine
             Building mine = _buildings.FirstOrDefault(b => MinesId.Contains(b.id));
             if (mine != null)
             {
-                GarrisonBuddy.Debug("Generating Custom points: Mine level " + mine.rank + " detected.");
+                GarrisonBuddy.Diagnostic("Generating Custom points: Mine level " + mine.rank + " detected.");
                 points.AddRange(Me.IsAlliance
                     ? AllianceBuildings[TownHallLvl - 1][(int) Buildings.Mine][mine.rank - 1]()
                     : HordeBuildings[TownHallLvl - 1][(int) Buildings.Mine][mine.rank - 1]());
@@ -5789,12 +5789,12 @@ namespace GarrisonBuddy
             Building garden = _buildings.FirstOrDefault(b => GardensId.Contains(b.id));
             if (garden != null)
             {
-                GarrisonBuddy.Debug("Generating Custom points: Garden level " + garden.rank + " detected.");
+                GarrisonBuddy.Diagnostic("Generating Custom points: Garden level " + garden.rank + " detected.");
                 points.AddRange(Me.IsAlliance
                     ? AllianceBuildings[TownHallLvl - 1][(int) Buildings.Garden][garden.rank - 1]()
                     : HordeBuildings[TownHallLvl - 1][(int) Buildings.Garden][garden.rank - 1]());
             }
-            GarrisonBuddy.Debug("Generating Custom points: Done with " + points.Count + " points.");
+            GarrisonBuddy.Diagnostic("Generating Custom points: Done with " + points.Count + " points.");
             return points;
         }
 

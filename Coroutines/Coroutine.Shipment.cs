@@ -60,7 +60,7 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235886);
             if (mineShipment == null)
             {
-                //GarrisonBuddy.Debug("Seems there's a problem, shipment for mine ready but can't find on map");
+                //GarrisonBuddy.Diagnostic("Seems there's a problem, shipment for mine ready but can't find on map");
                 return false;
             }
 
@@ -85,7 +85,7 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235885);
             if (gardenShipment == null)
             {
-                //GarrisonBuddy.Debug("Seems there's a problem, shipment for garden ready but can't find on map");
+                //GarrisonBuddy.Diagnostic("Seems there's a problem, shipment for garden ready but can't find on map");
                 return false;
             }
 

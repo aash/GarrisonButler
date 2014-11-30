@@ -24,7 +24,7 @@ namespace GarrisonBuddy
                 _waypoints = Dijkstra.GetPath(Me.Location, destination);
                 if (_waypoints.Count == 0)
                 {
-                    GarrisonBuddy.Err("Couldn't generate path from " + Me.Location + " to " + destination);
+                    GarrisonBuddy.Warning("Couldn't generate path from " + Me.Location + " to " + destination);
                     return false;
                 }
                 _lastMoveTo = _waypoints.First();
@@ -36,19 +36,19 @@ namespace GarrisonBuddy
                 if (Me.Location.Distance(_lastMoveTo) >= 1)
                 {
                     waypoint = _lastMoveTo;
-                    //GarrisonBuddy.Debug("Keeping next waypoint to " + destinationName + ": " + waypoint);
+                    //GarrisonBuddy.Diagnostic("Keeping next waypoint to " + destinationName + ": " + waypoint);
                 }
                 else
                 {
                     if (_waypoints.Count == 0)
                     {
-                        GarrisonBuddy.Debug("Waypoints list empty, assuming at destination: " + destinationName);
+                        GarrisonBuddy.Diagnostic("Waypoints list empty, assuming at destination: " + destinationName);
                         return false;
                     }
                     waypoint = _waypoints.First();
 
                     _waypoints.Remove(waypoint);
-                    GarrisonBuddy.Debug("Loading next waypoint to " + destinationName + ": " + waypoint);
+                    GarrisonBuddy.Diagnostic("Loading next waypoint to " + destinationName + ": " + waypoint);
                 }
                 _lastMoveTo = waypoint;
                 if (Me.Mounted)

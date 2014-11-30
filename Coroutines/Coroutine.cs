@@ -23,11 +23,8 @@ namespace GarrisonBuddy
         private static Composite _lootBehavior;
         private static Composite _combatBehavior;
         private static Composite _vendorBehavior;
-        private static DateTime _pulseTimestamp;
-        private static readonly WaitTimer AntiAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
-        private static readonly WaitTimer HarvestingTimer = WaitTimer.OneSecond;
+        private static readonly WaitTimer ResetAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
         private static WoWPoint _lastMoveTo;
-        private static readonly WaitTimer MoveToLogTimer = WaitTimer.OneSecond;
         private static List<Building> _buildings;
 
         private static readonly List<WoWPoint> AllyWaitingPoints = new List<WoWPoint>
@@ -46,7 +43,7 @@ namespace GarrisonBuddy
 
         private static bool test = true;
 
-        public static DateTime nextCheck = DateTime.Now;
+        public static DateTime NextCheck = DateTime.Now;
         public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
 
         private static LocalPlayer Me
@@ -89,7 +86,7 @@ namespace GarrisonBuddy
             }
             catch (Exception e)
             {
-                GarrisonBuddy.Err(e.ToString());
+                GarrisonBuddy.Warning(e.ToString());
             }
         }
 
@@ -107,8 +104,6 @@ namespace GarrisonBuddy
 
             WoWPoint myLoc = StyxWoW.Me.Location;
 
-            List<WoWPoint> playerLocations = null;
-
             foreach (WoWObject obj in incomingUnits)
             {
                 var gObj = obj as WoWGameObject;
@@ -116,9 +111,6 @@ namespace GarrisonBuddy
                 {
                     if (gObj.SubType != WoWGameObjectType.FishingHole)
                         continue;
-
-
-                    WoWPoint gObjLoc = gObj.Location;
 
                     outgoingUnits.Add(obj);
                     continue;
@@ -146,8 +138,8 @@ namespace GarrisonBuddy
 
         public static async Task<bool> RootLogic()
         {
-            CheckPulseTime();
-            AnitAfk();
+            CheckResetAfk();
+
             if (await RestoreUiIfNeeded())
                 return true;
 
@@ -170,9 +162,10 @@ namespace GarrisonBuddy
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
 
-            if ((DateTime.Now - nextCheck).TotalHours > 0)
+            // Check mission every minute
+            if ((DateTime.Now - NextCheck).TotalHours > 0)
             {
-                nextCheck = DateTime.Now.AddMinutes(1);
+                NextCheck = DateTime.Now.AddMinutes(1);
                 Check = true;
             }
 
@@ -248,7 +241,7 @@ namespace GarrisonBuddy
         {
             if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
             {
-                GarrisonBuddy.Debug("RestoreUiIfNeeded RestoreCompletedMission called");
+                GarrisonBuddy.Diagnostic("RestoreUiIfNeeded RestoreCompletedMission called");
                 // Restore UI
                 Lua.DoString("GarrisonMissionFrame.MissionTab.MissionList.CompleteDialog:Hide();" +
                              "GarrisonMissionFrame.MissionComplete:Hide();" +
@@ -281,86 +274,17 @@ namespace GarrisonBuddy
 
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_STARTED");
+            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED");
             string missionId = args.Args[0].ToString();
-            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             ToStart.RemoveAll(m => m.Key.MissionId == missionId);
         }
 
-        public static async Task<bool> FlyTo(WoWPoint destination, string destinationName = null)
+        private static void CheckResetAfk()
         {
-            if (destination.DistanceSqr(_lastMoveTo) > 5*5)
-            {
-                if (MoveToLogTimer.IsFinished)
-                {
-                    if (string.IsNullOrEmpty(destinationName))
-                        destinationName = destination.ToString();
-                    //AutoAnglerBot.Log("Flying to {0}", destinationName);
-                    MoveToLogTimer.Reset();
-                }
-                _lastMoveTo = destination;
-            }
-            Flightor.MoveTo(destination);
-            return true;
-        }
-
-        public static async Task<bool> Logout()
-        {
-            WoWUnit activeMover = WoWMovement.ActiveMover;
-            if (activeMover == null)
-                return false;
-
-            WoWItem hearthStone =
-                Me.BagItems.FirstOrDefault(
-                    h => h != null && h.IsValid && h.Entry == 6948
-                         && h.CooldownTimeLeft == TimeSpan.FromMilliseconds(0));
-            if (hearthStone == null)
-            {
-                //utoAnglerBot.Log("Unable to find a hearthstone");
-                return false;
-            }
-
-            if (activeMover.IsMoving)
-            {
-                WoWMovement.MoveStop();
-                //if (!await Coroutine.Wait(4000, () => !activeMover.IsMoving))
-                return false;
-            }
-
-            hearthStone.UseContainerItem();
-            //if (await Coroutine.Wait(15000, () => Me.Combat))
-            //    return false;
-
-            //AutoAnglerBot.Log("Logging out");
-            Lua.DoString("Logout()");
-            TreeRoot.Stop();
-            return true;
-        }
-
-        private static void AnitAfk()
-        {
-            // keep the bot from going afk.
-            if (AntiAfkTimer.IsFinished)
-            {
-                StyxWoW.ResetAfk();
-                AntiAfkTimer.Reset();
-            }
-        }
-
-        private static void CheckPulseTime()
-        {
-            if (_pulseTimestamp == DateTime.MinValue)
-            {
-                _pulseTimestamp = DateTime.Now;
-                return;
-            }
-
-            TimeSpan pulseTime = DateTime.Now - _pulseTimestamp;
-            if (pulseTime >= TimeSpan.FromSeconds(3))
-            {
-                //AutoAnglerBot.Err("Warning: It took {0} seconds to pulse.\nThis can cause missed bites. To fix try disabling all plugins",pulseTime.TotalSeconds);
-            }
-            _pulseTimestamp = DateTime.Now;
+            if (!ResetAfkTimer.IsFinished) return;
+            StyxWoW.ResetAfk();
+            ResetAfkTimer.Reset();
         }
 
         private static void SetLootPoi(WoWObject lootObj)
@@ -384,29 +308,5 @@ namespace GarrisonBuddy
                 }
             }
         }
-
-        //private static async Task<bool> CheckLootFrame()
-        //{
-        //    if (!LootTimer.IsFinished)
-        //    {
-        //        // loot everything.
-        //        if (AutoAnglerBot.Instance.LootFrameIsOpen)
-        //        {
-        //            for (int i = 0; i < LootFrame.Instance.LootItems; i++)
-        //            {
-        //                LootSlotInfo lootInfo = LootFrame.Instance.LootInfo(i);
-        //                if (AutoAnglerBot.Instance.FishCaught.ContainsKey(lootInfo.LootName))
-        //                    AutoAnglerBot.Instance.FishCaught[lootInfo.LootName] += (uint)lootInfo.LootQuantity;
-        //                else
-        //                    AutoAnglerBot.Instance.FishCaught.Add(lootInfo.LootName, (uint)lootInfo.LootQuantity);
-        //            }
-        //            LootFrame.Instance.LootAll();
-        //            LootTimer.Stop();
-        //            await CommonCoroutines.SleepForLagDuration();
-        //        }
-        //        return true;
-        //    }
-        //    return false;
-        //}
     }
 }

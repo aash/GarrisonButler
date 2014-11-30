@@ -13,7 +13,7 @@ namespace GarrisonLua
 
         public static Building GetBuildingById(String buildingId)
         {
-            GarrisonBuddy.GarrisonBuddy.Debug("GetBuildingById");
+            GarrisonBuddy.GarrisonBuddy.Diagnostic("GetBuildingById");
             String lua =
                 "print(1);" +
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
@@ -77,7 +77,7 @@ namespace GarrisonLua
 
         public static List<string> GetListBuildingsId()
         {
-            GarrisonBuddy.GarrisonBuddy.Debug("GetListBuildingsId");
+            GarrisonBuddy.GarrisonBuddy.Diagnostic("GetListBuildingsId");
             String lua =
                 "local RetInfo = {}; local buildings = C_Garrison.GetBuildings();" +
                 "for i = 1, #buildings do " +

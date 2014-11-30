@@ -52,28 +52,28 @@ namespace GarrisonBuddy
 
             if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
-                GarrisonBuddy.Debug("Mission tab not visible, clicking.");
+                GarrisonBuddy.Diagnostic("Mission tab not visible, clicking.");
                 InterfaceLua.ClickTabMission();
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
                 {
-                    GarrisonBuddy.Err("Couldn't display GarrisonMissionTab.");
+                    GarrisonBuddy.Warning("Couldn't display GarrisonMissionTab.");
                     return false;
                 }
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
-                GarrisonBuddy.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " +
+                GarrisonBuddy.Diagnostic("Mission not visible, opening mission: " + match.Key.MissionId + " - " +
                                     match.Key.Name);
                 InterfaceLua.OpenMission(match.Key);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
-                    GarrisonBuddy.Err("Couldn't display GarrisonMissionFrame.");
+                    GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame.");
                     return false;
                 }
             }
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
             {
-                GarrisonBuddy.Debug("Mission not visible or not valid, close and then opening mission: " +
+                GarrisonBuddy.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
                                     match.Key.MissionId + " - " + match.Key.Name);
                 InterfaceLua.ClickCloseMission();
                 InterfaceLua.OpenMission(match.Key);
@@ -82,7 +82,7 @@ namespace GarrisonBuddy
                         Buddy.Coroutines.Coroutine.Wait(2000,
                             () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
                 {
-                    GarrisonBuddy.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                    GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
                     return false;
                 }
             }
@@ -111,7 +111,7 @@ namespace GarrisonBuddy
             }
             catch (Exception e)
             {
-                GarrisonBuddy.Err(e.ToString());
+                GarrisonBuddy.Warning(e.ToString());
             }
             return true;
         }
