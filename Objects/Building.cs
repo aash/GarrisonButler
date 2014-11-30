@@ -10,7 +10,7 @@ namespace GarrisonBuddy
         private readonly String canUpgrade;
         private readonly String creationTime;
         private readonly String duration;
-        private readonly String id;
+        public readonly int id;
         private readonly String isBuilding;
         private readonly String isPrebuilt;
         private readonly String itemID;
@@ -19,15 +19,15 @@ namespace GarrisonBuddy
         private readonly String name;
         private readonly String nameShipment;
         private readonly String plotId;
-        private readonly String rank;
+        public readonly int rank;
         private readonly String shipmentCapacity;
-        private readonly String shipmentsReady;
+        public readonly int shipmentsReady;
         private readonly String shipmentsTotal;
         private readonly String timeStart;
 
-        public Building(string id, string plotId, string buildingLevel, string name, string rank, string isBuilding,
+        public Building(int id, string plotId, string buildingLevel, string name, int rank, string isBuilding,
             string timeStart, string buildTime, string canActivate, string canUpgrade, string isPrebuilt,
-            string nameShipment, string shipmentCapacity, string shipmentsReady, string shipmentsTotal,
+            string nameShipment, string shipmentCapacity, int shipmentsReady, string shipmentsTotal,
             string creationTime, string duration, string itemName, string itemQuality, string itemId)
         {
             this.id = id;
@@ -51,7 +51,7 @@ namespace GarrisonBuddy
             this.itemQuality = itemQuality;
             itemID = itemId;
 
-            GarrisonButler.Debug(ToString());
+            GarrisonBuddy.Debug(ToString());
         }
 
         public override string ToString()

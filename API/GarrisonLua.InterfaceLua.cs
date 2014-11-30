@@ -52,7 +52,7 @@ namespace GarrisonLua
 
         public static void OpenMission(Mission mission)
         {
-            GarrisonBuddy.GarrisonButler.Debug("OpenMission - id: " + mission.MissionId);
+            GarrisonBuddy.GarrisonBuddy.Debug("OpenMission - id: " + mission.MissionId);
             //Scroll until we see mission first
             String lua =
                 "local mission; local am = {}; C_Garrison.GetAvailableMissions(am);" +
@@ -89,7 +89,7 @@ namespace GarrisonLua
 
         public static void AddFollowersToMissionOld(string missionId, List<string> followersId)
         {
-            GarrisonBuddy.GarrisonButler.Debug("Cleaning mission Followers");
+            GarrisonBuddy.GarrisonBuddy.Debug("Cleaning mission Followers");
             String luaClear = String.Format(
                 "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
                 "for idx = 1, #MissionPageFollowers do " +
@@ -97,10 +97,10 @@ namespace GarrisonLua
                 "end;");
             Lua.DoString(luaClear);
 
-            GarrisonBuddy.GarrisonButler.Debug("Adding mission Followers: " + followersId.Count);
+            GarrisonBuddy.GarrisonBuddy.Debug("Adding mission Followers: " + followersId.Count);
             foreach (string t in followersId)
             {
-                GarrisonBuddy.GarrisonButler.Debug("Adding mission Followers ID: " + t);
+                GarrisonBuddy.GarrisonBuddy.Debug("Adding mission Followers ID: " + t);
             }
             //    var
             //        luaAdd =
@@ -158,7 +158,7 @@ namespace GarrisonLua
 
         public static void AddFollowersToMission(string missionId, List<string> followersId)
         {
-            //GarrisonButler.Debug("Cleaning mission Followers");
+            //GarrisonBuddy.Debug("Cleaning mission Followers");
             //String luaClear = String.Format(
             //    "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
             //    "for idx = 1, #MissionPageFollowers do " +
@@ -166,10 +166,10 @@ namespace GarrisonLua
             //    "end;");
             //Lua.DoString(luaClear);
 
-            //GarrisonButler.Debug("Adding mission Followers: " + followersId.Count);
+            //GarrisonBuddy.Debug("Adding mission Followers: " + followersId.Count);
             //    foreach (var t in followersId)
             //    {
-            //        GarrisonButler.Debug("Adding mission Followers ID: " + t);
+            //        GarrisonBuddy.Debug("Adding mission Followers ID: " + t);
             //    }
             //    var
             //        luaAdd =
@@ -264,7 +264,7 @@ namespace GarrisonLua
 
         public static void StartMission(string missionId)
         {
-            GarrisonBuddy.GarrisonButler.Debug("StartMission");
+            GarrisonBuddy.GarrisonBuddy.Debug("StartMission");
             String lua = String.Format("C_Garrison.StartMission(\"{0}\");", missionId);
             Lua.DoString(lua);
         }

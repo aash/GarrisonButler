@@ -32,7 +32,7 @@ namespace GarrisonBuddy
             Xp = xp;
             LevelXp = levelXp;
             Counters = counters;
-            //GarrisonButler.Debug(ToString());
+            //GarrisonBuddy.Debug(ToString());
         }
 
         public override string ToString()

@@ -158,16 +158,28 @@ namespace GarrisonBuddy
                 Check = true;
             }
 
+            // Garrison Cache
             if (await PickUpGarrisonCache())
                 return true;
 
+            // Mine
             if (await CleanMine())
                 return true;
+            if (await PickUpMineWorkOrders())
+                return true;
             
-            if (await CleanGuarden())
+            // Garden 
+            if (await CleanGarden())
                 return true;
 
+            if (await PickUpGardenWorkOrders())
+                return true;
 
+            // All other work orders
+            if (await PickUpAllWorkOrders())
+                return true;
+
+            // Missions
             if (await DoTurnInCompletedMissions())
                 return true;
 

@@ -23,7 +23,7 @@ namespace GarrisonBuddy
             if (MissionLua.GetNumberAvailableMissions() == 0)
                 return false;
 
-            GarrisonButler.Log("Found " + MissionLua.GetNumberAvailableMissions() + " available missions to complete.");
+            GarrisonBuddy.Log("Found " + MissionLua.GetNumberAvailableMissions() + " available missions to complete.");
             var tempFollowers = FollowersLua.GetAllFollowers().Select(x => x).ToList();
             var temp = new List<KeyValuePair<Mission, Follower[]>>();
             foreach (Mission mission in MissionLua.GetAllAvailableMissionsReport())
@@ -37,7 +37,7 @@ namespace GarrisonBuddy
                 }
             }
             ToStart.AddRange(temp.Where(x => ToStart.All(y => y.Key.MissionId != x.Key.MissionId)));
-            GarrisonButler.Log("Can succesfully complete: " + ToStart.Count + " missions.");
+            GarrisonBuddy.Log("Can succesfully complete: " + ToStart.Count + " missions.");
             Check = false;
             return true;
         }
@@ -52,32 +52,32 @@ namespace GarrisonBuddy
 
             if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
-                GarrisonButler.Debug("Mission tab not visible, clicking.");
+                GarrisonBuddy.Debug("Mission tab not visible, clicking.");
                 InterfaceLua.ClickTabMission();
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
                 {
-                    GarrisonButler.Err("Couldn't display GarrisonMissionTab.");
+                    GarrisonBuddy.Err("Couldn't display GarrisonMissionTab.");
                     return false;
                 }
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
-                GarrisonButler.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
+                GarrisonBuddy.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
                 InterfaceLua.OpenMission(match.Key);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
-                    GarrisonButler.Err("Couldn't display GarrisonMissionFrame.");
+                    GarrisonBuddy.Err("Couldn't display GarrisonMissionFrame.");
                     return false;
                 }
             }
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
             {
-                GarrisonButler.Debug("Mission not visible or not valid, close and then opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
+                GarrisonBuddy.Debug("Mission not visible or not valid, close and then opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
                 InterfaceLua.ClickCloseMission();
                 InterfaceLua.OpenMission(match.Key);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
                 {
-                    GarrisonButler.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                    GarrisonBuddy.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
                     return false;
                 }
             }
@@ -105,7 +105,7 @@ namespace GarrisonBuddy
             }
             catch (Exception e)
             {
-                GarrisonButler.Err(e.ToString());
+                GarrisonBuddy.Err(e.ToString());
             }
             return true;
         }

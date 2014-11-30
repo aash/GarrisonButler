@@ -21,7 +21,7 @@ namespace GarrisonBuddy
         Bounce
     }
 
-    public class GarrisonButler : BotBase
+    public class GarrisonBuddy : BotBase
     {
         private static WaitTimer _loadProfileTimer = new WaitTimer(TimeSpan.FromSeconds(1));
         private static DateTime _botStartTime;
@@ -40,7 +40,7 @@ namespace GarrisonBuddy
         private PathingType _pathingType = PathingType.Circle;
         private string _prevProfilePath;
 
-        public GarrisonButler()
+        public GarrisonBuddy()
         {
             Instance = this;
             BotEvents.Profile.OnNewOuterProfileLoaded += Profile_OnNewOuterProfileLoaded;
@@ -54,21 +54,21 @@ namespace GarrisonBuddy
         internal Dictionary<string, uint> FishCaught { get; private set; }
 
         // internal AutoAnglerProfile Profile { get; private set; }
-        internal static GarrisonButler Instance { get; private set; }
+        internal static GarrisonBuddy Instance { get; private set; }
 
 
         private void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
         {
-            GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");
+            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");
             if (args.Args[1].ToString() == "nil")
             {
-                GarrisonButler.Debug("GARRISON_MISSION_BONUS_ROLL_COMPLETE: Received a failure.");
+                GarrisonBuddy.Debug("GARRISON_MISSION_BONUS_ROLL_COMPLETE: Received a failure.");
             }
             else
             {
                 if (args.Args[0] == null)
                 {
-                    GarrisonButler.Err("ERROR: Arg0 null in GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+                    GarrisonBuddy.Err("ERROR: Arg0 null in GARRISON_MISSION_BONUS_ROLL_COMPLETE");
                 }
                 else
                 {
@@ -81,7 +81,7 @@ namespace GarrisonBuddy
                     }
                     else
                     {
-                        GarrisonButler.Log("Uknown mission completed.");
+                        GarrisonBuddy.Log("Uknown mission completed.");
                     }
                 }
             }
@@ -89,17 +89,17 @@ namespace GarrisonBuddy
 
         private void GARRISON_MISSION_COMPLETE_RESPONSE(object sender, LuaEventArgs args)
         {
-            GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_COMPLETE_RESPONSE ");
+            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_COMPLETE_RESPONSE ");
             // Store the success of the mission
             if (args.Args[1].ToString() == "nil")
             {
-                GarrisonButler.Debug("GARRISON_MISSION_COMPLETE_RESPONSE: Received a failure.");
+                GarrisonBuddy.Debug("GARRISON_MISSION_COMPLETE_RESPONSE: Received a failure.");
             }
             else
             {
                 if (args.Args[0] == null)
                 {
-                    GarrisonButler.Err("ERROR: Arg0 null in GARRISON_MISSION_COMPLETE_RESPONSE");
+                    GarrisonBuddy.Err("ERROR: Arg0 null in GARRISON_MISSION_COMPLETE_RESPONSE");
                 }
                 else
                 {
@@ -146,17 +146,17 @@ namespace GarrisonBuddy
 
         internal static void Log(string format, params object[] args)
         {
-            Logging.Write(Colors.DodgerBlue, String.Format("[GarrisonButler] {0}: {1}", Version, format), args);
+            Logging.Write(Colors.DodgerBlue, String.Format("[GarrisonBuddy] {0}: {1}", Version, format), args);
         }
 
         internal static void Err(string format, params object[] args)
         {
-            Logging.Write(Colors.Red, String.Format("[GarrisonButler] {0}: {1}", Version, format), args);
+            Logging.Write(Colors.Red, String.Format("[GarrisonBuddy] {0}: {1}", Version, format), args);
         }
 
         internal static void Debug(string format, params object[] args)
         {
-            Logging.WriteDiagnostic(Colors.DodgerBlue, String.Format("[GarrisonButler] {0}: {1}", Version, format), args);
+            Logging.WriteDiagnostic(Colors.DodgerBlue, String.Format("[GarrisonBuddy] {0}: {1}", Version, format), args);
         }
 
         private void DumpConfiguration()
@@ -199,7 +199,7 @@ namespace GarrisonBuddy
 
         public override string Name
         {
-            get { return "GarrisonButler"; }
+            get { return "GarrisonBuddy"; }
         }
 
         public override PulseFlags PulseFlags

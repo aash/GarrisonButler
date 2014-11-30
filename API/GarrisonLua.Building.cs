@@ -36,7 +36,7 @@ namespace GarrisonLua
                     // Info on shipments
                     "Temp[12] = nameShipment;" +
                     "Temp[13] = shipmentCapacity;" +
-                    "Temp[14] = shipmentsReady;" +
+                    "if (not shipmentsReady) then Temp[14] = 0; else Temp[14] = shipmentsReady;end;" +
                     "Temp[15] = shipmentsTotal;" +
                     "Temp[16] = creationTime;" +
                     "Temp[17] = duration;" +
@@ -61,7 +61,7 @@ namespace GarrisonLua
             String isPrebuilt = building[11];
             String nameShipment = building[12];
             String shipmentCapacity = building[13];
-            String shipmentsReady = building[14];
+            int shipmentsReady = building[14].ToInt32();
             String shipmentsTotal = building[15];
             String creationTime = building[16];
             String duration = building[17];

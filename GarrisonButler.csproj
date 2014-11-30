@@ -40,6 +40,10 @@
     <Compile Include="API\GarrisonLua.Follower.cs" />
     <Compile Include="API\GarrisonLua.InterfaceLua.cs" />
     <Compile Include="API\GarrisonLua.Mission.cs" />
+    <Compile Include="Coroutines\Coroutine.Guarden.cs" />
+    <Compile Include="Coroutines\Coroutine.Mine.cs" />
+    <Compile Include="Coroutines\Coroutine.Move.data.cs" />
+    <Compile Include="Coroutines\Coroutine.Shipment.cs" />
     <Compile Include="Coroutines\Coroutine.Mission.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -47,7 +51,7 @@
     <Compile Include="Objects\Building.cs" />
     <Compile Include="Coroutines\Coroutine.cs" />
     <Compile Include="Objects\Follower.cs" />
-    <Compile Include="GarrisonButler.cs" />
+    <Compile Include="GarrisonBuddy.cs" />
     <Compile Include="Objects\Mission.cs" />
   </ItemGroup>
   <ItemGroup>

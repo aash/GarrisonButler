@@ -51,7 +51,7 @@ namespace GarrisonBuddy
             Type = type;
             Xp = xp;
             Environment = environment;
-            //GarrisonButler.Debug(ToString());
+            //GarrisonBuddy.Debug(ToString());
         }
 
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level, int iLevel,
@@ -119,7 +119,7 @@ namespace GarrisonBuddy
             {
                 report = "MISSION FAILED\n" + ToString();
             }
-            GarrisonButler.Log(report);
+            GarrisonBuddy.Log(report);
         }
 
         public Follower[] FindMatch(List<Follower> followers)
@@ -173,11 +173,11 @@ namespace GarrisonBuddy
         {
             //foreach (var follower in possibleMatch)
             //{
-            //    GarrisonButler.Debug(follower.ToString());
+            //    GarrisonBuddy.Debug(follower.ToString());
             //}
             //foreach (var enemy in Enemies)
             //{
-            //    GarrisonButler.Debug("  " + enemy);
+            //    GarrisonBuddy.Debug("  " + enemy);
             //}
             List<String> counters = possibleMatch.Select(m => m.Counters).SelectMany(x => x).ToList();
             foreach (string ability in Enemies)
@@ -216,7 +216,7 @@ namespace GarrisonBuddy
                 MaterialMultiplier = materialMultiplier;
                 SuccessChance = successChance;
                 XpBonus = xpBonus;
-                GarrisonButler.Debug(ToString());
+                GarrisonBuddy.Debug(ToString());
             }
 
             public override string ToString()
