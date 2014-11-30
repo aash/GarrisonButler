@@ -22,7 +22,8 @@ namespace GarrisonBuddy
             235388, // Gorgrond Flytrap
             235376, // Frostweed 
             235389, // Starflower
-            235387  // Fireweed
+            235387,  // Fireweed
+            235391  // Talador Orchid
         }; 
 
         public static async Task<bool> CleanGarden()

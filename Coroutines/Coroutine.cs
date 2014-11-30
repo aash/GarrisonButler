@@ -175,8 +175,11 @@ namespace GarrisonBuddy
             if (await PickUpGardenWorkOrders())
                 return true;
 
-            // All other work orders
-            if (await PickUpAllWorkOrders())
+            // All other work orders => DOESNT WORK
+            //if (await PickUpAllWorkOrders())
+            //    return true;
+
+            if (await ActivateFinishedBuildings())
                 return true;
 
             // Missions

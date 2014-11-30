@@ -42,7 +42,7 @@ namespace GarrisonBuddy
             if (mine == null)
                 return false;
 
-            if (mine.shipmentsReady == 0)
+            if (BuildingsLua.GetNumberShipmentReadyByBuildingId(mine.id) == 0)
                 return false;
 
             var mineShipment = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235886);
@@ -66,7 +66,7 @@ namespace GarrisonBuddy
             if (garden == null)
                 return false;
 
-            if (garden.shipmentsReady == 0)
+            if (BuildingsLua.GetNumberShipmentReadyByBuildingId(garden.id) == 0)
                 return false;
 
             var gardenShipment = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235885);
@@ -83,19 +83,47 @@ namespace GarrisonBuddy
             return true;
         }
 
-
-        public static async Task<bool> PickUpAllWorkOrders()
+        internal static List<uint> FinalizeGarrisonPlotIds = new List<uint>()
         {
-            var shipments = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.GarrisonShipment).OrderBy(o=>o.Entry);
+            232651,
+            232652,
+            233250,
+            233251,
+            236190,
+            236191,
+            236192,
+            236193,
+            236261,
+            236263
+        };
+        public static async Task<bool> ActivateFinishedBuildings()
+        {
+            var toActivate = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry)).ToList().OrderBy(o => o.Location.X);
+            if (!toActivate.Any())
+                return false;
 
-            foreach (var shipment in shipments)
-            {
-                if (await MoveTo(shipment.Location))
-                    return true;
-                shipment.Interact();
+            if (await MoveTo(toActivate.First().Location))
+                return true;
 
-            }
+            toActivate.First().Interact();
+            await Buddy.Coroutines.Coroutine.Sleep(5000);
             return true;
         }
+
+
+        // DOESNT WORK SINCE SOME WORK ORDER ARE ALWAYS THERE! 
+        //public static async Task<bool> PickUpAllWorkOrders()
+        //{
+        //    var shipments = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.GarrisonShipment).OrderBy(o=>o.Entry);
+
+        //    foreach (var shipment in shipments)
+        //    {
+        //        if (await MoveTo(shipment.Location))
+        //            return true;
+        //        shipment.Interact();
+
+        //    }
+        //    return true;
+        //}
     }
 }
