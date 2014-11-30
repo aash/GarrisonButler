@@ -49,9 +49,9 @@ namespace GarrisonBuddy
             this.duration = duration;
             this.itemName = itemName;
             this.itemQuality = itemQuality;
-            itemID = itemId;
+            itemID = itemId ?? "None";
 
-            GarrisonBuddy.Debug(ToString());
+            //GarrisonBuddy.Debug(ToString());
         }
 
         public override string ToString()
