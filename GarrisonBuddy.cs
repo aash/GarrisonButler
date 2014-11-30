@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
+using GarrisonLua;
 using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -11,7 +12,6 @@ using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
-using GarrisonLua;
 
 namespace GarrisonBuddy
 {
@@ -59,16 +59,16 @@ namespace GarrisonBuddy
 
         private void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");
+            Debug("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");
             if (args.Args[1].ToString() == "nil")
             {
-                GarrisonBuddy.Debug("GARRISON_MISSION_BONUS_ROLL_COMPLETE: Received a failure.");
+                Debug("GARRISON_MISSION_BONUS_ROLL_COMPLETE: Received a failure.");
             }
             else
             {
                 if (args.Args[0] == null)
                 {
-                    GarrisonBuddy.Err("ERROR: Arg0 null in GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+                    Err("ERROR: Arg0 null in GARRISON_MISSION_BONUS_ROLL_COMPLETE");
                 }
                 else
                 {
@@ -81,7 +81,7 @@ namespace GarrisonBuddy
                     }
                     else
                     {
-                        GarrisonBuddy.Log("Uknown mission completed.");
+                        Log("Uknown mission completed.");
                     }
                 }
             }
@@ -89,17 +89,17 @@ namespace GarrisonBuddy
 
         private void GARRISON_MISSION_COMPLETE_RESPONSE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_COMPLETE_RESPONSE ");
+            Debug("LuaEvent: GARRISON_MISSION_COMPLETE_RESPONSE ");
             // Store the success of the mission
             if (args.Args[1].ToString() == "nil")
             {
-                GarrisonBuddy.Debug("GARRISON_MISSION_COMPLETE_RESPONSE: Received a failure.");
+                Debug("GARRISON_MISSION_COMPLETE_RESPONSE: Received a failure.");
             }
             else
             {
                 if (args.Args[0] == null)
                 {
-                    GarrisonBuddy.Err("ERROR: Arg0 null in GARRISON_MISSION_COMPLETE_RESPONSE");
+                    Err("ERROR: Arg0 null in GARRISON_MISSION_COMPLETE_RESPONSE");
                 }
                 else
                 {
@@ -286,7 +286,8 @@ namespace GarrisonBuddy
             Lua.Events.AttachEvent("GARRISON_MONUMENT_CLOSE_UI", GARRISON_MONUMENT_CLOSE_UI);
             Lua.Events.AttachEvent("GARRISON_MONUMENT_LIST_LOADED", GARRISON_MONUMENT_LIST_LOADED);
             Lua.Events.AttachEvent("GARRISON_MONUMENT_REPLACED", GARRISON_MONUMENT_REPLACED);
-            Lua.Events.AttachEvent("GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED", GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED);
+            Lua.Events.AttachEvent("GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED",
+                GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED);
             Lua.Events.AttachEvent("GARRISON_MONUMENT_SHOW_UI", GARRISON_MONUMENT_SHOW_UI);
             Lua.Events.AttachEvent("GARRISON_RECALL_PORTAL_LAST_USED_TIME", GARRISON_RECALL_PORTAL_LAST_USED_TIME);
             Lua.Events.AttachEvent("GARRISON_RECALL_PORTAL_USED", GARRISON_RECALL_PORTAL_USED);
@@ -305,8 +306,6 @@ namespace GarrisonBuddy
 
             Coroutine.OnStart();
         }
-
-
 
 
         private void GARRISON_HIDE_LANDING_PAGE(object sender, LuaEventArgs args)
@@ -430,16 +429,6 @@ namespace GarrisonBuddy
         {
             Logging.Write("LuaEvent: GARRISON_UPDATE ");
         }
-
-
-
-
-
-
-
-
-
-
 
 
         public override void Stop()

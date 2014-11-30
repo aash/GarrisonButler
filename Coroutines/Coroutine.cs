@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
-using CommonBehaviors.Actions;
 using GarrisonLua;
 using Styx;
 using Styx.Common.Helpers;
@@ -18,7 +17,7 @@ using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
 {
-   partial class Coroutine
+    partial class Coroutine
     {
         private static Composite _deathBehavior;
         private static Composite _lootBehavior;
@@ -30,6 +29,25 @@ namespace GarrisonBuddy
         private static WoWPoint _lastMoveTo;
         private static readonly WaitTimer MoveToLogTimer = WaitTimer.OneSecond;
         private static List<Building> _buildings;
+
+        private static readonly List<WoWPoint> AllyWaitingPoints = new List<WoWPoint>
+        {
+            new WoWPoint(), //level 1
+            new WoWPoint(), //level 2
+            new WoWPoint(1866.069, 230.9416, 76.63979) //level 3
+        };
+
+        private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>
+        {
+            new WoWPoint(), //level 1
+            new WoWPoint(), //level 2
+            new WoWPoint() //level 3
+        };
+
+        private static bool test = true;
+
+        public static DateTime nextCheck = DateTime.Now;
+        public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
 
         private static LocalPlayer Me
         {
@@ -78,20 +96,20 @@ namespace GarrisonBuddy
         internal static void OnStop()
         {
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
-
         }
+
         internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
         {
             if (StyxWoW.Me.Combat)
                 return;
 
-            var lootRadiusSqr = LootTargeting.LootRadius * LootTargeting.LootRadius;
+            double lootRadiusSqr = LootTargeting.LootRadius*LootTargeting.LootRadius;
 
-            var myLoc = StyxWoW.Me.Location;
+            WoWPoint myLoc = StyxWoW.Me.Location;
 
             List<WoWPoint> playerLocations = null;
 
-            foreach (var obj in incomingUnits)
+            foreach (WoWObject obj in incomingUnits)
             {
                 var gObj = obj as WoWGameObject;
                 if (gObj != null)
@@ -100,7 +118,7 @@ namespace GarrisonBuddy
                         continue;
 
 
-                    var gObjLoc = gObj.Location;
+                    WoWPoint gObjLoc = gObj.Location;
 
                     outgoingUnits.Add(obj);
                     continue;
@@ -167,7 +185,7 @@ namespace GarrisonBuddy
                 return true;
             if (await PickUpMineWorkOrders())
                 return true;
-            
+
             // Garden 
             if (await CleanGarden())
                 return true;
@@ -189,7 +207,7 @@ namespace GarrisonBuddy
             if (await DoCheckAvailableMissions())
                 return true;
 
-            if(await DoStartMissions())
+            if (await DoStartMissions())
                 return true;
 
             //if(test)
@@ -205,42 +223,27 @@ namespace GarrisonBuddy
             return false;
         }
 
-       private static async Task<bool> Waiting()
-       {
-           var TownHallLevel = BuildingsLua.GetTownHallLevel();
-           if (TownHallLevel < 1)
-               return false;
+        private static async Task<bool> Waiting()
+        {
+            int TownHallLevel = BuildingsLua.GetTownHallLevel();
+            if (TownHallLevel < 1)
+                return false;
 
-           List<WoWPoint> myFactionWaitingPoints;
-           if (Me.IsAlliance)
-               myFactionWaitingPoints = AllyWaitingPoints;
-           else
-               myFactionWaitingPoints = HordeWaitingPoints;
+            List<WoWPoint> myFactionWaitingPoints;
+            if (Me.IsAlliance)
+                myFactionWaitingPoints = AllyWaitingPoints;
+            else
+                myFactionWaitingPoints = HordeWaitingPoints;
 
-           if (myFactionWaitingPoints[TownHallLevel-1] == new WoWPoint())
-           {
-               throw new NotImplementedException();
-           };
+            if (myFactionWaitingPoints[TownHallLevel - 1] == new WoWPoint())
+            {
+                throw new NotImplementedException();
+            }
+            ;
 
-           return await MoveTo(myFactionWaitingPoints[TownHallLevel - 1]);
-       }
+            return await MoveTo(myFactionWaitingPoints[TownHallLevel - 1]);
+        }
 
-       private static readonly List<WoWPoint> AllyWaitingPoints = new List<WoWPoint>()
-       {
-          new WoWPoint(), //level 1
-          new WoWPoint(), //level 2
-          new WoWPoint(1866.069,230.9416,76.63979) //level 3
-       };
-
-       private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>()
-       {
-          new WoWPoint(), //level 1
-          new WoWPoint(), //level 2
-          new WoWPoint() //level 3
-       };
-       private static bool test = true;
-
-        public static DateTime nextCheck = DateTime.Now;
         public static async Task<bool> RestoreUiIfNeeded()
         {
             if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
@@ -275,8 +278,6 @@ namespace GarrisonBuddy
             await CommonCoroutines.SleepForLagDuration();
             return true;
         }
-
-        public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
 
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
         {

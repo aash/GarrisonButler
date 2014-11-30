@@ -71,6 +71,7 @@ namespace GarrisonLua
             String lua = "local am = {}; C_Garrison.GetAvailableMissions(am); return tostring(#am);";
             return Lua.GetReturnValues(lua)[0].ToInt32();
         }
+
         public static List<Mission> GetAllCompletedMissions()
         {
             return GetListCompletedMissionsId().Select(GetCompletedMissionById).ToList();
@@ -81,6 +82,7 @@ namespace GarrisonLua
         {
             return GetListMissionsId().Select(GetMissionById).ToList();
         }
+
         public static List<Mission> GetAllAvailableMissionsReport()
         {
             return GetListMissionsId().Select(GetMissionById).ToList();
@@ -103,8 +105,8 @@ namespace GarrisonLua
             List<string> enemies = Lua.GetReturnValues(lua);
             return enemies ?? new List<string>();
         }
-        
-        
+
+
         public static Mission GetMissionReportById(String missionId)
         {
             String lua =
@@ -165,6 +167,7 @@ namespace GarrisonLua
                 name, numFollowers, numRewards,
                 state, type, xp, environment);
         }
+
         public static Mission GetMissionById(String missionId)
         {
             String lua =

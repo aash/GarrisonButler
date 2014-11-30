@@ -92,6 +92,7 @@ namespace GarrisonLua
         {
             return GetListBuildingsId().Select(GetBuildingById).ToList();
         }
+
         public static int GetTownHallLevel()
         {
             const string lua = "local level, mapTexture, townHallX, townHallY = C_Garrison.GetGarrisonInfo();" +
@@ -99,6 +100,7 @@ namespace GarrisonLua
                                "else return tostring(level); end;";
             return Lua.GetReturnValues(lua)[0].ToInt32();
         }
+
         public static int GetNumberShipmentReadyByBuildingId(int buildingId)
         {
             String lua =
@@ -106,18 +108,17 @@ namespace GarrisonLua
                 "local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +
-                        "local buildingID = buildings[i].buildingID;" +
-                        "if (buildingID == \"{0}\") then " +
-                            "local nameShipment, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, itemName, itemIcon, itemQuality, itemID = C_Garrison.GetLandingPageShipmentInfo(buildingID);" +
-                            "if (not shipmentsReady) then " +
-                                "return tostring(0); else return tostring(shipmentsReady);" +
-                            "end;" +
-                        "end;" +
+                    "local buildingID = buildings[i].buildingID;" +
+                    "if (buildingID == \"{0}\") then " +
+                    "local nameShipment, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, itemName, itemIcon, itemQuality, itemID = C_Garrison.GetLandingPageShipmentInfo(buildingID);" +
+                    "if (not shipmentsReady) then " +
+                    "return tostring(0); else return tostring(shipmentsReady);" +
+                    "end;" +
+                    "end;" +
                     "end;" +
                     "return tostring(0);", buildingId);
             List<String> res = Lua.GetReturnValues(lua);
             return res[0].ToInt32();
         }
-
     }
 }

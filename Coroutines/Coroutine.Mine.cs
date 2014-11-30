@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using GarrisonLua;
-using Styx;
-using Styx.Common.Helpers;
-using Styx.CommonBot.Coroutines;
-using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -15,16 +8,15 @@ namespace GarrisonBuddy
 {
     partial class Coroutine
     {
-
-        private static List<uint> mineItems = new List<uint>()
+        private static readonly List<uint> mineItems = new List<uint>
         {
             232541, // Mine cart
             232542, // Blackrock Deposit 
             232543, // Rich Blackrock Deposit 
             232544, // True iron deposit
-            232545  // Rich True iron deposit
-        }; 
-        
+            232545 // Rich True iron deposit
+        };
+
         private static int PreserverdMiningPickItemId = 118903;
         private static int PreserverdMiningPickAura = 117061;
 
@@ -38,7 +30,8 @@ namespace GarrisonBuddy
                 return false;
 
             // Is there something to mine? 
-            var ores = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
+            List<WoWGameObject> ores =
+                ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
             if (!ores.Any())
                 return false;
 
@@ -51,15 +44,16 @@ namespace GarrisonBuddy
 
             // Do I have a cofee to use
             WoWItem cofee = Me.BagItems.Where(o => o.Entry == MinersCofeeItemId).ToList().FirstOrDefault();
-            if (cofee != null && cofee.Usable && 
-                (!Me.HasAura(MinersCofeeAura) || Me.Auras.FirstOrDefault(a=>a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2))
+            if (cofee != null && cofee.Usable &&
+                (!Me.HasAura(MinersCofeeAura) ||
+                 Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2))
             {
                 cofee.Use();
             }
 
 
-            var itemToCollect = ores.OrderBy(i => i.Distance).First();
-            if(await MoveTo(itemToCollect.Location))
+            WoWGameObject itemToCollect = ores.OrderBy(i => i.Distance).First();
+            if (await MoveTo(itemToCollect.Location))
                 return true;
 
             itemToCollect.Interact();

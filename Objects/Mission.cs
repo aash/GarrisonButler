@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonLua;
-using Styx.Helpers;
 
 namespace GarrisonBuddy
 {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GarrisonLua;
 using Styx;
@@ -24,7 +23,7 @@ namespace GarrisonBuddy
                 return false;
 
             GarrisonBuddy.Log("Found " + MissionLua.GetNumberAvailableMissions() + " available missions to complete.");
-            var tempFollowers = FollowersLua.GetAllFollowers().Select(x => x).ToList();
+            List<Follower> tempFollowers = FollowersLua.GetAllFollowers().Select(x => x).ToList();
             var temp = new List<KeyValuePair<Mission, Follower[]>>();
             foreach (Mission mission in MissionLua.GetAllAvailableMissionsReport())
             {
@@ -41,11 +40,12 @@ namespace GarrisonBuddy
             Check = false;
             return true;
         }
+
         public static async Task<bool> DoStartMissions()
         {
             if (ToStart.Count <= 0)
                 return false;
-            var match = ToStart.First();
+            KeyValuePair<Mission, Follower[]> match = ToStart.First();
 
             if (await MoveToTable())
                 return true;
@@ -62,7 +62,8 @@ namespace GarrisonBuddy
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
-                GarrisonBuddy.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
+                GarrisonBuddy.Debug("Mission not visible, opening mission: " + match.Key.MissionId + " - " +
+                                    match.Key.Name);
                 InterfaceLua.OpenMission(match.Key);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
@@ -72,10 +73,14 @@ namespace GarrisonBuddy
             }
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
             {
-                GarrisonBuddy.Debug("Mission not visible or not valid, close and then opening mission: " + match.Key.MissionId + " - " + match.Key.Name);
+                GarrisonBuddy.Debug("Mission not visible or not valid, close and then opening mission: " +
+                                    match.Key.MissionId + " - " + match.Key.Name);
                 InterfaceLua.ClickCloseMission();
                 InterfaceLua.OpenMission(match.Key);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
+                if (
+                    !await
+                        Buddy.Coroutines.Coroutine.Wait(2000,
+                            () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
                 {
                     GarrisonBuddy.Err("Couldn't display GarrisonMissionFrame or wrong mission opened.");
                     return false;
@@ -86,6 +91,7 @@ namespace GarrisonBuddy
             InterfaceLua.ClickCloseMission();
             return true;
         }
+
         public static async Task<bool> MoveToTable()
         {
             //move to table

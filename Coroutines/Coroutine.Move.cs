@@ -1,12 +1,9 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonLua;
 using Styx;
 using Styx.CommonBot.Coroutines;
-using Styx.Helpers;
 using Styx.WoWInternals;
 
 namespace GarrisonBuddy
@@ -20,7 +17,7 @@ namespace GarrisonBuddy
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
             if (Me.Location == destination)
-                return false; 
+                return false;
 
             if (target != destination || _lastMoveTo == new WoWPoint())
             {
@@ -75,7 +72,7 @@ namespace GarrisonBuddy
         public static void InitializationMove()
         {
             // Generate Garrison points based on garrison level and buildings level
-            if (_zonePoints == null) 
+            if (_zonePoints == null)
                 _zonePoints = GetGarrisonPoints();
 
             // Generating graph from list of points
@@ -252,7 +249,8 @@ namespace GarrisonBuddy
             internal void AddConnection(Node targetNode, double distance, bool twoWay)
             {
                 if (targetNode == null) throw new ArgumentNullException("targetNode");
-                if (targetNode == this) throw new ArgumentException("Node may not connect to itself: " + targetNode.Position);
+                if (targetNode == this)
+                    throw new ArgumentException("Node may not connect to itself: " + targetNode.Position);
                 if (distance <= 0) throw new ArgumentException("Distance must be positive.");
 
                 _connections.Add(new NodeConnection(targetNode, distance));
