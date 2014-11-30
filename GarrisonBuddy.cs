@@ -15,7 +15,7 @@ using Styx.WoWInternals;
 
 namespace GarrisonBuddy
 {
-    public enum PathingType
+    public enum PathingType 
     {
         Circle,
         Bounce
