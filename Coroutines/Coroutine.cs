@@ -29,7 +29,7 @@ namespace GarrisonBuddy
         private static readonly WaitTimer HarvestingTimer = WaitTimer.OneSecond;
         private static WoWPoint _lastMoveTo;
         private static readonly WaitTimer MoveToLogTimer = WaitTimer.OneSecond;
-        public static List<Building> Buildings;
+        private static List<Building> _buildings;
 
         private static LocalPlayer Me
         {
@@ -63,19 +63,67 @@ namespace GarrisonBuddy
         {
             try
             {
-                Buildings = BuildingsLua.GetAllBuildings();
+                _buildings = BuildingsLua.GetAllBuildings();
                 Check = true;
+                LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
 
                 InitializationMove();
             }
             catch (Exception e)
             {
-                GarrisonButler.Err(e.ToString());
+                GarrisonBuddy.Err(e.ToString());
             }
         }
 
         internal static void OnStop()
         {
+            LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
+
+        }
+        internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
+        {
+            if (StyxWoW.Me.Combat)
+                return;
+
+            var lootRadiusSqr = LootTargeting.LootRadius * LootTargeting.LootRadius;
+
+            var myLoc = StyxWoW.Me.Location;
+
+            List<WoWPoint> playerLocations = null;
+
+            foreach (var obj in incomingUnits)
+            {
+                var gObj = obj as WoWGameObject;
+                if (gObj != null)
+                {
+                    if (gObj.SubType != WoWGameObjectType.FishingHole)
+                        continue;
+
+
+                    var gObjLoc = gObj.Location;
+
+                    outgoingUnits.Add(obj);
+                    continue;
+                }
+
+                if (!LootTargeting.LootMobs)
+                    continue;
+
+                var unit = obj as WoWUnit;
+                if (unit == null)
+                    continue;
+
+                if (!unit.IsDead)
+                    continue;
+
+                if (Blacklist.Contains(unit, BlacklistFlags.Loot | BlacklistFlags.Node))
+                    continue;
+
+                if (myLoc.DistanceSqr(unit.Location) > lootRadiusSqr)
+                    continue;
+
+                outgoingUnits.Add(unit);
+            }
         }
 
         public static async Task<bool> RootLogic()
@@ -92,6 +140,8 @@ namespace GarrisonBuddy
             {
                 return true;
             }
+            if (await LootBehavior.ExecuteCoroutine())
+                return true;
 
             if (await VendorBehavior.ExecuteCoroutine())
                 return true;
@@ -102,14 +152,24 @@ namespace GarrisonBuddy
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
 
-            if (await DoTurnInCompletedMissions())
-                return true;
-
             if ((DateTime.Now - nextCheck).TotalHours > 0)
             {
                 nextCheck = DateTime.Now.AddMinutes(1);
                 Check = true;
             }
+
+            if (await PickUpGarrisonCache())
+                return true;
+
+            if (await CleanMine())
+                return true;
+            
+            if (await CleanGuarden())
+                return true;
+
+
+            if (await DoTurnInCompletedMissions())
+                return true;
 
             if (await DoCheckAvailableMissions())
                 return true;
@@ -117,11 +177,6 @@ namespace GarrisonBuddy
             if(await DoStartMissions())
                 return true;
 
-            if(await PickUpGarrisonCache())
-                return true;
-
-            if (await CleanMine())
-                return true;
             //if(test)
             //if (await MoveTo(new WoWPoint(1948.035, 284.513, 88.96583))) // testing purpose
             //    return true; // testing purpose
@@ -129,9 +184,45 @@ namespace GarrisonBuddy
             //if (await MoveToTable()) // testing purpose
             //    return true; // testing purpose
 
+            if (await Waiting())
+                return true;
+
             return false;
         }
 
+       private static async Task<bool> Waiting()
+       {
+           var TownHallLevel = BuildingsLua.GetTownHallLevel();
+           if (TownHallLevel < 1)
+               return false;
+
+           List<WoWPoint> myFactionWaitingPoints;
+           if (Me.IsAlliance)
+               myFactionWaitingPoints = AllyWaitingPoints;
+           else
+               myFactionWaitingPoints = HordeWaitingPoints;
+
+           if (myFactionWaitingPoints[TownHallLevel-1] == new WoWPoint())
+           {
+               throw new NotImplementedException();
+           };
+
+           return await MoveTo(myFactionWaitingPoints[TownHallLevel - 1]);
+       }
+
+       private static readonly List<WoWPoint> AllyWaitingPoints = new List<WoWPoint>()
+       {
+          new WoWPoint(), //level 1
+          new WoWPoint(), //level 2
+          new WoWPoint(1866.069,230.9416,76.63979) //level 3
+       };
+
+       private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>()
+       {
+          new WoWPoint(), //level 1
+          new WoWPoint(), //level 2
+          new WoWPoint() //level 3
+       };
        private static bool test = true;
 
         public static DateTime nextCheck = DateTime.Now;
@@ -139,7 +230,7 @@ namespace GarrisonBuddy
         {
             if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
             {
-                GarrisonButler.Debug("RestoreUiIfNeeded RestoreCompletedMission called");
+                GarrisonBuddy.Debug("RestoreUiIfNeeded RestoreCompletedMission called");
                 // Restore UI
                 Lua.DoString("GarrisonMissionFrame.MissionTab.MissionList.CompleteDialog:Hide();" +
                              "GarrisonMissionFrame.MissionComplete:Hide();" +
@@ -158,7 +249,7 @@ namespace GarrisonBuddy
             // Is there mission to turn in?
             if (MissionLua.GetNumberCompletedMissions() == 0)
                 return false;
-            GarrisonButler.Log("Found " + MissionLua.GetNumberCompletedMissions() + "completed missions to turn in.");
+            GarrisonBuddy.Log("Found " + MissionLua.GetNumberCompletedMissions() + "completed missions to turn in.");
 
             // are we at the action table?
             if (await MoveToTable())
@@ -174,9 +265,9 @@ namespace GarrisonBuddy
 
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
         {
-            GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED");
+            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_STARTED");
             string missionId = args.Args[0].ToString();
-            GarrisonButler.Debug("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            GarrisonBuddy.Debug("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             ToStart.RemoveAll(m => m.Key.MissionId == missionId);
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonBuddy;
+using Styx.Helpers;
 using Styx.WoWInternals;
 
 namespace GarrisonLua
@@ -12,7 +13,7 @@ namespace GarrisonLua
 
         public static Building GetBuildingById(String buildingId)
         {
-            GarrisonBuddy.GarrisonButler.Debug("GetBuildingById");
+            GarrisonBuddy.GarrisonBuddy.Debug("GetBuildingById");
             String lua =
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
@@ -47,11 +48,11 @@ namespace GarrisonLua
                     "for j_=0,20 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", buildingId);
             List<String> building = Lua.GetReturnValues(lua);
-            String id = building[0];
+            int id = building[0].ToInt32();
             String plotId = building[1];
             String buildingLevel = building[2];
             String name = building[3];
-            String rank = building[4];
+            int rank = building[4].ToInt32();
             String isBuilding = building[5];
             String timeStart = building[6];
             String buildTime = building[7];
@@ -75,7 +76,7 @@ namespace GarrisonLua
 
         public static List<string> GetListBuildingsId()
         {
-            GarrisonBuddy.GarrisonButler.Debug("GetListBuildingsId");
+            GarrisonBuddy.GarrisonBuddy.Debug("GetListBuildingsId");
             String lua =
                 "local RetInfo = {}; local buildings = C_Garrison.GetBuildings();" +
                 "for i = 1, #buildings do " +
@@ -90,5 +91,13 @@ namespace GarrisonLua
         {
             return GetListBuildingsId().Select(GetBuildingById).ToList();
         }
+        public static int GetTownHallLevel()
+        {
+            const string lua = "local level, mapTexture, townHallX, townHallY = C_Garrison.GetGarrisonInfo();" +
+                               "if (not level) then return tostring(0);" +
+                               "else return tostring(level); end;";
+            return Lua.GetReturnValues(lua)[0].ToInt32();
+        }
+
     }
 }
