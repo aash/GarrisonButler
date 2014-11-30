@@ -15,7 +15,7 @@ namespace GarrisonLua
         {
             GarrisonBuddy.GarrisonBuddy.Debug("GetBuildingById");
             String lua =
-                "GarrisonLandingPageReportList_Update();" +
+                "print(1);" +
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +
@@ -104,7 +104,6 @@ namespace GarrisonLua
         public static int GetNumberShipmentReadyByBuildingId(int buildingId)
         {
             String lua =
-                "GarrisonLandingPageReportList_Update();" +
                 "local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +
