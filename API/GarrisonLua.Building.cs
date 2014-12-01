@@ -15,7 +15,6 @@ namespace GarrisonLua
         {
             GarrisonBuddy.GarrisonBuddy.Diagnostic("GetBuildingById");
             String lua =
-                "print(1);" +
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +

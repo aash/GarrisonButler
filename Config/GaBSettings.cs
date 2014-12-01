@@ -19,6 +19,9 @@ namespace GarrisonBuddy.Config
 			Load();
 		}
 
+        [Setting, Styx.Helpers.DefaultValue(false),
+        Description("To let the bot use the garrison hearthstone if not already in garrison select true."), Category("General")]
+        public bool UseGarrisonHearthstone { get; set; }
         [Setting, Styx.Helpers.DefaultValue(true),
         Description("To let the bot collect the garrison cache select true."), Category("General")]
         public bool GarrisonCache { get; set; }

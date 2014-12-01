@@ -47,7 +47,7 @@
             this.ClientSize = new System.Drawing.Size(338, 302);
             this.Controls.Add(this.propertyGrid1);
             this.Name = "ConfigForm";
-            this.Text = "ConfigForm";
+            this.Text = "GarrisonBuddy Settings";
             this.ResumeLayout(false);
 
         }

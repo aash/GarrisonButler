@@ -11,7 +11,6 @@ using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.POI;
 using Styx.CommonBot.Routines;
-using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -31,7 +30,7 @@ namespace GarrisonBuddy
         private static readonly List<WoWPoint> AllyWaitingPoints = new List<WoWPoint>
         {
             new WoWPoint(), //level 1
-            new WoWPoint(), //level 2
+            new WoWPoint(1866.069, 230.9416, 76.63979), //level 2
             new WoWPoint(1866.069, 230.9416, 76.63979) //level 3
         };
 
@@ -46,6 +45,14 @@ namespace GarrisonBuddy
 
         public static DateTime NextCheck = DateTime.Now;
         public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
+
+        internal static readonly List<uint> GarrisonsZonesId = new List<uint>
+        {
+            7078, // Lunarfall - Ally
+            7004, // Frostwall - Horde
+        };
+
+        internal static readonly uint GarrisonHearthstone = 110560;
 
         private static LocalPlayer Me
         {
@@ -162,6 +169,26 @@ namespace GarrisonBuddy
 
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
+
+            if (!GarrisonsZonesId.Contains(Me.ZoneId))
+            {
+                if (GaBSettings.Mono.UseGarrisonHearthstone)
+                {
+                    WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
+                    if (stone != null)
+                    {
+                        stone.Use();
+                        await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId));
+                    }
+                    else GarrisonBuddy.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
+                }
+                else
+                {
+                    GarrisonBuddy.Log("Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
+                    return false;
+                }
+                return true;
+            }
 
             // Check mission every minute
             if ((DateTime.Now - NextCheck).TotalHours > 0)
