@@ -102,10 +102,13 @@ namespace GarrisonBuddy
             return true;
         }
 
+        private static readonly WoWPoint TableHorde = new WoWPoint(5559,4599,140);
+        private static readonly WoWPoint TableAlliance = new WoWPoint(1933, 346, 91);
+
         public static async Task<bool> MoveToTable()
         {
             //move to table
-            if (await MoveTo(new WoWPoint(1933, 346, 91), "Command table"))
+            if (await MoveTo(Me.IsAlliance?TableAlliance:TableHorde, "Command table"))
                 return true;
             // TO DO
 

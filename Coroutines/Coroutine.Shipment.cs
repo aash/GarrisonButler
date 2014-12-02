@@ -32,6 +32,7 @@ namespace GarrisonBuddy
             236192,
             236193,
             236261,
+            236262,
             236263
         };
         private static readonly WoWPoint MineShipmentAlly = new WoWPoint(1901.799, 103.2309, 83.52671);

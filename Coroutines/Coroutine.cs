@@ -38,8 +38,8 @@ namespace GarrisonBuddy
         private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>
         {
             new WoWPoint(), //level 1
-            new WoWPoint(), //level 2
-            new WoWPoint() //level 3
+            new WoWPoint(5585.125,4565.036,135.9761), //level 2
+            new WoWPoint(5585.125,4565.036,135.9761), //level 3
         };
 
         private static bool test = true;
@@ -269,8 +269,7 @@ namespace GarrisonBuddy
             {
                 throw new NotImplementedException();
             }
-            ;
-
+            
             return await MoveTo(myFactionWaitingPoints[TownHallLevel - 1]);
         }
 
