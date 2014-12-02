@@ -48,8 +48,10 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
             if (!ores.Any())
                 return false;
+            
+            WoWGameObject itemToCollect = ores.OrderBy(i => i.Distance).First();
 
-            GarrisonBuddy.Diagnostic("Found ore to gather.");
+            GarrisonBuddy.Diagnostic("Found ore to gather at:" + itemToCollect.Location );
 
             if (minesId.Contains(Me.SubZoneId))
             {
@@ -75,7 +77,6 @@ namespace GarrisonBuddy
                 coffee.Use();
             }
 
-            WoWGameObject itemToCollect = ores.OrderBy(i => i.Distance).First();
             if (await MoveTo(itemToCollect.Location))
                 return true;
 

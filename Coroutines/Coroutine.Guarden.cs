@@ -32,8 +32,10 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).ToList();
             if (!herbs.Any())
                 return false;
-            GarrisonBuddy.Diagnostic("Found herb to gather.");
+
             WoWGameObject itemToCollect = herbs.OrderBy(i => i.Distance).First();
+            
+            GarrisonBuddy.Diagnostic("Found herb to gather at: " + itemToCollect.Location);
             if (await MoveTo(itemToCollect.Location))
                 return true;
 
