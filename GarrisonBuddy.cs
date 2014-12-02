@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
 using GarrisonBuddy.Config;
@@ -9,7 +10,6 @@ using Styx.Common;
 using Styx.CommonBot;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
-using System.Windows.Forms;
 
 namespace GarrisonBuddy
 {
@@ -108,6 +108,7 @@ namespace GarrisonBuddy
 
         #region overrides
 
+        internal static bool LootIsOpen = false;
         private Composite _root;
 
         public override string Name
@@ -128,6 +129,11 @@ namespace GarrisonBuddy
         public override bool IsPrimaryType
         {
             get { return true; }
+        }
+
+        public override Form ConfigurationForm
+        {
+            get { return new ConfigForm(); }
         }
 
         public override void Pulse()
@@ -173,7 +179,6 @@ namespace GarrisonBuddy
             Coroutine.OnStart();
         }
 
-        internal static bool LootIsOpen = false;
         private static void LootClosed(object sender, LuaEventArgs args)
         {
             LootIsOpen = false;
@@ -183,12 +188,6 @@ namespace GarrisonBuddy
         {
             LootIsOpen = true;
         }
-       
-
-        public override Form ConfigurationForm
-        {
-            get { return new ConfigForm(); }
-        }
 
         #endregion
 
@@ -196,124 +195,124 @@ namespace GarrisonBuddy
 
         private void GARRISON_HIDE_LANDING_PAGE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_HIDE_LANDING_PAGE ");
+            Diagnostic("LuaEvent: GARRISON_HIDE_LANDING_PAGE ");
         }
 
         private void GARRISON_INVASION_AVAILABLE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_INVASION_AVAILABLE ");
+            Diagnostic("LuaEvent: GARRISON_INVASION_AVAILABLE ");
         }
 
         private void GARRISON_INVASION_UNAVAILABLE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_INVASION_UNAVAILABLE ");
+            Diagnostic("LuaEvent: GARRISON_INVASION_UNAVAILABLE ");
         }
 
         private void GARRISON_LANDINGPAGE_SHIPMENTS(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_LANDINGPAGE_SHIPMENTS ");
+            Diagnostic("LuaEvent: GARRISON_LANDINGPAGE_SHIPMENTS ");
         }
 
         private void GARRISON_MISSION_BONUS_ROLL_LOOT(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_BONUS_ROLL_LOOT ");
+            Diagnostic("LuaEvent: GARRISON_MISSION_BONUS_ROLL_LOOT ");
         }
 
 
         private void GARRISON_MISSION_FINISHED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_FINISHED ");
+            Diagnostic("LuaEvent: GARRISON_MISSION_FINISHED ");
         }
 
         private void GARRISON_MISSION_LIST_UPDATE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_LIST_UPDATE ");
+            Diagnostic("LuaEvent: GARRISON_MISSION_LIST_UPDATE ");
         }
 
         private void GARRISON_MISSION_NPC_CLOSED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_NPC_CLOSED ");
+            Diagnostic("LuaEvent: GARRISON_MISSION_NPC_CLOSED ");
         }
 
         private void GARRISON_MISSION_NPC_OPENED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_NPC_OPENED ");
+            Diagnostic("LuaEvent: GARRISON_MISSION_NPC_OPENED ");
         }
 
 
         private void GARRISON_MONUMENT_CLOSE_UI(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MONUMENT_CLOSE_UI ");
+            Diagnostic("LuaEvent: GARRISON_MONUMENT_CLOSE_UI ");
         }
 
         private void GARRISON_MONUMENT_LIST_LOADED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MONUMENT_LIST_LOADED ");
+            Diagnostic("LuaEvent: GARRISON_MONUMENT_LIST_LOADED ");
         }
 
         private void GARRISON_MONUMENT_REPLACED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MONUMENT_REPLACED ");
+            Diagnostic("LuaEvent: GARRISON_MONUMENT_REPLACED ");
         }
 
         private void GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED ");
+            Diagnostic("LuaEvent: GARRISON_MONUMENT_SELECTED_TROPHY_ID_LOADED ");
         }
 
         private void GARRISON_MONUMENT_SHOW_UI(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MONUMENT_SHOW_UI ");
+            Diagnostic("LuaEvent: GARRISON_MONUMENT_SHOW_UI ");
         }
 
         private void GARRISON_RECALL_PORTAL_LAST_USED_TIME(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECALL_PORTAL_LAST_USED_TIME ");
+            Diagnostic("LuaEvent: GARRISON_RECALL_PORTAL_LAST_USED_TIME ");
         }
 
         private void GARRISON_RECALL_PORTAL_USED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECALL_PORTAL_USED ");
+            Diagnostic("LuaEvent: GARRISON_RECALL_PORTAL_USED ");
         }
 
         private void GARRISON_RECRUITMENT_FOLLOWERS_GENERATED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECRUITMENT_FOLLOWERS_GENERATED ");
+            Diagnostic("LuaEvent: GARRISON_RECRUITMENT_FOLLOWERS_GENERATED ");
         }
 
         private void GARRISON_RECRUITMENT_NPC_CLOSED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECRUITMENT_NPC_CLOSED ");
+            Diagnostic("LuaEvent: GARRISON_RECRUITMENT_NPC_CLOSED ");
         }
 
         private void GARRISON_RECRUITMENT_NPC_OPENED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECRUITMENT_NPC_OPENED ");
+            Diagnostic("LuaEvent: GARRISON_RECRUITMENT_NPC_OPENED ");
         }
 
         private void GARRISON_RECRUITMENT_READY(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECRUITMENT_READY ");
+            Diagnostic("LuaEvent: GARRISON_RECRUITMENT_READY ");
         }
 
         private void GARRISON_RECRUIT_FOLLOWER_RESULT(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_RECRUIT_FOLLOWER_RESULT ");
+            Diagnostic("LuaEvent: GARRISON_RECRUIT_FOLLOWER_RESULT ");
         }
 
         private void GARRISON_SHOW_LANDING_PAGE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_SHOW_LANDING_PAGE ");
+            Diagnostic("LuaEvent: GARRISON_SHOW_LANDING_PAGE ");
         }
 
         private void GARRISON_TRADESKILL_NPC_CLOSED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_TRADESKILL_NPC_CLOSED ");
+            Diagnostic("LuaEvent: GARRISON_TRADESKILL_NPC_CLOSED ");
         }
 
         private void GARRISON_UPDATE(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_UPDATE ");
+            Diagnostic("LuaEvent: GARRISON_UPDATE ");
         }
 
 

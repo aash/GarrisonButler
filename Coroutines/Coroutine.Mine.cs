@@ -55,7 +55,7 @@ namespace GarrisonBuddy
             {
                 // Do I have a mining pick to use
                 WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
-                if (miningPick != null && miningPick.Usable 
+                if (miningPick != null && miningPick.Usable
                     && !Me.HasAura(PreserverdMiningPickAura)
                     && miningPick.CooldownTimeLeft.TotalSeconds == 0)
                 {

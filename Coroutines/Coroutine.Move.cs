@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
 {

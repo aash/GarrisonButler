@@ -14,6 +14,9 @@ namespace GarrisonBuddy
     {
         public static bool Check = true;
 
+        private static readonly WoWPoint TableHorde = new WoWPoint(5559, 4599, 140);
+        private static readonly WoWPoint TableAlliance = new WoWPoint(1933, 346, 91);
+
         public static async Task<bool> DoCheckAvailableMissions()
         {
             if (!GaBSettings.Mono.DoMissions)
@@ -73,7 +76,7 @@ namespace GarrisonBuddy
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
                 GarrisonBuddy.Diagnostic("Mission not visible, opening mission: " + match.Key.MissionId + " - " +
-                                    match.Key.Name);
+                                         match.Key.Name);
                 InterfaceLua.OpenMission(match.Key);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
@@ -84,7 +87,7 @@ namespace GarrisonBuddy
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
             {
                 GarrisonBuddy.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
-                                    match.Key.MissionId + " - " + match.Key.Name);
+                                         match.Key.MissionId + " - " + match.Key.Name);
                 InterfaceLua.ClickCloseMission();
                 InterfaceLua.OpenMission(match.Key);
                 if (
@@ -102,13 +105,10 @@ namespace GarrisonBuddy
             return true;
         }
 
-        private static readonly WoWPoint TableHorde = new WoWPoint(5559,4599,140);
-        private static readonly WoWPoint TableAlliance = new WoWPoint(1933, 346, 91);
-
         public static async Task<bool> MoveToTable()
         {
             //move to table
-            if (await MoveTo(Me.IsAlliance?TableAlliance:TableHorde, "Command table"))
+            if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "Command table"))
                 return true;
             // TO DO
 

@@ -38,8 +38,8 @@ namespace GarrisonBuddy
         private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>
         {
             new WoWPoint(), //level 1
-            new WoWPoint(5585.125,4565.036,135.9761), //level 2
-            new WoWPoint(5585.125,4565.036,135.9761), //level 3
+            new WoWPoint(5585.125, 4565.036, 135.9761), //level 2
+            new WoWPoint(5585.125, 4565.036, 135.9761), //level 3
         };
 
         private static bool test = true;
@@ -182,11 +182,12 @@ namespace GarrisonBuddy
                     {
                         if (stone.CooldownTimeLeft.TotalSeconds > 0)
                         {
-                            GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: On cooldown, " + stone.CooldownTimeLeft.TotalSeconds + " secs left."); 
+                            GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: On cooldown, " +
+                                                     stone.CooldownTimeLeft.TotalSeconds + " secs left.");
                         }
                         GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: using.");
                         stone.Use();
-                        if(!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
+                        if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
                         {
                             GarrisonBuddy.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
                             return false;
@@ -196,7 +197,8 @@ namespace GarrisonBuddy
                 }
                 else
                 {
-                    GarrisonBuddy.Log("Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
+                    GarrisonBuddy.Log(
+                        "Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
                     return false;
                 }
                 return true;
@@ -269,7 +271,7 @@ namespace GarrisonBuddy
             {
                 throw new NotImplementedException();
             }
-            
+
             return await MoveTo(myFactionWaitingPoints[TownHallLevel - 1]);
         }
 
@@ -290,9 +292,10 @@ namespace GarrisonBuddy
             }
             return false;
         }
+
         private static async Task<bool> CheckLootFrame()
         {
-                // loot everything.
+            // loot everything.
             if (!GarrisonBuddy.LootIsOpen) return false;
 
             for (int i = 0; i < LootFrame.Instance.LootItems; i++)
@@ -303,6 +306,7 @@ namespace GarrisonBuddy
             await CommonCoroutines.SleepForLagDuration();
             return true;
         }
+
         public static async Task<bool> DoTurnInCompletedMissions()
         {
             if (!GaBSettings.Mono.CompletedMissions)
