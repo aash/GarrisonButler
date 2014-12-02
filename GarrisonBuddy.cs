@@ -15,7 +15,7 @@ namespace GarrisonBuddy
 {
     public class GarrisonBuddy : BotBase
     {
-        internal static readonly Version Version = new Version(0, 2);
+        internal static readonly Version Version = new Version(0, 3);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
