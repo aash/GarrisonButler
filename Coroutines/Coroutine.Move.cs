@@ -66,7 +66,7 @@ namespace GarrisonBuddy
                 return true;
             }
 
-            await Buddy.Coroutines.Coroutine.Wait(500, () => !Me.IsMoving);
+            await Buddy.Coroutines.Coroutine.Wait(100, () => !Me.IsMoving);
 
             return false;
         }

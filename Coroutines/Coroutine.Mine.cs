@@ -55,7 +55,9 @@ namespace GarrisonBuddy
             {
                 // Do I have a mining pick to use
                 WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
-                if (miningPick != null && miningPick.Usable && !Me.HasAura(PreserverdMiningPickAura))
+                if (miningPick != null && miningPick.Usable 
+                    && !Me.HasAura(PreserverdMiningPickAura)
+                    && miningPick.CooldownTimeLeft.TotalSeconds == 0)
                 {
                     GarrisonBuddy.Diagnostic("Using Mining pick");
                     miningPick.Use();
@@ -63,13 +65,14 @@ namespace GarrisonBuddy
             }
 
             // Do I have a cofee to use
-            WoWItem cofee = Me.BagItems.Where(o => o.Entry == MinersCofeeItemId).ToList().FirstOrDefault();
-            if (cofee != null && cofee.Usable &&
+            WoWItem coffee = Me.BagItems.Where(o => o.Entry == MinersCofeeItemId).ToList().FirstOrDefault();
+            if (coffee != null && coffee.Usable &&
                 (!Me.HasAura(MinersCofeeAura) ||
-                 Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2))
+                 Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2)
+                && coffee.CooldownTimeLeft.TotalSeconds == 0)
             {
                 GarrisonBuddy.Diagnostic("Using coffee");
-                cofee.Use();
+                coffee.Use();
             }
 
             WoWGameObject itemToCollect = ores.OrderBy(i => i.Distance).First();
