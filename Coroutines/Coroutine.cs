@@ -9,6 +9,7 @@ using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
+using Styx.CommonBot.Frames;
 using Styx.CommonBot.POI;
 using Styx.CommonBot.Routines;
 using Styx.TreeSharp;
@@ -155,9 +156,11 @@ namespace GarrisonBuddy
                 return true;
 
             if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
-            {
                 return true;
-            }
+
+            if (await CheckLootFrame())
+                return true;
+
             if (await LootBehavior.ExecuteCoroutine())
                 return true;
 
@@ -177,8 +180,17 @@ namespace GarrisonBuddy
                     WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
                     if (stone != null)
                     {
+                        if (stone.CooldownTimeLeft.TotalSeconds > 0)
+                        {
+                            GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: On cooldown, " + stone.CooldownTimeLeft.TotalSeconds + " secs left."); 
+                        }
+                        GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: using.");
                         stone.Use();
-                        await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId));
+                        if(!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
+                        {
+                            GarrisonBuddy.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
+                            return false;
+                        }
                     }
                     else GarrisonBuddy.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
                 }
@@ -279,7 +291,19 @@ namespace GarrisonBuddy
             }
             return false;
         }
+        private static async Task<bool> CheckLootFrame()
+        {
+                // loot everything.
+            if (!GarrisonBuddy.LootIsOpen) return false;
 
+            for (int i = 0; i < LootFrame.Instance.LootItems; i++)
+            {
+                LootSlotInfo lootInfo = LootFrame.Instance.LootInfo(i);
+            }
+            LootFrame.Instance.LootAll();
+            await CommonCoroutines.SleepForLagDuration();
+            return true;
+        }
         public static async Task<bool> DoTurnInCompletedMissions()
         {
             if (!GaBSettings.Mono.CompletedMissions)
@@ -322,6 +346,9 @@ namespace GarrisonBuddy
 
             if (lootObj is WoWGameObject)
             {
+                var obj = lootObj as WoWGameObject;
+                if (obj.SubType == WoWGameObjectType.FishingHole)
+                    return;
                 BotPoi.Current = new BotPoi(lootObj, PoiType.Harvest);
             }
             else

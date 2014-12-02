@@ -97,7 +97,7 @@ namespace GarrisonBuddy
                 }
             }
             match.Key.AddFollowersToMission(match.Value.ToList());
-            InterfaceLua.StartMission(match.Key.MissionId);
+            InterfaceLua.StartMission(match.Key);
             InterfaceLua.ClickCloseMission();
             return true;
         }

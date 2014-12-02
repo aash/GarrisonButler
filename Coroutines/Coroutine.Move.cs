@@ -5,21 +5,28 @@ using System.Threading.Tasks;
 using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
 {
     partial class Coroutine
     {
         private static List<WoWPoint> _waypoints = new List<WoWPoint>();
+        private static WoWPoint _target;
 
-        private static WoWPoint target;
+        //public static async Task<bool> MoveToHarvest(WoWGameObject gameObject, string destinationName = null)
+        //{
+        //    if (await MoveTo(gameObject.Location))
+        //        return true;
 
+        //    WoWMovement.ClickToMove(gameObject.Location);
+        //}
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
             if (Me.Location == destination)
                 return false;
 
-            if (target != destination || _lastMoveTo == new WoWPoint())
+            if (_target != destination || _lastMoveTo == new WoWPoint())
             {
                 _waypoints = Dijkstra.GetPath(Me.Location, destination);
                 if (_waypoints.Count == 0)
@@ -28,9 +35,9 @@ namespace GarrisonBuddy
                     return false;
                 }
                 _lastMoveTo = _waypoints.First();
-                target = destination;
+                _target = destination;
             }
-            if (Me.Location.Distance(destination) > 8)
+            if (Me.Location.Distance(destination) > 5)
             {
                 WoWPoint waypoint;
                 if (Me.Location.Distance(_lastMoveTo) >= 1)
@@ -56,7 +63,7 @@ namespace GarrisonBuddy
                     await CommonCoroutines.LandAndDismount("Mount not supported yet.");
                 }
                 WoWMovement.ClickToMove(waypoint);
-                return true; //moveResult != MoveResult.Failed && moveResult != MoveResult.PathGenerationFailed;
+                return true;
             }
 
             await Buddy.Coroutines.Coroutine.Wait(500, () => !Me.IsMoving);

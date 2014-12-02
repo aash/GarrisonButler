@@ -262,10 +262,11 @@ namespace GarrisonLua
             Lua.DoString(lua);
         }
 
-        public static void StartMission(string missionId)
+        public static void StartMission(Mission mission)
         {
-            GarrisonBuddy.GarrisonBuddy.Diagnostic("StartMission");
-            String lua = String.Format("C_Garrison.StartMission(\"{0}\");", missionId);
+            GarrisonBuddy.GarrisonBuddy.Diagnostic("StartMission: ");
+            GarrisonBuddy.GarrisonBuddy.Diagnostic(mission.ToString());
+            String lua = String.Format("C_Garrison.StartMission(\"{0}\");", mission.MissionId);
             Lua.DoString(lua);
         }
     }

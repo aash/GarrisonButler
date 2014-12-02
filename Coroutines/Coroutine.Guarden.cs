@@ -38,6 +38,7 @@ namespace GarrisonBuddy
                 return true;
 
             itemToCollect.Interact();
+            //SetLootPoi(itemToCollect);
             await Buddy.Coroutines.Coroutine.Sleep(3500);
             return true;
         }

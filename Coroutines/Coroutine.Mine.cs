@@ -18,6 +18,16 @@ namespace GarrisonBuddy
             232545 // Rich True iron deposit
         };
 
+        internal static readonly List<uint> minesId = new List<uint>
+        {
+            7324, //ally 1
+            7325, // ally 2
+            7326, // ally 3
+            7327, // horde 1
+            7328, // horde 2
+            7329, // horde 3
+        };
+
         private static int PreserverdMiningPickItemId = 118903;
         private static int PreserverdMiningPickAura = 117061;
 
@@ -38,12 +48,16 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
             if (!ores.Any())
                 return false;
-
-            // Do I have a mining pick to use
-            WoWItem miningPick = Me.BagItems.Where(o => o.Entry == PreserverdMiningPickItemId).ToList().FirstOrDefault();
-            if (miningPick != null && miningPick.Usable && !Me.HasAura(PreserverdMiningPickAura))
+            if (minesId.Contains(Me.SubZoneId))
             {
-                miningPick.Use();
+                // Do I have a mining pick to use
+                WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
+                if (miningPick != null && miningPick.Usable && !Me.HasAura(PreserverdMiningPickAura))
+                {
+                    GarrisonBuddy.Diagnostic("Found " + miningPick.Name + " usable:" + miningPick.Usable);
+                    GarrisonBuddy.Diagnostic("Found " + miningPick.Name);
+                    miningPick.Use();
+                }
             }
 
             // Do I have a cofee to use
@@ -61,6 +75,7 @@ namespace GarrisonBuddy
                 return true;
 
             itemToCollect.Interact();
+            SetLootPoi(itemToCollect);
             await Buddy.Coroutines.Coroutine.Sleep(3500);
             return true;
         }

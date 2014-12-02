@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonBuddy.Config;
 using GarrisonLua;
+using Styx;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -20,7 +21,7 @@ namespace GarrisonBuddy
             237720
         };
 
-        internal static List<uint> FinalizeGarrisonPlotIds = new List<uint>
+        internal static readonly List<uint> FinalizeGarrisonPlotIds = new List<uint>
         {
             232651,
             232652,
@@ -33,8 +34,19 @@ namespace GarrisonBuddy
             236261,
             236263
         };
+        private static readonly WoWPoint MineShipmentAlly = new WoWPoint(1901.799, 103.2309, 83.52671);
+        private static readonly WoWPoint MineShipmentHorde = new WoWPoint(5474.07, 4451.756, 144.5106);
 
-        public static async Task<bool> PickUpGarrisonCache()
+        private static readonly WoWPoint GardenShipmentAlly = new WoWPoint(1901.799, 103.2309, 83.52671);
+        private static readonly WoWPoint GardenShipmentHorde = new WoWPoint(5414.973, 4574.003, 137.4256);
+
+        private static readonly List<uint> MineShipmentIds = new List<uint>()
+        {
+            239237,
+            235886,
+        };
+
+        private static async Task<bool> PickUpGarrisonCache()
         {
             if (!GaBSettings.Mono.GarrisonCache)
                 return false;
@@ -44,14 +56,16 @@ namespace GarrisonBuddy
             if (cache == null)
                 return false;
 
-            if (await MoveTo(cache.Location))
+            GarrisonBuddy.Diagnostic("Shipment: Detected garrison cache available to collect.");
+
+            if (await MoveTo(cache.Location, "Collecting garrison cache"))
                 return true;
 
             cache.Interact();
             return true;
         }
 
-        public static async Task<bool> PickUpMineWorkOrders()
+        private static async Task<bool> PickUpMineWorkOrders()
         {
             if (!GaBSettings.Mono.ShipmentsMine)
                 return false;
@@ -60,18 +74,21 @@ namespace GarrisonBuddy
             if (mine == null)
                 return false;
 
-            if (BuildingsLua.GetNumberShipmentReadyByBuildingId(mine.id) == 0)
+            var numShipments = BuildingsLua.GetNumberShipmentReadyByBuildingId(mine.id);
+            if (numShipments < 1)
                 return false;
+
+            GarrisonBuddy.Diagnostic("Shipment: Detected " + numShipments + " shipments to collect from mine.");
 
             WoWGameObject mineShipment =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235886);
             if (mineShipment == null)
             {
-                //GarrisonBuddy.Diagnostic("Seems there's a problem, shipment for mine ready but can't find on map");
-                return false;
+                GarrisonBuddy.Diagnostic("Seems there's a problem, shipment for mine ready but can't find on map. Trying to move to default location.");
+                return await MoveTo(Me.IsAlliance ? MineShipmentAlly : MineShipmentHorde, "Default location for mine shipments");
             }
 
-            if (await MoveTo(mineShipment.Location))
+            if (await MoveTo(mineShipment.Location, "Collecting mine shipments"))
                 return true;
 
             mineShipment.Interact();
@@ -79,7 +96,7 @@ namespace GarrisonBuddy
         }
 
 
-        public static async Task<bool> PickUpGardenWorkOrders()
+        private static async Task<bool> PickUpGardenWorkOrders()
         {
             if (!GaBSettings.Mono.ShipmentsGarden)
                 return false;
@@ -88,25 +105,29 @@ namespace GarrisonBuddy
             if (garden == null)
                 return false;
 
-            if (BuildingsLua.GetNumberShipmentReadyByBuildingId(garden.id) == 0)
+
+            var numShipments = BuildingsLua.GetNumberShipmentReadyByBuildingId(garden.id);
+            if (numShipments < 1)
                 return false;
 
+            GarrisonBuddy.Diagnostic("Shipment: Detected " + numShipments + " shipments to collect from garden.");
+            
             WoWGameObject gardenShipment =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235885);
             if (gardenShipment == null)
             {
-                //GarrisonBuddy.Diagnostic("Seems there's a problem, shipment for garden ready but can't find on map");
-                return false;
+                GarrisonBuddy.Diagnostic("Seems there's a problem, shipment for garden ready but can't find on map. Trying to move to known location.");
+                return await MoveTo(Me.IsAlliance ? GardenShipmentAlly : GardenShipmentHorde, "Default location for garden shipments");
             }
 
-            if (await MoveTo(gardenShipment.Location))
+            if (await MoveTo(gardenShipment.Location, "Collecting garden shipments"))
                 return true;
 
             gardenShipment.Interact();
             return true;
         }
 
-        public static async Task<bool> ActivateFinishedBuildings()
+        private static async Task<bool> ActivateFinishedBuildings()
         {
             if (!GaBSettings.Mono.ActivateBuildings)
                 return false;
@@ -119,7 +140,9 @@ namespace GarrisonBuddy
             if (!toActivate.Any())
                 return false;
 
-            if (await MoveTo(toActivate.First().Location))
+            GarrisonBuddy.Diagnostic("Shipment: Found " + toActivate.Count() + " buildings to activate.");
+
+            if (await MoveTo(toActivate.First().Location,"Building activation"))
                 return true;
 
             toActivate.First().Interact();

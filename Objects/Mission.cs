@@ -50,7 +50,7 @@ namespace GarrisonBuddy
             Type = type;
             Xp = xp;
             Environment = environment;
-            //GarrisonBuddy.Diagnostic(ToString());
+            GarrisonBuddy.Diagnostic(ToString());
         }
 
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level, int iLevel,
@@ -170,14 +170,6 @@ namespace GarrisonBuddy
 
         private bool IsMatch(IEnumerable<Follower> possibleMatch)
         {
-            //foreach (var follower in possibleMatch)
-            //{
-            //    GarrisonBuddy.Diagnostic(follower.ToString());
-            //}
-            //foreach (var enemy in Enemies)
-            //{
-            //    GarrisonBuddy.Diagnostic("  " + enemy);
-            //}
             List<String> counters = possibleMatch.Select(m => m.Counters).SelectMany(x => x).ToList();
             foreach (string ability in Enemies)
             {
