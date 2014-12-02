@@ -37,6 +37,7 @@ namespace GarrisonBuddy
             if (await MoveTo(itemToCollect.Location))
                 return true;
 
+            await Buddy.Coroutines.Coroutine.Sleep(300);
             itemToCollect.Interact();
             //SetLootPoi(itemToCollect);
             await Buddy.Coroutines.Coroutine.Sleep(3500);

@@ -146,6 +146,8 @@ namespace GarrisonBuddy
             if (await MoveTo(toActivate.First().Location,"Building activation"))
                 return true;
 
+
+            await Buddy.Coroutines.Coroutine.Sleep(300); 
             toActivate.First().Interact();
             await Buddy.Coroutines.Coroutine.Sleep(5000);
             return true;
