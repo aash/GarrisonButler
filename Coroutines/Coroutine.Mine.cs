@@ -29,7 +29,7 @@ namespace GarrisonBuddy
         };
 
         private static int PreserverdMiningPickItemId = 118903;
-        private static int PreserverdMiningPickAura = 117061;
+        private static int PreserverdMiningPickAura = 176061;
 
         private static int MinersCofeeItemId = 118897;
         private static int MinersCofeeAura = 176049;
@@ -48,14 +48,16 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
             if (!ores.Any())
                 return false;
+
+            GarrisonBuddy.Diagnostic("Found ore to gather.");
+
             if (minesId.Contains(Me.SubZoneId))
             {
                 // Do I have a mining pick to use
                 WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
                 if (miningPick != null && miningPick.Usable && !Me.HasAura(PreserverdMiningPickAura))
                 {
-                    GarrisonBuddy.Diagnostic("Found " + miningPick.Name + " usable:" + miningPick.Usable);
-                    GarrisonBuddy.Diagnostic("Found " + miningPick.Name);
+                    GarrisonBuddy.Diagnostic("Using Mining pick");
                     miningPick.Use();
                 }
             }
@@ -66,9 +68,9 @@ namespace GarrisonBuddy
                 (!Me.HasAura(MinersCofeeAura) ||
                  Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2))
             {
+                GarrisonBuddy.Diagnostic("Using coffee");
                 cofee.Use();
             }
-
 
             WoWGameObject itemToCollect = ores.OrderBy(i => i.Distance).First();
             if (await MoveTo(itemToCollect.Location))
