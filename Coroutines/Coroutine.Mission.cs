@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonBuddy.Config;
 using GarrisonLua;
+using MainDev.RemoteASM.Handlers;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
@@ -43,39 +44,24 @@ namespace GarrisonBuddy
             refreshFollowerTimer.Reset();
         }
 
-
-        private static bool IsToStartMission()
-        {
-            if (!GaBSettings.Mono.DoMissions)
-                return false;
-
-            return DoCheckAvailableMissions();
-        }
-
-        private static bool IsToTurnInMission()
-        {
-            if (!GaBSettings.Mono.CompletedMissions)
-                return false;
-
-            // Is there mission to turn in?
-            return MissionLua.GetNumberCompletedMissions() > 0;
-        }
-
         private static bool IsToDoMission()
         {
-            return IsToStartMission() || IsToTurnInMission();
+            if (_StartMissionsWaitTimer == null || _StartMissionsWaitTimer.IsFinished || StartMissionRunning ||
+                TurnInCompletedRunning)
+                return true;
+            return false;
         }
+        
+        private static WaitTimer _TurnInCompletedWaitTimer;
 
         public static async Task<bool> DoStartMissions()
         {
-            if (!GaBSettings.Mono.DoMissions)
+            if (!GaBSettings.Mono.DoMissions || !DoCheckAvailableMissions() || ToStart.Count <= 0)
+            {
+                StartMissionRunning = false;
                 return false;
-
-            if (!DoCheckAvailableMissions())
-                return false;
-
-            if (ToStart.Count <= 0)
-                return false;
+            }
+            StartMissionRunning = true;
             KeyValuePair<Mission, Follower[]> match = ToStart.First();
 
             if (await MoveToTable())
@@ -88,7 +74,7 @@ namespace GarrisonBuddy
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
                 {
                     GarrisonBuddy.Warning("Couldn't display GarrisonMissionTab.");
-                    return false;
+                    return true;
                 }
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
@@ -99,7 +85,7 @@ namespace GarrisonBuddy
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
                     GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame.");
-                    return false;
+                    return true;
                 }
             }
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
@@ -114,7 +100,7 @@ namespace GarrisonBuddy
                             () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
                 {
                     GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
-                    return false;
+                    return true;
                 }
             }
             match.Key.AddFollowersToMission(match.Value.ToList());
@@ -122,6 +108,11 @@ namespace GarrisonBuddy
             InterfaceLua.ClickCloseMission();
             return true;
         }
+
+        private static WaitTimer CheckAvailableMissionTimer;
+        private static bool TurnInCompletedRunning;
+        private static bool StartMissionRunning;
+        private static WaitTimer _StartMissionsWaitTimer;
 
         public static bool DoCheckAvailableMissions()
         {
@@ -132,7 +123,9 @@ namespace GarrisonBuddy
             // Is there mission available to start
             if (numberMissionAvailable == 0)
                 return false;
+
             bool forced = _missions != null && numberMissionAvailable != _missions.Count;
+
             RefreshMissions(forced);
             RefreshFollowers(forced);
             
@@ -150,9 +143,12 @@ namespace GarrisonBuddy
             ToStart.AddRange(temp.Where(x => ToStart.All(y => y.Key.MissionId != x.Key.MissionId)));
             var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
                        "Can succesfully complete: " + ToStart.Count + " missions.";
-            if(ToStart.Any())
-                GarrisonBuddy.Log(mess);
-            else GarrisonBuddy.Diagnostic(mess);
+            if (ToStart.Any())
+              GarrisonBuddy.Log(mess);
+            
+        else
+                GarrisonBuddy.Diagnostic(mess);
+            
 
             LastCheckValue = true;
             return ToStart.Any();
@@ -184,12 +180,13 @@ namespace GarrisonBuddy
 
         public static async Task<bool> DoTurnInCompletedMissions()
         {
-            if (!GaBSettings.Mono.CompletedMissions)
+            if (!GaBSettings.Mono.CompletedMissions || MissionLua.GetNumberCompletedMissions() == 0)
+            {
+                TurnInCompletedRunning = false;
                 return false;
+            }
+            TurnInCompletedRunning = true;
 
-            // Is there mission to turn in?
-            if (MissionLua.GetNumberCompletedMissions() == 0)
-                return false;
             GarrisonBuddy.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
 
             // are we at the action table?
@@ -208,6 +205,24 @@ namespace GarrisonBuddy
             string missionId = args.Args[0].ToString();
             GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             ToStart.RemoveAll(m => m.Key.MissionId == missionId);
+        }
+
+        private async static Task<bool> DoMissions()
+        {
+            if (_StartMissionsWaitTimer != null && !_StartMissionsWaitTimer.IsFinished && !TurnInCompletedRunning && !StartMissionRunning)
+                return false;
+            if (_StartMissionsWaitTimer == null)
+                _StartMissionsWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
+            _StartMissionsWaitTimer.Reset();
+            
+            // Missions
+            if (await DoTurnInCompletedMissions())
+                return true;
+
+            if (await DoStartMissions())
+                return true;
+
+            return false;
         }
     }
 }

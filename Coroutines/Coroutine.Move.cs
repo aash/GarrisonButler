@@ -8,6 +8,8 @@ using Bots.DungeonBuddy.Helpers;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
+using Styx.CommonBot;
+using Styx.CommonBot.Coroutines;
 using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.World;
@@ -27,6 +29,10 @@ namespace GarrisonBuddy
 
         //    WoWMovement.ClickToMove(gameObject.Location);
         //}
+        public static async Task<bool> MoveToSafe(WoWPoint destination, string destinationName = null)
+        {
+            return await MoveTo(Dijkstra.ClosestToNodes(destination), destinationName);
+        }
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
             if (Me.Location == destination)
@@ -46,12 +52,18 @@ namespace GarrisonBuddy
                 StuckWatch.Reset();
                 StuckWatch.Start();
             }
-            if (Me.Location.Distance(destination) > 5)
+            if (Me.Location.Distance(destination) > 5 + (Me.Mounted ? 3 : 0))
             {
                 WoWPoint waypoint;
-                if (Me.Location.Distance(_lastMoveTo) >= 1)
+                if (Me.Location.Distance(_lastMoveTo) >= 2)
                 {
                     waypoint = _lastMoveTo;
+                    // HERE WE CAN CHECK FOR MAYBE A FURTHER WAYPOINTS? 
+                    if (!furthestTrimmed && _waypoints.Count > 2)
+                    {
+                        _waypoints = await GetFurthestWaypoint(_waypoints);
+                        furthestTrimmed = true;
+                    }
                     //GarrisonBuddy.Diagnostic("Keeping next waypoint to " + destinationName + ": " + waypoint);
                 }
                 else
@@ -63,9 +75,10 @@ namespace GarrisonBuddy
                     }
 
                     // HERE WE CAN CHECK FOR MAYBE A FURTHER WAYPOINTS ? 
-                    _waypoints = await GetFurthestWaypoint(_waypoints);
+//                    _waypoints = await GetFurthestWaypoint(_waypoints);
 
                     waypoint = _waypoints.First();
+                    furthestTrimmed = false;
 
                     _waypoints.Remove(waypoint);
                     StuckWatch.Reset();
@@ -87,7 +100,19 @@ namespace GarrisonBuddy
                     StuckWatch.Start();
                     _target = new WoWPoint(); // reset path
                 }
-                else WoWMovement.ClickToMove(waypoint);
+                else
+                {
+                    if (Me.IsMoving && !Me.Mounted && Mount.CanMount())
+                    {
+                        WoWMovement.MoveStop();
+                        await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsMoving);
+                        Mount.GetMountSpell().Cast();
+                        await CommonCoroutines.SleepForLagDuration();
+                        await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
+                        await CommonCoroutines.SleepForLagDuration();
+                    }
+                    WoWMovement.ClickToMove(waypoint);
+                }
                 _lastDistance = Me.Location.DistanceSqr(_lastMoveTo);
                 return true;
             }
@@ -107,6 +132,7 @@ namespace GarrisonBuddy
             {
                 indexToKeep = index;
                 WoWPoint waypoint = waypoints[index];
+                await Buddy.Coroutines.Coroutine.Yield();
                 if (!IsValidWaypoint(Me.Location, waypoint))
                     break;
             }
@@ -135,15 +161,16 @@ namespace GarrisonBuddy
             for (float p = 0; p <= 1; p += (1/(from.Distance(waypoint))))
             {
                 WoWPoint pOrigin = from + (waypoint - from)*p;
-                for (float i = Me.BoundingHeight/3; i <= Me.BoundingHeight; i += Me.BoundingHeight/4)
+                for (float i = Me.BoundingHeight/3; i <= Me.BoundingHeight; i += Me.BoundingHeight/3)
                 {
                     WoWPoint pTo = waypoint + new WoWPoint(0, 0, i);
                     pOrigin.Z = GetGroundZ(pTo) + i;
 
-                    for (float j = -Me.BoundingRadius; j <= Me.BoundingRadius; j += Me.BoundingRadius/5)
+                    for (float j = -Me.BoundingRadius; j <= Me.BoundingRadius; j += Me.BoundingRadius/2)
                     {
                         WoWPoint perpTo = GetPerpPointsBeginning(pTo, pOrigin, j);
                         WoWPoint perpOrigin = GetPerpPointsBeginning(pOrigin, pTo, j);
+                        perpOrigin.Z = GetGroundZ(perpTo) + i;
                         lines.Add(new WorldLine(perpOrigin, perpTo));
                     }
                 }
@@ -159,7 +186,7 @@ namespace GarrisonBuddy
             //}
             //GarrisonBuddy.Diagnostic("RESULT to: " + pTo + "\nTraceLine - Collision:" + col);
             //GarrisonBuddy.Diagnostic("Slope: " + Slope(pOrigin, pTo));
-            if (!resTrace.All(res => res == false)) return false;
+            if (resTrace.Any(res => res == true)) return false;
             //GarrisonBuddy.Diagnostic("resTrace passed");
 
             return Slope(lines.First().Start, lines.First().End) < 45;
@@ -189,7 +216,6 @@ namespace GarrisonBuddy
 
             GameWorld.TraceLine(new WoWPoint(p.X, p.Y, (p.Z + 0.5)), new WoWPoint(p.X, p.Y, (p.Z - 5)),
                 TraceLineHitFlags.Collision, out ground);
-
             return ground != WoWPoint.Empty ? ground.Z : float.MinValue;
         }
 
@@ -197,6 +223,7 @@ namespace GarrisonBuddy
 
         private static Graph _movementGraph;
         private static List<WoWPoint> _zonePoints;
+        private static bool furthestTrimmed;
 
         public static void InitializationMove()
         {

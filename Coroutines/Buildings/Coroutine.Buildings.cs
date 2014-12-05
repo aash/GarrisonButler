@@ -29,6 +29,9 @@ namespace GarrisonBuddy
             236263
         };
 
+        private static WaitTimer _ActivateWaitTimer;
+        private static bool ActivateRunning;
+
 
         private static async Task<bool> DoBuildingRelated()
         {
@@ -42,19 +45,6 @@ namespace GarrisonBuddy
             if (await PickUpGarrisonCache())
                 return true;
 
-            // Mine
-            if (await CleanMine())
-                return true;
-
-            if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[0].buildingIds.Contains(b.id))))
-                return true;
-
-            // Garden 
-            if (await CleanGarden())
-                return true;
-
-            if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[1].buildingIds.Contains(b.id))))
-                return true;
 
             if (await ActivateFinishedBuildings())
                 return true;
@@ -64,6 +54,20 @@ namespace GarrisonBuddy
 
             if (await startWorkOrder())
                 return true;
+
+            // Mine
+            if (await CleanMine())
+                return true;
+
+            //if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[0].buildingIds.Contains(b.id))))
+            //   return true;
+
+            // Garden 
+            if (await CleanGarden())
+                return true;
+
+            //if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[1].buildingIds.Contains(b.id))))
+            //    return true;
 
             return false;
         }
@@ -150,14 +154,25 @@ namespace GarrisonBuddy
             if (!GaBSettings.Mono.ActivateBuildings)
                 return false;
 
+
+            if (_ActivateWaitTimer != null && !_ActivateWaitTimer.IsFinished && !ActivateRunning)
+                return false;
+            if (_ActivateWaitTimer == null)
+                _ActivateWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
+            _ActivateWaitTimer.Reset();
+
             IOrderedEnumerable<WoWGameObject> AllToActivate =
                 ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
                     .ToList()
                     .OrderBy(o => o.Location.X);
             if (!AllToActivate.Any())
+            {
+                ActivateRunning = false;
                 return false;
+            }
 
+            ActivateRunning = true;
             WoWGameObject toActivate = AllToActivate.First();
             GarrisonBuddy.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
             GarrisonBuddy.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +

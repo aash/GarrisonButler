@@ -12,7 +12,9 @@ using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
+using Styx.CommonBot.ObjectDatabase;
 using Styx.CommonBot.POI;
+using Styx.CommonBot.Profiles;
 using Styx.CommonBot.Routines;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
@@ -42,11 +44,16 @@ namespace GarrisonBuddy
         private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>
         {
             new WoWPoint(), //level 1
-            new WoWPoint(5585.125, 4565.036, 135.9761), //level 2
+            new WoWPoint(5590.288,4568.919,136.1698), //level 2
             new WoWPoint(5585.125, 4565.036, 135.9761), //level 3
         };
 
+        private static readonly WoWPoint allyMailbox = new WoWPoint(1927.694, 294.151, 88.96585);
+        private static readonly WoWPoint hordeMailbox = new WoWPoint(5580.682, 4570.392, 136.558);
+
+
         private static bool test = true;
+        private static long cpt = 0;
 
         public static DateTime NextCheck = DateTime.Now;
         public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
@@ -58,9 +65,8 @@ namespace GarrisonBuddy
         };
 
         internal static readonly uint GarrisonHearthstone = 110560;
-        private static readonly Stopwatch stopwatch = new Stopwatch();
         private static readonly WoWPoint FishingSpotAlly = new WoWPoint(2021.108, 187.5952, 84.55713);
-        private static readonly WoWPoint FishingSpotHorde = new WoWPoint();
+        private static readonly WoWPoint FishingSpotHorde = new WoWPoint(5482.597,4637.465,136.1296);
 
         private static LocalPlayer Me
         {
@@ -100,10 +106,9 @@ namespace GarrisonBuddy
         {
             try
             {
-                InitializationMove();
                 InitializeShipments();
                 InitializeMissions();
-                Check = true;
+                InitializationMove();
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
             }
             catch (Exception e)
@@ -157,14 +162,22 @@ namespace GarrisonBuddy
                 outgoingUnits.Add(unit);
             }
         }
-
+        
+        private static Stopwatch testStopwatch;
+        
         public static async Task<bool> RootLogic()
         {
-            stopwatch.Stop();
-            //GarrisonBuddy.Diagnostic("Time per tick: " + stopwatch.Elapsed + "\n\n");          
-            stopwatch.Reset();
-            stopwatch.Start();
-
+            if (testStopwatch == null)
+            {
+                testStopwatch = new Stopwatch();
+                testStopwatch.Start();
+            }
+            cpt++;
+            GarrisonBuddy.Diagnostic("Ready: " + ReadyToSwitch);
+            GarrisonBuddy.Diagnostic("Time per tick: " + testStopwatch.Elapsed);
+            GarrisonBuddy.Diagnostic("cpt: " + cpt);
+            testStopwatch.Reset();
+            testStopwatch.Start();
             CheckResetAfk();
 
             if (await RestoreUiIfNeeded())
@@ -191,32 +204,24 @@ namespace GarrisonBuddy
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
 
-            if (Me.Mounted)
-            {
-                await CommonCoroutines.LandAndDismount("Mount not supported yet.");
-                return true;
-            }
-
+            //if (Me.Mounted)
+            //{
+            //    await CommonCoroutines.LandAndDismount("Mount not supported yet.");
+            //    return true;
+            //}
+            
+            //GarrisonBuddy.Diagnostic("Time before start gar stuff: " + testStopwatch.Elapsed);
             if (await TransportToGarrison())
                 return true;
-
-
-            // Check mission every minute
-            if ((DateTime.Now - NextCheck).TotalHours > 0)
-            {
-                NextCheck = DateTime.Now.AddMinutes(1);
-                Check = true;
-            }
+            //GarrisonBuddy.Diagnostic("Time after TransportToGarrison: " + testStopwatch.Elapsed);
 
             if (await DoBuildingRelated())
                 return true;
+            //GarrisonBuddy.Diagnostic("Time after DoBuildingRelated: " + testStopwatch.Elapsed);
 
-            // Missions
-            if (await DoTurnInCompletedMissions())
+            if (await DoMissions())
                 return true;
-
-            if (await DoStartMissions())
-                return true;
+            //GarrisonBuddy.Diagnostic("Time after DoMissions: " + testStopwatch.Elapsed);
 
             //if(test)
             //if (await MoveTo(new WoWPoint(1948.035, 284.513, 88.96583))) // testing purpose
@@ -225,15 +230,88 @@ namespace GarrisonBuddy
             //if (await MoveToTable()) // testing purpose
             //    return true; // testing purpose
 
+            if (await DoDailyCd())
+                return true;
+            //GarrisonBuddy.Diagnostic("Time after DoDailyCd: " + testStopwatch.Elapsed);
+
+            if (await DoSalvages())
+                return true;
+            
+            var hasItemTomail = Styx.CommonBot.Inventory.InventoryManager.HaveItemsToMail;
+            if (hasItemTomail && Styx.Helpers.CharacterSettings.Instance.MailRecipient.Any())
+            {
+                var mailBox =
+                    ObjectManager.GetObjectsOfType<WoWGameObject>()
+                        .Where(o => o.SubType == WoWGameObjectType.Mailbox)
+                        .FirstOrDefault();
+                if(mailBox == null)
+                    if (await MoveTo(Me.IsAlliance ? allyMailbox : hordeMailbox))
+                        return true;
+                if (await MoveTo(mailBox.Location))
+                    return true;
+                await Buddy.Coroutines.Coroutine.Wait(1000, () => !Me.IsMoving);
+                mailBox.Interact();
+                await CommonCoroutines.SleepForLagDuration();
+                var items = Styx.CommonBot.Inventory.InventoryManager.GetItemsToMail();
+                var mailFrame = MailFrame.Instance;
+                await mailFrame.SendMailWithManyAttachmentsCoroutine(
+                    Styx.Helpers.CharacterSettings.Instance.MailRecipient,
+                    items);
+            }
+
+           
+
             if (await Waiting())
                 return true;
+            //GarrisonBuddy.Diagnostic("Time after Waiting: " + testStopwatch.Elapsed);
 
+            ReadyToSwitch = true;
             return false;
         }
 
+        private static readonly List<int> SalvageCratesIds = new List<int>()
+        {
+            114120,
+            114119
+        };
+
+        private static async Task<bool> DoSalvages()
+        {
+            var salvageCrates = Me.BagItems.Where(i => SalvageCratesIds.Contains((int)i.Entry));
+            if (salvageCrates.Any())
+            {
+                var building = _buildings.FirstOrDefault(b => b.id == 52 || b.id == 140 || b.id == 141);
+                if (building != null)
+                {
+                    ObjectManager.Update(); ;
+                    WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
+                    // can't find it? Let's try to get closer to the default location.
+                    if (unit == null)
+                    {
+                        await MoveTo(building.Pnj);
+                        return true;
+                    }
+
+                    if (await MoveTo(unit.Location))
+                        return true;
+                    if (Me.Mounted)
+                        await CommonCoroutines.Dismount("To salvage");
+                    foreach (var salvageCrate in salvageCrates)
+                    {
+                        await CommonCoroutines.SleepForLagDuration();
+                        salvageCrate.UseContainerItem();
+                        await Buddy.Coroutines.Coroutine.Wait(5000, () => Me.IsCasting);
+                        await Buddy.Coroutines.Coroutine.Yield();
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
         private static async Task<bool> TransportToGarrison()
         {
             if (GarrisonsZonesId.Contains(Me.ZoneId)) return false;
+
             if (GaBSettings.Mono.UseGarrisonHearthstone)
             {
                 WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
@@ -291,14 +369,17 @@ namespace GarrisonBuddy
                         return true;
                 }
             }
-            GarrisonBuddy.Log("You Garrison has been taken care of! Waiting for orders...");
+            else
+            {
+                GarrisonBuddy.Log("You Garrison has been taken care of! Waiting for orders...");
 
-            if (await MoveTo(Dijkstra.ClosestToNodes(myFactionWaitingPoints[townHallLevel - 1])))
-                return true;
-
+                if (await MoveTo(Dijkstra.ClosestToNodes(myFactionWaitingPoints[townHallLevel - 1])))
+                    return true;
+            }
             return false;
         }
 
+        public static bool ReadyToSwitch = false;
         private static bool IsAutoAngler()
         {
             if (BotManager.Current.Name == "Mixed Mode")
@@ -376,10 +457,9 @@ namespace GarrisonBuddy
             }
         }
 
-        private static bool ReadyForMixedMode()
+        private static bool AnythingLeftToDoBeforeEnd()
         {
-            if (IsAutoAngler())
-                if (Me.Location.Distance(Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde) > 10)
+            if (ReadyToSwitch) // && Location.Distance(Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde) > 10 || Me.IsMoving)
                     return false;
             return true;
         }
@@ -387,7 +467,9 @@ namespace GarrisonBuddy
         public static bool AnythingTodo()
         {
             RefreshBuildings();
-
+            // dailies cd
+            if (IsToDoCd())
+                return true;
             // Cache
             if (IsToDoCache())
                 return true;
@@ -403,10 +485,11 @@ namespace GarrisonBuddy
             // garden
             if (IsToDoGarden())
                 return true;
+
             // Missions
             if (IsToDoMission())
                 return true;
-            return !ReadyForMixedMode();
+            return AnythingLeftToDoBeforeEnd();
         }
     }
 }

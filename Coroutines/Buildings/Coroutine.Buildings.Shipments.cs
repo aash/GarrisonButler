@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonLua;
 using Styx;
+using Styx.Common;
+using Styx.Common.Helpers;
+using Styx.CommonBot.Frames;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -188,6 +192,10 @@ namespace GarrisonBuddy
             // Others? 
         };
 
+        private static bool PickupRunning;
+        private static WaitTimer _PickUpWaitTimer;
+        private static WaitTimer _StartOrderWaitTimer;
+        private static bool StartOrderRunning;
         #endregion
 
         private static void InitializeShipments()
@@ -197,6 +205,8 @@ namespace GarrisonBuddy
 
         private static bool IsToDoShipment()
         {
+            return _StartOrderWaitTimer.IsFinished || StartOrderRunning;
+
             // Work orders to start 
             IOrderedEnumerable<Building> toStarts =
                 _buildings.Where(b => b.canCompleteOrder() && BuildingsLua.GetNumberShipmentLeftToStart(b.id) > 0)
@@ -216,14 +226,23 @@ namespace GarrisonBuddy
 
         private static async Task<bool> startWorkOrder()
         {
+            if (_StartOrderWaitTimer != null && !_StartOrderWaitTimer.IsFinished && !StartOrderRunning)
+                return false;
+            if (_StartOrderWaitTimer == null)
+                _StartOrderWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
+            _StartOrderWaitTimer.Reset();
+
             // check if needed
             IOrderedEnumerable<Building> toStarts =
                 _buildings.Where(b => b.canCompleteOrder() && b.shipmentCapacity - b.shipmentsTotal > 0)
                     .OrderBy(b => b.id);
             ;
             if (!toStarts.Any())
+            {
+                StartOrderRunning = false;
                 return false;
-
+            }
+            StartOrderRunning = true;
             Building toStart = toStarts.First();
             // First go to the PNJ.
             WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == toStart.PnjId);
@@ -240,7 +259,11 @@ namespace GarrisonBuddy
             await Buddy.Coroutines.Coroutine.Wait(500, () =>
             {
                 if (!InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+                {
                     unit.Interact();
+                    IfGossip(unit);
+                }
+          
                 return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
             });
             await Buddy.Coroutines.Coroutine.Wait(3000, () =>
@@ -258,6 +281,20 @@ namespace GarrisonBuddy
         }
 
 
+        private static async Task<bool> IfGossip(WoWUnit pnj)
+        {
+            if (GossipFrame.Instance != null)
+            {
+                var frame = GossipFrame.Instance;
+                foreach (var gossipOptionEntry in frame.GossipOptionEntries)
+                {
+                    Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
+                }
+                frame.SelectGossipOption(0);
+                frame.SelectGossipOption(1);
+            }
+            return true;
+        }
         //itemToCollect = ores.OrderBy(i => i.Distance).First();
         //        // Do I have a mining pick to use
         //        WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
@@ -334,17 +371,37 @@ namespace GarrisonBuddy
             return true;
         }
 
+        private static Styx.WoWInternals.WoWGuid lastSeen = new WoWGuid();
 
         private static async Task<bool> PickUpAllWorkOrder()
         {
-            WoWGameObject ShipmentToCollect =
-                ObjectManager.GetObjectsOfType<WoWGameObject>()
+
+            if (_PickUpWaitTimer != null && !_PickUpWaitTimer.IsFinished && !PickupRunning)
+                return false;
+            if (_PickUpWaitTimer == null)
+                _PickUpWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
+            _PickUpWaitTimer.Reset();
+
+            WoWGameObject ShipmentToCollect = Me.ToGameObject();
+            if (lastSeen != new WoWGuid())
+            {
+               ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && o.DisplayId == 169091);
+            }
+            if (ShipmentToCollect == null)
+            {
+                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && o.DisplayId == 16091)
                     .OrderBy(o => o.Location.X)
                     .FirstOrDefault();
+            }
+              
             if (ShipmentToCollect == null)
+            {
+                PickupRunning = false;
                 return false;
-
+            }
+            lastSeen = ShipmentToCollect.Guid;
+            PickupRunning = true;
             GarrisonBuddy.Log("Found shipment to collect(" + ShipmentToCollect.Name + "), moving to shipment.");
             GarrisonBuddy.Diagnostic("Shipment " + ShipmentToCollect.SafeName + " - " + ShipmentToCollect.Entry + " - " +
                                      ShipmentToCollect.DisplayId + ": " + ShipmentToCollect.Location);

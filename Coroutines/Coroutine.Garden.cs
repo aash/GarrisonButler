@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonBuddy.Config;
+using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -19,8 +21,13 @@ namespace GarrisonBuddy
             235391 // Talador Orchid
         };
 
+        private static WaitTimer _gardenWaitTimer;
+        private static bool gardenRunning;
+
         private static bool IsToDoGarden()
         {
+            return _gardenWaitTimer == null || _gardenWaitTimer.IsFinished || gardenRunning;
+
             if (!GaBSettings.Mono.HarvestGarden)
                 return false;
 
@@ -34,8 +41,15 @@ namespace GarrisonBuddy
 
         public static async Task<bool> CleanGarden()
         {
-            if (!GaBSettings.Mono.HarvestGarden)
+            if (!GaBSettings.Mono.HarvestGarden ||( _gardenWaitTimer != null && !_gardenWaitTimer.IsFinished && !gardenRunning))
+            {
+                gardenRunning = false;
                 return false;
+            } 
+            
+            if (_gardenWaitTimer == null)
+                _gardenWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
+            _gardenWaitTimer.Reset();
 
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
@@ -44,8 +58,11 @@ namespace GarrisonBuddy
             List<WoWGameObject> herbs =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).ToList();
             if (!herbs.Any())
+            {
+                gardenRunning = false;
                 return false;
-
+            }
+            gardenRunning = true;
             WoWGameObject itemToCollect = herbs.OrderBy(i => i.Distance).First();
 
             GarrisonBuddy.Diagnostic("Found herb to gather at: " + itemToCollect.Location);

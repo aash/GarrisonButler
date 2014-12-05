@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonLua;
 using Styx;
+using Styx.Common;
+using Styx.CommonBot.Frames;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
@@ -71,7 +74,6 @@ namespace GarrisonBuddy
             this.itemQuality = itemQuality;
             itemID = itemId ?? "None";
             GetOrderInfo(MeIsAlliance);
-
             GarrisonBuddy.Diagnostic(ToString());
         }
 
@@ -177,7 +179,7 @@ namespace GarrisonBuddy
         //    return true;
         //}
 
-        private void GetOrderInfo(bool Alliance)
+        private void GetOrderInfo(bool alliance)
         {
             PnjId = 0;
             ReagentId = 0;
@@ -200,16 +202,15 @@ namespace GarrisonBuddy
                 case (int) buildings.BarracksLvl2:
                 case (int) buildings.BarracksLvl3:
                     break;
-
-                    //<Vendor Name="Dalana Clarke" Entry="89065" Type="Repair" X="1924.622" Y="225.1501" Z="76.96214" />
+                    //horde 2: <Vendor Name="Magrish" Entry="89066" Type="Repair" X="5569.239" Y="4462.448" Z="132.5624" />
+                    //ally 2: <Vendor Name="Dalana Clarke" Entry="89065" Type="Repair" X="1924.622" Y="225.1501" Z="76.96214" />
                 case (int) buildings.DwarvenBunkerLvl1:
                 case (int) buildings.DwarvenBunkerLvl2:
                 case (int) buildings.DwarvenBunkerLvl3:
-                    if (Alliance) PnjId = 89065;
-                    else throw new NotImplementedException();
+                    PnjId = alliance ? 89065 : 89066;
                     currencyId = 824;
                     NumberReagent = 20;
-                    Pnj = new WoWPoint(1924.622, 225.1501, 76.96214);
+                    Pnj = alliance ? new WoWPoint(1924.622, 225.1501, 76.96214) : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderCurrency;
                     break;
 
@@ -222,15 +223,15 @@ namespace GarrisonBuddy
                 case (int) buildings.EngineeringWorksLvl2:
                 case (int) buildings.EngineeringWorksLvl3:
                     break;
-                    //<Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
+                    //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
+                    //horde lvl 2 : <Vendor Name="Nali Softsoil" Entry="85783" Type="Repair" X="5410.738" Y="4568.479" Z="138.3254" />
                 case (int) buildings.GardenLvl1:
                 case (int) buildings.GardenLvl2:
                 case (int) buildings.GardenLvl3:
-                    if (Alliance) PnjId = 85514;
-                    else throw new NotImplementedException();
+                    PnjId = alliance ? 85514 : 85783;
                     ReagentId = 116053;
                     NumberReagent = 5;
-                    Pnj = new WoWPoint(1862.214, 140, 78.29137);
+                    Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738,4568.479,138.3254);
                     canCompleteOrder = canCompleteOrderItem;
                     break;
 
@@ -248,10 +249,17 @@ namespace GarrisonBuddy
                 case (int) buildings.GnomishGearworksLvl2:
                 case (int) buildings.GnomishGearworksLvl3:
                     break;
-
+                // Horde default location: 5574.952" Y="4508.236" Z="129.8942
+                //Horde lvl 2 <Vendor Name="Lumber Lord Oktron" Entry="84247" Type="Repair" X="5697.096" Y="4475.479" Z="131.5005" />
+                // ally 2 : <Vendor Name="Justin Timberlord" Entry="84248" Type="Repair" X="1872.647" Y="310.0204" Z="82.61102" />
                 case (int) buildings.LumberMillLvl1:
                 case (int) buildings.LumberMillLvl2:
                 case (int) buildings.LumberMillLvl3:
+                    PnjId = alliance ? 84248 : 84247;
+                    ReagentId = 114781; // Wood
+                    NumberReagent = 10;
+                    Pnj = alliance ? new WoWPoint(5590.288,4568.919,136.1698) : new WoWPoint(5574.952,4508.236,129.8942);
+                    canCompleteOrder = canCompleteOrderItem;
                     break;
 
                 case (int) buildings.MageTowerLvl1:
@@ -259,30 +267,35 @@ namespace GarrisonBuddy
                 case (int) buildings.MageTowerLvl3:
                     break;
 
+                //Ally 3 : <Vendor Name="Timothy Leens" Entry="77730" Type="Repair" X="1899.896" Y="101.2778" Z="83.52704" />
+                //horde 3 : <Vendor Name="Gorsol" Entry="81688" Type="Repair" X="5467.965" Y="4449.892" Z="144.6722" />
                 case (int) buildings.MineLvl1:
                 case (int) buildings.MineLvl2:
                 case (int) buildings.MineLvl3:
-                    if (Alliance) PnjId = 77730;
-                    else throw new NotImplementedException();
+                    PnjId = alliance ? 77730 : 81688;
                     ReagentId = 115508;
                     NumberReagent = 5;
-                    Pnj = new WoWPoint(1899.896, 101.2778, 83.52704);
+                    Pnj = alliance ? new WoWPoint(1899.896, 101.2778, 83.52704) : new WoWPoint(5467.965,4449.892,144.6722);
                     canCompleteOrder = canCompleteOrderItem;
                     break;
-                    // <Vendor Name="Timothy Leens" Entry="77730" Type="Repair" X="1899.896" Y="101.2778" Z="83.52704" />
 
+                //ally <Vendor Name="Hennick Helmsley" Entry="77378" Type="Repair" X="1830.828" Y="199.172" Z="72.71624" />
                 case (int) buildings.SalvageYardLvl1:
                 case (int) buildings.SalvageYardLvl2:
                 case (int) buildings.SalvageYardLvl3:
+                    PnjId = alliance ? 77378 : 79857;
+                    Pnj = alliance ? new WoWPoint(5590.288, 4568.919, 136.1698) : new WoWPoint(5574.952, 4508.236, 129.8942);
+
                     break;
 
-                    // <Vendor Name="Kurt Broadoak" Entry="77777" Type="Repair" X="1817.415" Y="232.1284" Z="72.94653" />
+                    // Ally lvl 2 <Vendor Name="Kurt Broadoak" Entry="77777" Type="Repair" X="1817.415" Y="232.1284" Z="72.94653" />
+                // Horde lvl 2 <Vendor Name="Y'rogg" Entry="79831" Type="Repair" X="5666.928" Y="4545.664" Z="120.0819" />
                 case (int) buildings.ScribeQuartersLvl1:
                 case (int) buildings.ScribeQuartersLvl2:
                 case (int) buildings.ScribeQuartersLvl3:
-                    if (Alliance) PnjId = 77777;
-                    else throw new NotImplementedException();
-                    ReagentId = 114931;
+                    if (alliance) PnjId = 77777;
+                    else PnjId = 79831;
+                    ReagentId = 114931; // Cerulean Pigment
                     NumberReagent = 2;
                     Pnj = new WoWPoint(1817.415, 232.1284, 72.94653);
                     canCompleteOrder = CanCompleteOrderMillable;
@@ -306,10 +319,16 @@ namespace GarrisonBuddy
                 case (int) buildings.TailoringEmporiumLvl2:
                 case (int) buildings.TailoringEmporiumLvl3:
                     break;
-
+                // <Vendor Name="Kinja" Entry="79817" Type="Repair" X="5641.551" Y="4508.724" Z="119.9587" />
                 case (int) buildings.TheForgeLvl1:
                 case (int) buildings.TheForgeLvl2:
                 case (int) buildings.TheForgeLvl3:
+                    if (alliance) throw new NotImplementedException();
+                    else PnjId = 79817;
+                    ReagentId = 109119; // True iron ore
+                    NumberReagent = 5;
+                    Pnj = new WoWPoint(1899.896, 101.2778, 83.52704);
+                    canCompleteOrder = canCompleteOrderItem;
                     break;
 
                 case (int) buildings.TheTanneryLvl1:

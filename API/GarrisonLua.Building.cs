@@ -6,6 +6,7 @@ using Styx;
 using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using GarrisonBuddy = GarrisonBuddy.GarrisonBuddy;
 
 namespace GarrisonLua
 {
@@ -15,7 +16,6 @@ namespace GarrisonLua
 
         public static Building GetBuildingById(String buildingId)
         {
-            GarrisonBuddy.GarrisonBuddy.Diagnostic("GetBuildingById");
             String lua =
                 "C_Garrison.RequestLandingPageShipmentInfo();" +
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
@@ -79,7 +79,6 @@ namespace GarrisonLua
 
         public static List<string> GetListBuildingsId()
         {
-            GarrisonBuddy.GarrisonBuddy.Diagnostic("GetListBuildingsId");
             String lua =
                 "local RetInfo = {}; local buildings = C_Garrison.GetBuildings();" +
                 "for i = 1, #buildings do " +
@@ -100,6 +99,7 @@ namespace GarrisonLua
             const string lua = "local level, mapTexture, townHallX, townHallY = C_Garrison.GetGarrisonInfo();" +
                                "if (not level) then return tostring(0);" +
                                "else return tostring(level); end;";
+            Logging.WriteDiagnostic("GetTownHallLevel:" + Lua.GetReturnValues(lua)[0].ToInt32());
             return Lua.GetReturnValues(lua)[0].ToInt32();
         }
 

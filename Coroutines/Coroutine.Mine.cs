@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonBuddy.Config;
+using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -36,8 +38,7 @@ namespace GarrisonBuddy
 
         private static bool IsToDoMine()
         {
-            if (!GaBSettings.Mono.HarvestMine)
-                return false;
+            return _mineWaitTimer == null || _mineWaitTimer.IsFinished || mineRunning;
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
@@ -47,23 +48,32 @@ namespace GarrisonBuddy
             return ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => mineItems.Contains(o.Entry));
         }
 
+        private static WaitTimer _mineWaitTimer;
         public static async Task<bool> CleanMine()
         {
+            if (_mineWaitTimer != null && !_mineWaitTimer.IsFinished && !mineRunning)
+                return false;
+            if (_mineWaitTimer == null)
+                _mineWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
+            _mineWaitTimer.Reset();
+
             if (!GaBSettings.Mono.HarvestMine)
                 return false;
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
                 return false;
-
             // Is there something to mine? 
             List<WoWGameObject> ores =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
             if (!ores.Any())
+            {
+                mineRunning = false; 
                 return false;
+            }
+            mineRunning = true;
 
             WoWGameObject itemToCollect = ores.OrderBy(i => i.Location.X).First();
-
             GarrisonBuddy.Diagnostic("Found ore to gather at:" + itemToCollect.Location);
 
             if (MinesId.Contains(Me.SubZoneId))
@@ -115,8 +125,9 @@ namespace GarrisonBuddy
                 return true;
             }
 
-            stopwatch.Stop();
             return await MoveTo(itemToCollect.Location);
         }
+
+        public static bool mineRunning { get; set; }
     }
 }
