@@ -18,7 +18,7 @@ namespace GarrisonBuddy
             232545 // Rich True iron deposit
         };
 
-        internal static readonly List<uint> minesId = new List<uint>
+        internal static readonly List<uint> MinesId = new List<uint>
         {
             7324, //ally 1
             7325, // ally 2
@@ -34,13 +34,26 @@ namespace GarrisonBuddy
         private static int MinersCofeeItemId = 118897;
         private static int MinersCofeeAura = 176049;
 
+        private static bool IsToDoMine()
+        {
+            if (!GaBSettings.Mono.HarvestMine)
+                return false;
+
+            // Do i have a mine?
+            if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
+                return false;
+
+            // Is there something to mine? 
+            return ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => mineItems.Contains(o.Entry));
+        }
+
         public static async Task<bool> CleanMine()
         {
             if (!GaBSettings.Mono.HarvestMine)
                 return false;
 
             // Do i have a mine?
-            if (!_buildings.Any(b => MinesId.Contains(b.id)))
+            if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
                 return false;
 
             // Is there something to mine? 
@@ -48,43 +61,62 @@ namespace GarrisonBuddy
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
             if (!ores.Any())
                 return false;
-            
-            WoWGameObject itemToCollect = ores.OrderBy(i => i.Distance).First();
 
-            GarrisonBuddy.Diagnostic("Found ore to gather at:" + itemToCollect.Location );
+            WoWGameObject itemToCollect = ores.OrderBy(i => i.Location.X).First();
 
-            if (minesId.Contains(Me.SubZoneId))
+            GarrisonBuddy.Diagnostic("Found ore to gather at:" + itemToCollect.Location);
+
+            if (MinesId.Contains(Me.SubZoneId))
             {
+                itemToCollect = ores.OrderBy(i => i.Distance).First();
                 // Do I have a mining pick to use
                 WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
                 if (miningPick != null && miningPick.Usable
                     && !Me.HasAura(PreserverdMiningPickAura)
-                    && miningPick.CooldownTimeLeft.TotalSeconds == 0)
+                    && miningPick.CooldownTimeLeft.TotalSeconds < 0.1)
                 {
                     GarrisonBuddy.Diagnostic("Using Mining pick");
                     miningPick.Use();
+                    ObjectManager.Update();
                 }
-            }
+                if (miningPick != null && miningPick.StackCount >= 4)
+                {
+                    GarrisonBuddy.Log("Mining picks full: deleting");
+                    Lua.DoString("ClearCursor()");
+                    miningPick.PickUp();
+                    Lua.DoString("DeleteCursorItem()");
+                }
 
-            // Do I have a cofee to use
-            WoWItem coffee = Me.BagItems.Where(o => o.Entry == MinersCofeeItemId).ToList().FirstOrDefault();
-            if (coffee != null && coffee.Usable &&
-                (!Me.HasAura(MinersCofeeAura) ||
-                 Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2)
-                && coffee.CooldownTimeLeft.TotalSeconds == 0)
-            {
-                GarrisonBuddy.Diagnostic("Using coffee");
-                coffee.Use();
-            }
+                // Do I have a cofee to use
+                WoWItem coffee = Me.BagItems.Where(o => o.Entry == MinersCofeeItemId).ToList().FirstOrDefault();
+                if (coffee != null && coffee.Usable &&
+                    (!Me.HasAura(MinersCofeeAura) ||
+                     Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2)
+                    && coffee.CooldownTimeLeft.TotalSeconds == 0)
+                {
+                    GarrisonBuddy.Diagnostic("Using coffee");
+                    coffee.Use();
+                }
+                if (coffee != null && coffee.StackCount >= 4)
+                {
+                    GarrisonBuddy.Log("Miner's Coffee full: deleting");
+                    Lua.DoString("ClearCursor()");
+                    coffee.PickUp();
+                    Lua.DoString("DeleteCursorItem()");
+                }
 
-            if (await MoveTo(itemToCollect.Location))
+
+                if (await MoveTo(itemToCollect.Location))
+                    return true;
+
+                itemToCollect.Interact();
+                SetLootPoi(itemToCollect);
+                await Buddy.Coroutines.Coroutine.Sleep(3500);
                 return true;
+            }
 
-            await Buddy.Coroutines.Coroutine.Sleep(300);
-            itemToCollect.Interact();
-            SetLootPoi(itemToCollect);
-            await Buddy.Coroutines.Coroutine.Sleep(3500);
-            return true;
+            stopwatch.Stop();
+            return await MoveTo(itemToCollect.Location);
         }
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonBuddy;
+using Styx;
+using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
 
@@ -15,6 +17,7 @@ namespace GarrisonLua
         {
             GarrisonBuddy.GarrisonBuddy.Diagnostic("GetBuildingById");
             String lua =
+                "C_Garrison.RequestLandingPageShipmentInfo();" +
                 "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +
@@ -35,9 +38,9 @@ namespace GarrisonLua
                     "Temp[11] = isPrebuilt;" +
                     // Info on shipments
                     "Temp[12] = nameShipment;" +
-                    "Temp[13] = shipmentCapacity;" +
+                    "if (not shipmentCapacity) then Temp[13] =  0; else Temp[13] = shipmentCapacity;end;" +
                     "if (not shipmentsReady) then Temp[14] = 0; else Temp[14] = shipmentsReady;end;" +
-                    "Temp[15] = shipmentsTotal;" +
+                    "if (not shipmentsTotal) then Temp[15] =  0; else Temp[15] = shipmentsTotal;end;" +
                     "Temp[16] = creationTime;" +
                     "Temp[17] = duration;" +
                     "Temp[18] = itemName;" +
@@ -60,16 +63,16 @@ namespace GarrisonLua
             String canUpgrade = building[9];
             String isPrebuilt = building[11];
             String nameShipment = building[12];
-            String shipmentCapacity = building[13];
+            int shipmentCapacity = building[13].ToInt32();
             int shipmentsReady = building[14].ToInt32();
-            String shipmentsTotal = building[15];
+            int shipmentsTotal = building[15].ToInt32();
             String creationTime = building[16];
             String duration = building[17];
             String itemName = building[18];
             String itemQuality = building[19];
             String itemID = building[20];
 
-            return new Building(id, plotId, buildingLevel, name, rank, isBuilding,
+            return new Building(StyxWoW.Me.IsAlliance, id, plotId, buildingLevel, name, rank, isBuilding,
                 timeStart, buildTime, canActivate, canUpgrade, isPrebuilt, nameShipment,
                 shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, itemName, itemQuality, itemID);
         }
@@ -107,7 +110,7 @@ namespace GarrisonLua
                 String.Format(
                     "for i = 1, #buildings do " +
                     "local buildingID = buildings[i].buildingID;" +
-                    "if (buildingID == \"{0}\") then " +
+                    "if (buildingID == {0} ) then " +
                     "local nameShipment, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, itemName, itemIcon, itemQuality, itemID = C_Garrison.GetLandingPageShipmentInfo(buildingID);" +
                     "if (not shipmentsReady) then " +
                     "return tostring(0); else return tostring(shipmentsReady);" +
@@ -115,6 +118,36 @@ namespace GarrisonLua
                     "end;" +
                     "end;" +
                     "return tostring(0);", buildingId);
+            List<String> res = Lua.GetReturnValues(lua);
+            return res[0].ToInt32();
+        }
+
+        public static int GetNumberShipmentLeftToStart(int buildingId)
+        {
+            String lua =
+                "C_Garrison.RequestLandingPageShipmentInfo();" +
+                "local buildings = C_Garrison.GetBuildings();" +
+                String.Format(
+                    "for i = 1, #buildings do " +
+                    "local buildingID = buildings[i].buildingID;" +
+                    "if (buildingID == {0} ) then " +
+                    "local nameShipment, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, itemName, itemIcon, itemQuality, itemID = C_Garrison.GetLandingPageShipmentInfo(buildingID);" +
+                    "if (not shipmentsTotal) then " +
+                    "return tostring(shipmentCapacity); else return tostring(shipmentCapacity-shipmentsTotal);" +
+                    "end;" +
+                    "end;" +
+                    "end;" +
+                    "return tostring(0);", buildingId);
+            List<String> res = Lua.GetReturnValues(lua);
+            return res[0].ToInt32();
+        }
+
+        public static int GetGarrisonRessources(int buildingId)
+        {
+            String lua =
+                "name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered = GetCurrencyInfo(824)" +
+                "return tostring(amount);";
+
             List<String> res = Lua.GetReturnValues(lua);
             return res[0].ToInt32();
         }

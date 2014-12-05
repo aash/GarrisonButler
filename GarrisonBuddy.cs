@@ -7,6 +7,7 @@ using CommonBehaviors.Actions;
 using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx.Common;
+using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
@@ -91,9 +92,16 @@ namespace GarrisonBuddy
             }
         }
 
+        private static String LogBak = "";
+        private static WaitTimer logTimer=new WaitTimer(TimeSpan.FromSeconds(5));
         internal static void Log(string message, params object[] args)
         {
-            Logging.Write(Colors.DarkGreen, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
+            var messFormat = String.Format("[GarrisonBuddy] {0}: {1}", Version, message);
+            if (LogBak == messFormat && !logTimer.IsFinished) return;
+
+            Logging.Write(Colors.DarkGreen, messFormat, args);
+            LogBak = messFormat;
+            logTimer.Reset();
         }
 
         internal static void Warning(string message, params object[] args)
@@ -128,7 +136,12 @@ namespace GarrisonBuddy
 
         public override bool IsPrimaryType
         {
-            get { return true; }
+            get { return false; }
+        }
+
+        public override bool RequirementsMet
+        {
+            get { return Coroutine.AnythingTodo(); }
         }
 
         public override Form ConfigurationForm

@@ -9,7 +9,7 @@ namespace GarrisonBuddy
 {
     partial class Coroutine
     {
-        private static readonly List<uint> GardenItems = new List<uint>
+        internal static readonly List<uint> GardenItems = new List<uint>
         {
             235390, // Nagrand Arrowbloom
             235388, // Gorgrond Flytrap
@@ -19,13 +19,26 @@ namespace GarrisonBuddy
             235391 // Talador Orchid
         };
 
+        private static bool IsToDoGarden()
+        {
+            if (!GaBSettings.Mono.HarvestGarden)
+                return false;
+
+            // Do i have a garden?
+            if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
+                return false;
+
+            // Is there something to gather? 
+            return ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => GardenItems.Contains(o.Entry));
+        }
+
         public static async Task<bool> CleanGarden()
         {
             if (!GaBSettings.Mono.HarvestGarden)
                 return false;
 
             // Do i have a garden?
-            if (!_buildings.Any(b => GardensId.Contains(b.id)))
+            if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
                 return false;
             // Is there something to gather? 
             List<WoWGameObject> herbs =
@@ -34,7 +47,7 @@ namespace GarrisonBuddy
                 return false;
 
             WoWGameObject itemToCollect = herbs.OrderBy(i => i.Distance).First();
-            
+
             GarrisonBuddy.Diagnostic("Found herb to gather at: " + itemToCollect.Location);
             if (await MoveTo(itemToCollect.Location))
                 return true;

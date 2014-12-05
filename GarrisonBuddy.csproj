@@ -47,10 +47,12 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Config\GaBSettings.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Shipments.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Cache.cs" />
     <Compile Include="Coroutines\Coroutine.Guarden.cs" />
     <Compile Include="Coroutines\Coroutine.Mine.cs" />
     <Compile Include="Coroutines\Coroutine.Move.data.cs" />
-    <Compile Include="Coroutines\Coroutine.Shipment.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.cs" />
     <Compile Include="Coroutines\Coroutine.Mission.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,19 @@ namespace GarrisonLua
             return t.ToBoolean();
         }
 
+        public static bool IsGarrisonCapacitiveDisplayFrame()
+        {
+            const string lua =
+                "if not GarrisonCapacitiveDisplayFrame then return false; else return tostring(GarrisonCapacitiveDisplayFrame:IsVisible());end;";
+            string t = Lua.GetReturnValues(lua)[0];
+            return t.ToBoolean();
+        }
+
+        public static void ClickStartOrderButton()
+        {
+            Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
+        }
+
         public static bool IsGarrisonMissionTabVisible()
         {
             const string lua =
