@@ -278,8 +278,8 @@ namespace GarrisonBuddy
                 {
                     Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
                 }
-                frame.SelectGossipOption(0);
                 frame.SelectGossipOption(1);
+                frame.SelectGossipOption(0);
             }
             return true;
         }

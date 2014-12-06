@@ -40,6 +40,7 @@ namespace GarrisonBuddy
         public int PnjId;
         public PrepOrderD PrepOrder = () => new Task<bool>(() => false);
         public int ReagentId;
+        public List<int> ReagentIds;
         public CanCompleteOrderD canCompleteOrder = () => false;
         private int currencyId;
         public int millItemPnj;
@@ -95,6 +96,23 @@ namespace GarrisonBuddy
             if (itemInReagentBank != null)
                 count += itemInReagentBank.StackCount;
             return count >= NumberReagent;
+        }
+        private bool canCompleteOrderItems()
+        {
+            foreach (var reagentId in ReagentIds)
+            {
+                long count = 0;
+                WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == reagentId);
+                if (itemInBags != null)
+                    count += itemInBags.StackCount;
+
+                WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == reagentId);
+                if (itemInReagentBank != null)
+                    count += itemInReagentBank.StackCount;
+                if (count >= NumberReagent)
+                        return true;
+            }
+            return false;
         }
 
         private bool CanCompleteOrderCurrency()
@@ -202,19 +220,21 @@ namespace GarrisonBuddy
                 case (int) buildings.BarnLvl1:
                 case (int) buildings.BarnLvl2:
                 case (int) buildings.BarnLvl3:
-                    //PnjId = alliance ? 77791 : 79814;
-                    //ReagentId = 108996;
-                    //NumberReagent = 5;
-                    //Pnj = alliance
-                    //    ? new WoWPoint(1830.828, 199.172, 72.71624)
-                    //    : new WoWPoint(5574.952, 4508.236, 129.8942);
-                    //canCompleteOrder = canCompleteOrderItem;
+                    PnjId = alliance ? 84524 : 85048;
+                    ReagentIds = new List<int>() { 119810, 119813, 119814 };
+                    NumberReagent = 1;
+                    Pnj = alliance
+                        ? new WoWPoint(1830.828, 199.172, 72.71624)
+                        : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    canCompleteOrder = canCompleteOrderItems;
                     break;
 
                 case (int) buildings.BarracksLvl1:
                 case (int) buildings.BarracksLvl2:
                 case (int) buildings.BarracksLvl3:
                     break;
+
+
                     //horde 2: <Vendor Name="Magrish" Entry="89066" Type="Repair" X="5569.239" Y="4462.448" Z="132.5624" />
                     //ally 2: <Vendor Name="Dalana Clarke" Entry="89065" Type="Repair" X="1924.622" Y="225.1501" Z="76.96214" />
                 case (int) buildings.DwarvenBunkerLvl1:
@@ -228,6 +248,8 @@ namespace GarrisonBuddy
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderCurrency;
                     break;
+
+
                     // horde 1 <Vendor Name="Yukla Greenshadow" Entry="79821" Type="Repair" X="5642.186" Y="4511.771" Z="120.1076" />
                     // ally 2 <Vendor Name="Garm" Entry="77781" Type="Repair" X="1806.123" Y="188.0837" Z="70.84762" />
                 case (int) buildings.EnchanterStudyLvl1:
@@ -242,8 +264,9 @@ namespace GarrisonBuddy
                     canCompleteOrder = canCompleteOrderItem;
                     break;
 
+
                 //Name="Helayn Whent" Entry="77831" X="1828.034" Y="198.3424" Z="72.75751"
-//horde 1 <Vendor Name="Garbra Fizzwonk" Entry="86696" Type="Repair" X="5669.706" Y="4550.133" Z="120.1031" />
+                //horde 1 <Vendor Name="Garbra Fizzwonk" Entry="86696" Type="Repair" X="5669.706" Y="4550.133" Z="120.1031" />
                 case (int) buildings.EngineeringWorksLvl1:
                 case (int) buildings.EngineeringWorksLvl2:
                 case (int)buildings.EngineeringWorksLvl3:
@@ -256,8 +279,8 @@ namespace GarrisonBuddy
                     canCompleteOrder = canCompleteOrderItem;
                     break;
 
-                    //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
-                    //horde lvl 2 : <Vendor Name="Nali Softsoil" Entry="85783" Type="Repair" X="5410.738" Y="4568.479" Z="138.3254" />
+                //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
+                //horde lvl 2 : <Vendor Name="Nali Softsoil" Entry="85783" Type="Repair" X="5410.738" Y="4568.479" Z="138.3254" />
                 case (int) buildings.GardenLvl1:
                 case (int) buildings.GardenLvl2:
                 case (int) buildings.GardenLvl3:
@@ -267,9 +290,9 @@ namespace GarrisonBuddy
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
                     break;
-                 //<Name="Kaya Solasen" Entry="77775" X="1825.785" Y="196.1163" Z="72.75745" /-->
-                    
-// horde 1 <Vendor Name="Elrondir Surrion" Entry="79830" Type="Repair" X="5649.468" Y="4509.388" Z="120.1563" />
+                 
+                //<Name="Kaya Solasen" Entry="77775" X="1825.785" Y="196.1163" Z="72.75745" /-->
+                // horde 1 <Vendor Name="Elrondir Surrion" Entry="79830" Type="Repair" X="5649.468" Y="4509.388" Z="120.1563" />
                 case (int) buildings.GemBoutiqueLvl1:
                 case (int) buildings.GemBoutiqueLvl2:
                 case (int)buildings.GemBoutiqueLvl3:
@@ -295,6 +318,8 @@ namespace GarrisonBuddy
                 case (int) buildings.GnomishGearworksLvl2:
                 case (int) buildings.GnomishGearworksLvl3:
                     break;
+
+
                     // Horde default location: 5574.952" Y="4508.236" Z="129.8942
                     //Horde lvl 2 <Vendor Name="Lumber Lord Oktron" Entry="84247" Type="Repair" X="5697.096" Y="4475.479" Z="131.5005" />
                     // ally 2 : <Vendor Name="Justin Timberlord" Entry="84248" Type="Repair" X="1872.647" Y="310.0204" Z="82.61102" />
