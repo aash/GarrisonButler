@@ -91,6 +91,10 @@ namespace GarrisonBuddy.Config
          Description("To let the bot salvage crates from missions."), Category("General")]
         public bool SalvageCrates { get; set; }
 
+        [Setting, Styx.Helpers.DefaultValue(60),
+         Description("The time minimum in minutes between two run at the garrison. Activate hearthstone if using as mixed mode."), Category("General")]
+        public int TimeMinBetweenRun { get; set; }
+
 
 
 

@@ -295,12 +295,12 @@ namespace GarrisonBuddy
             WoWGameObject ShipmentToCollect = Me.ToGameObject();
             if (lastSeen != new WoWGuid())
             {
-                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && o.DisplayId == 169091);
+                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && (o.DisplayId == 169091 || o.DisplayId == 19959));
             }
             if (ShipmentToCollect == null)
             {
                 ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>()
-                    .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && o.DisplayId == 16091)
+                    .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && (o.DisplayId == 169091 || o.DisplayId == 19959))
                     .OrderBy(o => o.Location.X)
                     .FirstOrDefault();
             }
@@ -320,7 +320,7 @@ namespace GarrisonBuddy
             WoWGameObject ShipmentToCollect = Me.ToGameObject();
             if (lastSeen != new WoWGuid())
             {
-               ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && o.DisplayId == 169091);
+                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && (o.DisplayId == 169091 || o.DisplayId == 19959));
             }
             if (ShipmentToCollect == null)
             {

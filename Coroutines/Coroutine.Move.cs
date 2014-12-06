@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using Bots.DungeonBuddy.Helpers;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
@@ -24,6 +22,29 @@ namespace GarrisonBuddy
         private static float _lastDistance;
         private static readonly Stopwatch StuckWatch = new Stopwatch();
 
+        private static MoveResult lastMoveResult;
+
+        //public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
+        //{
+        //    if (Me.Location.Distance(destination) > 5 + (Me.Mounted ? 3 : 0))
+        //    {
+
+        //        if (Navigator.CanNavigateFully(Me.Location, destination))
+        //        {
+        //            GarrisonBuddy.Diagnostic("Can use HB native movement system.");
+        //            if (lastMoveResult.IsSuccessful())
+        //                return false;
+
+        //            GarrisonBuddy.Diagnostic("Getting last run status");
+        //            Navigator.GetRunStatusFromMoveResult(lastMoveResult);
+        //            Navigator.MoveTo(destination);
+        //            return true;
+        //        }
+        //        GarrisonBuddy.Diagnostic("Using experimental movement system");
+        //        return await MoveToSub(destination, destinationName);
+        //    }
+        //    else return false;
+        //}
 
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
@@ -65,7 +86,7 @@ namespace GarrisonBuddy
                         GarrisonBuddy.Diagnostic("Waypoints list empty, assuming at destination: " + destinationName);
                         return false;
                     }
-                    
+
                     waypoint = _waypoints.First();
                     furthestTrimmed = false;
 
@@ -91,7 +112,8 @@ namespace GarrisonBuddy
                 }
                 else
                 {
-                    if (Me.IsMoving && !Me.Mounted && Mount.CanMount() && Me.Location.Distance(destination) >=  CharacterSettings.Instance.MountDistance)
+                    if (Me.IsMoving && !Me.Mounted && Mount.CanMount() &&
+                        Me.Location.Distance(destination) >= CharacterSettings.Instance.MountDistance)
                     {
                         WoWMovement.MoveStop();
                         await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsMoving);
@@ -165,7 +187,7 @@ namespace GarrisonBuddy
             }
             bool[] resTrace;
             GameWorld.MassTraceLine(lines.ToArray(), TraceLineHitFlags.Collision, out resTrace);
-            if (resTrace.Any(res => res == true)) return false;
+            if (resTrace.Any(res => res)) return false;
 
             return Slope(lines.First().Start, lines.First().End) < 45;
         }

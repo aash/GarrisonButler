@@ -12,14 +12,10 @@ using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
-using Styx.CommonBot.ObjectDatabase;
 using Styx.CommonBot.POI;
-using Styx.CommonBot.Profiles;
 using Styx.CommonBot.Routines;
-using Styx.Patchables;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
-using Styx.WoWInternals.DBC;
 using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
@@ -46,7 +42,7 @@ namespace GarrisonBuddy
         private static readonly List<WoWPoint> HordeWaitingPoints = new List<WoWPoint>
         {
             new WoWPoint(), //level 1
-            new WoWPoint(5590.288,4568.919,136.1698), //level 2
+            new WoWPoint(5590.288, 4568.919, 136.1698), //level 2
             new WoWPoint(5585.125, 4565.036, 135.9761), //level 3
         };
 
@@ -55,7 +51,7 @@ namespace GarrisonBuddy
 
 
         private static bool test = true;
-        private static long cpt = 0;
+        private static long cpt;
 
         public static DateTime NextCheck = DateTime.Now;
         public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
@@ -68,7 +64,79 @@ namespace GarrisonBuddy
 
         internal static readonly uint GarrisonHearthstone = 110560;
         private static readonly WoWPoint FishingSpotAlly = new WoWPoint(2021.108, 187.5952, 84.55713);
-        private static readonly WoWPoint FishingSpotHorde = new WoWPoint(5482.597,4637.465,136.1296);
+        private static readonly WoWPoint FishingSpotHorde = new WoWPoint(5482.597, 4637.465, 136.1296);
+
+        private static bool init;
+        
+        private static readonly List<int> SalvageCratesIds = new List<int>
+        {
+            114120,
+            114119
+        };
+
+        private static readonly List<WoWPoint> LastRoundWaypointsHorde = new List<WoWPoint>
+        {
+            new WoWPoint(5595.488, 4530.896, 126.0771),
+            new WoWPoint(5502.666, 4475.98, 138.9149),
+            new WoWPoint(5440.396, 4572.317, 135.7494),
+        };
+
+        private static readonly List<WoWPoint> LastRoundWaypointsAlly = new List<WoWPoint>
+        {
+            new WoWPoint(1917.989, 127.5877, 83.37553),
+            new WoWPoint(1866.669, 226.6118, 76.641),
+            new WoWPoint(1819.171, 212.0933, 71.44927),
+        };
+
+        private static int lastRoundTemp;
+
+        public static bool ReadyToSwitch = false;
+
+        private static bool DailiesTriggered;
+        private static WaitTimer DailiesWaitTimer;
+        private static int DailiesWaitTimerValue = 1;
+
+        private static WaitTimer CacheWaitTimer;
+        private static bool CacheTriggered;
+        private static int CacheWaitTimerValue = 1;
+
+
+        private static WaitTimer StartOrderWaitTimer;
+        private static bool StartOrderTriggered;
+        private static int StartOrderWaitTimerValue;
+
+        private static WaitTimer PickUpOrderWaitTimer;
+        private static bool PickUpOrderTriggered;
+        private static int PickUpOrderWaitTimerValue;
+
+
+        private static WaitTimer GardenWaitTimer;
+        private static int GardenWaitTimerValue;
+        private static bool GardenTriggered;
+
+
+        private static WaitTimer MineWaitTimer;
+        private static int MineWaitTimerValue = 1;
+        private static bool MineTriggered;
+
+        private static WaitTimer MissionWaitTimer;
+        private static bool MissionTriggered;
+        private static int MissionWaitTimerValue = 1;
+
+        private static WaitTimer TurnInMissionWaitTimer;
+        private static bool TurnInMissionsTriggered;
+        private static int TurnInMissionWaitTimerValue = 1;
+
+        private static WaitTimer StartMissionWaitTimer;
+        private static bool StartMissionTriggered;
+        private static int StartMissionWaitTimerValue = 1;
+
+        private static WaitTimer SalvageWaitTimer;
+        private static bool SalvageTriggered;
+        private static int SalvageWaitTimerValue = 1;
+        private static int LastRoundWaitTimerValue = 1;
+        private static bool LastRoundTriggered;
+        private static WaitTimer LastRoundWaitTimer;
 
         private static LocalPlayer Me
         {
@@ -116,7 +184,6 @@ namespace GarrisonBuddy
             }
         }
 
-        private static bool init = false;
         internal static void InitializeCoroutines()
         {
             if (init) return;
@@ -172,22 +239,11 @@ namespace GarrisonBuddy
                 outgoingUnits.Add(unit);
             }
         }
-        
-        private static Stopwatch testStopwatch;
-        
+
         public static async Task<bool> RootLogic()
         {
-
-            if (testStopwatch == null)
-            {
-                testStopwatch = new Stopwatch();
-                testStopwatch.Start();
-            }
-            cpt++;
-            testStopwatch.Reset();
-            testStopwatch.Start();
             CheckResetAfk();
-            
+
             if (await RestoreUiIfNeeded())
                 return true;
 
@@ -196,7 +252,6 @@ namespace GarrisonBuddy
 
             if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
                 return true;
-
 
             if (await VendorBehavior.ExecuteCoroutine())
                 return true;
@@ -212,7 +267,7 @@ namespace GarrisonBuddy
 
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
-            
+
 
             //GarrisonBuddy.Diagnostic("Time before start gar stuff: " + testStopwatch.Elapsed);
             if (await TransportToGarrison())
@@ -226,14 +281,14 @@ namespace GarrisonBuddy
             if (await DoMissions())
                 return true;
             //GarrisonBuddy.Diagnostic("Time after DoMissions: " + testStopwatch.Elapsed);
-            
+
             if (await DoDailyCd())
                 return true;
             //GarrisonBuddy.Diagnostic("Time after DoDailyCd: " + testStopwatch.Elapsed);
 
             if (await DoSalvages())
                 return true;
-            
+
             //var hasItemTomail = Styx.CommonBot.Inventory.InventoryManager.HaveItemsToMail;
             //if (hasItemTomail && Styx.Helpers.CharacterSettings.Instance.MailRecipient.Any())
             //{
@@ -256,44 +311,68 @@ namespace GarrisonBuddy
             //        items);
             //}
 
-           
+            if (await LastRound())
+                return true;
 
             if (await Waiting())
                 return true;
-            //GarrisonBuddy.Diagnostic("Time after Waiting: " + testStopwatch.Elapsed);
 
             ReadyToSwitch = true;
             return false;
         }
 
-        private static readonly List<int> SalvageCratesIds = new List<int>()
+        private static bool CanRunLastRound()
         {
-            114120,
-            114119
-        };
+            TimeSpan elapsedTime = DateTime.Now - lastRoundCheckTime;
+            if (elapsedTime.TotalMinutes > 30)
+                return true;
+            return false;
+        }
 
 
+        private static DateTime lastRoundCheckTime = DateTime.MinValue;
+        private static async Task<bool> LastRound()
+        {
+            if (!CanRunLastRound())
+                return false;
+            
+            GarrisonBuddy.Log("Doing a last round to check if something was not too far to see before.");
+            List<WoWPoint> myLastRoundPoints = Me.IsAlliance ? LastRoundWaypointsAlly : LastRoundWaypointsHorde;
+            if (lastRoundTemp > myLastRoundPoints.Count - 1)
+            {
+                lastRoundTemp = 0;
+                lastRoundCheckTime = DateTime.Now;
+                return false;
+            }
+            if (await MoveTo(myLastRoundPoints[lastRoundTemp]))
+                return true;
+            lastRoundTemp++;
+            return true;
+        }
 
         private static bool CanRunSalvage()
         {
             if (!GaBSettings.Mono.SalvageCrates)
                 return false;
-            var crates = Me.BagItems.Where(i => SalvageCratesIds.Contains((int)i.Entry));
-            var building = _buildings.FirstOrDefault(b => b.id == 52 || b.id == 140 || b.id == 141);
-            return crates.Any() && building != null; 
+            IEnumerable<WoWItem> crates = Me.BagItems.Where(i => SalvageCratesIds.Contains((int) i.Entry));
+            Building building = _buildings.FirstOrDefault(b => b.id == 52 || b.id == 140 || b.id == 141);
+            return crates.Any() && building != null;
         }
+
         private static async Task<bool> DoSalvages()
         {
             if (!CanRunSalvage())
                 return false;
-            var salvageCrates = Me.BagItems.Where(i => SalvageCratesIds.Contains((int)i.Entry));
+            IEnumerable<WoWItem> salvageCrates = Me.BagItems.Where(i => SalvageCratesIds.Contains((int) i.Entry));
             if (salvageCrates.Any())
             {
-                var building = _buildings.FirstOrDefault(b => b.id == 52 || b.id == 140 || b.id == 141);
+                Building building = _buildings.FirstOrDefault(b => b.id == 52 || b.id == 140 || b.id == 141);
                 if (building != null)
                 {
-                    ObjectManager.Update(); ;
-                    WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
+                    ObjectManager.Update();
+                    ;
+                    WoWUnit unit =
+                        ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
                     // can't find it? Let's try to get closer to the default location.
                     if (unit == null)
                     {
@@ -305,7 +384,7 @@ namespace GarrisonBuddy
                         return true;
                     if (Me.Mounted)
                         await CommonCoroutines.Dismount("To salvage");
-                    foreach (var salvageCrate in salvageCrates)
+                    foreach (WoWItem salvageCrate in salvageCrates)
                     {
                         await CommonCoroutines.SleepForLagDuration();
                         salvageCrate.UseContainerItem();
@@ -317,6 +396,7 @@ namespace GarrisonBuddy
             }
             return false;
         }
+
         private static async Task<bool> TransportToGarrison()
         {
             if (GarrisonsZonesId.Contains(Me.ZoneId)) return false;
@@ -328,10 +408,11 @@ namespace GarrisonBuddy
                 {
                     if (stone.CooldownTimeLeft.TotalSeconds > 0)
                     {
-                        GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: On cooldown, " +
+                        GarrisonBuddy.Warning("UseGarrisonHearthstone: On cooldown, " +
                                                  stone.CooldownTimeLeft.TotalSeconds + " secs left.");
+                        return true;
                     }
-                    GarrisonBuddy.Diagnostic("UseGarrisonHearthstone: using.");
+                    GarrisonBuddy.Log("Using garrison hearthstone.");
                     stone.Use();
                     if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
                     {
@@ -373,12 +454,13 @@ namespace GarrisonBuddy
                 var botBase = (MixedModeEx) BotManager.Current;
                 if (botBase.PrimaryBot.Name.ToLower().Contains("angler"))
                 {
-                    var fishingSpot = Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde;
-                    GarrisonBuddy.Log("You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
-                    if(Me.Location.Distance(fishingSpot) > 2)
+                    WoWPoint fishingSpot = Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde;
+                    GarrisonBuddy.Log(
+                        "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
+                    if (Me.Location.Distance(fishingSpot) > 2)
                     {
                         if (await MoveTo(fishingSpot))
-                        return true;
+                            return true;
                     }
                 }
             }
@@ -392,7 +474,6 @@ namespace GarrisonBuddy
             return false;
         }
 
-        public static bool ReadyToSwitch = false;
         private static bool IsAutoAngler()
         {
             if (BotManager.Current.Name == "Mixed Mode")
@@ -428,11 +509,10 @@ namespace GarrisonBuddy
         {
             // loot everything.
             if (!GarrisonBuddy.LootIsOpen) return false;
-            List<LootSlotInfo> lootSlotInfos = new List<LootSlotInfo>();
+            var lootSlotInfos = new List<LootSlotInfo>();
             for (int i = 0; i < LootFrame.Instance.LootItems; i++)
             {
                 lootSlotInfos.Add(LootFrame.Instance.LootInfo(i));
-                
             }
 
             if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
@@ -442,9 +522,9 @@ namespace GarrisonBuddy
             }))
             {
                 GarrisonBuddy.Log("Succesfully looted: ");
-                foreach (var lootinfo in lootSlotInfos)
+                foreach (LootSlotInfo lootinfo in lootSlotInfos)
                 {
-                    GarrisonBuddy.Log(lootinfo.LootQuantity + "x " + lootinfo.LootName);                    
+                    GarrisonBuddy.Log(lootinfo.LootQuantity + "x " + lootinfo.LootName);
                 }
             }
             else
@@ -489,53 +569,11 @@ namespace GarrisonBuddy
 
         private static bool AnythingLeftToDoBeforeEnd()
         {
-            if (ReadyToSwitch) // && Location.Distance(Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde) > 10 || Me.IsMoving)
-                    return false;
+            if (ReadyToSwitch)
+                // && Location.Distance(Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde) > 10 || Me.IsMoving)
+                return false;
             return true;
         }
-
-        private static bool DailiesTriggered = false;
-        private static WaitTimer DailiesWaitTimer;
-        private static int DailiesWaitTimerValue = 1;
-
-        private static WaitTimer CacheWaitTimer;
-        private static bool CacheTriggered;
-        private static int CacheWaitTimerValue = 1;
-        
-        
-        private static WaitTimer StartOrderWaitTimer;
-        private static bool StartOrderTriggered;
-        private static int StartOrderWaitTimerValue;
-
-        private static WaitTimer PickUpOrderWaitTimer;
-        private static bool PickUpOrderTriggered;
-        private static int PickUpOrderWaitTimerValue;
-
-
-        private static WaitTimer GardenWaitTimer;
-        private static int GardenWaitTimerValue;
-        private static bool GardenTriggered;
-
-
-        private static WaitTimer MineWaitTimer;
-        private static int MineWaitTimerValue = 1;
-        private static bool MineTriggered;
-
-        private static WaitTimer MissionWaitTimer;
-        private static bool MissionTriggered;
-        private static int MissionWaitTimerValue = 1;
-
-        private static WaitTimer TurnInMissionWaitTimer;
-        private static bool TurnInMissionsTriggered;
-        private static int TurnInMissionWaitTimerValue = 1;
-
-        private static WaitTimer StartMissionWaitTimer;
-        private static bool StartMissionTriggered;
-        private static int StartMissionWaitTimerValue = 1;
-
-        private static WaitTimer SalvageWaitTimer;
-        private static bool SalvageTriggered;
-        private static int SalvageWaitTimerValue = 1;
 
         public static bool AnythingTodo()
         {
@@ -548,32 +586,40 @@ namespace GarrisonBuddy
                 return true;
 
             // Start work orders
-            if (helperTriggerWithTimer(CanRunStartOrder, ref StartOrderWaitTimer, ref StartOrderTriggered, StartOrderWaitTimerValue))
+            if (helperTriggerWithTimer(CanRunStartOrder, ref StartOrderWaitTimer, ref StartOrderTriggered,
+                StartOrderWaitTimerValue))
                 return true;
 
             // Pick Up work orders
-            if (helperTriggerWithTimer(CanRunPickUpOrder, ref PickUpOrderWaitTimer, ref PickUpOrderTriggered, PickUpOrderWaitTimerValue))
+            if (helperTriggerWithTimer(CanRunPickUpOrder, ref PickUpOrderWaitTimer, ref PickUpOrderTriggered,
+                PickUpOrderWaitTimerValue))
                 return true;
 
             // Mine
             if (helperTriggerWithTimer(CanRunMine, ref MineWaitTimer, ref MineTriggered, MineWaitTimerValue))
                 return true;
 
-            // garden
+            // gardenla
             if (helperTriggerWithTimer(CanRunGarden, ref GardenWaitTimer, ref GardenTriggered, GardenWaitTimerValue))
                 return true;
 
             // Missions
-            if (helperTriggerWithTimer(CanRunTurnInMissions, ref TurnInMissionWaitTimer, ref TurnInMissionsTriggered, TurnInMissionWaitTimerValue))
+            if (helperTriggerWithTimer(CanRunTurnInMissions, ref TurnInMissionWaitTimer, ref TurnInMissionsTriggered,
+                TurnInMissionWaitTimerValue))
                 return true;
 
             // Missions completed 
-            if (helperTriggerWithTimer(CanRunStartMission, ref StartMissionWaitTimer, ref StartMissionTriggered, StartMissionWaitTimerValue))
+            if (helperTriggerWithTimer(CanRunStartMission, ref StartMissionWaitTimer, ref StartMissionTriggered,
+                StartMissionWaitTimerValue))
                 return true;
-            
-                
+
             // Salvage
             if (helperTriggerWithTimer(CanRunSalvage, ref SalvageWaitTimer, ref SalvageTriggered, SalvageWaitTimerValue))
+                return true;
+
+            // Salvage
+            if (helperTriggerWithTimer(CanRunLastRound, ref LastRoundWaitTimer, ref LastRoundTriggered,
+                LastRoundWaitTimerValue))
                 return true;
 
             return AnythingLeftToDoBeforeEnd();
@@ -581,13 +627,15 @@ namespace GarrisonBuddy
 
 
         // The trigger must be set off by someone else to avoid pauses in the behavior! 
-        private static bool helperTriggerWithTimer(Func<bool> condition, ref WaitTimer timer, ref bool toModify, int timerValue)
+        private static bool helperTriggerWithTimer(Func<bool> condition, ref WaitTimer timer, ref bool toModify,
+            int timerValue)
         {
             if (timer != null && !timer.IsFinished)
                 return toModify;
 
             if (timer == null)
                 timer = new WaitTimer(TimeSpan.FromMinutes(timerValue));
+            timer.Reset();
 
             if (condition())
                 toModify = true;
@@ -595,7 +643,5 @@ namespace GarrisonBuddy
 
             return toModify;
         }
-        
     }
-
 }

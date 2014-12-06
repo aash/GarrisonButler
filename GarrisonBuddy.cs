@@ -140,14 +140,23 @@ namespace GarrisonBuddy
             get { return false; }
         }
 
+        private DateTime lastRunTime = DateTime.MinValue;
         public override bool RequirementsMet
         {
             get
             {
-                var anyToDo = Coroutine.AnythingTodo();
-                if(anyToDo)
-                    Coroutine.ReadyToSwitch = false;
-                return anyToDo;
+                TimeSpan timeElapsed = DateTime.Now - lastRunTime;
+                if (timeElapsed.TotalMinutes > GaBSettings.Mono.TimeMinBetweenRun)
+                {
+                    var anyToDo = Coroutine.AnythingTodo();
+                    if (anyToDo)
+                    {
+                        lastRunTime = DateTime.Now;
+                        Coroutine.ReadyToSwitch = false;
+                    }
+                    return anyToDo;
+                }
+                return false;
             }
         }
 

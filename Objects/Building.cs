@@ -198,10 +198,17 @@ namespace GarrisonBuddy
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
                     break;
-
+                // horde   <Vendor Name="Farmer Lok'lub" Entry="85048" Type="Repair" X="5541.159" Y="4516.299" Z="131.7173" />
                 case (int) buildings.BarnLvl1:
                 case (int) buildings.BarnLvl2:
                 case (int) buildings.BarnLvl3:
+                    //PnjId = alliance ? 77791 : 79814;
+                    //ReagentId = 108996;
+                    //NumberReagent = 5;
+                    //Pnj = alliance
+                    //    ? new WoWPoint(1830.828, 199.172, 72.71624)
+                    //    : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    //canCompleteOrder = canCompleteOrderItem;
                     break;
 
                 case (int) buildings.BarracksLvl1:
@@ -359,12 +366,13 @@ namespace GarrisonBuddy
                 case (int) buildings.StorehouseLvl2:
                 case (int) buildings.StorehouseLvl3:
                     break;
-
+                    
+                // Horde : <Vendor Name="Turga" Entry="79863" Type="Repair" X="5643.418" Y="4507.895" Z="119.9948" />
                 case (int) buildings.TailoringEmporiumLvl1:
                 case (int) buildings.TailoringEmporiumLvl2:
                 case (int)buildings.TailoringEmporiumLvl3:
                     if (alliance) PnjId = 77778;
-                    else throw new NotImplementedException();
+                    else PnjId = 79863;
                     ReagentId = 111556; // True iron ore
                     NumberReagent = 5;
                     Pnj = alliance

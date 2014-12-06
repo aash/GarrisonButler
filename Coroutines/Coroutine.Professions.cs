@@ -127,7 +127,6 @@ namespace GarrisonBuddy
             }
             else
             {
-                GarrisonBuddy.Log("No available daily cd found. Will check again in " + DailiesWaitTimer.TimeLeft);
                 return false;
             }
         }

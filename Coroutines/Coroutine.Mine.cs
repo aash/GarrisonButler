@@ -115,6 +115,7 @@ namespace GarrisonBuddy
 
                 await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
                 await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
+                await Buddy.Coroutines.Coroutine.Wait(2000, () => GarrisonBuddy.LootIsOpen);
                 await CheckLootFrame();
                 return true;
             }
