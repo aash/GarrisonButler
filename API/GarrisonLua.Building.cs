@@ -6,7 +6,6 @@ using Styx;
 using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
-using GarrisonBuddy = GarrisonBuddy.GarrisonBuddy;
 
 namespace GarrisonLua
 {
@@ -99,7 +98,6 @@ namespace GarrisonLua
             const string lua = "local level, mapTexture, townHallX, townHallY = C_Garrison.GetGarrisonInfo();" +
                                "if (not level) then return tostring(0);" +
                                "else return tostring(level); end;";
-            Logging.WriteDiagnostic("GetTownHallLevel:" + Lua.GetReturnValues(lua)[0].ToInt32());
             return Lua.GetReturnValues(lua)[0].ToInt32();
         }
 

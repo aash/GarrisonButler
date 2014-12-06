@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx;
 using Styx.Common;
@@ -192,63 +193,42 @@ namespace GarrisonBuddy
             // Others? 
         };
 
-        private static bool PickupRunning;
-        private static WaitTimer _PickUpWaitTimer;
-        private static WaitTimer _StartOrderWaitTimer;
-        private static bool StartOrderRunning;
         #endregion
 
         private static void InitializeShipments()
         {
             RefreshBuildings();
         }
+        
 
-        private static bool IsToDoShipment()
+        private static bool CanRunStartOrder()
         {
-            return _StartOrderWaitTimer.IsFinished || StartOrderRunning;
-
-            // Work orders to start 
+            if (!GaBSettings.Mono.StartOrder)
+                return false;
             IOrderedEnumerable<Building> toStarts =
                 _buildings.Where(b => b.canCompleteOrder() && BuildingsLua.GetNumberShipmentLeftToStart(b.id) > 0)
                     .OrderBy(b => b.id);
-            ;
-            if (toStarts.Any())
-                return true;
-
-            // Work orders to pick up
-            WoWGameObject shipmentToCollect =
-                ObjectManager.GetObjectsOfType<WoWGameObject>()
-                    .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && o.DisplayId == 16091)
-                    .OrderBy(o => o.Location.X)
-                    .FirstOrDefault();
-            return shipmentToCollect != null;
+            
+            return toStarts.Any();
         }
 
-        private static async Task<bool> startWorkOrder()
+        private static async Task<bool> StartOrder()
         {
-            if (_StartOrderWaitTimer != null && !_StartOrderWaitTimer.IsFinished && !StartOrderRunning)
+            if (!CanRunStartOrder())
                 return false;
-            if (_StartOrderWaitTimer == null)
-                _StartOrderWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            _StartOrderWaitTimer.Reset();
 
-            // check if needed
-            IOrderedEnumerable<Building> toStarts =
+            var toStart =
                 _buildings.Where(b => b.canCompleteOrder() && b.shipmentCapacity - b.shipmentsTotal > 0)
-                    .OrderBy(b => b.id);
-            ;
-            if (!toStarts.Any())
-            {
-                StartOrderRunning = false;
-                return false;
-            }
-            StartOrderRunning = true;
-            Building toStart = toStarts.First();
+                    .OrderBy(b => b.id).First();
+            
+            GarrisonBuddy.Log("Moving to start work order:" + toStart.name);
             // First go to the PNJ.
             WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == toStart.PnjId);
             // can't find it? Let's try to get closer to the default location.
             if (unit == null)
             {
+                GarrisonBuddy.Diagnostic("Could not find unit (" + toStart.PnjId + "), moving to default location.\n" +
+                                         "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
                 await MoveTo(toStart.Pnj);
                 return true;
             }
@@ -256,17 +236,21 @@ namespace GarrisonBuddy
             if (await MoveTo(unit.Location))
                 return true;
 
-            await Buddy.Coroutines.Coroutine.Wait(500, () =>
+            if (!await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
                 if (!InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
                 {
-                    unit.Interact();
+                    unit.Interact(); 
                     IfGossip(unit);
                 }
-          
                 return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
-            });
-            await Buddy.Coroutines.Coroutine.Wait(3000, () =>
+            }))
+            {
+                GarrisonBuddy.Warning("Failed to open Work order frame.");
+                return true;
+            }
+
+            if (await Buddy.Coroutines.Coroutine.Wait(3000, () =>
             {
                 if (toStart.canCompleteOrder() && BuildingsLua.GetNumberShipmentLeftToStart(toStart.id) > 0)
                 {
@@ -275,7 +259,11 @@ namespace GarrisonBuddy
                     return false;
                 }
                 return true;
-            });
+            }))
+            {
+              GarrisonBuddy.Warning("Failed to start all work orders.");   
+            }
+            StartOrderTriggered = false;
             RefreshBuildings(true); 
             return true;
         }
@@ -295,6 +283,103 @@ namespace GarrisonBuddy
             }
             return true;
         }
+
+
+        private static WoWGuid lastSeen;
+
+        private static bool CanRunPickUpOrder()
+        {
+            if (!GaBSettings.Mono.CollectingShipments)
+                return false;
+
+            WoWGameObject ShipmentToCollect = Me.ToGameObject();
+            if (lastSeen != new WoWGuid())
+            {
+                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && o.DisplayId == 169091);
+            }
+            if (ShipmentToCollect == null)
+            {
+                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>()
+                    .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && o.DisplayId == 16091)
+                    .OrderBy(o => o.Location.X)
+                    .FirstOrDefault();
+            }
+
+            if (ShipmentToCollect == null)
+            {
+                return false;
+            }
+            lastSeen = ShipmentToCollect.Guid;
+            return true;
+        }
+        private static async Task<bool> PickUpAllWorkOrder()
+        {
+            if (!CanRunPickUpOrder())
+                return false;
+
+            WoWGameObject ShipmentToCollect = Me.ToGameObject();
+            if (lastSeen != new WoWGuid())
+            {
+               ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && o.DisplayId == 169091);
+            }
+            if (ShipmentToCollect == null)
+            {
+                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>()
+                    .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && o.DisplayId == 16091)
+                    .OrderBy(o => o.Location.X)
+                    .FirstOrDefault();
+            }
+              
+            if (ShipmentToCollect == null)
+            {
+                return false;
+            }
+            lastSeen = ShipmentToCollect.Guid;
+            GarrisonBuddy.Log("Found shipment to collect(" + ShipmentToCollect.Name + "), moving to shipment.");
+            GarrisonBuddy.Diagnostic("Shipment " + ShipmentToCollect.SafeName + " - " + ShipmentToCollect.Entry + " - " +
+                                     ShipmentToCollect.DisplayId + ": " + ShipmentToCollect.Location);
+            if (await MoveTo(ShipmentToCollect.Location))
+                return true;
+
+            GarrisonBuddy.Log("Collecting shipment(" + ShipmentToCollect.Name + ").");
+            if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+            {
+                ShipmentToCollect.Interact();
+                ObjectManager.Update();
+                return
+                    !ObjectManager.GetObjectsOfType<WoWGameObject>()
+                        .Any(o => o.Guid == ShipmentToCollect.Guid && o.DisplayId == 16091);
+            }))
+            {
+                GarrisonBuddy.Warning("Failed to collect shipment(" + ShipmentToCollect.Name + ").");
+            }
+            RefreshBuildings(true);
+            return true;
+        }
+
+
+
+        private struct Shipment
+        {
+            public readonly List<int> buildingIds;
+            public readonly WoWPoint defaultAllyLocation;
+            public readonly WoWPoint defaultHordeLocation;
+            public readonly int shipmentId;
+
+            public Shipment(int shipmentId, List<int> buildingIds, WoWPoint defaultAllyLocation,
+                WoWPoint defaultHordeLocation)
+                : this()
+            {
+                this.shipmentId = shipmentId;
+                this.buildingIds = buildingIds;
+                this.defaultAllyLocation = defaultAllyLocation;
+                this.defaultHordeLocation = defaultHordeLocation;
+            }
+        }
+    }
+}
+
+
         //itemToCollect = ores.OrderBy(i => i.Distance).First();
         //        // Do I have a mining pick to use
         //        WoWItem miningPick = Me.BagItems.FirstOrDefault(o => o.Entry == PreserverdMiningPickItemId);
@@ -324,206 +409,49 @@ namespace GarrisonBuddy
         //        await Buddy.Coroutines.Coroutine.Sleep(3500);
         //        return true;
 
-        private static async Task<bool> PickUpWorkOrder(Building building)
-        {
-            //Building building = _buildings.FirstOrDefault(b => shipment.buildingIds.Contains(b.id));
-            if (building == null)
-                return false;
+//private static async Task<bool> PickUpWorkOrder(Building building)
+//{
+//    //Building building = _buildings.FirstOrDefault(b => shipment.buildingIds.Contains(b.id));
+//    if (building == null)
+//        return false;
 
-            int numShipments = building.shipmentsReady;
-            if (numShipments < 1)
-                return false;
+//    int numShipments = building.shipmentsReady;
+//    if (numShipments < 1)
+//        return false;
 
-            GarrisonBuddy.Log("Detected " + numShipments + " shipments to collect from " + building.name + ".");
-            if (!ShipmentsMap.Any(s => s.buildingIds.Contains(building.id)))
-                return false;
+//    GarrisonBuddy.Log("Detected " + numShipments + " shipments to collect from " + building.name + ".");
+//    if (!ShipmentsMap.Any(s => s.buildingIds.Contains(building.id)))
+//        return false;
 
-            Shipment shipment = ShipmentsMap.First(s => s.buildingIds.Contains(building.id));
+//    Shipment shipment = ShipmentsMap.First(s => s.buildingIds.Contains(building.id));
 
-            WoWGameObject toCollect =
-                ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == shipment.shipmentId);
-            if (toCollect == null)
-            {
-                GarrisonBuddy.Log("Can't find PNJ for " + building.name + " shipments, moving closer.");
-                return
-                    await
-                        MoveTo(Me.IsAlliance ? shipment.defaultAllyLocation : shipment.defaultHordeLocation,
-                            "Default location for " + building.name + " shipments");
-            }
-            GarrisonBuddy.Log("Moving to PNJ for " + building.name + " shipments.");
-            if (await MoveTo(toCollect.Location, "Collecting " + building.name + " shipments"))
-                return true;
-
-
-            GarrisonBuddy.Log("Collecting " + building.name + " shipments.");
-            await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-            {
-                toCollect.Interact();
-                ObjectManager.Update();
-                return
-                    ObjectManager.GetObjectsOfType<WoWGameObject>()
-                        .Any(o => o.Guid == toCollect.Guid && o.DisplayId == 16091);
-            });
-
-            GarrisonBuddy.Log("Collecting Garrison cache.");
-            toCollect.Interact();
-            RefreshBuildings(true); 
-            return true;
-        }
-
-        private static Styx.WoWInternals.WoWGuid lastSeen = new WoWGuid();
-
-        private static async Task<bool> PickUpAllWorkOrder()
-        {
-
-            if (_PickUpWaitTimer != null && !_PickUpWaitTimer.IsFinished && !PickupRunning)
-                return false;
-            if (_PickUpWaitTimer == null)
-                _PickUpWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            _PickUpWaitTimer.Reset();
-
-            WoWGameObject ShipmentToCollect = Me.ToGameObject();
-            if (lastSeen != new WoWGuid())
-            {
-               ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Guid == lastSeen && o.DisplayId == 169091);
-            }
-            if (ShipmentToCollect == null)
-            {
-                ShipmentToCollect = ObjectManager.GetObjectsOfType<WoWGameObject>()
-                    .Where(o => o.SubType == WoWGameObjectType.GarrisonShipment && o.DisplayId == 16091)
-                    .OrderBy(o => o.Location.X)
-                    .FirstOrDefault();
-            }
-              
-            if (ShipmentToCollect == null)
-            {
-                PickupRunning = false;
-                return false;
-            }
-            lastSeen = ShipmentToCollect.Guid;
-            PickupRunning = true;
-            GarrisonBuddy.Log("Found shipment to collect(" + ShipmentToCollect.Name + "), moving to shipment.");
-            GarrisonBuddy.Diagnostic("Shipment " + ShipmentToCollect.SafeName + " - " + ShipmentToCollect.Entry + " - " +
-                                     ShipmentToCollect.DisplayId + ": " + ShipmentToCollect.Location);
-            if (await MoveTo(Dijkstra.ClosestToNodes(ShipmentToCollect.Location)))
-                return true;
-
-            GarrisonBuddy.Log("Collecting shipment(" + ShipmentToCollect.Name + ").");
-            if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-            {
-                ShipmentToCollect.Interact();
-                ObjectManager.Update();
-                return
-                    !ObjectManager.GetObjectsOfType<WoWGameObject>()
-                        .Any(o => o.Guid == ShipmentToCollect.Guid && o.DisplayId == 16091);
-            }))
-            {
-                GarrisonBuddy.Warning("Failed to collect shipment(" + ShipmentToCollect.Name + ").");
-            }
-            RefreshBuildings(true);
-            return true;
-        }
-
-        //private static async Task<bool> PickUpMineWorkOrders()
-        //{
-        //    if (!GaBSettings.Mono.ShipmentsMine)
-        //        return false;
-
-        //    Building mine = _buildings.FirstOrDefault(b => MinesId.Contains(b.id));
-        //    if (mine == null)
-        //        return false;
-
-        //    int numShipments = mine.shipmentsReady;
-        //    if (numShipments < 1)
-        //        return false;
-
-        //    GarrisonBuddy.Log("Buildings: Detected " + numShipments + " shipments to collect from mine.");
-
-        //    WoWGameObject mineShipment =
-        //        ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235886);
-        //    if (mineShipment == null)
-        //    {
-        //        return
-        //            await
-        //                MoveTo(Me.IsAlliance ? MineShipmentAlly : MineShipmentHorde,
-        //                    "Default location for mine shipments");
-        //    }
-
-        //    if (await MoveTo(mineShipment.Location, "Collecting mine shipments"))
-        //        return true;
-
-        //    mineShipment.Interact();
-        //    RefreshBuildings();
-        //    return true;
-        //}
+//    WoWGameObject toCollect =
+//        ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == shipment.shipmentId);
+//    if (toCollect == null)
+//    {
+//        GarrisonBuddy.Log("Can't find PNJ for " + building.name + " shipments, moving closer.");
+//        return
+//            await
+//                MoveTo(Me.IsAlliance ? shipment.defaultAllyLocation : shipment.defaultHordeLocation,
+//                    "Default location for " + building.name + " shipments");
+//    }
+//    GarrisonBuddy.Log("Moving to PNJ for " + building.name + " shipments.");
+//    if (await MoveTo(toCollect.Location, "Collecting " + building.name + " shipments"))
+//        return true;
 
 
-        //private static async Task<bool> PickUpGardenWorkOrders()
-        //{
-        //    if (!GaBSettings.Mono.ShipmentsGarden)
-        //        return false;
+//    GarrisonBuddy.Log("Collecting " + building.name + " shipments.");
+//    await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+//    {
+//        toCollect.Interact();
+//        ObjectManager.Update();
+//        return
+//            ObjectManager.GetObjectsOfType<WoWGameObject>()
+//                .Any(o => o.Guid == toCollect.Guid && o.DisplayId == 16091);
+//    });
 
-        //    Building garden = _buildings.FirstOrDefault(b => GardensId.Contains(b.id));
-        //    if (garden == null)
-        //        return false;
-
-
-        //    if ( garden.shipmentsReady == 0)
-        //        return false;
-
-        //    GarrisonBuddy.Log("Buildings: Detected " + garden.shipmentsReady + " shipments to collect from garden.");
-
-        //    WoWGameObject gardenShipment =
-        //        ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235885);
-        //    if (gardenShipment == null)
-        //    {
-        //        return
-        //            await
-        //                MoveTo(Me.IsAlliance ? GardenShipmentAlly : GardenShipmentHorde,
-        //                    "Default location for garden shipments");
-        //    }
-
-        //    if (await MoveTo(gardenShipment.Location, "Collecting garden shipments"))
-        //        return true;
-
-        //    gardenShipment.Interact();
-        //    RefreshBuildings();
-        //    return true;
-        //}
-
-
-        private struct Shipment
-        {
-            public readonly List<int> buildingIds;
-            public readonly WoWPoint defaultAllyLocation;
-            public readonly WoWPoint defaultHordeLocation;
-            public readonly int shipmentId;
-
-            public Shipment(int shipmentId, List<int> buildingIds, WoWPoint defaultAllyLocation,
-                WoWPoint defaultHordeLocation)
-                : this()
-            {
-                this.shipmentId = shipmentId;
-                this.buildingIds = buildingIds;
-                this.defaultAllyLocation = defaultAllyLocation;
-                this.defaultHordeLocation = defaultHordeLocation;
-            }
-        }
-
-
-        // DOESNT WORK SINCE SOME WORK ORDER ARE ALWAYS THERE! 
-        //public static async Task<bool> PickUpAllWorkOrders()
-        //{
-        //    var shipments = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.GarrisonShipment).OrderBy(o=>o.Entry);
-
-        //    foreach (var shipment in shipments)
-        //    {
-        //        if (await MoveTo(shipment.Location))
-        //            return true;
-        //        shipment.Interact();
-
-        //    }
-        //    return true;
-        //}
-    }
-}
+//    GarrisonBuddy.Log("Collecting Garrison cache.");
+//    toCollect.Interact();
+//    RefreshBuildings(true); 
+//    return true;
+//}

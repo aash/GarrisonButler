@@ -10,6 +10,7 @@ using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
+using Styx.Helpers;
 using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.World;
@@ -22,17 +23,8 @@ namespace GarrisonBuddy
         private static WoWPoint _target;
         private static float _lastDistance;
         private static readonly Stopwatch StuckWatch = new Stopwatch();
-        //public static async Task<bool> MoveToHarvest(WoWGameObject gameObject, string destinationName = null)
-        //{
-        //    if (await MoveTo(gameObject.Location))
-        //        return true;
 
-        //    WoWMovement.ClickToMove(gameObject.Location);
-        //}
-        public static async Task<bool> MoveToSafe(WoWPoint destination, string destinationName = null)
-        {
-            return await MoveTo(Dijkstra.ClosestToNodes(destination), destinationName);
-        }
+
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
             if (Me.Location == destination)
@@ -55,7 +47,7 @@ namespace GarrisonBuddy
             if (Me.Location.Distance(destination) > 5 + (Me.Mounted ? 3 : 0))
             {
                 WoWPoint waypoint;
-                if (Me.Location.Distance(_lastMoveTo) >= 2)
+                if (Me.Location.Distance(_lastMoveTo) >= 2 + (Me.Mounted ? 1 : 0))
                 {
                     waypoint = _lastMoveTo;
                     // HERE WE CAN CHECK FOR MAYBE A FURTHER WAYPOINTS? 
@@ -73,10 +65,7 @@ namespace GarrisonBuddy
                         GarrisonBuddy.Diagnostic("Waypoints list empty, assuming at destination: " + destinationName);
                         return false;
                     }
-
-                    // HERE WE CAN CHECK FOR MAYBE A FURTHER WAYPOINTS ? 
-//                    _waypoints = await GetFurthestWaypoint(_waypoints);
-
+                    
                     waypoint = _waypoints.First();
                     furthestTrimmed = false;
 
@@ -102,7 +91,7 @@ namespace GarrisonBuddy
                 }
                 else
                 {
-                    if (Me.IsMoving && !Me.Mounted && Mount.CanMount())
+                    if (Me.IsMoving && !Me.Mounted && Mount.CanMount() && Me.Location.Distance(destination) >=  CharacterSettings.Instance.MountDistance)
                     {
                         WoWMovement.MoveStop();
                         await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsMoving);
@@ -126,13 +115,13 @@ namespace GarrisonBuddy
             if (waypoints.Count == 1) return waypoints;
 
             var left = new List<WoWPoint>();
-            int maxTry = Math.Min(waypoints.Count, 8);
+            int maxTry = Math.Min(waypoints.Count, 4);
             int indexToKeep = 0;
             for (int index = 0; index < maxTry; index++)
             {
                 indexToKeep = index;
                 WoWPoint waypoint = waypoints[index];
-                await Buddy.Coroutines.Coroutine.Yield();
+                if (index%3 == 0) await Buddy.Coroutines.Coroutine.Yield();
                 if (!IsValidWaypoint(Me.Location, waypoint))
                     break;
             }
@@ -156,7 +145,6 @@ namespace GarrisonBuddy
 
         private static bool IsValidWaypoint(WoWPoint from, WoWPoint waypoint)
         {
-            bool toKeep = false;
             var lines = new List<WorldLine>();
             for (float p = 0; p <= 1; p += (1/(from.Distance(waypoint))))
             {
@@ -170,24 +158,14 @@ namespace GarrisonBuddy
                     {
                         WoWPoint perpTo = GetPerpPointsBeginning(pTo, pOrigin, j);
                         WoWPoint perpOrigin = GetPerpPointsBeginning(pOrigin, pTo, j);
-                        perpOrigin.Z = GetGroundZ(perpTo) + i;
+                        perpOrigin.Z = GetGroundZ(perpTo);
                         lines.Add(new WorldLine(perpOrigin, perpTo));
                     }
                 }
             }
             bool[] resTrace;
             GameWorld.MassTraceLine(lines.ToArray(), TraceLineHitFlags.Collision, out resTrace);
-            //for (int index = 0; index < lines.Count; index++)
-            //{
-            //    var worldLine = lines[index];
-            //    var res = resTrace[index];
-
-            //    //GarrisonBuddy.Diagnostic("worldline, from:" + worldLine.Start + "\nTo:" + worldLine.End + "\nRes:" + res);
-            //}
-            //GarrisonBuddy.Diagnostic("RESULT to: " + pTo + "\nTraceLine - Collision:" + col);
-            //GarrisonBuddy.Diagnostic("Slope: " + Slope(pOrigin, pTo));
             if (resTrace.Any(res => res == true)) return false;
-            //GarrisonBuddy.Diagnostic("resTrace passed");
 
             return Slope(lines.First().Start, lines.First().End) < 45;
         }
@@ -204,9 +182,6 @@ namespace GarrisonBuddy
 
             var N = new Vector2(1/(float) magnitude, (float) a2/(float) magnitude);
             var res1 = new WoWPoint(p1.X + distance*N.X, p1.Y + distance*N.Y, p1.Z);
-
-            //GarrisonBuddy.Diagnostic("point: " + res1 + "\nof: " + p1 + "\nand: " + p2);
-            //var res2 = new WoWPoint(p1.X - distance*dy, p1.Y + distance*dx, p1.X);
             return res1;
         }
 
@@ -266,21 +241,8 @@ namespace GarrisonBuddy
 
             public static WoWPoint ClosestToNodes(WoWPoint point)
             {
-                //var closest = new WoWPoint();
-
-                //float Mindistance = float.PositiveInfinity;
                 var items = _movementGraph.Nodes.Keys.Select(p => new {Point = p, dist = p.Distance(point)});
                 return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
-                //foreach (var node in _movementGraph.Nodes)
-                //{
-                //    float distance = node.Key.Distance(point);
-                //    if (distance < Mindistance)
-                //    {
-                //        closest = node.Key;
-                //        Mindistance = distance;
-                //    }
-                //}
-                //return closest;
             }
 
             public static List<WoWPoint> GetPath(WoWPoint from, WoWPoint to)

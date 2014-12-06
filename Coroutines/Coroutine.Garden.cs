@@ -21,13 +21,8 @@ namespace GarrisonBuddy
             235391 // Talador Orchid
         };
 
-        private static WaitTimer _gardenWaitTimer;
-        private static bool gardenRunning;
-
-        private static bool IsToDoGarden()
+        private static bool CanRunGarden()
         {
-            return _gardenWaitTimer == null || _gardenWaitTimer.IsFinished || gardenRunning;
-
             if (!GaBSettings.Mono.HarvestGarden)
                 return false;
 
@@ -41,38 +36,25 @@ namespace GarrisonBuddy
 
         public static async Task<bool> CleanGarden()
         {
-            if (!GaBSettings.Mono.HarvestGarden ||( _gardenWaitTimer != null && !_gardenWaitTimer.IsFinished && !gardenRunning))
-            {
-                gardenRunning = false;
+            if (!CanRunGarden())
                 return false;
-            } 
-            
-            if (_gardenWaitTimer == null)
-                _gardenWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            _gardenWaitTimer.Reset();
 
-            // Do i have a garden?
-            if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
-                return false;
-            // Is there something to gather? 
-            List<WoWGameObject> herbs =
-                ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).ToList();
-            if (!herbs.Any())
-            {
-                gardenRunning = false;
-                return false;
-            }
-            gardenRunning = true;
+            List<WoWGameObject> herbs = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).ToList();
             WoWGameObject itemToCollect = herbs.OrderBy(i => i.Distance).First();
-
-            GarrisonBuddy.Diagnostic("Found herb to gather at: " + itemToCollect.Location);
+            GarrisonBuddy.Log("Found herb to gather, moving to herb at: " + itemToCollect.Location);
             if (await MoveTo(itemToCollect.Location))
                 return true;
 
-            await Buddy.Coroutines.Coroutine.Sleep(300);
+            if (!await Buddy.Coroutines.Coroutine.Wait(500, () => !Me.IsMoving))
+            {
+                WoWMovement.MoveStop();   
+            }
+
             itemToCollect.Interact();
-            //SetLootPoi(itemToCollect);
-            await Buddy.Coroutines.Coroutine.Sleep(3500);
+
+            await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting); 
+            await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
+            await CheckLootFrame();
             return true;
         }
     }

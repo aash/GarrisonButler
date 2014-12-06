@@ -11,12 +11,13 @@ using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonBuddy
 {
     public class GarrisonBuddy : BotBase
     {
-        internal static readonly Version Version = new Version(0, 4);
+        internal static readonly Version Version = new Version(0, 5);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
@@ -99,7 +100,7 @@ namespace GarrisonBuddy
             var messFormat = String.Format("[GarrisonBuddy] {0}: {1}", Version, message);
             if (LogBak == messFormat && !logTimer.IsFinished) return;
 
-            Logging.Write(Colors.DarkGreen, messFormat, args);
+            Logging.Write(Colors.DeepSkyBlue, messFormat, args);
             LogBak = messFormat;
             logTimer.Reset();
         }
@@ -195,6 +196,7 @@ namespace GarrisonBuddy
             //Lua.Events.AttachEvent("GARRISON_UPDATE", GARRISON_UPDATE);
             Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
             Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
+            Coroutine.InitializeCoroutines();
             Coroutine.OnStart();
         }
 

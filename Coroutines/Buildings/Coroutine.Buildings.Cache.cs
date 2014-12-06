@@ -25,45 +25,40 @@ namespace GarrisonBuddy
         private static int _attemptCache;
         private static bool Found;
         private static WoWPoint cacheCachedLocation;
-        private static bool CacheRunning = false;
-
-        private static bool IsToDoCache()
-        {
-            return cacheWaitTimer == null || cacheWaitTimer.IsFinished || CacheRunning;
-        }
 
         private static WaitTimer cacheWaitTimer;
-        private static async Task<bool> PickUpGarrisonCache()
+
+
+
+        private static bool CanRunCache()
         {
-            if (cacheWaitTimer != null && !cacheWaitTimer.IsFinished && !CacheRunning)
+            if (!GaBSettings.Mono.GarrisonCache)
                 return false;
-            if (cacheWaitTimer == null)
-                cacheWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            cacheWaitTimer.Reset();
-
-
-            if (!IsToDoCache())
-            {
-                CacheRunning = false;
-                return false;
-            }
-
-            if (_attemptCache > 2)
-            {
-                GarrisonBuddy.Log("Not picking up available Cache since too many failed attempts in the past.");
-                CacheRunning = false;
-                return false;
-            }
-
+            // Check
             WoWGameObject cacheFound =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
             if (cacheFound == null && !Found)
-            {
-                CacheRunning = false;
                 return false;
-            }
+
             Found = true;
-            CacheRunning = true;
+
+            if (cacheFound != null) cacheCachedLocation = cacheFound.Location;
+            return true;
+        }
+
+        private static async Task<bool> PickUpGarrisonCache()
+        {
+            if (!CanRunCache())
+                return false;
+
+            WoWGameObject cacheFound =
+                ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
+
+            if (cacheFound == null && !Found)
+                return false;
+            
+            Found = true;
+
             if (cacheFound != null)
             {
                 cacheCachedLocation = cacheFound.Location;
@@ -96,8 +91,8 @@ namespace GarrisonBuddy
                     return true;
             }
 
-            CacheRunning = false;
             Found = false;
+            CacheTriggered = false;
             return true;
         }
     }

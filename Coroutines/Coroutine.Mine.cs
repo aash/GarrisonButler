@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonBuddy.Config;
+using Styx;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -36,9 +37,11 @@ namespace GarrisonBuddy
         private static int MinersCofeeItemId = 118897;
         private static int MinersCofeeAura = 176049;
 
-        private static bool IsToDoMine()
+        private static bool CanRunMine()
         {
-            return _mineWaitTimer == null || _mineWaitTimer.IsFinished || mineRunning;
+            // Settings
+            if (!GaBSettings.Mono.HarvestMine)
+                return false;
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
@@ -48,33 +51,16 @@ namespace GarrisonBuddy
             return ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => mineItems.Contains(o.Entry));
         }
 
-        private static WaitTimer _mineWaitTimer;
         public static async Task<bool> CleanMine()
         {
-            if (_mineWaitTimer != null && !_mineWaitTimer.IsFinished && !mineRunning)
-                return false;
-            if (_mineWaitTimer == null)
-                _mineWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            _mineWaitTimer.Reset();
-
-            if (!GaBSettings.Mono.HarvestMine)
+            if (!CanRunMine())
                 return false;
 
-            // Do i have a mine?
-            if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
-                return false;
-            // Is there something to mine? 
             List<WoWGameObject> ores =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => mineItems.Contains(o.Entry)).ToList();
-            if (!ores.Any())
-            {
-                mineRunning = false; 
-                return false;
-            }
-            mineRunning = true;
 
             WoWGameObject itemToCollect = ores.OrderBy(i => i.Location.X).First();
-            GarrisonBuddy.Diagnostic("Found ore to gather at:" + itemToCollect.Location);
+            GarrisonBuddy.Log("Found ore to gather, moving to ore at:" + itemToCollect.Location);
 
             if (MinesId.Contains(Me.SubZoneId))
             {
@@ -85,7 +71,7 @@ namespace GarrisonBuddy
                     && !Me.HasAura(PreserverdMiningPickAura)
                     && miningPick.CooldownTimeLeft.TotalSeconds < 0.1)
                 {
-                    GarrisonBuddy.Diagnostic("Using Mining pick");
+                    GarrisonBuddy.Log("Doh! Found a mining pick in my bag, let's get geared up.");
                     miningPick.Use();
                     ObjectManager.Update();
                 }
@@ -104,7 +90,7 @@ namespace GarrisonBuddy
                      Me.Auras.FirstOrDefault(a => a.Value.SpellId == MinersCofeeAura).Value.StackCount < 2)
                     && coffee.CooldownTimeLeft.TotalSeconds == 0)
                 {
-                    GarrisonBuddy.Diagnostic("Using coffee");
+                    GarrisonBuddy.Log("Found coffee in my bag, let's drink it.");
                     coffee.Use();
                 }
                 if (coffee != null && coffee.StackCount >= 4)
@@ -119,9 +105,17 @@ namespace GarrisonBuddy
                 if (await MoveTo(itemToCollect.Location))
                     return true;
 
+
+                if (!await Buddy.Coroutines.Coroutine.Wait(500, () => !Me.IsMoving))
+                {
+                    WoWMovement.MoveStop();
+                } 
+
                 itemToCollect.Interact();
-                SetLootPoi(itemToCollect);
-                await Buddy.Coroutines.Coroutine.Sleep(3500);
+
+                await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
+                await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
+                await CheckLootFrame();
                 return true;
             }
 

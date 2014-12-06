@@ -44,24 +44,16 @@ namespace GarrisonBuddy
             refreshFollowerTimer.Reset();
         }
 
-        private static bool IsToDoMission()
+        private static bool CanRunStartMission()
         {
-            if (_StartMissionsWaitTimer == null || _StartMissionsWaitTimer.IsFinished || StartMissionRunning ||
-                TurnInCompletedRunning)
-                return true;
-            return false;
+            return GaBSettings.Mono.StartMissions && DoCheckAvailableMissions() && ToStart.Count > 0;
         }
-        
-        private static WaitTimer _TurnInCompletedWaitTimer;
 
-        public static async Task<bool> DoStartMissions()
+        public static async Task<bool> StartMissions()
         {
-            if (!GaBSettings.Mono.DoMissions || !DoCheckAvailableMissions() || ToStart.Count <= 0)
-            {
-                StartMissionRunning = false;
+            if (!CanRunStartMission())
                 return false;
-            }
-            StartMissionRunning = true;
+
             KeyValuePair<Mission, Follower[]> match = ToStart.First();
 
             if (await MoveToTable())
@@ -116,9 +108,6 @@ namespace GarrisonBuddy
 
         public static bool DoCheckAvailableMissions()
         {
-            if (!GaBSettings.Mono.DoMissions)
-                return false;
-
             int numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
             // Is there mission available to start
             if (numberMissionAvailable == 0)
@@ -178,14 +167,15 @@ namespace GarrisonBuddy
             return true;
         }
 
+        private static bool CanRunTurnInMissions()
+        {
+            return GaBSettings.Mono.CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0;
+        }
+
         public static async Task<bool> DoTurnInCompletedMissions()
         {
-            if (!GaBSettings.Mono.CompletedMissions || MissionLua.GetNumberCompletedMissions() == 0)
-            {
-                TurnInCompletedRunning = false;
+            if (!CanRunTurnInMissions())
                 return false;
-            }
-            TurnInCompletedRunning = true;
 
             GarrisonBuddy.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
 
@@ -196,6 +186,7 @@ namespace GarrisonBuddy
             MissionLua.TurnInAllCompletedMissions();
             RestoreCompletedMission = true;
             await CommonCoroutines.SleepForLagDuration();
+            TurnInMissionsTriggered = false;
             return true;
         }
 
@@ -209,17 +200,11 @@ namespace GarrisonBuddy
 
         private async static Task<bool> DoMissions()
         {
-            if (_StartMissionsWaitTimer != null && !_StartMissionsWaitTimer.IsFinished && !TurnInCompletedRunning && !StartMissionRunning)
-                return false;
-            if (_StartMissionsWaitTimer == null)
-                _StartMissionsWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            _StartMissionsWaitTimer.Reset();
-            
             // Missions
             if (await DoTurnInCompletedMissions())
                 return true;
 
-            if (await DoStartMissions())
+            if (await StartMissions())
                 return true;
 
             return false;

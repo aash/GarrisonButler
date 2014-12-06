@@ -16,17 +16,28 @@ namespace GarrisonBuddy
 
         internal static readonly List<uint> FinalizeGarrisonPlotIds = new List<uint>
         {
-            232651,
-            232652,
+            231217,
+            231964,
+            233248,
+            233249,
             233250,
             233251,
+            232651,
+            232652,
+            236261,
+            236262,
+            236263,
+            236175,
+            236176,
+            236177,
+            236185,
+            236186,
+            236187,
+            236188,
             236190,
             236191,
             236192,
             236193,
-            236261,
-            236262,
-            236263
         };
 
         private static WaitTimer _ActivateWaitTimer;
@@ -41,10 +52,18 @@ namespace GarrisonBuddy
 
             // To do
 
+
             // Garrison Cache
             if (await PickUpGarrisonCache())
                 return true;
 
+            // Mine
+            if (await CleanMine())
+                return true;
+
+            // Garden 
+            if (await CleanGarden())
+                return true;
 
             if (await ActivateFinishedBuildings())
                 return true;
@@ -52,19 +71,12 @@ namespace GarrisonBuddy
             if (await PickUpAllWorkOrder())
                 return true;
 
-            if (await startWorkOrder())
-                return true;
-
-            // Mine
-            if (await CleanMine())
+            if (await StartOrder())
                 return true;
 
             //if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[0].buildingIds.Contains(b.id))))
             //   return true;
 
-            // Garden 
-            if (await CleanGarden())
-                return true;
 
             //if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[1].buildingIds.Contains(b.id))))
             //    return true;
@@ -153,27 +165,20 @@ namespace GarrisonBuddy
         {
             if (!GaBSettings.Mono.ActivateBuildings)
                 return false;
-
-
-            if (_ActivateWaitTimer != null && !_ActivateWaitTimer.IsFinished && !ActivateRunning)
-                return false;
-            if (_ActivateWaitTimer == null)
-                _ActivateWaitTimer = new WaitTimer(TimeSpan.FromMinutes(1));
-            _ActivateWaitTimer.Reset();
-
-            IOrderedEnumerable<WoWGameObject> AllToActivate =
+            
+            IOrderedEnumerable<WoWGameObject> allToActivate =
                 ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
                     .ToList()
                     .OrderBy(o => o.Location.X);
-            if (!AllToActivate.Any())
+            if (!allToActivate.Any())
             {
                 ActivateRunning = false;
                 return false;
             }
 
             ActivateRunning = true;
-            WoWGameObject toActivate = AllToActivate.First();
+            WoWGameObject toActivate = allToActivate.First();
             GarrisonBuddy.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
             GarrisonBuddy.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
                                      toActivate.DisplayId + ": " + toActivate.Location);
