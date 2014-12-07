@@ -338,21 +338,23 @@ namespace GarrisonBuddy
             GarrisonBuddy.Log("Found shipment to collect(" + ShipmentToCollect.Name + "), moving to shipment.");
             GarrisonBuddy.Diagnostic("Shipment " + ShipmentToCollect.SafeName + " - " + ShipmentToCollect.Entry + " - " +
                                      ShipmentToCollect.DisplayId + ": " + ShipmentToCollect.Location);
-            if (await MoveTo(ShipmentToCollect.Location))
+            if(await HarvestWoWGameOject(ShipmentToCollect))
                 return true;
+            //if (await MoveTo(ShipmentToCollect.Location))
+            //    return true;
 
-            GarrisonBuddy.Log("Collecting shipment(" + ShipmentToCollect.Name + ").");
-            if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-            {
-                ShipmentToCollect.Interact();
-                ObjectManager.Update();
-                return
-                    !ObjectManager.GetObjectsOfType<WoWGameObject>()
-                        .Any(o => o.Guid == ShipmentToCollect.Guid && o.DisplayId == 16091);
-            }))
-            {
-                GarrisonBuddy.Warning("Failed to collect shipment(" + ShipmentToCollect.Name + ").");
-            }
+            //GarrisonBuddy.Log("Collecting shipment(" + ShipmentToCollect.Name + ").");
+            //if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+            //{
+            //    ShipmentToCollect.Interact();
+            //    ObjectManager.Update();
+            //    return
+            //        !ObjectManager.GetObjectsOfType<WoWGameObject>()
+            //            .Any(o => o.Guid == ShipmentToCollect.Guid && o.DisplayId == 16091);
+            //}))
+            //{
+            //    GarrisonBuddy.Warning("Failed to collect shipment(" + ShipmentToCollect.Name + ").");
+            //}
             RefreshBuildings(true);
             return true;
         }

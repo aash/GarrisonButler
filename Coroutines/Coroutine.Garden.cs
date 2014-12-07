@@ -34,28 +34,45 @@ namespace GarrisonBuddy
             return ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => GardenItems.Contains(o.Entry));
         }
 
+        //public static async Task<bool> CleanGarden()
+        //{
+        //    if (!CanRunGarden())
+        //        return false;
+
+        //    List<WoWGameObject> herbs = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).ToList();
+        //    WoWGameObject itemToCollect = herbs.OrderBy(i => i.Distance).First();
+        //    GarrisonBuddy.Log("Found herb to gather, moving to herb at: " + itemToCollect.Location);
+        //    if (await MoveTo(itemToCollect.Location))
+        //        return true;
+
+        //    if (!await Buddy.Coroutines.Coroutine.Wait(500, () => !Me.IsMoving))
+        //    {
+        //        WoWMovement.MoveStop();
+        //    }
+
+        //    itemToCollect.Interact();
+
+        //    await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
+        //    await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
+        //    await CheckLootFrame();
+        //    return true;
+        //}
+        private static WoWGameObject CurentHerbToCollect;
         public static async Task<bool> CleanGarden()
         {
             if (!CanRunGarden())
                 return false;
-
-            List<WoWGameObject> herbs = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).ToList();
-            WoWGameObject itemToCollect = herbs.OrderBy(i => i.Distance).First();
-            GarrisonBuddy.Log("Found herb to gather, moving to herb at: " + itemToCollect.Location);
-            if (await MoveTo(itemToCollect.Location))
-                return true;
-
-            if (!await Buddy.Coroutines.Coroutine.Wait(500, () => !Me.IsMoving))
+            if (CurentHerbToCollect == null || !CurentHerbToCollect.IsValid)
             {
-                WoWMovement.MoveStop();   
+                CurentHerbToCollect =
+                    ObjectManager.GetObjectsOfType<WoWGameObject>()
+                        .Where(o => GardenItems.Contains(o.Entry))
+                        .OrderBy(o => o.Distance)
+                        .First();
+
+                GarrisonBuddy.Log("Found herb to gather, moving to herb at: " + CurentHerbToCollect.Location);
             }
-
-            itemToCollect.Interact();
-
-            await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting); 
-            await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
-            await CheckLootFrame();
-            return true;
+            return await HarvestWoWGameOject(CurentHerbToCollect);
         }
     }
 }

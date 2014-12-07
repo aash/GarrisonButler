@@ -427,7 +427,7 @@ namespace GarrisonBuddy
                     ReagentId = 110611; // True iron ore
                     NumberReagent = 5;
                     Pnj = alliance
-                        ? new WoWPoint(1830.828, 199.172, 72.71624)
+                        ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
                     break;

@@ -65,25 +65,28 @@ namespace GarrisonBuddy
                 GarrisonBuddy.Log("Detected garrison cache available, moving to collect.");
                 GarrisonBuddy.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " + cacheFound.DisplayId + ": " +
                                          cacheFound.Location);
-                if (await MoveTo(cacheFound.Location, "Collecting garrison cache"))
-                    return true;
 
-                GarrisonBuddy.Log("Collecting Garrison cache.");
-                if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-                {
-                    cacheFound.Interact();
-                    ObjectManager.Update();
-                    return !ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => GarrisonCaches.Contains(o.Entry));
-                }))
-                {
-                    GarrisonBuddy.Warning("Failed to collect Garrison cache. Already " + _attemptCache + " attempts failed.");
-                    _attemptCache++;
-                }
-                else
-                {
-                    GarrisonBuddy.Log("Succesfully collected Garrison cache.");
-                    _attemptCache = 0;
-                }
+
+                await HarvestWoWGameOject(cacheFound);
+                //if (await MoveTo(cacheFound.Location, "Collecting garrison cache"))
+                //    return true;
+
+                //GarrisonBuddy.Log("Collecting Garrison cache.");
+                //if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+                //{
+                //    cacheFound.Interact();
+                //    ObjectManager.Update();
+                //    return !ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => GarrisonCaches.Contains(o.Entry));
+                //}))
+                //{
+                //    GarrisonBuddy.Warning("Failed to collect Garrison cache. Already " + _attemptCache + " attempts failed.");
+                //    _attemptCache++;
+                //}
+                //else
+                //{
+                //    GarrisonBuddy.Log("Succesfully collected Garrison cache.");
+                //    _attemptCache = 0;
+                //}
             }
             else
             {

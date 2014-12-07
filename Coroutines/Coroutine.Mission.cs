@@ -19,7 +19,7 @@ namespace GarrisonBuddy
 
         private static readonly WoWPoint TableHorde = new WoWPoint(5559, 4599, 140);
         private static readonly WoWPoint TableAlliance = new WoWPoint(1933, 346, 91);
-        private static bool LastCheckValue;
+        private static bool CheckedMissions;
         private static readonly WaitTimer refreshMissionsTimer = new WaitTimer(TimeSpan.FromMinutes(5));
         private static readonly WaitTimer refreshFollowerTimer = new WaitTimer(TimeSpan.FromMinutes(5));
 
@@ -106,6 +106,7 @@ namespace GarrisonBuddy
         private static bool StartMissionRunning;
         private static WaitTimer _StartMissionsWaitTimer;
 
+        private static bool NeedToRun = false;
         public static bool DoCheckAvailableMissions()
         {
             int numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
@@ -114,7 +115,9 @@ namespace GarrisonBuddy
                 return false;
 
             bool forced = _missions != null && numberMissionAvailable != _missions.Count;
-
+            if (CheckedMissions && !forced)
+                return false;
+               
             RefreshMissions(forced);
             RefreshFollowers(forced);
             
@@ -139,18 +142,34 @@ namespace GarrisonBuddy
                 GarrisonBuddy.Diagnostic(mess);
             
 
-            LastCheckValue = true;
+            CheckedMissions = true;
             return ToStart.Any();
         }
 
+        private static WoWPoint TablePosition = WoWPoint.Empty;
+
         public static async Task<bool> MoveToTable()
         {
-            //move to table
-            if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "Command table"))
-                return true;
-            // TO DO
+            if (TablePosition == WoWPoint.Empty)
+            {
+                WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
+                if (tableForLoc != null)
+                {
+                    GarrisonBuddy.Diagnostic("Found Command table location, not using default anymore.");
+                    TablePosition = tableForLoc.Location;
+                }
+            }
+            if (TablePosition != WoWPoint.Empty)
+            {
+                if (await MoveTo(TablePosition, "Command table"))
+                    return true;
+            }
+            else
+            {
+                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "Command table"))
+                    return true;
+            }
 
-            //
             if (InterfaceLua.IsGarrisonMissionFrameOpen())
                 return false;
 

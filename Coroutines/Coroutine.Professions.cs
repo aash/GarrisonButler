@@ -34,8 +34,8 @@ namespace GarrisonBuddy
                 // Secrets
                 new KeyValuePair<uint, tradeskillID>((uint)118720,tradeskillID.Blacksmithing),
                 // Enchanting
-                //Luminous Shard
-                new KeyValuePair<uint, tradeskillID>((uint)169091,tradeskillID.Enchanting),
+                //Fractured Temporal Crystal
+                new KeyValuePair<uint, tradeskillID>((uint)115504,tradeskillID.Enchanting),
                 // Secret
                 new KeyValuePair<uint, tradeskillID>((uint)119293,tradeskillID.Enchanting),
                 // Engineering

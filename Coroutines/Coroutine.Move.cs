@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using GreyMagic;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
@@ -17,7 +18,7 @@ namespace GarrisonBuddy
 {
     partial class Coroutine
     {
-        private static List<WoWPoint> _waypoints = new List<WoWPoint>();
+        private static List<WoWPoint> _currentWaypointsList = new List<WoWPoint>();
         private static WoWPoint _target;
         private static float _lastDistance;
         private static readonly Stopwatch StuckWatch = new Stopwatch();
@@ -48,19 +49,27 @@ namespace GarrisonBuddy
 
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
-            if (Me.Location == destination)
+            if (Me.Location == destination || Me.Location.Distance(destination) < 2)
                 return false;
 
             if (_target != destination || _lastMoveTo == new WoWPoint())
             {
-                _waypoints = Dijkstra.GetPath(Me.Location, destination);
-                if (_waypoints.Count == 0)
+                var TaskResult = await Buddy.Coroutines.Coroutine.ExternalTask(Task.Run(() =>
+                {
+                    return Dijkstra.GetPath(Me.Location, destination);
+                }),30000);
+                if (!TaskResult.Completed)
+                {
+                    return true;
+                }
+                _currentWaypointsList = TaskResult.Result;
+                if (_currentWaypointsList.Count == 0)
                 {
                     if (Me.Location.Distance(destination) > 5)
                         GarrisonBuddy.Warning("Couldn't generate path from " + Me.Location + " to " + destination);
                     return false;
                 }
-                _lastMoveTo = _waypoints.First();
+                _lastMoveTo = _currentWaypointsList.First();
                 _target = destination;
                 StuckWatch.Reset();
                 StuckWatch.Start();
@@ -71,26 +80,26 @@ namespace GarrisonBuddy
                 if (Me.Location.Distance(_lastMoveTo) >= 2 + (Me.Mounted ? 1 : 0))
                 {
                     waypoint = _lastMoveTo;
-                    // HERE WE CAN CHECK FOR MAYBE A FURTHER WAYPOINTS? 
-                    if (!furthestTrimmed && _waypoints.Count > 2)
-                    {
-                        _waypoints = await GetFurthestWaypoint(_waypoints);
-                        furthestTrimmed = true;
-                    }
+                    //// HERE WE CAN CHECK FOR MAYBE A FURTHER WAYPOINTS? 
+                    //if (!furthestTrimmed && _waypoints.Count > 2)
+                    //{
+                    //    _waypoints = await GetFurthestWaypoint(_waypoints);
+                    //    furthestTrimmed = true;
+                    //}
                     //GarrisonBuddy.Diagnostic("Keeping next waypoint to " + destinationName + ": " + waypoint);
                 }
                 else
                 {
-                    if (_waypoints.Count == 0)
+                    if (_currentWaypointsList.Count == 0)
                     {
                         GarrisonBuddy.Diagnostic("Waypoints list empty, assuming at destination: " + destinationName);
                         return false;
                     }
 
-                    waypoint = _waypoints.First();
+                    waypoint = _currentWaypointsList.First();
                     furthestTrimmed = false;
 
-                    _waypoints.Remove(waypoint);
+                    _currentWaypointsList.Remove(waypoint);
                     StuckWatch.Reset();
                     StuckWatch.Start();
                     GarrisonBuddy.Diagnostic("Loading next waypoint to " + destinationName + ": " + waypoint);
@@ -137,13 +146,13 @@ namespace GarrisonBuddy
             if (waypoints.Count == 1) return waypoints;
 
             var left = new List<WoWPoint>();
-            int maxTry = Math.Min(waypoints.Count, 4);
+            int maxTry = Math.Min(waypoints.Count, 3);
             int indexToKeep = 0;
             for (int index = 0; index < maxTry; index++)
             {
                 indexToKeep = index;
                 WoWPoint waypoint = waypoints[index];
-                if (index%3 == 0) await Buddy.Coroutines.Coroutine.Yield();
+                await Buddy.Coroutines.Coroutine.Yield();
                 if (!IsValidWaypoint(Me.Location, waypoint))
                     break;
             }
@@ -152,12 +161,37 @@ namespace GarrisonBuddy
             GarrisonBuddy.Diagnostic("ENS skipped " + (waypoints.Count - left.Count) + " waypoints.");
             return left.Any() ? left : waypoints;
         }
+        private async static Task<List<WoWPoint>>  GetFurthestWaypoint2(List<WoWPoint> waypoints)
+        {
+            if (waypoints == null) throw new ArgumentNullException("waypoints");
+            if (waypoints.Count < 3) return waypoints;
+            int cpt = 0;
+            var res = new List<WoWPoint>(waypoints);
+            for (int index = 2; index < res.Count - 1; index++)
+            {
+                //GarrisonBuddy.Diagnostic("ENS2 index: " + index + " - count: " + waypoints.Count);
+                var waypoint = res[index];
+                var old = res[index - 2];
+                if (MinimalIsValidWaypoint(old, waypoint))
+                {
+                    if (IsValidWaypoint(old, waypoint))
+                    {
+                        res.RemoveAt(index - 1);
+                        index--;
+                        cpt++;
+                    }
+                }
+                await Buddy.Coroutines.Coroutine.Yield();
+            }
+            GarrisonBuddy.Diagnostic("ENS2 skipped " + cpt + " waypoints.");
+            return res;
+        }
 
         private static double Slope(WoWPoint p1, WoWPoint p2)
         {
             double m = p2.Z - p1.Z;
             double xy = Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
-            return RadianToDegree((Math.Atan2(m, xy)));
+            return m/xy;
         }
 
         private static double RadianToDegree(double angle)
@@ -165,18 +199,30 @@ namespace GarrisonBuddy
             return angle*(180.0/Math.PI);
         }
 
-        private static bool IsValidWaypoint(WoWPoint from, WoWPoint waypoint)
+        private static bool MinimalIsValidWaypoint(WoWPoint from, WoWPoint waypoint)
+        {
+            GarrisonBuddy.Diagnostic("height:" + Me.BoundingHeight);
+            var height = Me.BoundingHeight/2;
+            var tempFrom = from + new WoWPoint(0, 0, height);
+            var tempWaypoint = waypoint + new WoWPoint(0, 0, height);
+
+            var quickTest = GameWorld.TraceLine(tempFrom, tempWaypoint, TraceLineHitFlags.Collision);
+            return !quickTest && Slope(from, waypoint) < 1.2;
+        }
+ private static bool IsValidWaypoint(WoWPoint from, WoWPoint waypoint)
         {
             var lines = new List<WorldLine>();
+            var height = Me.BoundingHeight+Me.BoundingHeight/10;
+            var width = Me.BoundingRadius +Me.BoundingHeight/10;
             for (float p = 0; p <= 1; p += (1/(from.Distance(waypoint))))
             {
                 WoWPoint pOrigin = from + (waypoint - from)*p;
-                for (float i = Me.BoundingHeight/3; i <= Me.BoundingHeight; i += Me.BoundingHeight/3)
+                for (float i = height/3; i <= height; i += height/10)
                 {
                     WoWPoint pTo = waypoint + new WoWPoint(0, 0, i);
                     pOrigin.Z = GetGroundZ(pTo) + i;
 
-                    for (float j = -Me.BoundingRadius; j <= Me.BoundingRadius; j += Me.BoundingRadius/2)
+                    for (float j = -width; j <= width; j += width / 10)
                     {
                         WoWPoint perpTo = GetPerpPointsBeginning(pTo, pOrigin, j);
                         WoWPoint perpOrigin = GetPerpPointsBeginning(pOrigin, pTo, j);
@@ -189,7 +235,7 @@ namespace GarrisonBuddy
             GameWorld.MassTraceLine(lines.ToArray(), TraceLineHitFlags.Collision, out resTrace);
             if (resTrace.Any(res => res)) return false;
 
-            return Slope(lines.First().Start, lines.First().End) < 45;
+            return Slope(lines.First().Start, lines.First().End) < 1.2;
         }
 
         private static WoWPoint GetPerpPointsBeginning(WoWPoint p1, WoWPoint p2, double distance)
@@ -267,17 +313,35 @@ namespace GarrisonBuddy
                 return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
             }
 
+            private static Stopwatch pathGenerationStopwatch = new Stopwatch();
             public static List<WoWPoint> GetPath(WoWPoint from, WoWPoint to)
             {
                 InitializationMove();
+                pathGenerationStopwatch.Reset();
+                pathGenerationStopwatch.Start();
+
+                GarrisonBuddy.Diagnostic("Starting path generation.");
                 WoWPoint starting = ClosestToNodes(from);
+                GarrisonBuddy.Diagnostic("Found ClosestToNodes in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
                 WoWPoint ending = ClosestToNodes(to);
-                if (_movementGraph.Nodes.All(n => n.Key != starting))
+                GarrisonBuddy.Diagnostic("Found ClosestToNodes in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                if (!_movementGraph.Nodes.Any(n => n.Key == starting))
                     throw new ArgumentException("Starting node must be in graph.");
 
+                GarrisonBuddy.Diagnostic("Found Any in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
                 InitialiseGraph(_movementGraph, starting);
+                GarrisonBuddy.Diagnostic("Found InitialiseGraph in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
                 ProcessGraph(_movementGraph, starting);
-                return ExtractPath(_movementGraph, ending);
+                GarrisonBuddy.Diagnostic("Found ProcessGraph in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                var tempPath = ExtractPath(_movementGraph, ending);
+                GarrisonBuddy.Diagnostic("Found ExtractPath in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                //tempPath = await GetFurthestWaypoint2(tempPath);
+                //GarrisonBuddy.Diagnostic("Found GetFurthestWaypoint2 in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+
+                pathGenerationStopwatch.Stop();
+                GarrisonBuddy.Diagnostic("Path generated in " + pathGenerationStopwatch.ElapsedMilliseconds + "ms with " +
+                              tempPath.Count + " waypoints.");
+                return tempPath;
             }
 
             private static void InitialiseGraph(Graph graph, WoWPoint startingNode)

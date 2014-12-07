@@ -413,10 +413,13 @@ namespace GarrisonBuddy
                         return true;
                     }
                     GarrisonBuddy.Log("Using garrison hearthstone.");
+                    if(Me.IsMoving)
+                        WoWMovement.MoveStop();
+                    await Buddy.Coroutines.Coroutine.Wait(1000, () => !Me.IsMoving);
                     stone.Use();
                     if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
                     {
-                        GarrisonBuddy.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
+                        GarrisonBuddy.Warning("Used garrison hearthstone but not in garrison yet.");
                         return false;
                     }
                 }
@@ -424,7 +427,7 @@ namespace GarrisonBuddy
             }
             else
             {
-                GarrisonBuddy.Log(
+                GarrisonBuddy.Warning(
                     "Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
                 return false;
             }
@@ -509,6 +512,7 @@ namespace GarrisonBuddy
         {
             // loot everything.
             if (!GarrisonBuddy.LootIsOpen) return false;
+
             var lootSlotInfos = new List<LootSlotInfo>();
             for (int i = 0; i < LootFrame.Instance.LootItems; i++)
             {
