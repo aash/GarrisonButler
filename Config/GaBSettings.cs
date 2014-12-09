@@ -103,82 +103,82 @@ namespace GarrisonBuddy.Config
          Category("Work Orders")]
         public bool CollectingShipments { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("[EXPERIMENTAL] Might need for you to post the ID of the PNJ on the forum. To let the bot start work orders if available select true."),
          Category("Work Orders")]
         public bool StartOrder { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool AlchemyLab { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool Barn { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool Barracks { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("Dwarven Bunker and Warmill option! To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool BunkerWarMill { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool EnchanterStudy { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool EngineeringWorks { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool Garden { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool GemBoutique { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool GladiatorSanctum { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool LumberMill { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool Mine { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool ScribeQuarters { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool TailoringEmporium { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool TheForge { get; set; }
 
-        [Setting, Styx.Helpers.DefaultValue(true),
+        [Setting, Styx.Helpers.DefaultValue(false),
          Description("To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
         public bool TheTannery { get; set; }

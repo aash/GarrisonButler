@@ -92,7 +92,7 @@ namespace GarrisonBuddy
                 stuckHandlerGaB.Unstick();
                 return MoveResult.UnstuckAttempt;
             }
-            if (MoverLocation.Distance2DSqr(Coroutine.Dijkstra.ClosestToNodes(location)) < 1f)
+            if (MoverLocation.Distance2DSqr(location) < 1f)
             {
                 Clear();
                 stuckHandlerGaB.Reset();
@@ -102,6 +102,7 @@ namespace GarrisonBuddy
             if (MoverLocation.Distance2DSqr(Coroutine.Dijkstra.ClosestToNodes(location)) < 3f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
+                stuckHandlerGaB.Reset();
                 return MoveResult.Moved;
             }
             if (Mount.ShouldMount(location))
@@ -157,7 +158,6 @@ namespace GarrisonBuddy
                     return MoveResult.PathGenerationFailed;
                 }
                 CurrentMovePath2 = new MeshMovePath(path);
-                stuckHandlerGaB.Reset();
                 stuckHandlerGaB.Reset();
                 return MoveResult.PathGenerated;
             }

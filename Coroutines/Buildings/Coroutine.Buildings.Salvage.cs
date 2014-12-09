@@ -83,7 +83,7 @@ namespace GarrisonBuddy
             {
                 salvageCrate.UseContainerItem();
                 await CommonCoroutines.SleepForLagDuration();
-                await Buddy.Coroutines.Coroutine.Wait(5000, () => Me.IsCasting);
+                await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             return true;

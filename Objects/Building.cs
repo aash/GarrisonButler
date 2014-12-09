@@ -92,13 +92,22 @@ namespace GarrisonBuddy
             long count = 0;
             WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
             if (itemInBags != null)
+            {
+                GarrisonBuddy.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name, itemInBags.StackCount);
                 count += itemInBags.StackCount;
+            }
 
             WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
             if (itemInReagentBank != null)
+            {
+                GarrisonBuddy.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name, itemInReagentBank.StackCount);
                 count += itemInReagentBank.StackCount;
+            }
+
+            GarrisonBuddy.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{1}", ReagentId, count, NumberReagent);
             return count >= NumberReagent;
         }
+
         private bool canCompleteOrderItems()
         {
             foreach (var reagentId in ReagentIds)
@@ -106,11 +115,19 @@ namespace GarrisonBuddy
                 long count = 0;
                 WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == reagentId);
                 if (itemInBags != null)
+                {
+                    GarrisonBuddy.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name, itemInBags.StackCount);
                     count += itemInBags.StackCount;
+                }
 
                 WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == reagentId);
                 if (itemInReagentBank != null)
+                {
+                    GarrisonBuddy.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name, itemInReagentBank.StackCount);
                     count += itemInReagentBank.StackCount;
+                }
+                
+                GarrisonBuddy.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{1}", ReagentId, count, NumberReagent);
                 if (count >= NumberReagent)
                         return true;
             }

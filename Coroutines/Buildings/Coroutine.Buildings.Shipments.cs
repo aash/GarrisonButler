@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Bots.Quest.QuestOrder;
 using GarrisonBuddy.Config;
@@ -220,19 +221,24 @@ namespace GarrisonBuddy
                 GarrisonBuddy.Diagnostic("[ShipmentStart] Deactivated in user settings.");
                 return false;
             }
-            var buildingsWithToStart =
-                _buildings.Where(b => b.canCompleteOrder() && BuildingsLua.GetNumberShipmentLeftToStart(b.id) > 0)
-                    .OrderBy(b => b.id);
 
-
-            if (!buildingsWithToStart.Any())
+            var buildingsShipmentLeft =
+                _buildings.Where(b => BuildingsLua.GetNumberShipmentLeftToStart(b.id) > 0);
+            if (!buildingsShipmentLeft.Any())
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] No order available found.");
+                GarrisonBuddy.Diagnostic("[ShipmentStart] No buildings with shipment left to start.");
                 return false;
             }
 
-            GarrisonBuddy.Diagnostic("[ShipmentStart] #buildings {0} - first {1} - #Max {2}", buildingsWithToStart.Count(), buildingsWithToStart.First().name, buildingsWithToStart.First().shipmentCapacity);
-            buildingWithShipmentsToStart = buildingsWithToStart.First();
+            var buildingsToStart = buildingsShipmentLeft.Where(b => b.canCompleteOrder()).OrderBy(b => b.id);
+            if (!buildingsToStart.Any())
+            {
+                GarrisonBuddy.Diagnostic("[ShipmentStart] Can't complete work orders, missing reagents.");
+                return false;
+            }
+
+            GarrisonBuddy.Diagnostic("[ShipmentStart] #buildings {0} - first {1} - #Max {2}", buildingsToStart.Count(), buildingsToStart.First().name, buildingsToStart.First().shipmentCapacity);
+            buildingWithShipmentsToStart = buildingsToStart.First();
             return true;
         }
 
@@ -243,20 +249,15 @@ namespace GarrisonBuddy
             if (!CanRunStartOrder(out buildingWithShipmentsToStart))
                 return false;
 
-            //if (BotPoi.Current.Type != PoiType.Hotspot && BotPoi.Current.Type != PoiType.Interact)
-            //    BotPoi.Clear();
-
-            GarrisonBuddy.Log("Moving to start work order:" + buildingWithShipmentsToStart.name);
+            GarrisonBuddy.Log("[ShipmentStart] Moving to start work order:" + buildingWithShipmentsToStart.name);
 
             WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == buildingWithShipmentsToStart.PnjId);
             if (unit == null)
             {
-                GarrisonBuddy.Diagnostic("Could not find unit (" + buildingWithShipmentsToStart.PnjId + "), moving to default location.\n" +
+                GarrisonBuddy.Diagnostic("[ShipmentStart] Could not find unit (" + buildingWithShipmentsToStart.PnjId + "), moving to default location.\n" +
                                          "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
 
-                if (BotPoi.Current.Type != PoiType.Hotspot || BotPoi.Current.Location != buildingWithShipmentsToStart.Pnj)
-                    BotPoi.Current = new BotPoi(buildingWithShipmentsToStart.Pnj, PoiType.Hotspot); ;
-
+                ObjectManager.Update();
                 await MoveTo(buildingWithShipmentsToStart.Pnj);
                 return true;
             }
@@ -264,6 +265,7 @@ namespace GarrisonBuddy
             if (await MoveTo(unit.Location))
                return true;
 
+            GarrisonBuddy.Diagnostic("[ShipmentStart] Arrived at location.");
             unit.Interact();
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             if (!await Buddy.Coroutines.Coroutine.Wait(500, () =>
@@ -276,12 +278,12 @@ namespace GarrisonBuddy
                 return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
             }))
             {
-                GarrisonBuddy.Warning("Failed to open Work order frame.");
+                GarrisonBuddy.Warning("[ShipmentStart] Failed to open Work order frame.");
                 return true;
             }
             else
             {
-                GarrisonBuddy.Log("Work order frame opened.");
+                GarrisonBuddy.Log("[ShipmentStart] Work order frame opened.");
             }
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 

@@ -53,11 +53,12 @@ namespace GarrisonBuddy
         private static bool lastCheckCd = false;
         private static List<Helpers.TradeskillHelper> tradeskillHelpers;
 
-        private static List<WoWSpell> DailyProfessionCD;
+        private static List<KeyValuePair<tradeskillID,WoWSpell>> DailyProfessionCD;
 
         private static readonly List<KeyValuePair<uint, tradeskillID>> AllDailyProfessionCD =
             new List<KeyValuePair<uint, tradeskillID>>
             {
+                // Alchemy
                 new KeyValuePair<uint, tradeskillID>(108996, tradeskillID.Alchemy),
                 new KeyValuePair<uint, tradeskillID>(118700, tradeskillID.Alchemy),
                 // BlackSmithing
@@ -93,7 +94,8 @@ namespace GarrisonBuddy
         {
             if (DailyProfessionCD != null) return;
 
-            DailyProfessionCD = new List<WoWSpell>();
+            DailyProfessionCD = new List<KeyValuePair<tradeskillID,WoWSpell>>();
+
             GarrisonBuddy.Log("Loading Professions dailies, please wait.");
             foreach (var item in AllDailyProfessionCD)
             {
@@ -102,10 +104,11 @@ namespace GarrisonBuddy
                 WoWSpell spell = HasRecipe((int) item.Key, (int) item.Value);
                 if (spell != null)
                 {
-                    GarrisonBuddy.Log("Adding daily CD: " + spell.Name);
-                    DailyProfessionCD.Add(spell);
+                    GarrisonBuddy.Log("Adding daily CD: {0} - {1}", (tradeskillID)item.Value, spell.Name);
+                    DailyProfessionCD.Add(new KeyValuePair<tradeskillID, WoWSpell>(item.Value,spell));
                 }
             }
+
             GarrisonBuddy.Log("Loading Professions dailies done.");
         }
 
@@ -136,11 +139,11 @@ namespace GarrisonBuddy
         private static bool ShouldRunDailies()
         {
             tradeskillID tradeskillId = new tradeskillID();
-            int id = 0;
-            return CanRunDailies(ref tradeskillId, ref id);
+            WoWSpell spell = null;
+            return CanRunDailies(ref spell, ref tradeskillId);
         }
 
-        private static bool CanRunDailies(ref tradeskillID tradeskillId, ref int id)
+        private static bool CanRunDailies(ref WoWSpell spellOut, ref tradeskillID tradeskillId)
         {
             // Check
             InitializeDailies();
@@ -157,24 +160,18 @@ namespace GarrisonBuddy
                 return false;
             }
 
-            foreach (WoWSpell spell in DailyProfessionCD)
+            foreach (KeyValuePair<tradeskillID,WoWSpell> spellProfession in DailyProfessionCD)
             {
                 //ADD CHECK WITH OPTIONS, can use itemID
-                if (spell.CooldownTimeLeft.TotalSeconds == 0)
+                if (spellProfession.Value.CooldownTimeLeft.TotalSeconds == 0)
                 {
-                    GarrisonBuddy.Diagnostic("[Profession] Detected available daily profession cd: " + spell.Name);
-                    KeyValuePair<uint, tradeskillID> cd = AllDailyProfessionCD.FirstOrDefault(c => c.Key == spell.Id);
-                    if (cd.Value == null || cd.Key == null)
-                    {
-                        GarrisonBuddy.Diagnostic("[Profession] Unable to find a match in DB for spell:" + spell.Name + " value:" + (cd.Value == null).ToString() + " key " + (cd.Key == null).ToString());
-                    }
-                    else
-                    {
-                        id = (int)cd.Key;
-                        tradeskillId = cd.Value;
-                        GarrisonBuddy.Diagnostic("[Profession] Found possible daily CD:" + spell.Name);
-                        return true;
-                    }
+                    tradeskillID tradeskill = spellProfession.Key;
+                    WoWSpell Spell = spellProfession.Value;
+
+                    spellOut = Spell;
+                    tradeskillId = tradeskill;
+                    GarrisonBuddy.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1}", (tradeskillID)tradeskillId, Spell.Name);
+                    return true;
                 }
             }
             GarrisonBuddy.Diagnostic("[Profession] No possible daily CD found.");
@@ -183,20 +180,20 @@ namespace GarrisonBuddy
 
         public static async Task<bool> DoDailyCd()
         {
-            int IdSpell = 0;
+            WoWSpell spell = null;
             tradeskillID tradeskillId = 0;
 
-            if (!CanRunDailies(ref tradeskillId, ref IdSpell))
+            if (!CanRunDailies(ref spell, ref tradeskillId))
                 return false;
 
             if (tradeskillId == tradeskillID.Blacksmithing || tradeskillId == tradeskillID.Engineering)
             {
-                if (await FindAnvilAndDoCd((int)tradeskillId, (int)IdSpell))
+                if (await FindAnvilAndDoCd(spell, (int)tradeskillId))
                     return true;
             }
             else
             {
-                if (await DoCd((int)tradeskillId, (int)IdSpell))
+                if (await DoCd(spell, (int)tradeskillId))
                     return true;
             }
 
@@ -204,7 +201,7 @@ namespace GarrisonBuddy
             return true;
         }
 
-        private static async Task<bool> FindAnvilAndDoCd(int id, int skillLineId)
+        private static async Task<bool> FindAnvilAndDoCd(WoWSpell spell, int skillLineId)
         {
             WoWGameObject anvil =
                 ObjectManager.GetObjectsOfType<WoWGameObject>()
@@ -217,33 +214,28 @@ namespace GarrisonBuddy
             }
             else
             {
+                GarrisonBuddy.Warning("[Profession] Current CD requires an anvil, moving to the safest one.");
                 if (await MoveTo(anvil.Location))
                     return true;
-
-                await Buddy.Coroutines.Coroutine.Sleep(500);
-                WoWMovement.MoveStop();
-                if (await DoCd(id, skillLineId))
+                
+                if (await DoCd(spell, skillLineId))
                     return true;
             }
             return false;
         }
 
-        private static async Task<bool> DoCd(int id, int skillLineId)
+        private static async Task<bool> DoCd(WoWSpell spell, int skillLineId)
         {
-            int max = GetMaxRepeat(id, skillLineId);
-            if (max > 0)
-            {
-                WoWSpell spell = GetRecipeSpell(id, skillLineId);
-                GarrisonBuddy.Log("[Profession] Realizing daily CD: " + spell.Name);
+            GarrisonBuddy.Log("[Profession] Realizing daily CD: " + spell.Name);
                 if (Me.IsMoving)
                     WoWMovement.MoveStop();
+                if (Me.Mounted)
+                    await CommonCoroutines.LandAndDismount();
                 await CommonCoroutines.SleepForLagDuration();
                 spell.Cast();
                 await CommonCoroutines.SleepForLagDuration();
                 await Buddy.Coroutines.Coroutine.Wait(10000, () => !Me.IsCasting);
                 return true;
-            }
-            return false;
         }
 
         private static WoWSpell HasRecipe(int itemOrSpellId, int TradeSkillId)

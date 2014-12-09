@@ -106,16 +106,29 @@ namespace GarrisonBuddy
             WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
             if (item == null || !item.IsValid || !item.Usable)
                 return false;
-            if (auraId != 0 && maxStack != 0 && Me.Auras.FirstOrDefault(a => a.Value.SpellId == auraId).Value != null)
+
+            var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
+            if (auraId != 0 && maxStack != 0 && auras.Any())
             {
-                uint stackAura = Me.Auras.FirstOrDefault(a => a.Value.SpellId == auraId).Value.StackCount;
-                if (stackAura >= maxStack)
+                var Aura = auras.First().Value;
+                if (Aura == null)
+                {
+                    GarrisonBuddy.Diagnostic("[Item] Aura null skipping.");
                     return false;
+                }
+                if (Aura.StackCount >= maxStack)
+                {
+                    GarrisonBuddy.Diagnostic("[Item] Number of stacks: {0} - too high to use item {1}", Aura.StackCount, Aura.Name); 
+                    return false;
+                }
+                GarrisonBuddy.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", Aura.Name, Aura.StackCount); 
             }
+
             if (item.CooldownTimeLeft.TotalSeconds > 0)
                 return false;
 
             item.Use();
+            GarrisonBuddy.Diagnostic("[Item] Using: {0}", item.Name); 
             await CommonCoroutines.SleepForLagDuration();
             return true;
         }
