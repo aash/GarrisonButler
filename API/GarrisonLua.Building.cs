@@ -149,5 +149,30 @@ namespace GarrisonLua
             List<String> res = Lua.GetReturnValues(lua);
             return res[0].ToInt32();
         }
+
+        // Must be using a capacitive frame!
+        public static int GetCapacitiveFrameMaxShipments()
+        {
+            String lua =
+                "local amount = 99;" +
+                "for i = 1, C_Garrison.GetNumShipmentReagents() do " +
+                "local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(i);" +
+                "print(quantity);" +
+                "print(needed);" +
+                "if i == 1 then " +
+                "amount = quantity / needed;" +
+                "print(amount);" +
+                "print(amount);" +
+                "end;" +
+               "local ratio = quantity/needed;" +
+                "if ratio < amount then " +
+                "amount = ratio;" +
+                "end;" +
+                "end;" +
+                "return tostring(amount);";
+            float res = Lua.GetReturnValues(lua)[0].ToFloat();
+            GarrisonBuddy.GarrisonBuddy.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
+            return (int)res;
+        }
     }
 }

@@ -25,39 +25,35 @@ namespace GarrisonBuddy
         private static int _attemptCache;
         private static bool Found;
         private static WoWPoint cacheCachedLocation;
-
         private static WaitTimer cacheWaitTimer;
 
-
-
-        private static bool CanRunCache()
+        private static bool CanRunCache(ref WoWGameObject cache)
         {
             if (!GaBSettings.Mono.GarrisonCache)
                 return false;
             // Check
-            WoWGameObject cacheFound =
+            cache =
                 ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
-            if (cacheFound == null && !Found)
+            if (cache == null && !Found)
                 return false;
 
             Found = true;
 
-            if (cacheFound != null) cacheCachedLocation = cacheFound.Location;
+            if (cache != null) cacheCachedLocation = cache.Location;
             return true;
+        }
+        private static bool ShouldRunCache()
+        {
+            WoWGameObject cacheFound = null;
+            return CanRunCache(ref cacheFound);
         }
 
         private static async Task<bool> PickUpGarrisonCache()
         {
-            if (!CanRunCache())
-                return false;
+            WoWGameObject cacheFound = null;
 
-            WoWGameObject cacheFound =
-                ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
-
-            if (cacheFound == null && !Found)
+            if (!CanRunCache(ref cacheFound))
                 return false;
-            
-            Found = true;
 
             if (cacheFound != null)
             {
@@ -68,25 +64,6 @@ namespace GarrisonBuddy
 
 
                 await HarvestWoWGameOject(cacheFound);
-                //if (await MoveTo(cacheFound.Location, "Collecting garrison cache"))
-                //    return true;
-
-                //GarrisonBuddy.Log("Collecting Garrison cache.");
-                //if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-                //{
-                //    cacheFound.Interact();
-                //    ObjectManager.Update();
-                //    return !ObjectManager.GetObjectsOfType<WoWGameObject>().Any(o => GarrisonCaches.Contains(o.Entry));
-                //}))
-                //{
-                //    GarrisonBuddy.Warning("Failed to collect Garrison cache. Already " + _attemptCache + " attempts failed.");
-                //    _attemptCache++;
-                //}
-                //else
-                //{
-                //    GarrisonBuddy.Log("Succesfully collected Garrison cache.");
-                //    _attemptCache = 0;
-                //}
             }
             else
             {

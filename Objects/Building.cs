@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx;
 using Styx.WoWInternals.WoWObjects;
@@ -44,6 +45,7 @@ namespace GarrisonBuddy
         public CanCompleteOrderD canCompleteOrder = () => false;
         private int currencyId;
         public int millItemPnj;
+        public bool CollectShipment = false;
 
         public Building(bool MeIsAlliance, int id, string plotId, string buildingLevel, string name, int rank,
             string isBuilding,
@@ -215,6 +217,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.AlchemyLab;
                     break;
                 // horde   <Vendor Name="Farmer Lok'lub" Entry="85048" Type="Repair" X="5541.159" Y="4516.299" Z="131.7173" />
                 case (int) buildings.BarnLvl1:
@@ -227,6 +230,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItems;
+                    CollectShipment = GaBSettings.Mono.Barn;
                     break;
 
                 case (int) buildings.BarracksLvl1:
@@ -247,6 +251,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1924.622, 225.1501, 76.96214)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderCurrency;
+                    CollectShipment = GaBSettings.Mono.DwarvenBunker;
                     break;
 
 
@@ -255,13 +260,14 @@ namespace GarrisonBuddy
                 case (int) buildings.EnchanterStudyLvl1:
                 case (int) buildings.EnchanterStudyLvl2:
                 case (int) buildings.EnchanterStudyLvl3:
-                    PnjId = alliance ? 77781 : 79821;
+                    PnjId = alliance ? 77781 : 79820;
                     ReagentId = 109693;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
-                        : new WoWPoint(5574.952, 4508.236, 129.8942);
+                        : new WoWPoint(5645.052, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.EnchanterStudy;
                     break;
 
 
@@ -277,6 +283,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.EngineeringWorks;
                     break;
 
                 //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
@@ -289,6 +296,7 @@ namespace GarrisonBuddy
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.Garden;
                     break;
                  
                 //<Name="Kaya Solasen" Entry="77775" X="1825.785" Y="196.1163" Z="72.75745" /-->
@@ -301,6 +309,7 @@ namespace GarrisonBuddy
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.GemBoutique;
                     break;
 
                 //ally 2 <WoWUnit Name="Altar of Bones" Entry="86639" X="1865.334" Y="313.169" Z="83.95637" />
@@ -312,6 +321,7 @@ namespace GarrisonBuddy
                     NumberReagent = 10;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.GladiatorSanctum;
                     break;
 
                 case (int) buildings.GnomishGearworksLvl1:
@@ -333,6 +343,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1872.647, 310.0204, 82.61102)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.LumberMill;
                     break;
 
                 case (int) buildings.MageTowerLvl1:
@@ -352,6 +363,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1899.896, 101.2778, 83.52704)
                         : new WoWPoint(5467.965, 4449.892, 144.6722);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.Mine;
                     break;
 
                     //ally <Vendor Name="Hennick Helmsley" Entry="77378" Type="Repair" X="1830.828" Y="199.172" Z="72.71624" />
@@ -377,6 +389,7 @@ namespace GarrisonBuddy
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderMillable;
                     MillableFrom = Coroutine.GardenItems;
+                    CollectShipment = GaBSettings.Mono.ScribeQuarters;
                     // PrepOrder = 
                     // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     millItemPnj = 77372;
@@ -404,6 +417,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.TailoringEmporium;
                     break;
                     // <Vendor Name="Kinja" Entry="79817" Type="Repair" X="5641.551" Y="4508.724" Z="119.9587" />
                 case (int) buildings.TheForgeLvl1:
@@ -417,6 +431,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.TheForge;
                     break;
 
                 case (int) buildings.TheTanneryLvl1:
@@ -430,6 +445,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
+                    CollectShipment = GaBSettings.Mono.TheTannery;
                     break;
 
 
@@ -440,20 +456,7 @@ namespace GarrisonBuddy
                     break; // This one changes everyday... 
             }
         }
-
-        /*
-         * Mine
-         * alliance: 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         */
-
+        
         private enum buildings
         {
             MineLvl1 = 61,

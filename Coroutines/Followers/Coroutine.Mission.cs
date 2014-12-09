@@ -115,9 +115,7 @@ namespace GarrisonBuddy
                 return false;
 
             bool forced = _missions != null && numberMissionAvailable != _missions.Count;
-            if (CheckedMissions && !forced)
-                return false;
-               
+
             RefreshMissions(forced);
             RefreshFollowers(forced);
             
@@ -140,10 +138,7 @@ namespace GarrisonBuddy
             
         else
                 GarrisonBuddy.Diagnostic(mess);
-            
-
-            CheckedMissions = true;
-            return ToStart.Any();
+        return ToStart.Any();
         }
 
         private static WoWPoint TablePosition = WoWPoint.Empty;

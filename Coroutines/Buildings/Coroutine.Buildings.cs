@@ -40,10 +40,6 @@ namespace GarrisonBuddy
             236193,
         };
 
-        private static WaitTimer _ActivateWaitTimer;
-        private static bool ActivateRunning;
-
-
         private static async Task<bool> DoBuildingRelated()
         {
             RefreshBuildings();
@@ -51,11 +47,6 @@ namespace GarrisonBuddy
             // Check followers for buildings
 
             // To do
-
-
-            // Garrison Cache
-            if (await PickUpGarrisonCache())
-                return true;
 
             // Mine
             if (await CleanMine())
@@ -65,21 +56,18 @@ namespace GarrisonBuddy
             if (await CleanGarden())
                 return true;
 
-            if (await ActivateFinishedBuildings())
+            if (await PickUpAllWorkOrder())
                 return true;
 
-            if (await PickUpAllWorkOrder())
+            // Garrison Cache
+            if (await PickUpGarrisonCache())
+                return true;
+
+            if (await ActivateFinishedBuildings())
                 return true;
 
             if (await StartOrder())
                 return true;
-
-            //if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[0].buildingIds.Contains(b.id))))
-            //   return true;
-
-
-            //if (await PickUpWorkOrder(_buildings.FirstOrDefault(b => ShipmentsMap[1].buildingIds.Contains(b.id))))
-            //    return true;
 
             return false;
         }
@@ -93,79 +81,11 @@ namespace GarrisonBuddy
             RefreshBuildingsTimer.Reset();
         }
 
-
-        //private static async Task<bool> PickUpMineWorkOrders()
-        //{
-        //    if (!GaBSettings.Mono.ShipmentsMine)
-        //        return false;
-
-        //    Building mine = _buildings.FirstOrDefault(b => MinesId.Contains(b.id));
-        //    if (mine == null)
-        //        return false;
-
-        //    int numShipments = mine.shipmentsReady;
-        //    if (numShipments < 1)
-        //        return false;
-
-        //    GarrisonBuddy.Log("Buildings: Detected " + numShipments + " shipments to collect from mine.");
-
-        //    WoWGameObject mineShipment =
-        //        ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235886);
-        //    if (mineShipment == null)
-        //    {
-        //        return
-        //            await
-        //                MoveTo(Me.IsAlliance ? MineShipmentAlly : MineShipmentHorde,
-        //                    "Default location for mine shipments");
-        //    }
-
-        //    if (await MoveTo(mineShipment.Location, "Collecting mine shipments"))
-        //        return true;
-
-        //    mineShipment.Interact();
-        //    RefreshBuildings();
-        //    return true;
-        //}
-
-
-        //private static async Task<bool> PickUpGardenWorkOrders()
-        //{
-        //    if (!GaBSettings.Mono.ShipmentsGarden)
-        //        return false;
-
-        //    Building garden = _buildings.FirstOrDefault(b => GardensId.Contains(b.id));
-        //    if (garden == null)
-        //        return false;
-
-
-        //    if ( garden.shipmentsReady == 0)
-        //        return false;
-
-        //    GarrisonBuddy.Log("Buildings: Detected " + garden.shipmentsReady + " shipments to collect from garden.");
-
-        //    WoWGameObject gardenShipment =
-        //        ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 235885);
-        //    if (gardenShipment == null)
-        //    {
-        //        return
-        //            await
-        //                MoveTo(Me.IsAlliance ? GardenShipmentAlly : GardenShipmentHorde,
-        //                    "Default location for garden shipments");
-        //    }
-
-        //    if (await MoveTo(gardenShipment.Location, "Collecting garden shipments"))
-        //        return true;
-
-        //    gardenShipment.Interact();
-        //    RefreshBuildings();
-        //    return true;
-        //}
-
         private static async Task<bool> ActivateFinishedBuildings()
         {
             if (!GaBSettings.Mono.ActivateBuildings)
                 return false;
-            
+
             IOrderedEnumerable<WoWGameObject> allToActivate =
                 ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
@@ -173,11 +93,9 @@ namespace GarrisonBuddy
                     .OrderBy(o => o.Location.X);
             if (!allToActivate.Any())
             {
-                ActivateRunning = false;
                 return false;
             }
 
-            ActivateRunning = true;
             WoWGameObject toActivate = allToActivate.First();
             GarrisonBuddy.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
             GarrisonBuddy.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
@@ -202,20 +120,4 @@ namespace GarrisonBuddy
             return true;
         }
     }
-
-
-    // DOESNT WORK SINCE SOME WORK ORDER ARE ALWAYS THERE! 
-    //public static async Task<bool> PickUpAllWorkOrders()
-    //{
-    //    var shipments = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => o.SubType == WoWGameObjectType.GarrisonShipment).OrderBy(o=>o.Entry);
-
-    //    foreach (var shipment in shipments)
-    //    {
-    //        if (await MoveTo(shipment.Location))
-    //            return true;
-    //        shipment.Interact();
-
-    //    }
-    //    return true;
-    //}
 }

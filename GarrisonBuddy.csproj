@@ -49,15 +49,24 @@
     <Compile Include="Config\GaBSettings.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Shipments.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Cache.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Salvage.cs" />
+    <Compile Include="Coroutines\Coroutine.LastRound.cs" />
+    <Compile Include="Coroutines\Coroutine.Dijkstra.cs" />
+    <Compile Include="Coroutines\Coroutine.Move2.cs" />
+    <Compile Include="Coroutines\Coroutine.Waiting.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Harvest.cs" />
     <Compile Include="Coroutines\Coroutine.Professions.cs" />
-    <Compile Include="Coroutines\Coroutine.Garden.cs" />
-    <Compile Include="Coroutines\Coroutine.Mine.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Garden.cs" />
+    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Mine.cs" />
     <Compile Include="Coroutines\Coroutine.Move.data.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.cs" />
-    <Compile Include="Coroutines\Coroutine.Mission.cs" />
+    <Compile Include="Coroutines\Followers\Coroutine.Mission.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coroutines\Coroutine.Move.cs" />
+    <Compile Include="Libraries\HeapPriorityQueue.cs" />
+    <Compile Include="Libraries\IPriorityQueue.cs" />
+    <Compile Include="Libraries\PriorityQueueNode.cs" />
     <Compile Include="Objects\Building.cs" />
     <Compile Include="Coroutines\Coroutine.cs" />
     <Compile Include="Objects\Follower.cs" />
@@ -104,6 +113,7 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
