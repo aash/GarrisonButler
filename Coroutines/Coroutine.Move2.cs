@@ -32,6 +32,7 @@ namespace GarrisonBuddy
 
         public override void OnRemoveAsCurrent()
         {
+            GarrisonBuddy.Log("Custom navigation System removed!");
             base.OnRemoveAsCurrent();
         }
 
@@ -51,17 +52,18 @@ namespace GarrisonBuddy
             base.OnSetAsCurrent();
             stuckHandlerGaB = this.StuckHandler;
             stuckHandlerGaB.Reset();
+            GarrisonBuddy.Log("Custom navigation System activated!");
         }
 
         public override bool CanNavigateWithin(WoWPoint @from, WoWPoint to, float distanceTolerancy)
         {
-            return base.CanNavigateWithin(@from, to, distanceTolerancy);
+            return true;
         }
 
         public override bool CanNavigateFully(WoWPoint @from, WoWPoint to)
         {
 
-            return base.CanNavigateFully(@from, to);
+            return true;
         }
 
         private WoWPoint getDestination()
@@ -83,7 +85,6 @@ namespace GarrisonBuddy
                 return MoveResult.Failed;
 
             WoWPoint MoverLocation = activeMover.Location;
-            //if (location1.Distance2DSqr(current) < PathPrecision * PathPrecision && location1.Z - current.Z < 4.5f)
 
             if (stuckHandlerGaB.IsStuck())
             {
@@ -92,28 +93,22 @@ namespace GarrisonBuddy
                 return MoveResult.UnstuckAttempt;
             }
             if (MoverLocation.Distance2DSqr(Coroutine.Dijkstra.ClosestToNodes(location)) < 1f)
-            //PathPrecision * PathPrecision && MoverLocation.Z - current.Z < 4.5f)
             {
-                //Navigator.PlayerMover.MoveTowards(current);
                 Clear();
                 stuckHandlerGaB.Reset();
                 StuckWatch.Reset();
                 return MoveResult.ReachedDestination;
             }
             if (MoverLocation.Distance2DSqr(Coroutine.Dijkstra.ClosestToNodes(location)) < 3f)
-            //PathPrecision * PathPrecision && MoverLocation.Z - current.Z < 4.5f)
             {
-                //Navigator.PlayerMover.MoveTowards(current);
                 Navigator.PlayerMover.MoveTowards(location);
                 return MoveResult.Moved;
             }
-            // ISSUE: reference to a compiler-generated field
             if (Mount.ShouldMount(location))
             {
-                // ISSUE: reference to a compiler-generated method
                 Mount.StateMount(getDestination);
             }
-            if (waitTimer1.IsFinished) // Some kind of timer for moving object or interactions
+            if (waitTimer1.IsFinished)
             {
                 WoWGameObject woWgameObject =
                     ObjectManager.GetObjectsOfType<WoWGameObject>(false, false)
@@ -126,25 +121,17 @@ namespace GarrisonBuddy
                         });
                 if (woWgameObject != null)
                 {
-                    //Logging.WriteDiagnostic(MeshNavigator.(148289),
-                    //    new object[2] // Moving to game object to interact
-                    //    {
-                    //        (object) woWgameObject.Name,
-                    //        (object) (bool) (woWgameObject.Locked ? 1 : 0)
-                    //    });
                     woWgameObject.Interact();
                 }
                 waitTimer1.Reset();
             }
             bool flag = false;
-            // ISSUE: reference to a compiler-generated field
             if (CurrentMovePath2 == null || CurrentMovePath2.Path.End.DistanceSqr(location) > 9.0f)
             {
                 flag = true;
             }
 
             else if (waitTimer2.IsFinished && Unnamed2(CurrentMovePath2, MoverLocation))
-                // about not being on the path? 
             {
                 WoWMovement.MoveStop();
                 flag = true;
@@ -159,39 +146,18 @@ namespace GarrisonBuddy
             {
                 WoWPoint startFp;
                 WoWPoint endFp;
-                // ISSUE: reference to a compiler-generated field
-                // ISSUE: reference to a compiler-generated field
-                // ISSUE: reference to a compiler-generated field
                 if (MoverLocation.DistanceSqr(location) > 160000.0 &&
                     FlightPaths.ShouldTakeFlightpath(MoverLocation, location, activeMover.MovementInfo.RunSpeed) &&
                     FlightPaths.SetFlightPathUsage(MoverLocation, location, out startFp, out endFp))
                     return MoveResult.PathGenerated;
-                // ISSUE: reference to a compiler-generated field
                 PathFindResult path = FindPath(MoverLocation, location);
                 if (!path.Succeeded)
                 {
-                    //if (path.Aborted)
-                    //    Logging.WriteDiagnostic(\u0086\u0002.\u0088\u0010(), MeshNavigator.\u0010(148427),
-                    //        (object) path.Start, (object) path.End, (object) \u000F.\u0001(path.Elapsed),
-                    //        TreeRoot.State == TreeRootState.Stopping
-                    //            ? (object) MeshNavigator.\u0010(148529)
-                    //            : (object) MeshNavigator.\u0010(148520));
-                    //else
-                    //    Logging.WriteDiagnostic(\u0086\u0002.\u0088\u0010(), MeshNavigator.\u0010(148546),
-                    //        (object) path.Start, (object) path.End, (object) LoadedMapNames,
-                    //        (object) \u000F.\u0001(path.Elapsed), (object) path.FailStep);
                     stuckHandlerGaB.Reset();
                     return MoveResult.PathGenerationFailed;
                 }
-                //if (path.IsPartialPath)
-                //    Logging.WriteDiagnostic(\u0086\u0002.\u008E\u0010(), MeshNavigator.\u0010(23194),
-                //        (object) path.Start, (object) path.End, (object) \u000F.\u0001(path.Elapsed));
-                //else if (path.Elapsed.TotalMilliseconds > 50.0)
-                //    Logging.WriteDiagnostic(MeshNavigator.\u0010(23279), (object) path.Start, (object) path.End,
-                //        (object) \u000F.\u0001(path.Elapsed));
                 CurrentMovePath2 = new MeshMovePath(path);
                 stuckHandlerGaB.Reset();
-                //this.\u0001(CurrentMovePath, (Vector3) location1);
                 stuckHandlerGaB.Reset();
                 return MoveResult.PathGenerated;
             }

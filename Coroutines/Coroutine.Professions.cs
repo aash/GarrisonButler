@@ -144,32 +144,40 @@ namespace GarrisonBuddy
         {
             // Check
             InitializeDailies();
+
             if (!DailyProfessionCD.Any())
+            {
+                GarrisonBuddy.Diagnostic("[Profession] DailyProfessionCD is empty."); 
                 return false;
+            }
 
             if (AllDailyProfessionCD == null)
+            {
+                GarrisonBuddy.Diagnostic("[Profession] AllDailyProfessionCD not initialized.");
                 return false;
+            }
 
             foreach (WoWSpell spell in DailyProfessionCD)
             {
                 //ADD CHECK WITH OPTIONS, can use itemID
                 if (spell.CooldownTimeLeft.TotalSeconds == 0)
                 {
-                    GarrisonBuddy.Diagnostic("Detected available daily profession cd: " + spell.Name);
+                    GarrisonBuddy.Diagnostic("[Profession] Detected available daily profession cd: " + spell.Name);
                     KeyValuePair<uint, tradeskillID> cd = AllDailyProfessionCD.FirstOrDefault(c => c.Key == spell.Id);
                     if (cd.Value == null || cd.Key == null)
                     {
-                        GarrisonBuddy.Diagnostic("Unable to find a match in DB for spell:" + spell.Name + " value:" + (cd.Value == null).ToString() + " key " + (cd.Key == null).ToString());
+                        GarrisonBuddy.Diagnostic("[Profession] Unable to find a match in DB for spell:" + spell.Name + " value:" + (cd.Value == null).ToString() + " key " + (cd.Key == null).ToString());
                     }
                     else
                     {
                         id = (int)cd.Key;
                         tradeskillId = cd.Value;
+                        GarrisonBuddy.Diagnostic("[Profession] Found possible daily CD:" + spell.Name);
                         return true;
                     }
                 }
             }
-           
+            GarrisonBuddy.Diagnostic("[Profession] No possible daily CD found.");
             return false;
         }
 
@@ -201,7 +209,7 @@ namespace GarrisonBuddy
             WoWGameObject anvil =
                 ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => o.SpellFocus == WoWSpellFocus.Anvil)
-                    .OrderBy(o => Me.Location.DistanceSqr(o.Location))
+                    .OrderBy(o => o.Location.DistanceSqr(Dijkstra.ClosestToNodes(o.Location))) // The closest to a known waypoint
                     .FirstOrDefault();
             if (anvil == null)
             {
@@ -226,6 +234,7 @@ namespace GarrisonBuddy
             if (max > 0)
             {
                 WoWSpell spell = GetRecipeSpell(id, skillLineId);
+                GarrisonBuddy.Log("[Profession] Realizing daily CD: " + spell.Name);
                 if (Me.IsMoving)
                     WoWMovement.MoveStop();
                 await CommonCoroutines.SleepForLagDuration();
@@ -241,8 +250,8 @@ namespace GarrisonBuddy
         {
             string name = Enum.GetName(typeof (tradeskillID), TradeSkillId);
             var TradeSkillSpell = (tradeskillSpell) Enum.Parse(typeof (tradeskillSpell), name);
-            GarrisonBuddy.Diagnostic("Name:" + name);
-            GarrisonBuddy.Diagnostic("TradeSkillSpell:" + TradeSkillSpell);
+            GarrisonBuddy.Diagnostic("[Profession] Name:" + name);
+            GarrisonBuddy.Diagnostic("[Profession] TradeSkillSpell:" + TradeSkillSpell);
 
             if (!SpellManager.HasSpell((int) TradeSkillSpell))
                 return null;

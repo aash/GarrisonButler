@@ -22,8 +22,6 @@ namespace GarrisonBuddy
             new WoWPoint(1819.171, 212.0933, 71.44927),
         };
 
-
-
         private static bool CanRunLastRound()
         {
             TimeSpan elapsedTime = DateTime.Now - lastRoundCheckTime;
@@ -31,8 +29,7 @@ namespace GarrisonBuddy
                 return true;
             return false;
         }
-
-
+        
         private static async Task<bool> LastRound()
         {
             if (!CanRunLastRound())

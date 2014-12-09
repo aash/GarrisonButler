@@ -48,7 +48,7 @@ namespace GarrisonBuddy
                 if (_currentWaypointsList.Count == 0)
                 {
                     if (Me.Location.Distance(destination) > 5)
-                        GarrisonBuddy.Warning("Couldn't generate path from " + Me.Location + " to " + destination);
+                        GarrisonBuddy.Warning("[Navigation] Couldn't generate path from " + Me.Location + " to " + destination);
                     return false;
                 }
                 _lastMoveTo = _currentWaypointsList.First();
@@ -67,7 +67,7 @@ namespace GarrisonBuddy
                 {
                     if (_currentWaypointsList.Count == 0)
                     {
-                        GarrisonBuddy.Diagnostic("Waypoints list empty, assuming at destination: " + destinationName);
+                        GarrisonBuddy.Diagnostic("[Navigation] Waypoints list empty, assuming at destination: " + destinationName);
                         return false;
                     }
 
@@ -76,7 +76,7 @@ namespace GarrisonBuddy
                     _currentWaypointsList.Remove(waypoint);
                     StuckWatch.Reset();
                     StuckWatch.Start();
-                    GarrisonBuddy.Diagnostic("Loading next waypoint to " + destinationName + ": " + waypoint);
+                    GarrisonBuddy.Diagnostic("[Navigation] Loading next waypoint to " + destinationName + ": " + waypoint);
                 }
                 _lastMoveTo = waypoint;
                 {

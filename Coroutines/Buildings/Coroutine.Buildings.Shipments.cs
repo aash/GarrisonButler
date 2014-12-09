@@ -260,40 +260,7 @@ namespace GarrisonBuddy
                 await MoveTo(buildingWithShipmentsToStart.Pnj);
                 return true;
             }
-
-            //if (await MoveTo(unit.Location))
-            //    return true;
-            //
-
-
-            //var node = BotPoi.Current.AsObject as WoWGameObject;
-            //if (node == null || !node.IsValid)
-            //{
-            //    BotPoi.Clear();
-            //}
-            //if (await MoveTo(unit.Location))
-            //    return true;
-
-            //if (!await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsMoving))
-            //{
-            //    WoWMovement.MoveStop();
-            //}
-            //await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
-            //GarrisonBuddy.Diagnostic("sleep");
-            //await Buddy.Coroutines.Coroutine.Sleep(200);
-
-            //if (!Me.IsMoving && !Me.IsCasting && BotPoi.Current.AsObject != toHarvest)
-            //    toHarvest.Interact();
-
-            //BotPoi.Current = new BotPoi(unit, PoiType.Harvest);
-            //return true;
-
-            //
-            //if(BotPoi.Current.Type != PoiType.Interact || BotPoi.Current.Entry != unit.Entry)
-            //Vendor test = new Vendor(unit,Vendor.VendorType.Sell);
-            //    BotPoi.Current = new BotPoi(test, PoiType.Sell); //ForcedQuestPickUp(unit,PoiType.Quest);
-
-
+            
             if (await MoveTo(unit.Location))
                return true;
 
@@ -317,8 +284,8 @@ namespace GarrisonBuddy
                 GarrisonBuddy.Log("Work order frame opened.");
             }
 
-// Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
-// bag update delayed is the last fired event when adding a work order.  
+            // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
+            // bag update delayed is the last fired event when adding a work order.  
 
             int NumberToStart = BuildingsLua.GetCapacitiveFrameMaxShipments();
 

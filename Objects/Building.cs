@@ -251,7 +251,7 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1924.622, 225.1501, 76.96214)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderCurrency;
-                    CollectShipment = GaBSettings.Mono.DwarvenBunker;
+                    CollectShipment = GaBSettings.Mono.BunkerWarMill;
                     break;
 
 
@@ -316,7 +316,7 @@ namespace GarrisonBuddy
                 case (int) buildings.GladiatorSanctumLvl1:
                 case (int) buildings.GladiatorSanctumLvl2:
                 case (int)buildings.GladiatorSanctumLvl3:
-                    PnjId = alliance ? 86639 : 0;
+                    PnjId = alliance ? 86639 : 86639;
                     ReagentId = 118043;
                     NumberReagent = 10;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
@@ -409,8 +409,7 @@ namespace GarrisonBuddy
                 case (int) buildings.TailoringEmporiumLvl1:
                 case (int) buildings.TailoringEmporiumLvl2:
                 case (int)buildings.TailoringEmporiumLvl3:
-                    if (alliance) PnjId = 77778;
-                    else PnjId = 79863;
+                    PnjId = alliance ? 77778 : 79863;
                     ReagentId = 111556; // True iron ore
                     NumberReagent = 5;
                     Pnj = alliance
@@ -423,8 +422,7 @@ namespace GarrisonBuddy
                 case (int) buildings.TheForgeLvl1:
                 case (int) buildings.TheForgeLvl2:
                 case (int) buildings.TheForgeLvl3:
-                    if (alliance) PnjId = 77792;
-                    PnjId = 79817;
+                    PnjId = alliance ? 77792 : 79817;
                     ReagentId = 109119; // True iron ore
                     NumberReagent = 5;
                     Pnj = alliance
@@ -437,9 +435,8 @@ namespace GarrisonBuddy
                 case (int) buildings.TheTanneryLvl1:
                 case (int) buildings.TheTanneryLvl2:
                 case (int)buildings.TheTanneryLvl3:
-                    if (alliance) PnjId = 78207;
-                    PnjId = 0;
-                    ReagentId = 110611; // True iron ore
+                    PnjId = alliance ? 78207 : 79833;
+                    ReagentId = 110611;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)

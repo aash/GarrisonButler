@@ -98,7 +98,6 @@ namespace GarrisonBuddy.Config
 
         #region Work orders
 
-
         [Setting, Styx.Helpers.DefaultValue(true),
          Description("To let the bot pick up the completed work orders if available select true."),
          Category("Work Orders")]
@@ -125,9 +124,9 @@ namespace GarrisonBuddy.Config
         public bool Barracks { get; set; }
 
         [Setting, Styx.Helpers.DefaultValue(true),
-         Description("To let the bot start work orders for this building if available select true."),
+         Description("Dwarven Bunker and Warmill option! To let the bot start work orders for this building if available select true."),
          Category("Work Orders")]
-        public bool DwarvenBunker { get; set; }
+        public bool BunkerWarMill { get; set; }
 
         [Setting, Styx.Helpers.DefaultValue(true),
          Description("To let the bot start work orders for this building if available select true."),
@@ -186,9 +185,6 @@ namespace GarrisonBuddy.Config
 
         #endregion
 
-
-
-
         [Setting, Styx.Helpers.DefaultValue(true),
          Description("To let the bot start missions select true. To not do missions, select false."),
          Category("Mission")]
@@ -197,9 +193,5 @@ namespace GarrisonBuddy.Config
         [Setting, Styx.Helpers.DefaultValue(true),
          Description("To let the bot collect completed missions select true."), Category("Mission")]
         public bool CompletedMissions { get; set; }
-
-
-
-
     }
 }
