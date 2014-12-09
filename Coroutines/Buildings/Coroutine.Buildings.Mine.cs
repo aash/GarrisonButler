@@ -54,15 +54,28 @@ namespace GarrisonBuddy
             node = null;
             // Settings
             if (!GaBSettings.Mono.HarvestMine)
+            {
+                GarrisonBuddy.Diagnostic("[Mine] Deactivated in user settings.");
                 return false;
+            }
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
+            {
+                GarrisonBuddy.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
                 return false;
+            }
 
             // Is there something to mine? 
             node = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
-            return node != null;
+            if (node == null)
+            {
+                GarrisonBuddy.Diagnostic("[Mine] No ore found to harvest.");
+                return false;
+            }
+
+            GarrisonBuddy.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
+            return true;
         }
 
         public static async Task<bool> CleanMine()
@@ -70,8 +83,6 @@ namespace GarrisonBuddy
             WoWGameObject nodeToCollect = null;
             if (!CanRunMine(out nodeToCollect))
                 return false;
-
-            GarrisonBuddy.Log("Found ore to gather, moving to ore at:" + nodeToCollect.Location);
 
             if (MinesId.Contains(Me.SubZoneId))
             {
@@ -81,9 +92,11 @@ namespace GarrisonBuddy
                 if (await UseItemInbags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1))
                     return true;
 
+                GarrisonBuddy.Log("[Mine] In mine, moving to harvest ore at: " + nodeToCollect.Location);
                 return await HarvestWoWGameOject(nodeToCollect);
             }
 
+            GarrisonBuddy.Log("[Mine] Not in mine yet, moving to harvest ore at: " + nodeToCollect.Location);
             return await MoveTo(nodeToCollect.Location);
         }
 

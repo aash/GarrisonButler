@@ -34,17 +34,26 @@ namespace GarrisonBuddy
             herbToGather = null;
 
             if (!GaBSettings.Mono.HarvestGarden)
+            {
+                GarrisonBuddy.Diagnostic("[Garden] Deactivated in user settings.");
                 return false;
-
+            }
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
+            {
+                GarrisonBuddy.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
                 return false;
+            }
 
             // Is there something to gather? 
             herbToGather = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GardenItems.Contains(o.Entry));
             if (herbToGather == null)
+            {
+                GarrisonBuddy.Diagnostic("[Garden] No herb detected.");
                 return false;
+            }
 
+            GarrisonBuddy.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
             return true;
         }
 
@@ -54,8 +63,7 @@ namespace GarrisonBuddy
             if (!CanRunGarden(out toGather))
                 return false;
 
-            GarrisonBuddy.Log("Found herb to gather, moving to herb at: " + toGather.Location);
-
+            GarrisonBuddy.Log("[Garden] Moving to harvest herb at: " + toGather.Location);
             return await HarvestWoWGameOject(toGather);
         }
     }

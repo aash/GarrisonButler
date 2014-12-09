@@ -207,47 +207,57 @@ namespace GarrisonBuddy
 
         private static bool ShouldRunStartOrder()
         {
-            IEnumerable<Building> d;
+            Building d;
             return CanRunStartOrder(out d);
         }
 
-        private static bool CanRunStartOrder(out IEnumerable<Building> buildingsWithShipmentsToStart)
+        private static bool CanRunStartOrder(out Building buildingWithShipmentsToStart)
         {
-            buildingsWithShipmentsToStart = null;
+            buildingWithShipmentsToStart = null;
 
             if (!GaBSettings.Mono.StartOrder)
+            {
+                GarrisonBuddy.Diagnostic("[ShipmentStart] Deactivated in user settings.");
                 return false;
-
-            buildingsWithShipmentsToStart =
+            }
+            var buildingsWithToStart =
                 _buildings.Where(b => b.canCompleteOrder() && BuildingsLua.GetNumberShipmentLeftToStart(b.id) > 0)
                     .OrderBy(b => b.id);
 
-            return buildingsWithShipmentsToStart.Any();
+
+            if (!buildingsWithToStart.Any())
+            {
+                GarrisonBuddy.Diagnostic("[ShipmentStart] No order available found.");
+                return false;
+            }
+
+            GarrisonBuddy.Diagnostic("[ShipmentStart] #buildings {0} - first {1} - #Max {2}", buildingsWithToStart, buildingsWithToStart.First().name, buildingsWithToStart.First().shipmentCapacity);
+            buildingWithShipmentsToStart = buildingsWithToStart.First();
+            return true;
         }
 
         private static async Task<bool> StartOrder()
         {
-            IEnumerable<Building> buildingsWithShipmentsToStart;
+            Building buildingWithShipmentsToStart;
 
-            if (!CanRunStartOrder(out buildingsWithShipmentsToStart))
+            if (!CanRunStartOrder(out buildingWithShipmentsToStart))
                 return false;
 
             //if (BotPoi.Current.Type != PoiType.Hotspot && BotPoi.Current.Type != PoiType.Interact)
             //    BotPoi.Clear();
 
-            var toStart = buildingsWithShipmentsToStart.First();
-            GarrisonBuddy.Log("Moving to start work order:" + toStart.name);
+            GarrisonBuddy.Log("Moving to start work order:" + buildingWithShipmentsToStart.name);
 
-            WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == toStart.PnjId);
+            WoWUnit unit = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == buildingWithShipmentsToStart.PnjId);
             if (unit == null)
             {
-                GarrisonBuddy.Diagnostic("Could not find unit (" + toStart.PnjId + "), moving to default location.\n" +
+                GarrisonBuddy.Diagnostic("Could not find unit (" + buildingWithShipmentsToStart.PnjId + "), moving to default location.\n" +
                                          "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
-                
-                if(BotPoi.Current.Type != PoiType.Hotspot || BotPoi.Current.Location != toStart.Pnj)
-                    BotPoi.Current = new BotPoi(toStart.Pnj, PoiType.Hotspot); ;
-             
-               await MoveTo(toStart.Pnj);
+
+                if (BotPoi.Current.Type != PoiType.Hotspot || BotPoi.Current.Location != buildingWithShipmentsToStart.Pnj)
+                    BotPoi.Current = new BotPoi(buildingWithShipmentsToStart.Pnj, PoiType.Hotspot); ;
+
+                await MoveTo(buildingWithShipmentsToStart.Pnj);
                 return true;
             }
 
