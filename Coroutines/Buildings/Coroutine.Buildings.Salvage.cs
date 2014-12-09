@@ -25,18 +25,34 @@ namespace GarrisonBuddy
             return CanRunSalvage(out salvagecrates, out building);
         }
 
-        private static bool CanRunSalvage(out IEnumerable<WoWItem> salvageCrates, out Building building)
+        private static bool CanRunSalvage(out IEnumerable<WoWItem> salvageCratesFound, out Building building)
         {
-            salvageCrates = null;
+            salvageCratesFound = null;
             building = null;
 
             if (!GaBSettings.Mono.SalvageCrates)
+            {
+                GarrisonBuddy.Diagnostic("[Salvage] Deactivated in user settings.");
                 return false;
+            }
+            var salvageBuildings = _buildings.Where(b => b.id == 52 || b.id == 140 || b.id == 141);
+            if (!salvageBuildings.Any())
+            {
+                GarrisonBuddy.Diagnostic("[Salvage] No recycle center detected.");
+                return false;
+            }
+            building = salvageBuildings.First();
 
-            building = _buildings.FirstOrDefault(b => b.id == 52 || b.id == 140 || b.id == 141);
-            salvageCrates = Me.BagItems.Where(i => SalvageCratesIds.Contains((int) i.Entry));
+            salvageCratesFound = Me.BagItems.Where(i => SalvageCratesIds.Contains((int)i.Entry));
+            int numSalvageCrates = salvageCratesFound.Count();
+            if (numSalvageCrates == 0)
+            {
+                GarrisonBuddy.Diagnostic("[Salvage] Recycle center detected but no salvage crates detected in bags.");
+                return false;
+            }
 
-            return salvageCrates.Any() && building != null;
+            GarrisonBuddy.Diagnostic("[Salvage] Found Recycle center and salvage crates - #{0}", numSalvageCrates);
+            return true;
         }
 
         private static async Task<bool> DoSalvages()

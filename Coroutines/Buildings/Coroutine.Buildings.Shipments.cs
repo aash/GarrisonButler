@@ -231,7 +231,7 @@ namespace GarrisonBuddy
                 return false;
             }
 
-            GarrisonBuddy.Diagnostic("[ShipmentStart] #buildings {0} - first {1} - #Max {2}", buildingsWithToStart, buildingsWithToStart.First().name, buildingsWithToStart.First().shipmentCapacity);
+            GarrisonBuddy.Diagnostic("[ShipmentStart] #buildings {0} - first {1} - #Max {2}", buildingsWithToStart.Count(), buildingsWithToStart.First().name, buildingsWithToStart.First().shipmentCapacity);
             buildingWithShipmentsToStart = buildingsWithToStart.First();
             return true;
         }

@@ -211,7 +211,7 @@ namespace GarrisonBuddy
                 case (int) buildings.AlchemyLabLvl2:
                 case (int) buildings.AlchemyLabLvl3:
                     PnjId = alliance ? 77791 : 79814;
-                    ReagentId = 108996;
+                    ReagentId = 109124;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
