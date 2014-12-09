@@ -157,14 +157,10 @@ namespace GarrisonLua
                 "local amount = 99;" +
                 "for i = 1, C_Garrison.GetNumShipmentReagents() do " +
                 "local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(i);" +
-                "print(quantity);" +
-                "print(needed);" +
                 "if i == 1 then " +
                 "amount = quantity / needed;" +
-                "print(amount);" +
-                "print(amount);" +
                 "end;" +
-               "local ratio = quantity/needed;" +
+                "local ratio = quantity/needed;" +
                 "if ratio < amount then " +
                 "amount = ratio;" +
                 "end;" +

@@ -314,17 +314,7 @@ namespace GarrisonBuddy
 
             for (int i = NumberToStart; i > 0; i--)
             {
-                if (await
-                    CommonCoroutines.WaitForLuaEvent("BAG_UPDATE_DELAYED", 500,
-                        () => BuildingsLua.GetCapacitiveFrameMaxShipments() == i,
-                        InterfaceLua.ClickStartOrderButton))
-                {
-                    GarrisonBuddy.Log("Succesfully started work order for " + toStart.name);
-                }
-                else
-                {
-                    GarrisonBuddy.Warning("Never received confirmation of new work order for " + toStart.name + ". Either failed or missed answer due to lag.");
-                }
+                InterfaceLua.ClickStartOrderButton();
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             StartOrderTriggered = false;
