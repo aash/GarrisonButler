@@ -61,9 +61,8 @@ namespace GarrisonBuddy
                 // Alchemy
                 new KeyValuePair<uint, tradeskillID>(108996, tradeskillID.Alchemy),
                 new KeyValuePair<uint, tradeskillID>(118700, tradeskillID.Alchemy), // secret
-                // BlackSmithing
-                // Truesteel
-                new KeyValuePair<uint, tradeskillID>(108257, tradeskillID.Blacksmithing),
+                // BlackSmithing // Truesteel
+                new KeyValuePair<uint, tradeskillID>(108257, tradeskillID.Blacksmithing), 
                 // Secrets
                 new KeyValuePair<uint, tradeskillID>(118720, tradeskillID.Blacksmithing),
                 // Enchanting
@@ -81,7 +80,7 @@ namespace GarrisonBuddy
                 new KeyValuePair<uint, tradeskillID>(119297, tradeskillID.Inscription), // secrets
                 // Jewelcrafting
                 new KeyValuePair<uint, tradeskillID>(115524, tradeskillID.Jewelcrafting),
-                new KeyValuePair<uint, tradeskillID>(118723, tradeskillID.Jewelcrafting),
+                new KeyValuePair<uint, tradeskillID>(118723, tradeskillID.Jewelcrafting), // secret
                 // Leatherworking
                 new KeyValuePair<uint, tradeskillID>(110611, tradeskillID.Leatherworking),
                 new KeyValuePair<uint, tradeskillID>(118721, tradeskillID.Leatherworking),

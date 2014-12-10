@@ -150,7 +150,9 @@ namespace GarrisonBuddy
             if (itemInReagentBank != null)
                 count += itemInReagentBank.StackCount;
 
-            if (count >= NumberReagent) return true;
+            if (count >= NumberReagent)
+                return true;
+            return false;
 
 
             IEnumerable<WoWItem> millableInBags =
