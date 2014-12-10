@@ -128,7 +128,7 @@ namespace GarrisonBuddy
                 return false;
 
             item.Use();
-            GarrisonBuddy.Diagnostic("[Item] Using: {0}", item.Name); 
+            GarrisonBuddy.Log("[Item] Using: {0}", item.Name); 
             await CommonCoroutines.SleepForLagDuration();
             return true;
         }

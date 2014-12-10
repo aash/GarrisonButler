@@ -53,7 +53,7 @@ namespace GarrisonBuddy
         private static bool lastCheckCd = false;
         private static List<Helpers.TradeskillHelper> tradeskillHelpers;
 
-        private static List<KeyValuePair<tradeskillID,WoWSpell>> DailyProfessionCD;
+        private static List<Tuple<int,tradeskillID,WoWSpell>> DailyProfessionCD;
 
         private static readonly List<KeyValuePair<uint, tradeskillID>> AllDailyProfessionCD =
             new List<KeyValuePair<uint, tradeskillID>>
@@ -61,7 +61,8 @@ namespace GarrisonBuddy
                 // Alchemy
                 new KeyValuePair<uint, tradeskillID>(108996, tradeskillID.Alchemy),
                 new KeyValuePair<uint, tradeskillID>(118700, tradeskillID.Alchemy), // secret
-                // BlackSmithing // Truesteel
+                // BlackSmithing 
+                // Truesteel
                 new KeyValuePair<uint, tradeskillID>(108257, tradeskillID.Blacksmithing), 
                 // Secrets
                 new KeyValuePair<uint, tradeskillID>(118720, tradeskillID.Blacksmithing),
@@ -93,7 +94,7 @@ namespace GarrisonBuddy
         {
             if (DailyProfessionCD != null) return;
 
-            DailyProfessionCD = new List<KeyValuePair<tradeskillID,WoWSpell>>();
+            DailyProfessionCD = new List<Tuple<int,tradeskillID,WoWSpell>>();
 
             GarrisonBuddy.Log("Loading Professions dailies, please wait.");
             foreach (var item in AllDailyProfessionCD)
@@ -104,7 +105,7 @@ namespace GarrisonBuddy
                 if (spell != null)
                 {
                     GarrisonBuddy.Log("Adding daily CD: {0} - {1}", (tradeskillID)item.Value, spell.Name);
-                    DailyProfessionCD.Add(new KeyValuePair<tradeskillID, WoWSpell>(item.Value,spell));
+                    DailyProfessionCD.Add(new Tuple<int, tradeskillID, WoWSpell>((int)item.Key, item.Value, spell));
                 }
             }
 
@@ -159,14 +160,16 @@ namespace GarrisonBuddy
                 return false;
             }
 
-            foreach (KeyValuePair<tradeskillID,WoWSpell> spellProfession in DailyProfessionCD)
+            foreach (Tuple<int,tradeskillID,WoWSpell> spellProfession in DailyProfessionCD)
             {
                 //ADD CHECK WITH OPTIONS, can use itemID
-                if (spellProfession.Value.CooldownTimeLeft.TotalSeconds == 0)
+                if (spellProfession.Item3.CooldownTimeLeft.TotalSeconds == 0)
                 {
-                    tradeskillID tradeskill = spellProfession.Key;
-                    WoWSpell Spell = spellProfession.Value;
-
+                    tradeskillID tradeskill = spellProfession.Item2;
+                    var Spell = spellProfession.Item3;
+                    int maxDoable = GetMaxRepeat(spellProfession.Item1, (int)tradeskillId);
+                    if (maxDoable <= 0)
+                        return false;
                     spellOut = Spell;
                     tradeskillId = tradeskill;
                     GarrisonBuddy.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1}", (tradeskillID)tradeskillId, Spell.Name);

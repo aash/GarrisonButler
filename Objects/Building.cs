@@ -154,7 +154,6 @@ namespace GarrisonBuddy
                 return true;
             return false;
 
-
             IEnumerable<WoWItem> millableInBags =
                 StyxWoW.Me.BagItems.Where(i => MillableFrom.Contains(i.Entry) && i.StackCount > 5);
             if (millableInBags.Any())
