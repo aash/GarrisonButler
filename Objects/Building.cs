@@ -104,7 +104,7 @@ namespace GarrisonBuddy
                 count += itemInReagentBank.StackCount;
             }
 
-            GarrisonBuddy.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{1}", ReagentId, count, NumberReagent);
+            GarrisonBuddy.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId, count, NumberReagent, count >= NumberReagent);
             return count >= NumberReagent;
         }
 
