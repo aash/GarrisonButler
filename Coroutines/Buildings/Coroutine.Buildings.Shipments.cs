@@ -229,8 +229,14 @@ namespace GarrisonBuddy
                 GarrisonBuddy.Diagnostic("[ShipmentStart] No buildings with shipment left to start.");
                 return false;
             }
+            var buildingsShipmentActivated =_buildings.Where(b => b.CollectShipment);
+            if (!buildingsShipmentActivated.Any())
+            {
+                GarrisonBuddy.Diagnostic("[ShipmentStart] Buildings with shipments but none activated.");
+                return false;
+            }
 
-            var buildingsToStart = buildingsShipmentLeft.Where(b => b.canCompleteOrder()).OrderBy(b => b.id);
+            var buildingsToStart = buildingsShipmentActivated.Where(b => b.canCompleteOrder()).OrderBy(b => b.id);
             if (!buildingsToStart.Any())
             {
                 GarrisonBuddy.Diagnostic("[ShipmentStart] Can't complete work orders, missing reagents.");
