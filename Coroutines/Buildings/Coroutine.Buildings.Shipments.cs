@@ -229,7 +229,7 @@ namespace GarrisonBuddy
                 GarrisonBuddy.Diagnostic("[ShipmentStart] No buildings with shipment left to start.");
                 return false;
             }
-            var buildingsShipmentActivated =_buildings.Where(b => b.CollectShipment);
+            var buildingsShipmentActivated = buildingsShipmentLeft.Where(b => b.CollectShipment);
             if (!buildingsShipmentActivated.Any())
             {
                 GarrisonBuddy.Diagnostic("[ShipmentStart] Buildings with shipments but none activated.");
