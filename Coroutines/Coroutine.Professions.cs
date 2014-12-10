@@ -60,7 +60,7 @@ namespace GarrisonBuddy
             {
                 // Alchemy
                 new KeyValuePair<uint, tradeskillID>(108996, tradeskillID.Alchemy),
-                new KeyValuePair<uint, tradeskillID>(118700, tradeskillID.Alchemy),
+                new KeyValuePair<uint, tradeskillID>(118700, tradeskillID.Alchemy), // secret
                 // BlackSmithing
                 // Truesteel
                 new KeyValuePair<uint, tradeskillID>(108257, tradeskillID.Blacksmithing),
@@ -77,8 +77,8 @@ namespace GarrisonBuddy
                 // bolts
                 new KeyValuePair<uint, tradeskillID>(111366, tradeskillID.Engineering),
                 // Inscription
-                new KeyValuePair<uint, tradeskillID>(169081, tradeskillID.Inscription),
-                new KeyValuePair<uint, tradeskillID>(119297, tradeskillID.Inscription),
+                new KeyValuePair<uint, tradeskillID>(112377, tradeskillID.Inscription), // war paint
+                new KeyValuePair<uint, tradeskillID>(119297, tradeskillID.Inscription), // secrets
                 // Jewelcrafting
                 new KeyValuePair<uint, tradeskillID>(115524, tradeskillID.Jewelcrafting),
                 new KeyValuePair<uint, tradeskillID>(118723, tradeskillID.Jewelcrafting),
