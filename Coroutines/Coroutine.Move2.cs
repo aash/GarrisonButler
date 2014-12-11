@@ -109,7 +109,7 @@ namespace GarrisonBuddy
                 stuckHandlerGaB.Reset();
                 return MoveResult.PathGenerated;
             }
-            if (MoverLocation.Distance(location) < 1.5f)
+            if (MoverLocation.Distance(location) < 2.4f)
             {
                 Clear();
                 GarrisonBuddy.Warning("reset STUCK");
@@ -117,7 +117,7 @@ namespace GarrisonBuddy
                 StuckWatch.Reset();
                 return MoveResult.ReachedDestination;
             }
-            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 3f)
+            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 7f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
                 return MoveResult.Moved;

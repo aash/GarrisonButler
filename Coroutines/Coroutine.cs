@@ -187,6 +187,23 @@ namespace GarrisonBuddy
 
         internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
         {
+
+            if (GaBSettings.Mono.ConfigVersion != GarrisonBuddy.Version.Minor)
+            {
+                // Popup to explain this is a beta and they need to reconfigure their configs.
+                Bots.DungeonBuddy.Helpers.Alert.Show("GarrisonBuddy Public Beta",
+                    "Hey!\n" +
+                    "Thanks for your support and your help testing out this new botBase.\n" +
+                    "Since GarrisonBuddy is still on heavy development you are required to verify your settings foe each new build you install.\n" +
+                    "Be sure to restart the bot after doing so!" +
+                    "If you have any issues, please post a full log on the GarrisonBuddy Forum page.\n" +
+                    "Bot safe,\n" +
+                    "Deams\n",
+                    60, true,false);
+                TreeRoot.Stop();
+            }
+            
+
             if (StyxWoW.Me.Combat)
                 return;
 

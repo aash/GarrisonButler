@@ -48,6 +48,8 @@
             this.Controls.Add(this.propertyGrid1);
             this.Name = "ConfigForm";
             this.Text = "GarrisonBuddy Settings";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigForm_FormClosed);
+            this.Load += new System.EventHandler(this.ConfigForm_Load);
             this.ResumeLayout(false);
 
         }
