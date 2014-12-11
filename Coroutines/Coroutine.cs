@@ -160,6 +160,7 @@ namespace GarrisonBuddy
             }
         }
 
+        private static ActionsSequence mainSequence;
         internal static void InitializeCoroutines()
         {
             if (init) return;
@@ -167,6 +168,15 @@ namespace GarrisonBuddy
             InitializeMissions();
             InitializationMove();
             InitializeDailies();
+
+            mainSequence = new ActionsSequence();
+            mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
+            mainSequence.AddAction(InitializeBuildingsCoroutines());
+            mainSequence.AddAction(new ActionBasic(DoMissions));
+            mainSequence.AddAction(new ActionBasic(DoDailyCd));
+            mainSequence.AddAction(new ActionBasic(DoSalvages));
+            mainSequence.AddAction(new ActionBasic(LastRound));
+            mainSequence.AddAction(new ActionBasic(Waiting));
             init = true;
         }
 
@@ -215,11 +225,12 @@ namespace GarrisonBuddy
                 outgoingUnits.Add(unit);
             }
         }
-
+        
         private static Stopwatch testStopwatch = new Stopwatch();
-        private static bool LogTime = false;
+        private static bool LogTime = true;
         public static async Task<bool> RootLogic()
         {
+            // Fast checks
             CheckResetAfk();
 
             if (await RestoreUiIfNeeded())
@@ -245,56 +256,42 @@ namespace GarrisonBuddy
 
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
+
             if(LogTime)
-            GarrisonBuddy.Diagnostic("[Time] TICK: " + testStopwatch.Elapsed);
+                GarrisonBuddy.Diagnostic("[Time] TICK: " + testStopwatch.Elapsed);
 
-            testStopwatch.Reset();
-            testStopwatch.Start();
-
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] start: " + testStopwatch.Elapsed);
-            if (await TransportToGarrison())
+            // Heavier coroutines on timer
+            if (await mainSequence.ExecuteAction())
                 return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] TransportToGarrison: " + testStopwatch.Elapsed);
-
-            if (await DoBuildingRelated())
-                return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] DoBuildingRelated: " + testStopwatch.Elapsed);
-
-            if (await DoMissions())
-                return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] DoMissions: " + testStopwatch.Elapsed);
-
-            if (await DoDailyCd())
-                return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] DoDailyCd: " + testStopwatch.Elapsed);
-
-            if (await DoSalvages())
-                return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] DoSalvages: " + testStopwatch.Elapsed);
-
-            if (await LastRound())
-                return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("[Time] LastRound: " + testStopwatch.Elapsed);
-
-            if (await Waiting())
-                return true;
-            if (LogTime)
-            GarrisonBuddy.Diagnostic("Time Waiting: " + testStopwatch.Elapsed);
 
             ReadyToSwitch = true;
             return false;
         }
 
+        internal static Tuple<bool, WoWItem> CanTPToGarrison()
+        {
+            if (!GaBSettings.Mono.UseGarrisonHearthstone)
+            {
+                return new Tuple<bool, WoWItem>(false, null);
+            }
+
+            if (GarrisonsZonesId.Contains(Me.ZoneId))
+            {
+                return new Tuple<bool, WoWItem>(false, null);
+            }
+
+            WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
+            if(stone == null)
+                return new Tuple<bool, WoWItem>(false, null);
+
+             if (stone.CooldownTimeLeft.TotalSeconds > 0)
+                return new Tuple<bool, WoWItem>(false, null);
+
+            return new Tuple<bool, WoWItem>(true,stone);
+        }
+
         private static async Task<bool> TransportToGarrison()
         {
-            if (GarrisonsZonesId.Contains(Me.ZoneId)) return false;
 
             if (GaBSettings.Mono.UseGarrisonHearthstone)
             {
@@ -326,7 +323,7 @@ namespace GarrisonBuddy
                     "Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
                 return false;
             }
-            return true;
+            return false;
         }
 
         private static bool IsAutoAngler()
@@ -429,7 +426,7 @@ namespace GarrisonBuddy
 //if (hasItemTomail && Styx.Helpers.CharacterSettings.Instance.MailRecipient.Any())
 //{
 //    var mailBox =
-//        ObjectManager.GetObjectsOfType<WoWGameObject>()
+//        ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
 //            .Where(o => o.SubType == WoWGameObjectType.Mailbox)
 //            .FirstOrDefault();
 //    if(mailBox == null)

@@ -25,46 +25,43 @@ namespace GarrisonBuddy
 
         private static bool ShouldRunGarden()
         {
-            WoWGameObject herb = null;
-            return CanRunGarden(out herb);
+            return CanRunGarden().Item1;
         }
 
-        private static bool CanRunGarden(out WoWGameObject herbToGather)
+        private static Tuple<bool,WoWGameObject> CanRunGarden()
         {
-            herbToGather = null;
-
             if (!GaBSettings.Mono.HarvestGarden)
             {
                 GarrisonBuddy.Diagnostic("[Garden] Deactivated in user settings.");
-                return false;
+                return new Tuple<bool, WoWGameObject>(false,null);
             }
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
             {
                 GarrisonBuddy.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
-                return false;
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             // Is there something to gather? 
-            herbToGather = ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GardenItems.Contains(o.Entry));
+            var herbToGather = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().FirstOrDefault(o => GardenItems.Contains(o.Entry));
             if (herbToGather == null)
             {
                 GarrisonBuddy.Diagnostic("[Garden] No herb detected.");
-                return false;
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             GarrisonBuddy.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
-            return true;
+            return new Tuple<bool, WoWGameObject>(true,herbToGather);
         }
 
-        public static async Task<bool> CleanGarden()
-        {
-            WoWGameObject toGather = null;
-            if (!CanRunGarden(out toGather))
-                return false;
+        //public static async Task<bool> CleanGarden()
+        //{
+        //    WoWGameObject toGather = null;
+        //    if (!CanRunGarden(out toGather))
+        //        return false;
 
-            GarrisonBuddy.Log("[Garden] Moving to harvest herb at: " + toGather.Location);
-            return await HarvestWoWGameOject(toGather);
-        }
+        //    GarrisonBuddy.Log("[Garden] Moving to harvest herb at: " + toGather.Location);
+        //    return await HarvestWoWGameOject(toGather);
+        //}
     }
 }

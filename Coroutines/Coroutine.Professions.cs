@@ -206,7 +206,7 @@ namespace GarrisonBuddy
         private static async Task<bool> FindAnvilAndDoCd(WoWSpell spell, int skillLineId)
         {
             WoWGameObject anvil =
-                ObjectManager.GetObjectsOfType<WoWGameObject>()
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .Where(o => o.SpellFocus == WoWSpellFocus.Anvil)
                     .OrderBy(o => o.Location.DistanceSqr(Dijkstra.ClosestToNodes(o.Location))) // The closest to a known waypoint
                     .FirstOrDefault();

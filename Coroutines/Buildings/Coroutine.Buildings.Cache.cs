@@ -27,34 +27,27 @@ namespace GarrisonBuddy
         private static WoWPoint cacheCachedLocation;
         private static WaitTimer cacheWaitTimer;
 
-        private static bool CanRunCache(ref WoWGameObject cache)
+        private static Tuple<bool,WoWGameObject> CanRunCache()
         {
             if (!GaBSettings.Mono.GarrisonCache)
-                return false;
+                return new Tuple<bool, WoWGameObject>(false,null);
             // Check
-            cache =
-                ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
+            var cache =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
             if (cache == null && !Found)
-                return false;
-
+                return new Tuple<bool, WoWGameObject>(false, null);
+            
             Found = true;
-
             if (cache != null) cacheCachedLocation = cache.Location;
-            return true;
+            return new Tuple<bool, WoWGameObject>(true, cache);
         }
         private static bool ShouldRunCache()
         {
-            WoWGameObject cacheFound = null;
-            return CanRunCache(ref cacheFound);
+            return CanRunCache().Item1;
         }
 
-        private static async Task<bool> PickUpGarrisonCache()
+        private static async Task<bool> PickUpGarrisonCache(WoWGameObject cacheFound)
         {
-            WoWGameObject cacheFound = null;
-
-            if (!CanRunCache(ref cacheFound))
-                return false;
-
             if (cacheFound != null)
             {
                 cacheCachedLocation = cacheFound.Location;

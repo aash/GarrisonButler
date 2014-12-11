@@ -45,88 +45,98 @@ namespace GarrisonBuddy
 
         private static bool ShouldRunMine()
         {
-            WoWGameObject node = null;
-            return CanRunMine(out node);
+            return CanRunMine().Item1;
         }
 
-        private static bool CanRunMine(out WoWGameObject node)
+        private static Tuple<bool, WoWGameObject> CanRunMine()
         {
-            node = null;
             // Settings
             if (!GaBSettings.Mono.HarvestMine)
             {
                 GarrisonBuddy.Diagnostic("[Mine] Deactivated in user settings.");
-                return false;
+                return new Tuple<bool,WoWGameObject>(false,null);
             }
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
             {
                 GarrisonBuddy.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
-                return false;
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             // Is there something to mine? 
-            node = ObjectManager.GetObjectsOfType<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
-            if (node == null)
+            WoWGameObject node = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
+            if (node == default(WoWGameObject))
             {
                 GarrisonBuddy.Diagnostic("[Mine] No ore found to harvest.");
-                return false;
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             GarrisonBuddy.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
-            return true;
+            return new Tuple<bool, WoWGameObject>(true, node);
         }
 
-        public static async Task<bool> CleanMine()
+        private static bool MeIsInMine()
         {
-            WoWGameObject nodeToCollect = null;
-            if (!CanRunMine(out nodeToCollect))
-                return false;
-
-            if (MinesId.Contains(Me.SubZoneId))
-            {
-                if (await UseItemInbags(MinersCofeeItemId, MinersCofeeAura, 2))
-                    return true;
-
-                if (await UseItemInbags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1))
-                    return true;
-
-                GarrisonBuddy.Log("[Mine] In mine, moving to harvest ore at: " + nodeToCollect.Location);
-                return await HarvestWoWGameOject(nodeToCollect);
-            }
-
-            GarrisonBuddy.Log("[Mine] Not in mine yet, moving to harvest ore at: " + nodeToCollect.Location);
-            return await MoveTo(nodeToCollect.Location);
+            return MinesId.Contains(Me.SubZoneId);
         }
 
+        //public static async Task<bool> CollectOreInMine(WoWGameObject nodeToCollect)
+        //{
+        //    if (MinesId.Contains(Me.SubZoneId))
+        //    {
+        //        if (await UseItemInbags(MinersCofeeItemId, MinersCofeeAura, 2))
+        //            return true;
 
-        public static async Task<bool> UseItemInbags(uint entry, uint auraId = 0, int maxStack = 0)
+        //        if (await UseItemInbags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1))
+        //            return true;
+
+        //        GarrisonBuddy.Log("[Mine] In mine, moving to harvest ore at: " + nodeToCollect.Location);
+        //        return await HarvestWoWGameOject(nodeToCollect);
+        //    }
+
+        //    GarrisonBuddy.Log("[Mine] Not in mine yet, moving to harvest ore at: " + nodeToCollect.Location);
+        //    return await MoveTo(nodeToCollect.Location);
+        //}
+
+        public static Func<Tuple<bool, WoWItem>> CanUseItemInBags(uint entry, uint auraId = 0, int maxStack = 0)
         {
-            WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
-            if (item == null || !item.IsValid || !item.Usable)
-                return false;
-
-            var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
-            if (auraId != 0 && maxStack != 0 && auras.Any())
+            return new Func<Tuple<bool, WoWItem>>(() =>
             {
-                var Aura = auras.First().Value;
-                if (Aura == null)
+                WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
+                if (item == null || !item.IsValid || !item.Usable)
+                    return new Tuple<bool,
+                        WoWItem>(false,
+                            null);
+                var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
+                if (auraId != 0 && maxStack != 0 && auras.Any())
                 {
-                    GarrisonBuddy.Diagnostic("[Item] Aura null skipping.");
-                    return false;
+                    var Aura = auras.First().Value;
+                    if (Aura == null)
+                    {
+                        GarrisonBuddy.Diagnostic("[Item] Aura null skipping.");
+                        return new Tuple<bool,
+                            WoWItem>(false,
+                                null);
+                    }
+                    if (Aura.StackCount >= maxStack)
+                    {
+                        GarrisonBuddy.Diagnostic("[Item] Number of stacks: {0} - too high to use item {1}",
+                            Aura.StackCount,
+                            Aura.Name);
+                        return new Tuple<bool, WoWItem>(false, null);
+                    }
+                    GarrisonBuddy.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", Aura.Name, Aura.StackCount);
                 }
-                if (Aura.StackCount >= maxStack)
-                {
-                    GarrisonBuddy.Diagnostic("[Item] Number of stacks: {0} - too high to use item {1}", Aura.StackCount, Aura.Name); 
-                    return false;
-                }
-                GarrisonBuddy.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", Aura.Name, Aura.StackCount); 
-            }
 
-            if (item.CooldownTimeLeft.TotalSeconds > 0)
-                return false;
+                if (item.CooldownTimeLeft.TotalSeconds > 0)
+                    return new Tuple<bool, WoWItem>(false, null);
+                return new Tuple<bool, WoWItem>(true, item);
+            });
+        }
 
+        public static async Task<bool> UseItemInbags(WoWItem item)
+        {
             item.Use();
             GarrisonBuddy.Log("[Item] Using: {0}", item.Name); 
             await CommonCoroutines.SleepForLagDuration();

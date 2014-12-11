@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
+using Styx.CommonBot.Profiles.Quest.Order;
+using Tripper.RecastManaged.Recast;
 
 namespace GarrisonBuddy
 {
@@ -51,7 +54,7 @@ namespace GarrisonBuddy
                 if (await MoveTo(myFactionWaitingPoints[townHallLevel - 1]))
                     return true;
             }
-            return false;
+            return true;
         }
 
         private static bool AnythingLeftToDoBeforeEnd()
@@ -72,22 +75,17 @@ namespace GarrisonBuddy
             if (helperTriggerWithTimer(ShouldRunCache, ref CacheWaitTimer, ref CacheTriggered, CacheWaitTimerValue))
                 return true;
 
-            // Start work orders
-            if (helperTriggerWithTimer(ShouldRunStartOrder, ref StartOrderWaitTimer, ref StartOrderTriggered,
-                StartOrderWaitTimerValue))
-                return true;
-
-            // Pick Up work orders
-            if (helperTriggerWithTimer(CanRunPickUpOrder, ref PickUpOrderWaitTimer, ref PickUpOrderTriggered,
-                PickUpOrderWaitTimerValue))
-                return true;
-
             // Mine
             if (helperTriggerWithTimer(ShouldRunMine, ref MineWaitTimer, ref MineTriggered, MineWaitTimerValue))
                 return true;
 
             // gardenla
             if (helperTriggerWithTimer(ShouldRunGarden, ref GardenWaitTimer, ref GardenTriggered, GardenWaitTimerValue))
+                return true;
+
+            // Start or pickup work orders
+            if (helperTriggerWithTimer(ShouldRunPickUpOrStartShipment, ref StartOrderWaitTimer, ref StartOrderTriggered,
+                StartOrderWaitTimerValue))
                 return true;
 
             // Missions
@@ -130,5 +128,127 @@ namespace GarrisonBuddy
 
             return toModify;
         }
+        // The trigger must be set off by someone else to avoid pauses in the behavior! 
+       
+    }
+
+    internal class ActionsSequence : Action
+    {
+        private List<Action> Actions;
+
+        public ActionsSequence(params Action[] actions)
+        {
+            Actions = actions.ToList();
+        }
+        public ActionsSequence(ActionsSequence actionsSequence)
+        {
+            Actions = actionsSequence.Actions;
+        }
+        public ActionsSequence()
+        {
+            Actions = new List<Action>();
+        }
+
+        public void AddAction(Action action)
+        {
+            Actions.Add(action);
+        }
+
+        public override async Task<bool> ExecuteAction()
+        {
+            GarrisonBuddy.Diagnostic("Starting main sequence.");
+            foreach (var actionBasic in Actions)
+            {
+                GarrisonBuddy.Diagnostic("Starting main sequence: executing action");
+                if (await actionBasic.ExecuteAction())
+                    return true;
+            }
+            return false;
+        }
+    }
+    internal class ActionOnTimer<T> : Action
+    {
+        private readonly Func<T, Task<bool>> _action;
+        private readonly Func<Tuple<bool, T>> _condition;
+        private readonly T _tempStorage;
+        private Action[] _preActions;
+        private WaitTimer _waitTimer;
+        private bool _lastResult;
+
+        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 1000, bool instantStart = false, params Action[] preAction)
+        {
+            _action = action;
+            _condition = condition;
+            _tempStorage = default(T);
+            _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
+            _lastResult = instantStart;
+            _preActions = preAction;
+        }
+
+        public override async Task<bool> ExecuteAction()
+        {
+            GarrisonBuddy.Diagnostic("Execute ActionOnTimer.");
+            if (!_lastResult && !_waitTimer.IsFinished)
+            {
+                GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
+                return false;
+            }
+            GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
+
+            
+                var result = _condition();
+                if (result.Item1)
+                {
+                    foreach (var preAction in _preActions)
+                    {
+                        if(await preAction.ExecuteAction())
+                            await Buddy.Coroutines.Coroutine.Yield();
+                    }
+                    _lastResult = await _action(result.Item2);
+                }
+                else
+                    _lastResult = result.Item1;
+            
+            _waitTimer.Reset();
+            return _lastResult;
+        }
+    }
+
+    internal class ActionBasic : Action
+    {
+        private readonly Func<Task<bool>> _action;
+        private readonly Func<bool> _condition;
+        protected WaitTimer _waitTimer;
+        protected bool _lastResult;
+
+        public ActionBasic(Func<Task<bool>> action, int waitTimeMs = 1000, bool instantStart = false)
+        {
+            _action = action;
+            _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
+            _lastResult = instantStart;
+        }
+        public ActionBasic()
+        { }
+        public override async Task<bool> ExecuteAction()
+        {
+            GarrisonBuddy.Diagnostic("Execute ExecuteAction.");
+            if (!_lastResult && !_waitTimer.IsFinished)
+            {
+                GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
+                return false;
+            }
+
+            GarrisonBuddy.Diagnostic("Execute ExecuteAction: Executing");
+            _lastResult = await _action();
+            GarrisonBuddy.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
+
+            _waitTimer.Reset();
+            return _lastResult;
+        }
+    }
+    internal abstract class Action
+    {
+        public abstract Task<bool> ExecuteAction();
+
     }
 }

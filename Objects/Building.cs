@@ -15,26 +15,26 @@ namespace GarrisonBuddy
 
         public delegate Task<bool> PrepOrderD();
 
-        private readonly String _buildTime;
-        private readonly String buildingLevel;
-        private readonly String canActivate;
-        private readonly String canUpgrade;
-        private readonly String creationTime;
-        private readonly String duration;
-        public readonly int id;
-        private readonly String isBuilding;
-        private readonly String isPrebuilt;
-        private readonly String itemID;
-        private readonly String itemName;
-        private readonly String itemQuality;
-        public readonly String name;
-        private readonly String nameShipment;
-        private readonly String plotId;
-        public readonly int rank;
-        public readonly int shipmentCapacity;
-        public readonly int shipmentsReady;
-        public readonly int shipmentsTotal;
-        private readonly String timeStart;
+        private  String _buildTime;
+        private  String buildingLevel;
+        private  String canActivate;
+        private  String canUpgrade;
+        public String creationTime;
+        private  String duration;
+        public  int id;
+        private  String isBuilding;
+        private  String isPrebuilt;
+        private  String itemID;
+        private  String itemName;
+        private  String itemQuality;
+        public  String name;
+        private  String nameShipment;
+        private  String plotId;
+        public  int rank;
+        public  int shipmentCapacity;
+        public  int shipmentsReady;
+        public  int shipmentsTotal;
+        private  String timeStart;
         private List<uint> MillableFrom = new List<uint>();
         public int NumberReagent;
         public WoWPoint Pnj;
@@ -45,7 +45,9 @@ namespace GarrisonBuddy
         public CanCompleteOrderD canCompleteOrder = () => false;
         private int currencyId;
         public int millItemPnj;
-        public bool CollectShipment = false;
+        public bool UserSettingStartShipment = false;
+        private static List<uint> ListDisplayIds;
+        public List<uint> Displayids; 
 
         public Building(bool MeIsAlliance, int id, string plotId, string buildingLevel, string name, int rank,
             string isBuilding,
@@ -77,6 +79,8 @@ namespace GarrisonBuddy
             GarrisonBuddy.Diagnostic(ToString());
         }
 
+        public bool UserSettingPickUpShipment { get; set; }
+
         public override string ToString()
         {
             return
@@ -86,6 +90,37 @@ namespace GarrisonBuddy
                     isPrebuilt, nameShipment, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration,
                     itemName, itemQuality, itemID);
         }
+
+        public int NumberShipmentLeftToStart()
+        {
+            return shipmentCapacity;
+            // return BuildingsLua.GetNumberShipmentLeftToStart(id);
+        }
+
+        public void Refresh()
+        {
+            var b = BuildingsLua.GetBuildingById(id.ToString());
+            id = b.id;
+            plotId = b.plotId;
+            buildingLevel = b.buildingLevel;
+            name = b.name;
+            rank = b.rank;
+            isBuilding = b.isBuilding;
+            timeStart = b.timeStart;
+            _buildTime = b._buildTime;
+            canActivate = b.canActivate;
+            canUpgrade = b.canUpgrade;
+            isPrebuilt = b.isPrebuilt;
+            nameShipment = b.nameShipment;
+            shipmentCapacity = b.shipmentCapacity;
+            shipmentsReady = b.shipmentsReady;
+            shipmentsTotal = b.shipmentsTotal;
+            creationTime = b.creationTime;
+            duration = b.duration;
+            itemName = b.itemName;
+            itemQuality = b.itemQuality;
+        }
+
 
         private bool canCompleteOrderItem()
         {
@@ -198,7 +233,7 @@ namespace GarrisonBuddy
         //    {
         //        if (!StyxWoW.Me.BagItems.Any(i => i.Entry == 114942))
         //        {
-        //            var pnj = ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(u => u.Entry == millItemPnj);
+        //            var pnj = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == millItemPnj);
         //            if (pnj == null) return false;
         //            if(await Coroutine.MoveTo(Coroutine.Dijkstra.ClosestToNodes(pnj.Location)))
         //                return false;
@@ -221,6 +256,7 @@ namespace GarrisonBuddy
             NumberReagent = 0;
             currencyId = 0;
             Pnj = new WoWPoint();
+            Displayids = new List<uint>();
             switch (id)
             {
                 //<Vendor Name="Keyana Tone" Entry="79814" Type="Repair" X="5662.159" Y="4551.546" Z="119.9567" />
@@ -235,7 +271,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.AlchemyLab;
+                    UserSettingStartShipment = GaBSettings.Mono.AlchemyLab;
+                    Displayids = new List<uint>()
+                    {
+                        15377, // Garrison Building Alchemy Level 1
+                        15378, // Garrison Building Alchemy Level 2
+                        15149, // Garrison Building Alchemy Level 3
+                        22950, // Garrison Building Horde Alchemy V1
+                        22951, // Garrison Building Horde Alchemy V2
+                        22952, // Garrison Building Horde Alchemy V3
+                    };
                     break;
                 // horde   <Vendor Name="Farmer Lok'lub" Entry="85048" Type="Repair" X="5541.159" Y="4516.299" Z="131.7173" />
                 case (int) buildings.BarnLvl1:
@@ -248,12 +293,30 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItems;
-                    CollectShipment = GaBSettings.Mono.Barn;
+                    UserSettingStartShipment = GaBSettings.Mono.Barn;
+                    Displayids = new List<uint>()
+                    {
+                        14609, // Garrison Building Barn V1
+                        14523, // Garrison Building  Level 2
+                        18234, // Garrison Building  Level 3
+                        18556, // Garrison Building Horde Barn V1
+                        18557, // Garrison Building Horde Barn V2
+                        18573, // Garrison Building Horde Barn V3
+                    };
                     break;
 
                 case (int) buildings.BarracksLvl1:
                 case (int) buildings.BarracksLvl2:
-                case (int) buildings.BarracksLvl3:
+                case (int)buildings.BarracksLvl3:
+                    Displayids = new List<uint>()
+                    {
+                        14398, // Garrison Building Barracks V1
+                        14399, // Garrison Building Barracks V2
+                        14400, // Garrison Building Barracks V3
+                        18558, // Garrison Building Horde Barracks V1
+                        18559, // Garrison Building Horde Barracks V2
+                        18560, // Garrison Building Horde Barracks V3
+                    };
                     break;
 
 
@@ -269,7 +332,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1924.622, 225.1501, 76.96214)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderCurrency;
-                    CollectShipment = GaBSettings.Mono.BunkerWarMill;
+                    UserSettingStartShipment = GaBSettings.Mono.BunkerWarMill;
+                    Displayids = new List<uint>()
+                    {
+                        14474, // Garrison Building Armory V1
+                        14516, // Garrison Building Armory V2
+                        14517, // Garrison Building Armory V3
+                        18553, // Garrison Building Horde Armory V1
+                        18554, // Garrison Building Horde Armory V2
+                        18555, // Garrison Building Horde Armory V3
+                    };
                     break;
 
 
@@ -285,7 +357,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5645.052, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.EnchanterStudy;
+                    UserSettingStartShipment = GaBSettings.Mono.EnchanterStudy;
+                    Displayids = new List<uint>()
+                    {
+                        15384, // Garrison Building Enchanting Level 1
+                        15385, // Garrison Building Enchanting Level 2
+                        15143, // Garrison Building Enchanting Level 3
+                        22966, // Garrison Building Horde Enchanting V1
+                        22967, // Garrison Building Horde Enchanting V2
+                        22968, // Garrison Building Horde Enchanting V3
+                    };
                     break;
 
 
@@ -301,7 +382,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.EngineeringWorks;
+                    UserSettingStartShipment = GaBSettings.Mono.EngineeringWorks;
+                    Displayids = new List<uint>()
+                    {
+                        15142, // Garrison Building Engineering Level 3
+                        15382, // Garrison Building Engineering Level 2
+                        15381, // Garrison Building Engineering Level 1
+                        22969, // Garrison Building Horde Engineering V1
+                        22970, // Garrison Building Horde Engineering V2
+                        22971, // Garrison Building Horde Engineering V3
+                    };
                     break;
 
                 //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
@@ -314,7 +404,16 @@ namespace GarrisonBuddy
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.Garden;
+                    UserSettingStartShipment = GaBSettings.Mono.Garden;
+                    Displayids = new List<uint>()
+                    {
+                        20785, // Garrison Building Farm V3
+                        20784, // Garrison Building Farm V2
+                        20783, // Garrison Building Farm V1
+                        21880, // Garrison Building Farm V3 H
+                        21879, // Garrison Building Farm V2H
+                        21878, // Garrison Building Farm V1H
+                    };
                     break;
                  
                 //<Name="Kaya Solasen" Entry="77775" X="1825.785" Y="196.1163" Z="72.75745" /-->
@@ -327,7 +426,16 @@ namespace GarrisonBuddy
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.GemBoutique;
+                    UserSettingStartShipment = GaBSettings.Mono.GemBoutique;
+                    Displayids = new List<uint>()
+                    {
+                        15390, // Garrison Building  Jewelcrafting V1
+                        15391, // Garrison Building  Jewelcrafting V2
+                        15145, // Garrison Building  Jewelcrafting V3
+                        22975, // Garrison Building Horde Jewelcrafting V1
+                        22976, // Garrison Building Horde Jewelcrafting V2
+                        22977, // Garrison Building Horde Jewelcrafting V3
+                    };
                     break;
 
                 //ally 2 <WoWUnit Name="Altar of Bones" Entry="86639" X="1865.334" Y="313.169" Z="83.95637" />
@@ -339,12 +447,30 @@ namespace GarrisonBuddy
                     NumberReagent = 10;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.GladiatorSanctum;
+                    UserSettingStartShipment = GaBSettings.Mono.GladiatorSanctum;
+                    Displayids = new List<uint>()
+                    {
+                        14597, // Garrison Building Alliance Sparring Arena V1
+                        14623, // Garrison Building Alliance Sparring Arena V2
+                        19148, // Garrison Building Alliance Sparring Arena V3
+                        18577, // Garrison Building Horde Sparring Arena V1
+                        18578, // Garrison Building Horde Sparring Arena V2
+                        18579, // Garrison Building Horde Sparring Arena V3
+                    };
                     break;
 
                 case (int) buildings.GnomishGearworksLvl1:
                 case (int) buildings.GnomishGearworksLvl2:
-                case (int) buildings.GnomishGearworksLvl3:
+                case (int)buildings.GnomishGearworksLvl3:
+                    Displayids = new List<uint>()
+                    {
+                        19149, // Garrison Building Horde Workshop V1
+                        19150, // Garrison Building Horde Workshop V2
+                        18580, // Garrison Building Horde Workshop V3
+                        16044, // Garrison Building  Workshop V1
+                        16045, // Garrison Building  Workshop V2
+                        16046, // Garrison Building  Workshop V3
+                    };
                     break;
 
 
@@ -361,7 +487,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1872.647, 310.0204, 82.61102)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.LumberMill;
+                    UserSettingStartShipment = GaBSettings.Mono.LumberMill;
+                    Displayids = new List<uint>()
+                    {
+                        14620, // Garrison Building  Mill V1
+                        14621, // Garrison Building  Mill V2
+                        19145, // Garrison Building  Mill V3
+                        20111, // Garrison Building Horde Mill V1
+                        20112, // Garrison Building Horde Mill V2
+                        20113, // Garrison Building Horde Mill V3
+                    };
                     break;
 
                 case (int) buildings.MageTowerLvl1:
@@ -381,7 +516,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1899.896, 101.2778, 83.52704)
                         : new WoWPoint(5467.965, 4449.892, 144.6722);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.Mine;
+                    UserSettingStartShipment = GaBSettings.Mono.Mine;
+                    Displayids = new List<uint>()
+                    {
+                        14622, // Garrison Building  Mine V1
+                        14647, // Garrison Building  Mine V2
+                        14648, // Garrison Building  Mine V3
+                        18567, // Garrison Building Horde Mine V1
+                        18568, // Garrison Building Horde Mine V2
+                        18569, // Garrison Building Horde Mine V3
+                    };
                     break;
 
                     //ally <Vendor Name="Hennick Helmsley" Entry="77378" Type="Repair" X="1830.828" Y="199.172" Z="72.71624" />
@@ -392,6 +536,15 @@ namespace GarrisonBuddy
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    Displayids = new List<uint>()
+                    {
+                        22908, // Garrison Building Salvage Tent
+                        22902, // Garrison Building Alliance Salvage Tent V2
+                        15363, // Garrison Building Salvage Yard V3
+                        22981, // Garrison Building Horde Salvage Yard V1
+                        22982, // Garrison Building Horde Salvage Yard V2
+                        22983, // Garrison Building Horde Salvage Yard V3
+                    };
                     break;
 
                     // Ally lvl 2 <Vendor Name="Kurt Broadoak" Entry="77777" Type="Repair" X="1817.415" Y="232.1284" Z="72.94653" />
@@ -407,15 +560,33 @@ namespace GarrisonBuddy
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderMillable;
                     MillableFrom = Coroutine.GardenItems;
-                    CollectShipment = GaBSettings.Mono.ScribeQuarters;
+                    UserSettingStartShipment = GaBSettings.Mono.ScribeQuarters;
                     // PrepOrder = 
                     // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     millItemPnj = 77372;
+                    Displayids = new List<uint>()
+                    {
+                        15388, // Garrison Building  Inscription V1
+                        15389, // Garrison Building  Inscription V2
+                        15144, // Garrison Building  Inscription V3
+                        22972, // Garrison Building Horde Inscription V1
+                        22973, // Garrison Building Horde Inscription V2
+                        22974, // Garrison Building Horde Inscription V3
+                    };
                     break;
 
                 case (int) buildings.StablesLvl1:
                 case (int) buildings.StablesLvl2:
-                case (int) buildings.StablesLvl3:
+                case (int)buildings.StablesLvl3:
+                    Displayids = new List<uint>()
+                    {
+                        14625, // Garrison Building  Stable V1
+                        14652, // Garrison Building  Stable V2
+                        14653, // Garrison Building  Stable V3
+                        18570, // Garrison Building Horde Stable V1
+                        18571, // Garrison Building Horde Stable V2
+                        18572, // Garrison Building Horde Stable V3
+                    };
                     break;
 
                 case (int) buildings.StorehouseLvl1:
@@ -434,7 +605,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.TailoringEmporium;
+                    UserSettingStartShipment = GaBSettings.Mono.TailoringEmporium;
+                    Displayids = new List<uint>()
+                    {
+                        15386, // Garrison Building  Tailoring V1
+                        15387, // Garrison Building  Tailoring V2
+                        15195, // Garrison Building  Tailoring V3
+                        22987, // Garrison Building Horde Tailoring V1
+                        22988, // Garrison Building Horde Tailoring V2
+                        22989, // Garrison Building Horde Tailoring V3
+                    };
                     break;
                     // <Vendor Name="Kinja" Entry="79817" Type="Repair" X="5641.551" Y="4508.724" Z="119.9587" />
                 case (int) buildings.TheForgeLvl1:
@@ -447,7 +627,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.TheForge;
+                    UserSettingStartShipment = GaBSettings.Mono.TheForge;
+                    Displayids = new List<uint>()
+                    {
+                        15375, // Garrison Building Blacksmith Level 1
+                        15376, // Garrison Building Blacksmith Level 2
+                        15194, // Garrison Building Blacksmith Level 3
+                        22953, // Garrison Building Horde Blacksmith V1
+                        22954, // Garrison Building Horde Blacksmith V2
+                        22955, // Garrison Building Horde Blacksmith V3
+                    };
                     break;
 
                 case (int) buildings.TheTanneryLvl1:
@@ -460,7 +649,16 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    CollectShipment = GaBSettings.Mono.TheTannery;
+                    UserSettingStartShipment = GaBSettings.Mono.TheTannery;
+                    Displayids = new List<uint>()
+                    {
+                        15379, // Garrison Building  Leatherworking V1
+                        15380, // Garrison Building  Leatherworking V2
+                        15140, // Garrison Building  Leatherworking V3
+                        22978, // Garrison Building Horde Leatherworking V1
+                        22979, // Garrison Building Horde Leatherworking V2
+                        22980, // Garrison Building Horde Leatherworking V3
+                    };
                     break;
 
 
@@ -468,114 +666,140 @@ namespace GarrisonBuddy
                 case (int) buildings.TradingPostLvl1:
                 case (int) buildings.TradingPostLvl2:
                 case (int)buildings.TradingPostLvl3:
+                    Displayids = new List<uint>()
+                    {
+                        18574, // Garrison Building  Trading Post V1
+                        18575, // Garrison Building  Trading Post V2
+                        18576, // Garrison Building  Trading Post V3
+                        15403, // Garrison Building Horde Trading Post V1
+                        15404, // Garrison Building Horde Trading Post V2
+                        20150, // Garrison Building Horde Trading Post V3
+                    };
                     break; // This one changes everyday... 
             }
         }
         
-        private enum buildings
+        private static List<Tuple<int,WoWPoint>> plotIdToPosition = new List<Tuple<int, WoWPoint>>()
         {
-            MineLvl1 = 61,
-            MineLvl2 = 62,
-            MineLvl3 = 63,
+            new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)), // mine
+            new Tuple<int, WoWPoint>(63,new WoWPoint(1854.596,146.9596,78.29183)), //garden lvl 3
+new Tuple<int, WoWPoint>(59,new WoWPoint(2010.991,167.3314,83.60134)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
+new Tuple<int, WoWPoint>(59,new WoWPoint(1906.121,92.27457,83.52486)),
 
-            GardenLvl1 = 29,
-            GardenLvl2 = 136,
-            GardenLvl3 = 137,
+        }; 
+       
+    }
+    public enum buildings
+    {
+        MineLvl1 = 61,
+        MineLvl2 = 62,
+        MineLvl3 = 63,
 
-
-            BarracksLvl1 = 26,
-            BarracksLvl2 = 27,
-            BarracksLvl3 = 28,
-
-
-            DwarvenBunkerLvl1 = 8,
-            DwarvenBunkerLvl2 = 9,
-            DwarvenBunkerLvl3 = 10,
-
-
-            GnomishGearworksLvl1 = 162,
-            GnomishGearworksLvl2 = 163,
-            GnomishGearworksLvl3 = 164,
-
-
-            MageTowerLvl1 = 37,
-            MageTowerLvl2 = 38,
-            MageTowerLvl3 = 39,
+        GardenLvl1 = 29,
+        GardenLvl2 = 136,
+        GardenLvl3 = 137,
 
 
-            StablesLvl1 = 65,
-            StablesLvl2 = 66,
-            StablesLvl3 = 67,
+        BarracksLvl1 = 26,
+        BarracksLvl2 = 27,
+        BarracksLvl3 = 28,
 
 
-            BarnLvl1 = 24,
-            BarnLvl2 = 25,
-            BarnLvl3 = 133,
+        DwarvenBunkerLvl1 = 8,
+        DwarvenBunkerLvl2 = 9,
+        DwarvenBunkerLvl3 = 10,
 
 
-            GladiatorSanctumLvl1 = 159,
-            GladiatorSanctumLvl2 = 160,
-            GladiatorSanctumLvl3 = 161,
+        GnomishGearworksLvl1 = 162,
+        GnomishGearworksLvl2 = 163,
+        GnomishGearworksLvl3 = 164,
 
 
-            LumberMillLvl1 = 40,
-            LumberMillLvl2 = 41,
-            LumberMillLvl3 = 138,
+        MageTowerLvl1 = 37,
+        MageTowerLvl2 = 38,
+        MageTowerLvl3 = 39,
 
 
-            TradingPostLvl1 = 111,
-            TradingPostLvl2 = 144,
-            TradingPostLvl3 = 145,
+        StablesLvl1 = 65,
+        StablesLvl2 = 66,
+        StablesLvl3 = 67,
 
 
-            AlchemyLabLvl1 = 76,
-            AlchemyLabLvl2 = 119,
-            AlchemyLabLvl3 = 120,
+        BarnLvl1 = 24,
+        BarnLvl2 = 25,
+        BarnLvl3 = 133,
 
 
-            EnchanterStudyLvl1 = 93,
-            EnchanterStudyLvl2 = 125,
-            EnchanterStudyLvl3 = 126,
+        GladiatorSanctumLvl1 = 159,
+        GladiatorSanctumLvl2 = 160,
+        GladiatorSanctumLvl3 = 161,
 
 
-            GemBoutiqueLvl1 = 96,
-            GemBoutiqueLvl2 = 131,
-            GemBoutiqueLvl3 = 132,
+        LumberMillLvl1 = 40,
+        LumberMillLvl2 = 41,
+        LumberMillLvl3 = 138,
 
 
-            SalvageYardLvl1 = 52,
-            SalvageYardLvl2 = 140,
-            SalvageYardLvl3 = 141,
+        TradingPostLvl1 = 111,
+        TradingPostLvl2 = 144,
+        TradingPostLvl3 = 145,
 
 
-            ScribeQuartersLvl1 = 95,
-            ScribeQuartersLvl2 = 129,
-            ScribeQuartersLvl3 = 130,
+        AlchemyLabLvl1 = 76,
+        AlchemyLabLvl2 = 119,
+        AlchemyLabLvl3 = 120,
 
 
-            StorehouseLvl1 = 51,
-            StorehouseLvl2 = 142,
-            StorehouseLvl3 = 143,
+        EnchanterStudyLvl1 = 93,
+        EnchanterStudyLvl2 = 125,
+        EnchanterStudyLvl3 = 126,
 
 
-            TailoringEmporiumLvl1 = 94,
-            TailoringEmporiumLvl2 = 127,
-            TailoringEmporiumLvl3 = 128,
+        GemBoutiqueLvl1 = 96,
+        GemBoutiqueLvl2 = 131,
+        GemBoutiqueLvl3 = 132,
 
 
-            TheForgeLvl1 = 60,
-            TheForgeLvl2 = 117,
-            TheForgeLvl3 = 118,
+        SalvageYardLvl1 = 52,
+        SalvageYardLvl2 = 140,
+        SalvageYardLvl3 = 141,
 
 
-            TheTanneryLvl1 = 90,
-            TheTanneryLvl2 = 121,
-            TheTanneryLvl3 = 122,
+        ScribeQuartersLvl1 = 95,
+        ScribeQuartersLvl2 = 129,
+        ScribeQuartersLvl3 = 130,
 
 
-            EngineeringWorksLvl1 = 91,
-            EngineeringWorksLvl2 = 123,
-            EngineeringWorksLvl3 = 124,
-        }
+        StorehouseLvl1 = 51,
+        StorehouseLvl2 = 142,
+        StorehouseLvl3 = 143,
+
+
+        TailoringEmporiumLvl1 = 94,
+        TailoringEmporiumLvl2 = 127,
+        TailoringEmporiumLvl3 = 128,
+
+
+        TheForgeLvl1 = 60,
+        TheForgeLvl2 = 117,
+        TheForgeLvl3 = 118,
+
+
+        TheTanneryLvl1 = 90,
+        TheTanneryLvl2 = 121,
+        TheTanneryLvl3 = 122,
+
+
+        EngineeringWorksLvl1 = 91,
+        EngineeringWorksLvl2 = 123,
+        EngineeringWorksLvl3 = 124,
     }
 }

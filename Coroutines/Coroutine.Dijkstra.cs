@@ -26,7 +26,7 @@ namespace GarrisonBuddy
                 _zonePoints = GetGarrisonPoints();
                 navigation = new NavigationGaB();
                 Navigator.NavigationProvider = navigation;
-                navigation.UpdateMaps();
+                //navigation.UpdateMaps();
             }
             // Generating graph from list of points
             _movementGraph = Dijkstra.GraphFromList(_zonePoints);

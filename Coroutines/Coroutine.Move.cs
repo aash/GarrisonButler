@@ -27,13 +27,19 @@ namespace GarrisonBuddy
 
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
-           lastMoveResult = Navigator.MoveTo(destination);
+            lastMoveResult = Navigator.MoveTo(destination);
             Navigator.GetRunStatusFromMoveResult(lastMoveResult);
             switch (lastMoveResult)
             {
                     case MoveResult.Failed:
-                    case MoveResult.ReachedDestination:
                     return false;
+                    GarrisonBuddy.Diagnostic("[Navigation] MoveResult: Failed.");
+                    break;
+
+                    case MoveResult.ReachedDestination:
+                    GarrisonBuddy.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
+                    return false;
+                    break;
             }
                 return true;
         }

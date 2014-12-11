@@ -93,7 +93,7 @@ namespace GarrisonBuddy.Config
         [Setting, Styx.Helpers.DefaultValue(60),
          Description("The time minimum in minutes between two run at the garrison. Activate hearthstone if using as mixed mode."), Category("General")]
         public int TimeMinBetweenRun { get; set; }
-
+        //UserSettingPickUpShipment // To add for all buildings...
         #endregion
 
         #region Work orders
