@@ -260,6 +260,7 @@ namespace GarrisonBuddy
             if(LogTime)
                 GarrisonBuddy.Diagnostic("[Time] TICK: " + testStopwatch.Elapsed);
 
+            RefreshBuildings();
             // Heavier coroutines on timer
             if (await mainSequence.ExecuteAction())
                 return true;

@@ -31,6 +31,10 @@ namespace GarrisonBuddy
             Navigator.GetRunStatusFromMoveResult(lastMoveResult);
             switch (lastMoveResult)
             {
+                    case MoveResult.UnstuckAttempt:
+                    await Buddy.Coroutines.Coroutine.Sleep(500);
+                    break;
+
                     case MoveResult.Failed:
                     return false;
                     GarrisonBuddy.Diagnostic("[Navigation] MoveResult: Failed.");

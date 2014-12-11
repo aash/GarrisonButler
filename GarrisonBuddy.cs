@@ -17,7 +17,7 @@ namespace GarrisonBuddy
 {
     public class GarrisonBuddy : BotBase
     {
-        internal static readonly Version Version = new Version(0, 6, 4);
+        internal static readonly Version Version = new Version(0, 7, 0);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
@@ -100,7 +100,7 @@ namespace GarrisonBuddy
             var messFormat = String.Format("[GarrisonBuddy] {0}: {1}", Version, message);
             if (LogBak == messFormat && !logTimer.IsFinished) return;
 
-            Logging.Write(Colors.DeepSkyBlue, messFormat, args);
+            Logging.Write(Colors.LightSeaGreen, messFormat, args);
             LogBak = messFormat;
             logTimer.Reset();
         }
@@ -112,7 +112,7 @@ namespace GarrisonBuddy
 
         internal static void Diagnostic(string message, params object[] args)
         {
-            Logging.WriteDiagnostic(Colors.DeepPink, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
+            Logging.WriteDiagnostic(Colors.Orange, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
         }
 
         #region overrides

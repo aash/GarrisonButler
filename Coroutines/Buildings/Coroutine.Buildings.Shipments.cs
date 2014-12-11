@@ -257,7 +257,7 @@ namespace GarrisonBuddy
             return true; // Done
         }
 
-        internal static Tuple<bool, Building> CanStartShipment([NotNull] Building building)
+        internal static Tuple<bool, Building> CanStartShipment(Building building)
         {
             if (building == null)
             {

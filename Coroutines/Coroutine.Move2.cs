@@ -49,8 +49,8 @@ namespace GarrisonBuddy
 
         public override void OnSetAsCurrent()
         {
-            base.OnSetAsCurrent();
             stuckHandlerGaB = this.StuckHandler;
+            base.OnSetAsCurrent();
             stuckHandlerGaB.Reset();
             GarrisonBuddy.Log("Custom navigation System activated!");
         }
@@ -88,21 +88,38 @@ namespace GarrisonBuddy
 
             if (stuckHandlerGaB.IsStuck())
             {
-                GarrisonBuddy.Diagnostic("Is stuck! ");
+                GarrisonBuddy.Diagnostic("Is stuck :O ! ");
                 stuckHandlerGaB.Unstick();
-                return MoveResult.UnstuckAttempt;
+                stuckHandlerGaB.Unstick();
+                stuckHandlerGaB.Unstick();
+                stuckHandlerGaB.Unstick();
+                var rand = new Random(DateTime.Today.Millisecond);
+                var rand1 = (rand.NextDouble() - 0.5) * 20;
+                var rand2 = (rand.NextDouble() - 0.5) * 20;
+                var rand3 = (rand.NextDouble() - 0.5) * 20;
+                PathFindResult path = FindPath(MoverLocation+new WoWPoint(rand1,rand2,rand3), location);
+                if (!path.Succeeded)
+                {
+                    GarrisonBuddy.Warning("reset STUCK");
+                    stuckHandlerGaB.Reset();
+                    return MoveResult.PathGenerationFailed;
+                } 
+                CurrentMovePath2 = new MeshMovePath(path);
+                GarrisonBuddy.Warning("reset STUCK");
+                stuckHandlerGaB.Reset();
+                return MoveResult.PathGenerated;
             }
-            if (MoverLocation.Distance2DSqr(location) < 1f)
+            if (MoverLocation.Distance(location) < 1.5f)
             {
                 Clear();
+                GarrisonBuddy.Warning("reset STUCK");
                 stuckHandlerGaB.Reset();
                 StuckWatch.Reset();
                 return MoveResult.ReachedDestination;
             }
-            if (MoverLocation.Distance2DSqr(Coroutine.Dijkstra.ClosestToNodes(location)) < 3f)
+            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 3f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
-                stuckHandlerGaB.Reset();
                 return MoveResult.Moved;
             }
             if (Mount.ShouldMount(location))
@@ -140,7 +157,7 @@ namespace GarrisonBuddy
             }
             if (!flag)
             {
-                stuckHandlerGaB.Reset();
+                GarrisonBuddy.Warning("reset STUCKNO");
                 return MovePath(CurrentMovePath2);
             }
             if (flag)
@@ -154,14 +171,16 @@ namespace GarrisonBuddy
                 PathFindResult path = FindPath(MoverLocation, location);
                 if (!path.Succeeded)
                 {
+                    GarrisonBuddy.Warning("reset STUCK");
                     stuckHandlerGaB.Reset();
                     return MoveResult.PathGenerationFailed;
                 }
                 CurrentMovePath2 = new MeshMovePath(path);
+                GarrisonBuddy.Warning("reset STUCK");
                 stuckHandlerGaB.Reset();
                 return MoveResult.PathGenerated;
             }
-            stuckHandlerGaB.Reset();
+            GarrisonBuddy.Warning("reset STUCK");
             return MovePath(CurrentMovePath2);
         }
 

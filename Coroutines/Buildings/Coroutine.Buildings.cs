@@ -43,6 +43,7 @@ namespace GarrisonBuddy
         private static List<ActionBasic> BuildingsActions; 
         public static ActionsSequence InitializeBuildingsCoroutines()
         {
+            
             // Initializing coroutines
             GarrisonBuddy.Diagnostic("Initialization Buildings coroutines...");
             var buildingsActionsSequence = new ActionsSequence();
@@ -55,10 +56,11 @@ namespace GarrisonBuddy
                  b =>
                      (b.id == (int)buildings.GardenLvl1) || (b.id == (int)buildings.GardenLvl2) ||
                      (b.id == (int)buildings.GardenLvl3));
-
-             // Harvest mine
-            buildingsActionsSequence.AddAction(
-                 new ActionOnTimer<WoWGameObject>(
+            if (mine != null)
+            {
+                // Harvest mine
+                buildingsActionsSequence.AddAction(
+                    new ActionOnTimer<WoWGameObject>(
                         HarvestWoWGameOject,
                         CanRunMine,
                         1000,
@@ -78,21 +80,23 @@ namespace GarrisonBuddy
                                 return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine(), canUse.Item2);
                             })));
 
-                        // Take care of mine shipments
-            buildingsActionsSequence.AddAction(
-                new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                    PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine)));
-                        
-                        // Harvest garden
-            buildingsActionsSequence.AddAction(
-                new ActionOnTimer<WoWGameObject>(HarvestWoWGameOject, CanRunGarden));
+                // Take care of mine shipments
+                buildingsActionsSequence.AddAction(
+                    new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
+                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine)));
+            }
+            if (garden != null)
+            {
+                // Harvest garden
+                buildingsActionsSequence.AddAction(
+                    new ActionOnTimer<WoWGameObject>(HarvestWoWGameOject, CanRunGarden));
 
-                        // Take care of garden shipments
-            buildingsActionsSequence.AddAction(
-                new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                    PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden)));
-
-                        // Take care of all shipments
+                // Take care of garden shipments
+                buildingsActionsSequence.AddAction(
+                    new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
+                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden)));
+            }
+            // Take care of all shipments
             buildingsActionsSequence.AddAction(
                 new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
                     PickUpOrStartAtLeastOneShipment, CanPickUpOrStartAtLeastOneShipmentFromAll));
