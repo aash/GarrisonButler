@@ -1,11 +1,14 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
 using GarrisonLua;
 using Styx;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonBuddy
 {
@@ -42,14 +45,14 @@ namespace GarrisonBuddy
         public PrepOrderD PrepOrder = () => new Task<bool>(() => false);
         public int ReagentId;
         public List<int> ReagentIds;
-        public bool UserSettingStartShipment = false;
 
+        private String timeStart;
+        private String nameShipment;
+        private String plotId;
         private String _buildTime;
         private String buildingLevel;
         private String canActivate;
-        public CanCompleteOrderD canCompleteOrder = () => false;
         private String canUpgrade;
-        public String creationTime;
         private int currencyId;
         private String duration;
         public int id;
@@ -59,13 +62,15 @@ namespace GarrisonBuddy
         private String itemQuality;
         public int millItemPnj;
         public String name;
-        private String nameShipment;
-        private String plotId;
         public int rank;
         public int shipmentCapacity;
         public int shipmentsReady;
+
         public int shipmentsTotal;
-        private String timeStart;
+        public String creationTime;
+        public CanCompleteOrderD canCompleteOrder = () => false;
+        // Settings
+
 
         public Building(bool MeIsAlliance, int id, string plotId, string buildingLevel, string name, int rank,
             string isBuilding,
@@ -96,8 +101,6 @@ namespace GarrisonBuddy
             GetOrderInfo(MeIsAlliance);
             GarrisonBuddy.Diagnostic(ToString());
         }
-
-        public bool UserSettingPickUpShipment { get; set; }
 
         public override string ToString()
         {
@@ -294,8 +297,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.AlchemyLabStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.AlchemyLabPickUp;
                     Displayids = new List<uint>
                     {
                         15377, // Garrison Building Alchemy Level 1
@@ -317,8 +318,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItems;
-                    UserSettingStartShipment = GaBSettings.Mono.BarnStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.BarracksPickUp;
                     Displayids = new List<uint>
                     {
                         14609, // Garrison Building Barn V1
@@ -357,8 +356,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1924.622, 225.1501, 76.96214)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderCurrency;
-                    UserSettingStartShipment = GaBSettings.Mono.BunkerWarMillStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.BunkerWarMillPickUp;
                     Displayids = new List<uint>
                     {
                         14474, // Garrison Building Armory V1
@@ -383,8 +380,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5645.052, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.EnchanterStudyStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.EnchanterStudyPickUp;
                     Displayids = new List<uint>
                     {
                         15384, // Garrison Building Enchanting Level 1
@@ -409,8 +404,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.EngineeringWorksStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.EnchanterStudyPickUp;
                     Displayids = new List<uint>
                     {
                         15142, // Garrison Building Engineering Level 3
@@ -432,8 +425,6 @@ namespace GarrisonBuddy
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.GardenStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.GardenPickUp;
                     Displayids = new List<uint>
                     {
                         20785, // Garrison Building Farm V3
@@ -455,8 +446,6 @@ namespace GarrisonBuddy
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.GemBoutiqueStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.GemBoutiquePickUp;
                     Displayids = new List<uint>
                     {
                         15390, // Garrison Building  Jewelcrafting V1
@@ -477,8 +466,6 @@ namespace GarrisonBuddy
                     NumberReagent = 10;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.GladiatorSanctumStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.GladiatorSanctumPickUp;
                     Displayids = new List<uint>
                     {
                         14597, // Garrison Building Alliance Sparring Arena V1
@@ -518,8 +505,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1872.647, 310.0204, 82.61102)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.LumberMillStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.LumberMillPickUp;
                     Displayids = new List<uint>
                     {
                         14620, // Garrison Building  Mill V1
@@ -548,8 +533,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1899.896, 101.2778, 83.52704)
                         : new WoWPoint(5467.965, 4449.892, 144.6722);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.MineStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.MinePickUp;
                     Displayids = new List<uint>
                     {
                         14622, // Garrison Building  Mine V1
@@ -593,8 +576,6 @@ namespace GarrisonBuddy
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = CanCompleteOrderMillable;
                     MillableFrom = Coroutine.GardenItems;
-                    UserSettingStartShipment = GaBSettings.Mono.ScribeQuartersStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.ScribeQuartersPickUp;
                     // PrepOrder = 
                     // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     millItemPnj = 77372;
@@ -639,8 +620,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.TailoringEmporiumStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.TailoringEmporiumPickUp;
                     Displayids = new List<uint>
                     {
                         15386, // Garrison Building  Tailoring V1
@@ -662,8 +641,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.TheForgeStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.TheForgePickUp;
                     Displayids = new List<uint>
                     {
                         15375, // Garrison Building Blacksmith Level 1
@@ -685,8 +662,6 @@ namespace GarrisonBuddy
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     canCompleteOrder = canCompleteOrderItem;
-                    UserSettingStartShipment = GaBSettings.Mono.TheTanneryStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.TheTanneryPickUp;
                     Displayids = new List<uint>
                     {
                         15379, // Garrison Building  Leatherworking V1
@@ -712,8 +687,6 @@ namespace GarrisonBuddy
                         15404, // Garrison Building Horde Trading Post V2
                         20150, // Garrison Building Horde Trading Post V3
                     };
-                    UserSettingStartShipment = GaBSettings.Mono.TradingPostStart;
-                    UserSettingPickUpShipment = GaBSettings.Mono.TradingPostPickUp;
                     break; // This one changes everyday... 
             }
         }

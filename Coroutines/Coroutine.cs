@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
 using GarrisonBuddy.Config;
+using GarrisonBuddy.Objects;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
@@ -173,7 +174,7 @@ namespace GarrisonBuddy
             mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
             mainSequence.AddAction(InitializeBuildingsCoroutines());
             mainSequence.AddAction(new ActionBasic(DoMissions));
-            mainSequence.AddAction(new ActionBasic(DoDailyCd));
+            mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd,CanRunDailies));
             mainSequence.AddAction(new ActionBasic(DoSalvages));
             mainSequence.AddAction(new ActionBasic(LastRound));
             mainSequence.AddAction(new ActionBasic(Waiting));
@@ -231,7 +232,7 @@ namespace GarrisonBuddy
         private static bool LogTime = true;
         public static async Task<bool> RootLogic()
         {
-            if (GaBSettings.Mono.ConfigVersion != GarrisonBuddy.Version.Minor)
+            if (GaBSettings.Get().ConfigVersion != GarrisonBuddy.Version.Minor)
             {
                 // Popup to explain this is a beta and they need to reconfigure their configs.
                 Bots.DungeonBuddy.Helpers.Alert.Show("GarrisonBuddy Public Beta",
@@ -287,7 +288,7 @@ namespace GarrisonBuddy
 
         internal static Tuple<bool, WoWItem> CanTPToGarrison()
         {
-            if (!GaBSettings.Mono.UseGarrisonHearthstone)
+            if (!GaBSettings.Get().UseGarrisonHearthstone)
             {
                 return new Tuple<bool, WoWItem>(false, null);
             }
@@ -310,7 +311,7 @@ namespace GarrisonBuddy
         private static async Task<bool> TransportToGarrison()
         {
 
-            if (GaBSettings.Mono.UseGarrisonHearthstone)
+            if (GaBSettings.Get().UseGarrisonHearthstone)
             {
                 WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
                 if (stone != null)

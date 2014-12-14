@@ -46,7 +46,7 @@ namespace GarrisonBuddy
 
         private static bool CanRunStartMission()
         {
-            return GaBSettings.Mono.StartMissions && DoCheckAvailableMissions() && ToStart.Count > 0;
+            return GaBSettings.Get().StartMissions && DoCheckAvailableMissions() && ToStart.Count > 0;
         }
 
         public static async Task<bool> StartMissions()
@@ -183,7 +183,7 @@ namespace GarrisonBuddy
 
         private static bool CanRunTurnInMissions()
         {
-            return GaBSettings.Mono.CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0;
+            return GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0;
         }
 
         public static async Task<bool> DoTurnInCompletedMissions()

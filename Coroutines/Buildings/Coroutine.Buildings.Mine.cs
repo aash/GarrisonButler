@@ -51,7 +51,7 @@ namespace GarrisonBuddy
         private static Tuple<bool, WoWGameObject> CanRunMine()
         {
             // Settings
-            if (!GaBSettings.Mono.HarvestMine)
+            if (!GaBSettings.Get().HarvestMine)
             {
                 GarrisonBuddy.Diagnostic("[Mine] Deactivated in user settings.");
                 return new Tuple<bool,WoWGameObject>(false,null);

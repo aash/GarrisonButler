@@ -46,6 +46,7 @@
     <Compile Include="Config\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Config\GaBSettings.Building.cs" />
     <Compile Include="Config\GaBSettings.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Shipments.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Cache.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Libraries\PriorityQueueNode.cs" />
     <Compile Include="Objects\Building.cs" />
     <Compile Include="Coroutines\Coroutine.cs" />
+    <Compile Include="Objects\DailyProfession.cs" />
     <Compile Include="Objects\Follower.cs" />
     <Compile Include="GarrisonBuddy.cs" />
     <Compile Include="Objects\Mission.cs" />
@@ -87,6 +89,7 @@
       <HintPath>..\..\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="RemoteASM">
       <HintPath>..\..\RemoteASM.dll</HintPath>
     </Reference>
@@ -100,6 +103,7 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="Tripper.RecastManaged">
       <HintPath>..\..\Tripper.RecastManaged.dll</HintPath>
@@ -107,6 +111,7 @@
     <Reference Include="Tripper.Tools">
       <HintPath>..\..\Tripper.Tools.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Config\ConfigForm.resx">

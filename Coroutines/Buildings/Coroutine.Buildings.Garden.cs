@@ -30,7 +30,7 @@ namespace GarrisonBuddy
 
         private static Tuple<bool,WoWGameObject> CanRunGarden()
         {
-            if (!GaBSettings.Mono.HarvestGarden)
+            if (!GaBSettings.Get().HarvestGarden)
             {
                 GarrisonBuddy.Diagnostic("[Garden] Deactivated in user settings.");
                 return new Tuple<bool, WoWGameObject>(false,null);

@@ -143,7 +143,7 @@ namespace GarrisonBuddy
 
         internal static Tuple<bool, WoWGameObject> CanActivateAtLeastOneBuilding()
         {
-            if (!GaBSettings.Mono.ActivateBuildings)
+            if (!GaBSettings.Get().ActivateBuildings)
                 return new Tuple<bool, WoWGameObject>(false,null);
 
             IOrderedEnumerable<WoWGameObject> allToActivate =

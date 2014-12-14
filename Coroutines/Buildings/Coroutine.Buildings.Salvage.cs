@@ -30,7 +30,7 @@ namespace GarrisonBuddy
             salvageCratesFound = null;
             building = null;
 
-            if (!GaBSettings.Mono.SalvageCrates)
+            if (!GaBSettings.Get().SalvageCrates)
             {
                 GarrisonBuddy.Diagnostic("[Salvage] Deactivated in user settings.");
                 return false;

@@ -267,7 +267,7 @@ namespace GarrisonBuddy
             building.Refresh();
             
             // Activated by user ?
-            if (!building.UserSettingStartShipment)
+            if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
             {
                 GarrisonBuddy.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name); 
                 return new Tuple<bool, Building>(false, null);
@@ -309,7 +309,7 @@ namespace GarrisonBuddy
             building.Refresh();
 
             // Activated by user ?
-            if (!building.UserSettingPickUpShipment)
+            if (GaBSettings.Get().GetBuildingSettings(building.id).CanCollectOrder)
             {
                 GarrisonBuddy.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.name);
                 return new Tuple<bool, WoWGameObject>(false, null);

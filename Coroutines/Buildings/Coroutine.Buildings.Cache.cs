@@ -29,7 +29,7 @@ namespace GarrisonBuddy
 
         private static Tuple<bool,WoWGameObject> CanRunCache()
         {
-            if (!GaBSettings.Mono.GarrisonCache)
+            if (!GaBSettings.Get().GarrisonCache)
                 return new Tuple<bool, WoWGameObject>(false,null);
             // Check
             var cache =
