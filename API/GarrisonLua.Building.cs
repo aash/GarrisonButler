@@ -29,10 +29,10 @@ namespace GarrisonLua
                     "Temp[2] = buildings[i].buildingLevel;" +
                     "Temp[3] = name;" +
                     "Temp[4] = rank;" +
-                    "Temp[5] = isBuilding;" +
+                    "if (not isBuilding) then Temp[5] =  0; else Temp[5] = isBuilding;end;" +
                     "Temp[6] = timeStart;" +
                     "Temp[7] = buildTime;" +
-                    "Temp[8] = canActivate;" +
+                    "if (not canActivate) then Temp[8] =  0; else Temp[8] = canActivate;end;" +
                     "Temp[9] = canUpgrade;" +
                     "Temp[11] = isPrebuilt;" +
                     // Info on shipments
@@ -55,10 +55,10 @@ namespace GarrisonLua
             String buildingLevel = building[2];
             String name = building[3];
             int rank = building[4].ToInt32();
-            String isBuilding = building[5];
+            bool isBuilding = building[5].ToBoolean();
             String timeStart = building[6];
             String buildTime = building[7];
-            String canActivate = building[8];
+            bool canActivate = building[8].ToBoolean();
             String canUpgrade = building[9];
             String isPrebuilt = building[11];
             String nameShipment = building[12];
@@ -132,6 +132,26 @@ namespace GarrisonLua
                     "local nameShipment, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, itemName, itemIcon, itemQuality, itemID = C_Garrison.GetLandingPageShipmentInfo(buildingID);" +
                     "if (not shipmentsTotal) then " +
                     "return tostring(shipmentCapacity); else return tostring(shipmentCapacity-shipmentsTotal);" +
+                    "end;" +
+                    "end;" +
+                    "end;" +
+                    "return tostring(0);", buildingId);
+            List<String> res = Lua.GetReturnValues(lua);
+            return res[0].ToInt32();
+        }
+
+        public static int GetShipmentTotal(int buildingId)
+        {
+            String lua =
+                "C_Garrison.RequestLandingPageShipmentInfo();" +
+                "local buildings = C_Garrison.GetBuildings();" +
+                String.Format(
+                    "for i = 1, #buildings do " +
+                    "local buildingID = buildings[i].buildingID;" +
+                    "if (buildingID == {0} ) then " +
+                    "local nameShipment, texture, shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, timeleftString, itemName, itemIcon, itemQuality, itemID = C_Garrison.GetLandingPageShipmentInfo(buildingID);" +
+                    "if (not shipmentsTotal) then " +
+                    "return tostring(0); else return tostring(shipmentsTotal);" +
                     "end;" +
                     "end;" +
                     "end;" +

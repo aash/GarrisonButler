@@ -51,12 +51,12 @@ namespace GarrisonBuddy
         private String plotId;
         private String _buildTime;
         private String buildingLevel;
-        private String canActivate;
+        internal bool canActivate;
         private String canUpgrade;
         private int currencyId;
         private String duration;
         public int id;
-        private String isBuilding;
+        internal bool isBuilding;
         private String isPrebuilt;
         private String itemName;
         private String itemQuality;
@@ -73,8 +73,8 @@ namespace GarrisonBuddy
 
 
         public Building(bool MeIsAlliance, int id, string plotId, string buildingLevel, string name, int rank,
-            string isBuilding,
-            string timeStart, string buildTime, string canActivate, string canUpgrade, string isPrebuilt,
+            bool isBuilding,
+            string timeStart, string buildTime, bool canActivate, string canUpgrade, string isPrebuilt,
             string nameShipment, int shipmentCapacity, int shipmentsReady, int shipmentsTotal,
             string creationTime, string duration, string itemName, string itemQuality, string itemId)
         {
@@ -114,7 +114,7 @@ namespace GarrisonBuddy
 
         public int NumberShipmentLeftToStart()
         {
-            return shipmentCapacity;
+            return shipmentCapacity - shipmentsTotal;
             // return BuildingsLua.GetNumberShipmentLeftToStart(id);
         }
 
@@ -792,6 +792,9 @@ namespace GarrisonBuddy
         TheTanneryLvl2 = 121,
         TheTanneryLvl3 = 122,
 
+        FishingShackLvl1 = 64,
+        FishingShackLvl2 = 134,
+        FishingShackLvl3 = 135,
 
         EngineeringWorksLvl1 = 91,
         EngineeringWorksLvl2 = 123,

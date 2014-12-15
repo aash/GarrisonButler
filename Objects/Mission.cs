@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonLua;
 
 namespace GarrisonBuddy
@@ -183,9 +184,9 @@ namespace GarrisonBuddy
             return true;
         }
 
-        public void AddFollowersToMission(List<Follower> followers)
+        public async Task AddFollowersToMission(List<Follower> followers)
         {
-            InterfaceLua.AddFollowersToMission(MissionId, followers.Select(f => f.FollowerId).ToList());
+            await InterfaceLua.AddFollowersToMission(MissionId, followers.Select(f => f.FollowerId).ToList());
         }
 
         public class CompletedMission

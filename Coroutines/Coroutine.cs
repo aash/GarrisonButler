@@ -15,6 +15,7 @@ using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
 using Styx.CommonBot.POI;
 using Styx.CommonBot.Routines;
+using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -149,11 +150,35 @@ namespace GarrisonBuddy
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
         }
 
+        private static ActionsSequence mainSequence;
         internal static void OnStart()
         {
             try
             {
+                InitializeShipments();
+                GarrisonBuddy.Warning("InitializeShipments");
+                InitializeMissions();
+                GarrisonBuddy.Warning("InitializeMissions");
+                InitializationMove();
+                GarrisonBuddy.Warning("InitializationMove");
+                InitializeDailies();
+                GarrisonBuddy.Warning("InitializeDailies");
+
+                mainSequence = new ActionsSequence();
+                mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
+                mainSequence.AddAction(InitializeBuildingsCoroutines());
+                mainSequence.AddAction(new ActionBasic(DoMissions));
+                mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies));
+                mainSequence.AddAction(new ActionBasic(DoSalvages));
+                mainSequence.AddAction(new ActionBasic(LastRound));
+                mainSequence.AddAction(new ActionBasic(Waiting));
+
+                InitializeDailies();
+                GarrisonBuddy.Warning("mainSequence");
+
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
+                InitializeDailies();
+                GarrisonBuddy.Warning("LootTargeting");
             }
             catch (Exception e)
             {
@@ -161,29 +186,13 @@ namespace GarrisonBuddy
             }
         }
 
-        private static ActionsSequence mainSequence;
-        internal static void InitializeCoroutines()
-        {
-            if (init) return;
-            InitializeShipments();
-            InitializeMissions();
-            InitializationMove();
-            InitializeDailies();
-
-            mainSequence = new ActionsSequence();
-            mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
-            mainSequence.AddAction(InitializeBuildingsCoroutines());
-            mainSequence.AddAction(new ActionBasic(DoMissions));
-            mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd,CanRunDailies));
-            mainSequence.AddAction(new ActionBasic(DoSalvages));
-            mainSequence.AddAction(new ActionBasic(LastRound));
-            mainSequence.AddAction(new ActionBasic(Waiting));
-            init = true;
-        }
 
         internal static void OnStop()
         {
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
+            mainSequence = null;
+            Navigator.NavigationProvider = oldNavigation;
+            navigation = null;
         }
 
         internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
@@ -277,7 +286,6 @@ namespace GarrisonBuddy
             if(LogTime)
                 GarrisonBuddy.Diagnostic("[Time] TICK: " + testStopwatch.Elapsed);
 
-            RefreshBuildings();
             // Heavier coroutines on timer
             if (await mainSequence.ExecuteAction())
                 return true;

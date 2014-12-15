@@ -165,33 +165,60 @@ namespace GarrisonBuddy
             get { return new ConfigForm(); }
         }
 
-        public override void Pulse()
-        {
-        }
 
         public override void Initialize()
         {
             // Loading configuration from file or default
             GaBSettings.Load();
+
+            GarrisonBuddy.Diagnostic("Attaching to GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+            Lua.Events.AttachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
+
+            GarrisonBuddy.Diagnostic("Attaching to GARRISON_MISSION_COMPLETE_RESPONSE");
+            Lua.Events.AttachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
+
+            GarrisonBuddy.Diagnostic("Attaching to GARRISON_MISSION_STARTED");
+            Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
+
+            GarrisonBuddy.Diagnostic("Attaching to LOOT_OPENED");
+            Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
+
+            GarrisonBuddy.Diagnostic("Attaching to LOOT_CLOSED");
+            Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
+        }
+
+        public override void OnDeselected()
+        {
+            GarrisonBuddy.Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+            Lua.Events.DetachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
+            GarrisonBuddy.Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
+            Lua.Events.DetachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
+            GarrisonBuddy.Diagnostic("Detaching from GARRISON_MISSION_STARTED");
+            Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
+            GarrisonBuddy.Diagnostic("Detaching from LOOT_OPENED");
+            Lua.Events.DetachEvent("LOOT_OPENED", LootOpened);
+            GarrisonBuddy.Diagnostic("Detaching from LOOT_CLOSED");
+            Lua.Events.DetachEvent("LOOT_CLOSED", LootClosed);
+            base.OnDeselected();
         }
 
         public override void Start()
         {
-            Lua.Events.AttachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
-            Lua.Events.AttachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
-            Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
-            Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
-            Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
-            Coroutine.InitializeCoroutines();
-            Coroutine.OnStart();
-        }
+            try
+            {
+                GarrisonBuddy.Diagnostic("Coroutine OnStart");
+                Coroutine.OnStart();
+            }
+            catch (Exception e)
+            {
 
+                GarrisonBuddy.Diagnostic(e.ToString());
+            }
+        }
 
         public override void Stop()
         {
             Coroutine.OnStop();
-            Lua.Events.DetachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
-            Lua.Events.DetachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
         }
 
         #endregion

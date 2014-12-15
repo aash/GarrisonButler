@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GarrisonBuddy.Config;
 using Styx;
 
 namespace GarrisonBuddy
@@ -25,7 +26,7 @@ namespace GarrisonBuddy
         private static bool CanRunLastRound()
         {
             TimeSpan elapsedTime = DateTime.Now - lastRoundCheckTime;
-            if (elapsedTime.TotalMinutes > 30)
+            if (elapsedTime.TotalMinutes > GaBSettings.Get().TimeMinBetweenRun)
                 return true;
             return false;
         }
@@ -44,7 +45,10 @@ namespace GarrisonBuddy
                 return false;
             }
             if (await MoveTo(myLastRoundPoints[_lastRoundTemp]))
+            {
                 return true;
+            }
+
             _lastRoundTemp++;
             return true;
         }

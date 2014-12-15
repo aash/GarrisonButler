@@ -18,16 +18,23 @@ namespace GarrisonBuddy
 
         private static NavigationGaB navigation;
 
+        internal static NavigationProvider oldNavigation;
+
         public static void InitializationMove()
         {
             // Generate Garrison points based on garrison level and buildings level
             if (_zonePoints == null)
             {
                 _zonePoints = GetGarrisonPoints();
-                navigation = new NavigationGaB();
-                Navigator.NavigationProvider = navigation;
                 //navigation.UpdateMaps();
             }
+            if (navigation == null)
+            {
+                navigation = new NavigationGaB();
+                oldNavigation = Navigator.NavigationProvider;
+                Navigator.NavigationProvider = navigation;
+            }
+
             // Generating graph from list of points
             _movementGraph = Dijkstra.GraphFromList(_zonePoints);
 

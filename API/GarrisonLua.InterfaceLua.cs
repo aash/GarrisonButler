@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonBuddy;
+using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
 
@@ -169,7 +171,7 @@ namespace GarrisonLua
             Lua.DoString(luaAdd);
         }
 
-        public static void AddFollowersToMission(string missionId, List<string> followersId)
+        public async static Task AddFollowersToMission(string missionId, List<string> followersId)
         {
             //GarrisonBuddy.Diagnostic("Cleaning mission Followers");
             //String luaClear = String.Format(
@@ -267,6 +269,7 @@ namespace GarrisonLua
                 //"GarrisonFollowerOptionDropDown.followerID = (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID" +
                 //"ToggleDropDownMenu(1, nil, GarrisonFollowerOptionDropDown, \"cursor\", 0, 0);"
             }
+            await CommonCoroutines.SleepForRandomReactionTime();
         }
 
         public static void ClickStartMission()

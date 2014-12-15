@@ -36,7 +36,7 @@ namespace GarrisonBuddy.Objects
 
         public void Initialize()
         {
-            if (Activated)
+            if (GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId).Activated && Spell == null)
                 Spell = HasRecipe();
         }
         public bool needAnvil()
@@ -135,23 +135,22 @@ namespace GarrisonBuddy.Objects
         public static readonly List<DailyProfession> AllDailies =
        new List<DailyProfession>()
             {
-                new DailyProfession("",108996, DailyProfession.tradeskillID.Alchemy),
-                new DailyProfession("",08996, DailyProfession.tradeskillID.Alchemy),
-                new DailyProfession("",18700, DailyProfession.tradeskillID.Alchemy),
-                new DailyProfession("",08257, DailyProfession.tradeskillID.Blacksmithing), 
-                new DailyProfession("",18720, DailyProfession.tradeskillID.Blacksmithing),
-                new DailyProfession("",15504, DailyProfession.tradeskillID.Enchanting),
-                new DailyProfession("",19293, DailyProfession.tradeskillID.Enchanting),
-                new DailyProfession("",19299, DailyProfession.tradeskillID.Engineering),
-                new DailyProfession("",11366, DailyProfession.tradeskillID.Engineering),
-                new DailyProfession("",12377, DailyProfession.tradeskillID.Inscription), // war paint
-                new DailyProfession("",19297, DailyProfession.tradeskillID.Inscription), // secrets
-                new DailyProfession("",15524, DailyProfession.tradeskillID.Jewelcrafting),
-                new DailyProfession("",18723, DailyProfession.tradeskillID.Jewelcrafting), // secret
-                new DailyProfession("",10611, DailyProfession.tradeskillID.Leatherworking),
-                new DailyProfession("",18721, DailyProfession.tradeskillID.Leatherworking),
-                new DailyProfession("",11556, DailyProfession.tradeskillID.Tailoring),
-                new DailyProfession("",18722, DailyProfession.tradeskillID.Tailoring),
+                new DailyProfession("Alchemical Catalyst",108996, DailyProfession.tradeskillID.Alchemy),
+                new DailyProfession("Secret of Draenor Alchemy",118700, DailyProfession.tradeskillID.Alchemy),
+                new DailyProfession("Truesteel Ingot",108257, DailyProfession.tradeskillID.Blacksmithing), 
+                new DailyProfession("Secret of Draenor Blacksmithing",118720, DailyProfession.tradeskillID.Blacksmithing),
+                new DailyProfession("Fractured Temporal Crystal",115504, DailyProfession.tradeskillID.Enchanting),
+                new DailyProfession("Secret of Draenor Enchanting",119293, DailyProfession.tradeskillID.Enchanting),
+                new DailyProfession("Gearspring Parts",111366, DailyProfession.tradeskillID.Engineering),
+                new DailyProfession("Secret of Draenor Engineering",119299, DailyProfession.tradeskillID.Engineering),
+                new DailyProfession("War Paints",112377, DailyProfession.tradeskillID.Inscription), // war paint
+                new DailyProfession("Secret of Draenor Inscription",119297, DailyProfession.tradeskillID.Inscription), // secrets
+                new DailyProfession("Taladite Crystal",115524, DailyProfession.tradeskillID.Jewelcrafting),
+                new DailyProfession("Secret of Draenor Jewelcrafting",118723, DailyProfession.tradeskillID.Jewelcrafting), // secret
+                new DailyProfession("Burnished Leather",110611, DailyProfession.tradeskillID.Leatherworking),
+                new DailyProfession("Secret of Draenor Leatherworking",118721, DailyProfession.tradeskillID.Leatherworking),
+                new DailyProfession("Hexweave Cloth",111556, DailyProfession.tradeskillID.Tailoring),
+                new DailyProfession("Secret of Draenor Tailoring",118722, DailyProfession.tradeskillID.Tailoring),
             };
 
         public enum tradeskillID

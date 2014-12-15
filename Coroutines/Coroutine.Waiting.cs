@@ -28,7 +28,7 @@ namespace GarrisonBuddy
 
             if (myFactionWaitingPoints[townHallLevel - 1] == new WoWPoint())
             {
-                throw new NotImplementedException();
+                throw new NotImplementedException("This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
 
 
@@ -54,7 +54,7 @@ namespace GarrisonBuddy
                 if (await MoveTo(myFactionWaitingPoints[townHallLevel - 1]))
                     return true;
             }
-            return true;
+            return false;
         }
 
         private static bool AnythingLeftToDoBeforeEnd()
@@ -156,10 +156,10 @@ namespace GarrisonBuddy
 
         public override async Task<bool> ExecuteAction()
         {
-            GarrisonBuddy.Diagnostic("Starting main sequence.");
+            //GarrisonBuddy.Diagnostic("Starting main sequence.");
             foreach (var actionBasic in Actions)
             {
-                GarrisonBuddy.Diagnostic("Starting main sequence: executing action");
+                //GarrisonBuddy.Diagnostic("Starting main sequence: executing action");
                 if (await actionBasic.ExecuteAction())
                     return true;
             }
@@ -187,13 +187,13 @@ namespace GarrisonBuddy
 
         public override async Task<bool> ExecuteAction()
         {
-            GarrisonBuddy.Diagnostic("Execute ActionOnTimer.");
+            //GarrisonBuddy.Diagnostic("Execute ActionOnTimer.");
             if (!_lastResult && !_waitTimer.IsFinished)
             {
-                GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
+                //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
                 return false;
             }
-            GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
+            //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
 
             
                 var result = _condition();
@@ -231,16 +231,16 @@ namespace GarrisonBuddy
         { }
         public override async Task<bool> ExecuteAction()
         {
-            GarrisonBuddy.Diagnostic("Execute ExecuteAction.");
+            //GarrisonBuddy.Diagnostic("Execute ExecuteAction.");
             if (!_lastResult && !_waitTimer.IsFinished)
             {
-                GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
+                //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
                 return false;
             }
 
-            GarrisonBuddy.Diagnostic("Execute ExecuteAction: Executing");
+            //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Executing");
             _lastResult = await _action();
-            GarrisonBuddy.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
+            //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
 
             _waitTimer.Reset();
             return _lastResult;

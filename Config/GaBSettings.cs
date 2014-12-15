@@ -24,7 +24,7 @@ namespace GarrisonBuddy.Config
         private static GaBSettings DefaultConfig()
         {
             GaBSettings ret = new GaBSettings();
-            
+            ret.TimeMinBetweenRun = 60;
             // Buildings generation, Ugly... but dynamic
             ret.BuildingsSettings = new List<BuildingSettings>();
             foreach (buildings building in (buildings[]) Enum.GetValues((typeof (buildings))))
@@ -55,16 +55,18 @@ namespace GarrisonBuddy.Config
         public List<DailyProfession> DailySettings { get; set; }
 
         public bool UseGarrisonHearthstone { get; set; }
-        public bool CollectingShipment { get; set; }
-        public bool StartOrder { get; set; }
+
+        
         public bool GarrisonCache { get; set; }
         public bool HarvestGarden { get; set; }
         public bool HarvestMine { get; set; }
         public bool ActivateBuildings { get; set; }
         public bool SalvageCrates { get; set; }
-        public int TimeMinBetweenRun { get; set; }
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
+
+
+        public int TimeMinBetweenRun { get; set; }
 
         public int ConfigVersion { get; set; }
 
@@ -80,7 +82,13 @@ namespace GarrisonBuddy.Config
 
         public BuildingSettings GetBuildingSettings(int id)
         {
-            return BuildingsSettings.First(b => b.BuildingIds.Contains(id));
+            var settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            if(settings  == default(BuildingSettings))
+            {
+              GarrisonBuddy.Warning("Building with id: {0} not found in config.",id);  
+                throw new Exception();
+            }
+            return settings;
         }
 
 
