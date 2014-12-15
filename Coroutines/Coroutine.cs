@@ -241,7 +241,11 @@ namespace GarrisonBuddy
         private static bool LogTime = true;
         public static async Task<bool> RootLogic()
         {
-            if (GaBSettings.Get().ConfigVersion != GarrisonBuddy.Version.Minor)
+            var configVersion = GaBSettings.Get().ConfigVersion;
+            if (configVersion.Build != GarrisonBuddy.Version.Build ||
+                configVersion.Major != GarrisonBuddy.Version.Major ||
+                configVersion.Minor != GarrisonBuddy.Version.Minor ||
+                configVersion.Revision != GarrisonBuddy.Version.Revision)
             {
                 // Popup to explain this is a beta and they need to reconfigure their configs.
                 Bots.DungeonBuddy.Helpers.Alert.Show("GarrisonBuddy Public Beta",

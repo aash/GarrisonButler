@@ -36,7 +36,7 @@ namespace GarrisonBuddy.Objects
 
         public void Initialize()
         {
-            if (GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId).Activated && Spell == null)
+            if (GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId).Activated)
                 Spell = HasRecipe();
         }
         public bool needAnvil()

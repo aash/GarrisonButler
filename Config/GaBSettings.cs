@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
+using GarrisonBuddy.Libraries;
 using GarrisonBuddy.Objects;
 using JetBrains.Annotations;
 using Styx.Helpers;
@@ -24,6 +25,7 @@ namespace GarrisonBuddy.Config
         private static GaBSettings DefaultConfig()
         {
             GaBSettings ret = new GaBSettings();
+            ret.ConfigVersion = new ModuleVersion();
             ret.TimeMinBetweenRun = 60;
             // Buildings generation, Ugly... but dynamic
             ret.BuildingsSettings = new List<BuildingSettings>();
@@ -60,6 +62,8 @@ namespace GarrisonBuddy.Config
         public bool GarrisonCache { get; set; }
         public bool HarvestGarden { get; set; }
         public bool HarvestMine { get; set; }
+        public bool UseCoffee { get; set; }
+        public bool UseMiningPick { get; set; }
         public bool ActivateBuildings { get; set; }
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }
@@ -68,7 +72,7 @@ namespace GarrisonBuddy.Config
 
         public int TimeMinBetweenRun { get; set; }
 
-        public int ConfigVersion { get; set; }
+        public ModuleVersion ConfigVersion { get; set; }
 
         public static GaBSettings Get()
         {
@@ -94,7 +98,7 @@ namespace GarrisonBuddy.Config
 
         public static void Save()
         {
-            Get().ConfigVersion = GarrisonBuddy.Version.Minor;
+            Get().ConfigVersion = GarrisonBuddy.Version;
 
             var writer =
                 new XmlSerializer(typeof (GaBSettings));

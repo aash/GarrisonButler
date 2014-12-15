@@ -443,7 +443,8 @@ namespace GarrisonBuddy
                 return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
             }))
             {
-                GarrisonBuddy.Warning("[ShipmentStart] Failed to open Work order frame.");
+                GarrisonBuddy.Warning("[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
+                WorkAroundBugFrame();
                 return true;
             }
             GarrisonBuddy.Log("[ShipmentStart] Work order frame opened.");
@@ -482,7 +483,10 @@ namespace GarrisonBuddy
             return false; // done here
         }
 
-
+        private static void WorkAroundBugFrame()
+        {
+            WoWMovement.Move(WoWMovement.MovementDirection.ForwardBackMovement,TimeSpan.FromSeconds(3));
+        }
         private static async Task<bool> IfGossip(WoWUnit pnj)
         {
             if (GossipFrame.Instance != null)

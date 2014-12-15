@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
 using GarrisonBuddy.Config;
+using GarrisonBuddy.Libraries;
 using GarrisonLua;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -17,7 +18,7 @@ namespace GarrisonBuddy
 {
     public class GarrisonBuddy : BotBase
     {
-        internal static readonly Version Version = new Version(0, 7, 1);
+        internal static readonly ModuleVersion Version = new ModuleVersion(0, 7, 0);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();

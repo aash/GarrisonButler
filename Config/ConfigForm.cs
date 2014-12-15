@@ -47,7 +47,7 @@ namespace GarrisonBuddy.Config
                 Height = 400;
                 MinHeight = 300;
                 MinHeight = 300;
-                this.Title = "GarrisonBuddy Beta v" + "0.7.0";
+                this.Title = "GarrisonBuddy Beta v" + GarrisonBuddy.Version;
 
                 TabControl tabControl = new TabControl();
                 tabControl.Height = double.NaN;
@@ -380,6 +380,12 @@ namespace GarrisonBuddy.Config
 
                 var HarvestMine = CreateCheckBoxWithBinding("Harvest ores in mine", "HarvestMine", GaBSettings.Get());
                 mainWrapPanel.Children.Add(HarvestMine);
+
+                var UseCoffee = CreateCheckBoxWithBinding("Use coffee in mine", "UseCoffee", GaBSettings.Get());
+                mainWrapPanel.Children.Add(UseCoffee);
+
+                var UseMiningPick = CreateCheckBoxWithBinding("Use mining pick in mine", "UseMiningPick", GaBSettings.Get());
+                mainWrapPanel.Children.Add(UseMiningPick);
 
 
                 var ActivateBuildings = CreateCheckBoxWithBinding("Activate finished buildings", "ActivateBuildings", GaBSettings.Get());

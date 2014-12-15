@@ -27,13 +27,15 @@ namespace GarrisonBuddy
 
         private static void InitializeDailies()
         {
+            if (_detectedDailyProfessions != null) return;
+
             GarrisonBuddy.Log("Loading Professions dailies, please wait.");
             _detectedDailyProfessions = new List<DailyProfession>();
 
             foreach (DailyProfession daily in DailyProfession.AllDailies)
             {
                 daily.Initialize();
-                if (daily.Spell != null && !_detectedDailyProfessions.Contains(daily))
+                if (daily.Spell != null)
                 {
                     GarrisonBuddy.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Spell.Name);
                     _detectedDailyProfessions.Add(daily);
@@ -65,15 +67,10 @@ namespace GarrisonBuddy
                 return new Tuple<bool, DailyProfession>(false, null);
             }
 
-            IEnumerable<DailyProfession> activatedDailies = _detectedDailyProfessions.Where(d => d.Activated);
-            if (!activatedDailies.Any())
-            {
-                GarrisonBuddy.Diagnostic("[Profession] No daily profession CD detected are activated.");
-            }
-
             IEnumerable<DailyProfession> possibleDailies =
-                activatedDailies.Where(d => Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
+                _detectedDailyProfessions.Where(d => Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
                     .Where(d => d.GetMaxRepeat() > 0).OrderBy(d=>d.TradeskillId);
+
             if (possibleDailies.Any())
             {
                 var daily = possibleDailies.First();

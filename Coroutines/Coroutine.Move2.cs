@@ -64,8 +64,8 @@ namespace GarrisonBuddy
 
             public override void Reset()
             {
-                stopwatch.Reset();
-                stopwatch.Start();
+                //stopwatch.Reset();
+                //stopwatch.Start();
                 cpt = 0;
                 cacheDestination = CurrentDestination;
             }

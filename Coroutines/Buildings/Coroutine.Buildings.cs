@@ -70,14 +70,14 @@ namespace GarrisonBuddy
                             () =>
                             {
                                 var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 2)();
-                                return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine(), canUse.Item2);
+                                return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
                             }),
                         new ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
                             {
                                 var canUse = CanUseItemInBags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1)();
-                                return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine(), canUse.Item2);
+                                return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
                             })));
 
                 // Take care of mine shipments
