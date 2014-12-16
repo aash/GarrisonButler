@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bots.Professionbuddy.Dynamic;
+using GarrisonBuddy.Config;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
@@ -31,8 +33,13 @@ namespace GarrisonBuddy
                 throw new NotImplementedException("This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
 
+            Bots.Professionbuddy.Dynamic.HBRelogApi hbRelogApi = new HBRelogApi();
 
-            if (BotManager.Current.Name == "Mixed Mode")
+            if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
+            {
+                hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);                
+            }
+            else if (BotManager.Current.Name == "Mixed Mode")
             {
                 var botBase = (MixedModeEx) BotManager.Current;
                 if (botBase.PrimaryBot.Name.ToLower().Contains("angler"))
@@ -46,13 +53,19 @@ namespace GarrisonBuddy
                             return true;
                     }
                 }
+                else
+                {
+                    // Go out of garrison! 
+                }
             }
             else
             {
                 GarrisonBuddy.Log("You Garrison has been taken care of! Waiting for orders...");
 
-                if (await MoveTo(myFactionWaitingPoints[townHallLevel - 1]))
+                /*
+                 * if (await MoveTo(myFactionWaitingPoints[townHallLevel - 1]))
                     return true;
+                */
             }
             return false;
         }

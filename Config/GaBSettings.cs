@@ -73,6 +73,7 @@ namespace GarrisonBuddy.Config
         public int TimeMinBetweenRun { get; set; }
 
         public ModuleVersion ConfigVersion { get; set; }
+        public bool HBRelogMode { get; set; }
 
         public static GaBSettings Get()
         {

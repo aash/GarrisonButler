@@ -67,6 +67,7 @@
     <Compile Include="Coroutines\Coroutine.Move.cs" />
     <Compile Include="Libraries\HeapPriorityQueue.cs" />
     <Compile Include="Libraries\IPriorityQueue.cs" />
+    <Compile Include="Libraries\ModuleVersion.cs" />
     <Compile Include="Libraries\PriorityQueueNode.cs" />
     <Compile Include="Objects\Building.cs" />
     <Compile Include="Coroutines\Coroutine.cs" />

@@ -368,6 +368,9 @@ namespace GarrisonBuddy.Config
 
                 var UseGarrisonHearthstone = CreateCheckBoxWithBinding("Use Garrison Hearthstone", "UseGarrisonHearthstone", GaBSettings.Get());
                 mainWrapPanel.Children.Add(UseGarrisonHearthstone);
+
+                var HBRelogMode = CreateCheckBoxWithBinding("Activate HBRelog Mode: auto skip to next task when done (Cautious, not tested!)", "HBRelogMode", GaBSettings.Get());
+                mainWrapPanel.Children.Add(HBRelogMode);
                 
 
                 var GarrisonCache = CreateCheckBoxWithBinding("Collect garrison cache", "GarrisonCache", GaBSettings.Get());
@@ -412,6 +415,7 @@ namespace GarrisonBuddy.Config
             {
                 CheckBox checkBox = new CheckBox();
                 checkBox.Content = Label;
+                checkBox.Height = 25;
                 // binding
                 var binding = new System.Windows.Data.Binding(AttributeName);
                 binding.Source = source;

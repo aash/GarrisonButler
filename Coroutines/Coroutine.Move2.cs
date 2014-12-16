@@ -150,7 +150,7 @@ namespace GarrisonBuddy
                 stuckHandlerGaB.Reset();
                 return MoveResult.ReachedDestination;
             }
-            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 7f)
+            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
                 stuckHandlerGaB.Reset();

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
+using GarrisonBuddy.Config;
 using GarrisonBuddy.Objects;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
@@ -27,12 +28,17 @@ namespace GarrisonBuddy
 
         private static void InitializeDailies()
         {
-            if (_detectedDailyProfessions != null) return;
+            //if (_detectedDailyProfessions != null) return;
 
-            GarrisonBuddy.Log("Loading Professions dailies, please wait.");
-            _detectedDailyProfessions = new List<DailyProfession>();
+            //GarrisonBuddy.Log("Loading Professions dailies, please wait.");
+            if (_detectedDailyProfessions == null)
+                _detectedDailyProfessions = new List<DailyProfession>();
+            var dailyNotAdded = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d) && d.Activated);
+            
+            if (!dailyNotAdded.Any())
+                return;
 
-            foreach (DailyProfession daily in DailyProfession.AllDailies)
+            foreach (DailyProfession daily in dailyNotAdded)
             {
                 daily.Initialize();
                 if (daily.Spell != null)
@@ -42,7 +48,7 @@ namespace GarrisonBuddy
                 }
             }
 
-            GarrisonBuddy.Log("Loading Professions dailies done.");
+            //GarrisonBuddy.Log("Loading Professions dailies done.");
         }
 
         private static bool ShouldRunDailies()
