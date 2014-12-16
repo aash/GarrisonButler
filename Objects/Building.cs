@@ -614,7 +614,7 @@ namespace GarrisonBuddy
                 case (int) buildings.TailoringEmporiumLvl2:
                 case (int) buildings.TailoringEmporiumLvl3:
                     PnjId = alliance ? 77778 : 79863;
-                    ReagentId = 111556; // True iron ore
+                    ReagentId = 111557; // Sumptuous fur
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
