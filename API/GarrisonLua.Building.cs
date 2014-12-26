@@ -160,7 +160,7 @@ namespace GarrisonLua
             return res[0].ToInt32();
         }
 
-        public static int GetGarrisonRessources(int buildingId)
+        public static int GetGarrisonRessources()
         {
             String lua =
                 "name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered = GetCurrencyInfo(824)" +

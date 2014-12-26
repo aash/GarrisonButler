@@ -197,7 +197,7 @@ namespace GarrisonBuddy
 
         private bool CanCompleteOrderCurrency()
         {
-            return BuildingsLua.GetGarrisonRessources(id) > NumberReagent;
+            return BuildingsLua.GetGarrisonRessources() > NumberReagent;
         }
 
         private bool CanCompleteOrderMillable()

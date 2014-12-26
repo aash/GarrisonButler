@@ -56,7 +56,6 @@ namespace GarrisonBuddy
         private static long cpt;
 
         public static DateTime NextCheck = DateTime.Now;
-        public static List<KeyValuePair<Mission, Follower[]>> ToStart = new List<KeyValuePair<Mission, Follower[]>>();
 
         internal static readonly List<uint> GarrisonsZonesId = new List<uint>
         {
@@ -166,9 +165,9 @@ namespace GarrisonBuddy
 
                 mainSequence = new ActionsSequence();
                 mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
-                mainSequence.AddAction(InitializeBuildingsCoroutines());
-                mainSequence.AddAction(new ActionBasic(DoMissions));
                 mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies));
+                mainSequence.AddAction(InitializeBuildingsCoroutines());
+                mainSequence.AddAction(InitializeMissionsCoroutines());
                 mainSequence.AddAction(new ActionBasic(DoSalvages));
                 mainSequence.AddAction(new ActionBasic(LastRound));
                 mainSequence.AddAction(new ActionBasic(Waiting));

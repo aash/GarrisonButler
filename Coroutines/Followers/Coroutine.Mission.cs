@@ -44,18 +44,63 @@ namespace GarrisonBuddy
             refreshFollowerTimer.Reset();
         }
 
-        private static bool CanRunStartMission()
+        private static Tuple<bool, Tuple<Mission, Follower[]>> CanRunStartMission()
         {
-            return GaBSettings.Get().StartMissions && DoCheckAvailableMissions() && ToStart.Count > 0;
+            if (!GaBSettings.Get().StartMissions)
+            {
+                GarrisonBuddy.Diagnostic("[Missions] Deactivated in user settings.");
+                return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
+            }
+
+            int numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
+
+            // Is there mission available to start
+            if (numberMissionAvailable == 0)
+            {
+                GarrisonBuddy.Diagnostic("[Missions] No missions available to start.");
+                return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
+            }
+
+            RefreshMissions(true);
+            RefreshFollowers(true);
+
+
+            int garrisonRessources = BuildingsLua.GetGarrisonRessources();
+            var Missions = _missions.Where(m => m.Cost < garrisonRessources);
+            if (!Missions.Any())
+            {
+                GarrisonBuddy.Diagnostic("[Missions] Not enough ressources to start a mission.");
+                return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
+            }
+
+            var ToStart = new List<Tuple<Mission, Follower[]>>();
+            foreach (Mission mission in Missions)
+            {
+                Follower[] match =
+                    mission.FindMatch(_followers.Where(f => f.IsCollected && f.Status == "nil").ToList());
+                if (match == null)
+                    continue;
+                else
+                {
+                    ToStart.Add(new Tuple<Mission, Follower[]>(mission, match));
+                    _followers.RemoveAll(match.Contains);
+                }                
+            }
+
+            var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
+                       "Can succesfully complete: " + ToStart.Count + " missions.";
+            GarrisonBuddy.Log(mess);
+
+            if (!ToStart.Any())
+            {
+                return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
+            }
+
+            return new Tuple<bool, Tuple<Mission, Follower[]>>(true, ToStart.First());
         }
 
-        public static async Task<bool> StartMissions()
-        {
-            if (!CanRunStartMission())
-                return false;
-
-            KeyValuePair<Mission, Follower[]> match = ToStart.First();
-
+        public static async Task<bool> StartMission(Tuple<Mission, Follower[]> missionToStart)
+        {            
             if (await MoveToTable())
                 return true;
 
@@ -71,70 +116,37 @@ namespace GarrisonBuddy
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
-                GarrisonBuddy.Diagnostic("Mission not visible, opening mission: " + match.Key.MissionId + " - " +
-                                         match.Key.Name);
-                InterfaceLua.OpenMission(match.Key);
+                GarrisonBuddy.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId + " - " +
+                                         missionToStart.Item1.Name);
+                InterfaceLua.OpenMission(missionToStart.Item1);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
                     GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame.");
                     return true;
                 }
             }
-            else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId))
+            else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
             {
                 GarrisonBuddy.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
-                                         match.Key.MissionId + " - " + match.Key.Name);
+                                         missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
                 InterfaceLua.ClickCloseMission();
-                InterfaceLua.OpenMission(match.Key);
+                InterfaceLua.OpenMission(missionToStart.Item1);
                 if (
                     !await
                         Buddy.Coroutines.Coroutine.Wait(2000,
-                            () => InterfaceLua.IsGarrisonMissionVisibleAndValid(match.Key.MissionId)))
+                            () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
                 {
                     GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
                     return true;
                 }
             }
-            await match.Key.AddFollowersToMission(match.Value.ToList());
-            InterfaceLua.StartMission(match.Key);
+            await missionToStart.Item1.AddFollowersToMission(missionToStart.Item2.ToList());
+            InterfaceLua.StartMission(missionToStart.Item1);
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             InterfaceLua.ClickCloseMission();
             return true;
         }
 
-        public static bool DoCheckAvailableMissions()
-        {
-            int numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
-            // Is there mission available to start
-            if (numberMissionAvailable == 0)
-                return false;
-
-            bool forced = _missions != null && numberMissionAvailable != _missions.Count;
-
-            RefreshMissions(forced);
-            RefreshFollowers(forced);
-            
-            var temp = new List<KeyValuePair<Mission, Follower[]>>();
-            foreach (Mission mission in _missions)
-            {
-                Follower[] match =
-                    mission.FindMatch(_followers.Where(f => f.IsCollected && f.Status == "nil").ToList());
-                if (match != null)
-                {
-                    temp.Add(new KeyValuePair<Mission, Follower[]>(mission, match));
-                    _followers.RemoveAll(match.Contains);
-                }
-            }
-            ToStart.AddRange(temp.Where(x => ToStart.All(y => y.Key.MissionId != x.Key.MissionId)));
-            var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
-                       "Can succesfully complete: " + ToStart.Count + " missions.";
-            if (ToStart.Any())
-              GarrisonBuddy.Log(mess);
-            
-        else
-                GarrisonBuddy.Diagnostic(mess);
-        return ToStart.Any();
-        }
 
         private static WoWPoint TablePosition = WoWPoint.Empty;
 
@@ -204,20 +216,27 @@ namespace GarrisonBuddy
         {
             GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED");
             string missionId = args.Args[0].ToString();
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
-            ToStart.RemoveAll(m => m.Key.MissionId == missionId);
+            //GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
         }
 
-        private async static Task<bool> DoMissions()
+        public static ActionsSequence InitializeMissionsCoroutines()
         {
-            // Missions
-            if (await DoTurnInCompletedMissions())
-                return true;
 
-            if (await StartMissions())
-                return true;
+            // Initializing coroutines
+            GarrisonBuddy.Diagnostic("Initialization Missions coroutines...");
+            var missionsActionsSequence = new ActionsSequence();
 
-            return false;
+            // DoTurnInCompletedMissions
+            missionsActionsSequence.AddAction(
+                new ActionBasic(DoTurnInCompletedMissions));
+
+            // StartMissions
+            missionsActionsSequence.AddAction(
+                new ActionOnTimer<Tuple<Mission, Follower[]>>(StartMission, CanRunStartMission));
+
+            GarrisonBuddy.Diagnostic("Initialization Missions coroutines done!");
+            return missionsActionsSequence;
         }
     }
 }
