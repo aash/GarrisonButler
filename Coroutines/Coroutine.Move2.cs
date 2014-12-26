@@ -284,7 +284,7 @@ namespace GarrisonBuddy
             {
                 //StyxWoW.Memory.ReleaseFrame();
                 //while it is not done with timeout 
-                while ((DateTime.Now - startedAt).TotalMilliseconds < 1000/TreeRoot.TicksPerSecond || task.IsCompleted)
+                while ((DateTime.Now - startedAt).TotalMilliseconds < 10000/TreeRoot.TicksPerSecond || !task.IsCompleted)
                 {
                     try
                     {
