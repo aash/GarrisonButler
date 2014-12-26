@@ -297,14 +297,15 @@ namespace GarrisonBuddy
         internal static async Task<bool> PickUpOrStartAtLeastOneShipment(
             Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>> input)
         {
-            Tuple<bool, Building> canStart = input.Item1;
             Tuple<bool, WoWGameObject> canPickUp = input.Item2;
-            if (canStart.Item1)
-                if (await StartShipment(canStart.Item2))
-                    return true;
+            Tuple<bool, Building> canStart = input.Item1;
 
             if (canPickUp.Item1)
                 if (await PickUpShipment(canPickUp.Item2))
+                    return true;
+
+            if (canStart.Item1)
+                if (await StartShipment(canStart.Item2))
                     return true;
 
             return true; // Done

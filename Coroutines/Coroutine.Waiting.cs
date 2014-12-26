@@ -102,12 +102,12 @@ namespace GarrisonBuddy
                 return true;
 
             // Missions
-            if (helperTriggerWithTimer(CanRunTurnInMissions, ref TurnInMissionWaitTimer, ref TurnInMissionsTriggered,
+            if (helperTriggerWithTimer(ShouldRunTurnInMissions, ref TurnInMissionWaitTimer, ref TurnInMissionsTriggered,
                 TurnInMissionWaitTimerValue))
                 return true;
 
             // Missions completed 
-            if (helperTriggerWithTimer(CanRunStartMission, ref StartMissionWaitTimer, ref StartMissionTriggered,
+            if (helperTriggerWithTimer(ShouldRunStartMission, ref StartMissionWaitTimer, ref StartMissionTriggered,
                 StartMissionWaitTimerValue))
                 return true;
 
@@ -188,7 +188,7 @@ namespace GarrisonBuddy
         private WaitTimer _waitTimer;
         private bool _lastResult;
 
-        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 1000, bool instantStart = false, params Action[] preAction)
+        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 3000, bool instantStart = false, params Action[] preAction)
         {
             _action = action;
             _condition = condition;
@@ -207,8 +207,7 @@ namespace GarrisonBuddy
                 return false;
             }
             //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
-
-            
+                        
                 var result = _condition();
                 if (result.Item1)
                 {
@@ -234,7 +233,7 @@ namespace GarrisonBuddy
         protected WaitTimer _waitTimer;
         protected bool _lastResult;
 
-        public ActionBasic(Func<Task<bool>> action, int waitTimeMs = 1000, bool instantStart = false)
+        public ActionBasic(Func<Task<bool>> action, int waitTimeMs = 3000, bool instantStart = false)
         {
             _action = action;
             _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));

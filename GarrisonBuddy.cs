@@ -18,7 +18,7 @@ namespace GarrisonBuddy
 {
     public class GarrisonBuddy : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(0, 7, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(0, 7, 2);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
@@ -219,7 +219,7 @@ namespace GarrisonBuddy
 
         public override void Stop()
         {
-            Coroutine.OnStop();
+           Coroutine.OnStop();
         }
 
         #endregion

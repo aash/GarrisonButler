@@ -42,7 +42,7 @@ namespace GarrisonBuddy
             }
             public override bool IsStuck()
             {
-                if (stopwatch.ElapsedMilliseconds > 5000)
+                if (stopwatch.ElapsedMilliseconds > 7000)
                 {
                     stopwatch.Reset();
                     stopwatch.Start();
@@ -64,8 +64,8 @@ namespace GarrisonBuddy
 
             public override void Reset()
             {
-                //stopwatch.Reset();
-                //stopwatch.Start();
+                stopwatch.Reset();
+                stopwatch.Start();
                 cpt = 0;
                 cacheDestination = CurrentDestination;
             }
@@ -292,12 +292,14 @@ namespace GarrisonBuddy
                         ObjectManager.Update();
                         WoWMovement.Pulse();
                         StyxWoW.ResetAfk();
+                        //StyxWoW.Memory.ReleaseFrame();
                     }
                     catch (Exception ex)
                     {
                         Logging.WriteException(ex);
                     }
                 }
+                //StyxWoW.Memory.AcquireFrame();
                 return task.Result;
             }
             catch (AggregateException ex)

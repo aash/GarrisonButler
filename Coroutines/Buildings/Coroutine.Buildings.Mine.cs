@@ -65,7 +65,7 @@ namespace GarrisonBuddy
             }
 
             // Is there something to mine? 
-            WoWGameObject node = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
+            WoWGameObject node = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.Distance).FirstOrDefault();
             if (node == default(WoWGameObject))
             {
                 GarrisonBuddy.Diagnostic("[Mine] No ore found to harvest.");

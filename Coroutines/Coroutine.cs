@@ -155,13 +155,13 @@ namespace GarrisonBuddy
             try
             {
                 InitializeShipments();
-                GarrisonBuddy.Warning("InitializeShipments");
+                GarrisonBuddy.Diagnostic("InitializeShipments");
                 InitializeMissions();
-                GarrisonBuddy.Warning("InitializeMissions");
+                GarrisonBuddy.Diagnostic("InitializeMissions");
                 InitializationMove();
-                GarrisonBuddy.Warning("InitializationMove");
+                GarrisonBuddy.Diagnostic("InitializationMove");
                 InitializeDailies();
-                GarrisonBuddy.Warning("InitializeDailies");
+                GarrisonBuddy.Diagnostic("InitializeDailies");
 
                 mainSequence = new ActionsSequence();
                 mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
@@ -172,12 +172,7 @@ namespace GarrisonBuddy
                 mainSequence.AddAction(new ActionBasic(LastRound));
                 mainSequence.AddAction(new ActionBasic(Waiting));
 
-                InitializeDailies();
-                GarrisonBuddy.Warning("mainSequence");
-
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
-                InitializeDailies();
-                GarrisonBuddy.Warning("LootTargeting");
             }
             catch (Exception e)
             {
@@ -237,7 +232,7 @@ namespace GarrisonBuddy
         }
         
         private static Stopwatch testStopwatch = new Stopwatch();
-        private static bool LogTime = true;
+
         public static async Task<bool> RootLogic()
         {
             var configVersion = GaBSettings.Get().ConfigVersion;
@@ -285,9 +280,6 @@ namespace GarrisonBuddy
 
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
-
-            if(LogTime)
-                GarrisonBuddy.Diagnostic("[Time] TICK: " + testStopwatch.Elapsed);
 
             // Heavier coroutines on timer
             if (await mainSequence.ExecuteAction())

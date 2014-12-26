@@ -44,6 +44,11 @@ namespace GarrisonBuddy
             refreshFollowerTimer.Reset();
         }
 
+        private static bool ShouldRunStartMission()
+        {
+            return CanRunStartMission().Item1;
+        }
+
         private static Tuple<bool, Tuple<Mission, Follower[]>> CanRunStartMission()
         {
             if (!GaBSettings.Get().StartMissions)
@@ -188,18 +193,19 @@ namespace GarrisonBuddy
             return true;
         }
 
-        private static bool CanRunTurnInMissions()
+        private static Tuple<bool, int> CanRunTurnInMissions()
         {
-            return GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0;
+            return new Tuple<bool, int>(GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0, 0);
         }
 
-        public static async Task<bool> DoTurnInCompletedMissions()
+        private static bool ShouldRunTurnInMissions()
         {
-            if (!CanRunTurnInMissions())
-                return false;
+            return CanRunTurnInMissions().Item1;
+        }
 
+        public static async Task<bool> DoTurnInCompletedMissions(int osef)
+        {
             GarrisonBuddy.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
-
             // are we at the action table?
             if (await MoveToTable())
                 return true;
@@ -222,16 +228,15 @@ namespace GarrisonBuddy
 
         public static ActionsSequence InitializeMissionsCoroutines()
         {
-
             // Initializing coroutines
             GarrisonBuddy.Diagnostic("Initialization Missions coroutines...");
             var missionsActionsSequence = new ActionsSequence();
 
             // DoTurnInCompletedMissions
             missionsActionsSequence.AddAction(
-                new ActionBasic(DoTurnInCompletedMissions));
+                new ActionOnTimer<int>(DoTurnInCompletedMissions, CanRunTurnInMissions));
 
-            // StartMissions
+            //// StartMissions
             missionsActionsSequence.AddAction(
                 new ActionOnTimer<Tuple<Mission, Follower[]>>(StartMission, CanRunStartMission));
 
