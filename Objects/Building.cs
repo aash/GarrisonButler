@@ -442,7 +442,7 @@ namespace GarrisonBuddy
                 case (int) buildings.GemBoutiqueLvl2:
                 case (int) buildings.GemBoutiqueLvl3:
                     PnjId = alliance ? 77775 : 79830;
-                    ReagentId = 115524;
+                    ReagentId = 109118;
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     canCompleteOrder = canCompleteOrderItem;
