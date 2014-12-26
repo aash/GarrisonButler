@@ -43,7 +43,7 @@ namespace GarrisonBuddy
             }
 
             // Is there something to gather? 
-            var herbToGather = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().FirstOrDefault(o => GardenItems.Contains(o.Entry));
+            var herbToGather = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
             if (herbToGather == null)
             {
                 GarrisonBuddy.Diagnostic("[Garden] No herb detected.");
