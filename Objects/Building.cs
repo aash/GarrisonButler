@@ -656,7 +656,7 @@ namespace GarrisonBuddy
                 case (int) buildings.TheTanneryLvl2:
                 case (int) buildings.TheTanneryLvl3:
                     PnjId = alliance ? 78207 : 79833;
-                    ReagentId = 110611;
+                    ReagentId = 110609;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
