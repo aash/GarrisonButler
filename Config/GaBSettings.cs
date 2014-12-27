@@ -99,21 +99,14 @@ namespace GarrisonBuddy.Config
 
         public static void Save()
         {
-            try
-            {
-                Get().ConfigVersion = GarrisonBuddy.Version;
+            Get().ConfigVersion = GarrisonBuddy.Version;
 
-                var writer =
-                    new XmlSerializer(typeof(GaBSettings));
-                var file =
-                    new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonBuddySettings.xml"), false);
-                writer.Serialize(file, currentSettings);
-                file.Close();
-            }
-            catch(Exception e)
-            {
-                GarrisonBuddy.Warning(e.Message);
-            }
+            var writer =
+                new XmlSerializer(typeof(GaBSettings));
+            var file =
+                new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonBuddySettings.xml"), false);
+            writer.Serialize(file, currentSettings);
+            file.Close();
         }
 
         public static void Load()

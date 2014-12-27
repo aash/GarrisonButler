@@ -445,7 +445,7 @@ namespace GarrisonBuddy
             }))
             {
                 GarrisonBuddy.Warning("[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
-                WorkAroundBugFrame();
+                await WorkAroundBugFrame();
                 return true;
             }
             GarrisonBuddy.Log("[ShipmentStart] Work order frame opened.");
@@ -484,9 +484,14 @@ namespace GarrisonBuddy
             return false; // done here
         }
 
-        private static void WorkAroundBugFrame()
+        private async static Task WorkAroundBugFrame()
         {
-            WoWMovement.Move(WoWMovement.MovementDirection.ForwardBackMovement,TimeSpan.FromSeconds(3));
+            Buddy.Coroutines.Coroutine.Wait(3000, () =>
+                {
+                    MoveToTable();
+                    return false;
+                });
+            return;
         }
         private static async Task<bool> IfGossip(WoWUnit pnj)
         {

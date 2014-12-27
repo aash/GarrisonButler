@@ -18,7 +18,7 @@ namespace GarrisonBuddy
         public static bool Check = true;
 
         private static readonly WoWPoint TableHorde = new WoWPoint(5559, 4599, 140);
-        private static readonly WoWPoint TableAlliance = new WoWPoint(1933, 346, 91);
+        private static readonly WoWPoint TableAlliance = new WoWPoint(1943, 330, 91);
         private static bool CheckedMissions;
         private static readonly WaitTimer refreshMissionsTimer = new WaitTimer(TimeSpan.FromMinutes(5));
         private static readonly WaitTimer refreshFollowerTimer = new WaitTimer(TimeSpan.FromMinutes(5));

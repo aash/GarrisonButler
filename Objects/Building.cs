@@ -444,7 +444,7 @@ namespace GarrisonBuddy
                     PnjId = alliance ? 77775 : 79830;
                     ReagentId = 109118;
                     NumberReagent = 5;
-                    Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
+                    Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5630.081,4526.252,119.2066);
                     canCompleteOrder = canCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -551,7 +551,7 @@ namespace GarrisonBuddy
                     PnjId = alliance ? 77378 : 79857;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
-                        : new WoWPoint(5574.952, 4508.236, 129.8942);
+                        : new WoWPoint(5630.081, 4526.252, 119.2066);
                     Displayids = new List<uint>
                     {
                         22908, // Garrison Building Salvage Tent

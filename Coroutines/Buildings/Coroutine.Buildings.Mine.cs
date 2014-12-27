@@ -138,8 +138,9 @@ namespace GarrisonBuddy
         public static async Task<bool> UseItemInbags(WoWItem item)
         {
             item.Use();
-            GarrisonBuddy.Log("[Item] Using: {0}", item.Name); 
+            GarrisonBuddy.Log("[Item] Using: {0}", item.Name);
             await CommonCoroutines.SleepForLagDuration();
+            await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);
             return true;
         }
     }
