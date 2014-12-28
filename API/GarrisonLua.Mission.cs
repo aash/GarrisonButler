@@ -252,7 +252,7 @@ namespace GarrisonLua
                               "b[11] = am[idx].isRare;" +
                               "b[12] = am[idx].typeAtlas;" +
                               "b[13] = am[idx].missionID;" +
-                              "b[14] = am[idx].numFollowers;" + //"print (#pairs(am[idx].followers));" +
+                              "b[14] = am[idx].numFollowers;" +
                               "b[15] = am[idx].numRewards;" +
                               "b[16] = xp;" +
                               "b[17] = am[idx].materialMultiplier;" +
@@ -295,35 +295,7 @@ namespace GarrisonLua
                 state, type, xp, material, successChance, xpBonus, success);
         }
 
-        //public static CompletedMission GetCompletedMissionById(String missionId)
-        //{
-        //    String lua =
-        //        "local cm = C_Garrison.GetCompleteMissions(); local RetInfo = {}; local b = {}; local _;" +
-        //        String.Format("for idx = 1, #cm do " +
-        //                      "if cm[idx].missionID == {0} then " +
-        //                      "_, cm[idx].xp = C_Garrison.GetMissionInfo(cm[idx].missionID);" +
-        //                      "_, _, _, cm[idx].successChance, _, _, cm[idx].xpBonus, " +
-        //                      "cm[idx].materialMultiplier = C_Garrison.GetPartyMissionInfo(cm[idx].missionID);" +
-        //                      "b[0] = cm[idx].missionID;" +
-        //                      "b[1] = cm[idx].name;" +
-        //                      "b[2] = cm[idx].xp;" +
-        //                      "b[3] = cm[idx].successChance;" +
-        //                      "b[4] = cm[idx].xpBonus;" +
-        //                      "b[5] = cm[idx].materialMultiplier;" +
-        //                      "end;" +
-        //                      "end;", missionId) +
-        //        "for j_=0,5 do table.insert(RetInfo,tostring(b[j_]));end; " +
-        //        "return unpack(RetInfo)";
-        //    List<string> completedMission = Lua.GetReturnValues(lua);
-        //    String id = completedMission[0];
-        //    String name = completedMission[1];
-
-        //    int Xp = completedMission[2].ToInt32();
-        //    int SuccessChance = completedMission[3].ToInt32();
-        //    int XpBonus = completedMission[4].ToInt32();
-        //    int MaterialMultiplier = completedMission[5].ToInt32();
-        //    return new CompletedMission(id, name, Xp, MaterialMultiplier, SuccessChance, XpBonus);
-        //}
+        
         public static void TurnInAllCompletedMissions()
         {
             foreach (Mission completedMission in GetAllCompletedMissions())
@@ -333,13 +305,9 @@ namespace GarrisonLua
                     "local cm = C_Garrison.GetCompleteMissions();" +
                     "for idx = 1, #cm do " +
                     " if cm[idx] and cm[idx].state and (cm[idx].state < 0) then " +
-                    //" print(" + '"' + "MissionComplete, mark as complete: " + '"' + ", " +
                     "C_Garrison.MarkMissionComplete(cm[idx].missionID)" +
-                    //") " +
                     " elseif cm[idx] and cm[idx].state then " +
-                    //" print(" + '"' + "MissionComplete, bonus roll: " + '"' + ", " +
                     "C_Garrison.MissionBonusRoll(cm[idx].missionID)" +
-                    //") " +
                     " end;" +
                     " end;");
             }
@@ -355,14 +323,9 @@ namespace GarrisonLua
                     String.Format(
                         "for idx = 1, #cm do if cm[idx].missionID == {0} then" +
                         " if cm[idx] and cm[idx].state and (cm[idx].state < 0) then " +
-                        //" print(" + '"' + "MissionComplete, mark as complete: " + '"' + ", " +
                         "C_Garrison.MarkMissionComplete(cm[idx].missionID)" +
-                        //") " + 
                         " elseif cm[idx] and cm[idx].state then " +
-                        //" print(" + '"' + "MissionComplete, bonus roll: " + '"' + ", " +
                         "C_Garrison.MissionBonusRoll(cm[idx].missionID)" +
-                        //") " +
-                        //" else print(" + '"' + "MissionComplete, Cancelling" + '"' + ") " +
                         " end;" +
                         " end;end;", completedMission.MissionId));
             }

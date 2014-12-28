@@ -71,7 +71,7 @@ namespace GarrisonLua
         public static Follower GetFollowerById(String followerId)
         {
             String lua =
-                "local RetInfo = {}; Temp = {}; local followers = C_Garrison.GetFollowers();" +
+                "local RetInfo = {}; local Temp = {}; local followers = C_Garrison.GetFollowers();" +
                 String.Format(
                     "for i,f in ipairs(followers) do " +
                     "local followerID = (f.garrFollowerID) and tonumber(f.garrFollowerID) or f.followerID;" +
@@ -125,7 +125,6 @@ namespace GarrisonLua
                 "for i,v in ipairs(followers) do " +
                 "table.insert(RetInfo,tostring( (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID));" +
                 "end;" +
-                //"for idx = 1, #followers do table.insert(RetInfo,tostring(followers[idx].followerID));end;" +
                 "return unpack(RetInfo)";
             List<string> followerId = Lua.GetReturnValues(lua);
             return followerId;

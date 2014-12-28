@@ -17,7 +17,7 @@ namespace GarrisonLua
         {
             String lua =
                 "C_Garrison.RequestLandingPageShipmentInfo();" +
-                "local RetInfo = {}; Temp = {}; local buildings = C_Garrison.GetBuildings();" +
+                "local RetInfo = {}; local Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +
                     "local buildingID = buildings[i].buildingID;" +
@@ -163,7 +163,7 @@ namespace GarrisonLua
         public static int GetGarrisonRessources()
         {
             String lua =
-                "name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered = GetCurrencyInfo(824)" +
+                "local name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered = GetCurrencyInfo(824)" +
                 "return tostring(amount);";
 
             List<String> res = Lua.GetReturnValues(lua);

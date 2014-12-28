@@ -18,7 +18,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(0, 7, 2);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 0, 0);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
@@ -98,7 +98,7 @@ namespace GarrisonButler
         private static WaitTimer logTimer=new WaitTimer(TimeSpan.FromSeconds(5));
         internal static void Log(string message, params object[] args)
         {
-            var messFormat = String.Format("[GarrisonButler] {0}: {1}", Version, message);
+            var messFormat = String.Format("[{0}] {1}: {2}", NameStatic, Version, message);
             if (LogBak == messFormat && !logTimer.IsFinished) return;
 
             Logging.Write(Colors.LightSeaGreen, messFormat, args);
@@ -108,12 +108,12 @@ namespace GarrisonButler
 
         internal static void Warning(string message, params object[] args)
         {
-            Logging.Write(Colors.Red, String.Format("[GarrisonButler] {0}: {1}", Version, message), args);
+            Logging.Write(Colors.Red, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
         internal static void Diagnostic(string message, params object[] args)
         {
-            Logging.WriteDiagnostic(Colors.Orange, String.Format("[GarrisonButler] {0}: {1}", Version, message), args);
+            Logging.WriteDiagnostic(Colors.Orange, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
         #region overrides
@@ -123,7 +123,12 @@ namespace GarrisonButler
 
         public override string Name
         {
-            get { return "GarrisonButler"; }
+            get { return NameStatic; }
+        }
+
+        public static string NameStatic
+        {
+            get { return "GarrisonButler Lite"; }
         }
 
         public override PulseFlags PulseFlags

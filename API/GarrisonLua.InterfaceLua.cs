@@ -91,8 +91,6 @@ namespace GarrisonLua
 
         public static void ClickCloseMission()
         {
-            //String lua = "GarrisonMissionFrame.MissionTab.MissionPage.CloseButton:Click();";
-
             String lua =
                 "GarrisonMissionFrame.MissionTab.MissionPage:Hide();" +
                 "GarrisonMissionFrame.MissionTab.MissionList:Show();" +
@@ -117,36 +115,12 @@ namespace GarrisonLua
             {
                 GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
             }
-            //    var
-            //        luaAdd =
-            //            "local fols = {};" +
-            //            String.Format("fols[1]=\"{0}\";fols[2]=\"{1}\";fols[3]=\"{2}\";",
-            //                followersId[0], followersId.ElementAtOrDefault(1),
-            //                followersId.ElementAtOrDefault(2)) +
-            //            "print(\"fols:\",fols[1],fols[2],fols[3]);" +
-            //            "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
-            //            "local am = {}; C_Garrison.GetAvailableMissions(am);" +
-            //            "local missionID;" +
-            //            "for idx = 1, #am do " +
-            //string.Format("if am[idx].missionID == {0} then print(1000000); missionID = am[idx].missionID;" +
-            //              "end;", missionId) +
-            //            "end;" +
-            //            "for idx = 1, #MissionPageFollowers do " +
-            //                "local follower = C_Garrison.GetFollowerInfo(fols[idx]);" +
-            //                "if follower then " +
-            //                    "print(\"followerID:\",follower.followerID);" +
-
-            //                    "print(\"missionID:\",missionID);" +
-            //                    "C_Garrison.AddFollowerToMission(missionID, follower.followerID);" +
-            //                "end;" +
-            //            "end;";
             string
                 luaAdd =
                     "local fols = {};" +
                     String.Format("fols[1]=\"{0}\";fols[2]=\"{1}\";fols[3]=\"{2}\";",
                         followersId[0], followersId.ElementAtOrDefault(1),
                         followersId.ElementAtOrDefault(2)) +
-                    "print(\"fols:\",fols[1],fols[2],fols[3]);" +
                     "local am = {}; C_Garrison.GetAvailableMissions(am);" +
                     "local missionID;" +
                     "for idx = 1, #am do " +
@@ -158,89 +132,18 @@ namespace GarrisonLua
                     "local follower = C_Garrison.GetFollowerInfo(fols[idx]);" +
                     "local followerFrame = MissionPageFollowers[idx];" +
                     "if follower then " +
-                    "print(\"followerID:\",follower.followerID);" +
-                    "print(\"missionID:\",missionID);" +
                     "GarrisonMissionPage_SetFollower(followerFrame, follower);" +
                     "end;" +
                     "end;";
-            //String
-            //    luaAdd = String.Format("C_Garrison.AddFollowerToMission(\"{0}\",\"{1}\");", missionId, followersId[i]);
-            //String
-            //      luaAdd = String.Format("GarrisonMissionPage_AddFollower(\"{1}\");", missionId, followersId[i]);
-
             Lua.DoString(luaAdd);
         }
 
         public async static Task AddFollowersToMission(string missionId, List<string> followersId)
         {
-            //GarrisonButler.Diagnostic("Cleaning mission Followers");
-            //String luaClear = String.Format(
-            //    "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
-            //    "for idx = 1, #MissionPageFollowers do " +
-            //        "GarrisonMissionPage_ClearFollower(MissionPageFollowers[idx]);" +
-            //    "end;");
-            //Lua.DoString(luaClear);
-
-            //GarrisonButler.Diagnostic("Adding mission Followers: " + followersId.Count);
-            //    foreach (var t in followersId)
-            //    {
-            //        GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
-            //    }
-            //    var
-            //        luaAdd =
-            //            "local fols = {};" +
-            //            String.Format("fols[1]=\"{0}\";fols[2]=\"{1}\";fols[3]=\"{2}\";",
-            //                followersId[0], followersId.ElementAtOrDefault(1),
-            //                followersId.ElementAtOrDefault(2)) +
-            //            "print(\"fols:\",fols[1],fols[2],fols[3]);" +
-            //            "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
-            //            "local am = {}; C_Garrison.GetAvailableMissions(am);" +
-            //            "local missionID;" +
-            //            "for idx = 1, #am do " +
-            //string.Format("if am[idx].missionID == {0} then print(1000000); missionID = am[idx].missionID;" +
-            //              "end;", missionId) +
-            //            "end;" +
-            //            "for idx = 1, #MissionPageFollowers do " +
-            //                "local follower = C_Garrison.GetFollowerInfo(fols[idx]);" +
-            //                "if follower then " +
-            //                    "print(\"followerID:\",follower.followerID);" +
-
-            //                    "print(\"missionID:\",missionID);" +
-            //                    "C_Garrison.AddFollowerToMission(missionID, follower.followerID);" +
-            //                "end;" +
-            //            "end;";
-            //    var
-            //        luaAdd =
-            //            "local fols = {};" +
-            //            String.Format("fols[1]=\"{0}\";fols[2]=\"{1}\";fols[3]=\"{2}\";",
-            //                followersId[0], followersId.ElementAtOrDefault(1),
-            //                followersId.ElementAtOrDefault(2)) +
-            //            "print(\"fols:\",fols[1],fols[2],fols[3]);" +
-            //            "local am = {}; C_Garrison.GetAvailableMissions(am);" +
-            //            "local missionID;" +
-            //            "for idx = 1, #am do " +
-            //string.Format("if am[idx].missionID == {0} then print(1000000); missionID = am[idx].missionID;" +
-            //              "end;", missionId) +
-            //            "end;" +
-            //            "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
-            //            "for idx = 1, #MissionPageFollowers do " +
-            //                "local follower = C_Garrison.GetFollowerInfo(fols[idx]);" +
-            //                "local followerFrame = MissionPageFollowers[idx];" +
-            //                "if follower then " +
-            //                    "print(\"followerID:\",follower.followerID);" +
-            //                    "print(\"missionID:\",missionID);" +
-            //                    "GarrisonMissionPage_SetFollower(followerFrame, follower);" +
-            //                "end;" +
-            //            "end;";
-            //String
-            //    luaAdd = String.Format("C_Garrison.AddFollowerToMission(\"{0}\",\"{1}\");", missionId, followersId[i]);
-            //String luaAdd = String.Format("print(tonumber({0}));" +
-            //                              "GarrisonMissionPage_AddFollower(tonumber({0}));", followersId.FirstOrDefault());
             foreach (string followerId in followersId)
             {
                 String luaAdd = String.Format(
-                    //Check if in current lsit
-                    ///run print(GarrisonMissionFrameFollowersListScrollFrame.buttons[1].info.followerID);
+                    //Check if in current list
                     "local button;" +
                     "local buttons = GarrisonMissionFrameFollowersListScrollFrame.buttons;" +
                     "local min, max = GarrisonMissionFrameFollowersListScrollFrame.scrollBar:GetMinMaxValues();" +
@@ -265,9 +168,6 @@ namespace GarrisonLua
                 Lua.DoString(luaAdd);
                 luaAdd = "DropDownList1Button1:Click();";
                 Lua.DoString(luaAdd);
-                //"local v = button.info;" +
-                //"GarrisonFollowerOptionDropDown.followerID = (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID" +
-                //"ToggleDropDownMenu(1, nil, GarrisonFollowerOptionDropDown, \"cursor\", 0, 0);"
             }
             await CommonCoroutines.SleepForRandomReactionTime();
         }
