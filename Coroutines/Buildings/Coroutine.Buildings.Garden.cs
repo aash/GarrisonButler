@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -32,13 +32,13 @@ namespace GarrisonBuddy
         {
             if (!GaBSettings.Get().HarvestGarden)
             {
-                GarrisonBuddy.Diagnostic("[Garden] Deactivated in user settings.");
+                GarrisonButler.Diagnostic("[Garden] Deactivated in user settings.");
                 return new Tuple<bool, WoWGameObject>(false,null);
             }
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
             {
-                GarrisonBuddy.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
+                GarrisonButler.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
@@ -46,11 +46,11 @@ namespace GarrisonBuddy
             var herbToGather = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
             if (herbToGather == null)
             {
-                GarrisonBuddy.Diagnostic("[Garden] No herb detected.");
+                GarrisonButler.Diagnostic("[Garden] No herb detected.");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
-            GarrisonBuddy.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
+            GarrisonButler.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
             return new Tuple<bool, WoWGameObject>(true,herbToGather);
         }
 
@@ -60,7 +60,7 @@ namespace GarrisonBuddy
         //    if (!CanRunGarden(out toGather))
         //        return false;
 
-        //    GarrisonBuddy.Log("[Garden] Moving to harvest herb at: " + toGather.Location);
+        //    GarrisonButler.Log("[Garden] Moving to harvest herb at: " + toGather.Location);
         //    return await HarvestWoWGameOject(toGather);
         //}
     }

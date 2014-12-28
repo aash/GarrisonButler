@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using GarrisonLua;
 using Styx;
 using Styx.Common;
@@ -15,7 +15,7 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -205,7 +205,7 @@ namespace GarrisonBuddy
 
         //    if (!GaBSettings.Mono.CollectingShipments)
         //    {
-        //        GarrisonBuddy.Diagnostic("[ShipmentCollect] Deactivated in user settings.");
+        //        GarrisonButler.Diagnostic("[ShipmentCollect] Deactivated in user settings.");
         //        return false;
         //    }
 
@@ -215,7 +215,7 @@ namespace GarrisonBuddy
         //    var BuildingToCollects = _buildings.Where(b => b.shipmentsReady > 0);
         //    if (!BuildingToCollects.Any())
         //    {
-        //        GarrisonBuddy.Diagnostic("[ShipmentCollect] Deactivated in user settings.");
+        //        GarrisonButler.Diagnostic("[ShipmentCollect] Deactivated in user settings.");
         //        return false;
         //    }
 
@@ -225,20 +225,20 @@ namespace GarrisonBuddy
         //        ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => BuildingsIds.Contains(o.DisplayId)).OrderBy(o=>o.DistanceSqr);
         //    if (!buildingsAsObjects.Any())
         //    {
-        //        GarrisonBuddy.Diagnostic("[ShipmentCollect] Found pickup but couldn't find buildings.");
+        //        GarrisonButler.Diagnostic("[ShipmentCollect] Found pickup but couldn't find buildings.");
         //        foreach (var toCollect in BuildingToCollects)
         //        {
-        //            GarrisonBuddy.Diagnostic("[ShipmentCollect]     Building {0}", toCollect.name);
+        //            GarrisonButler.Diagnostic("[ShipmentCollect]     Building {0}", toCollect.name);
         //            foreach (var id in toCollect.Displayids)
         //            {
-        //                GarrisonBuddy.Diagnostic("[ShipmentCollect]         ID {0}", id);                        
+        //                GarrisonButler.Diagnostic("[ShipmentCollect]         ID {0}", id);                        
         //            }
         //        }
         //        return false;
         //    }
 
         //    buildingAsObject = buildingsAsObjects.FirstOrDefault();
-        //    GarrisonBuddy.Diagnostic("[ShipmentCollect] Found shipment to collect for building {0} - {1}", buildingAsObject.SafeName, buildingAsObject.Location);
+        //    GarrisonButler.Diagnostic("[ShipmentCollect] Found shipment to collect for building {0} - {1}", buildingAsObject.SafeName, buildingAsObject.Location);
         //    return true;
         //}
 
@@ -315,7 +315,7 @@ namespace GarrisonBuddy
         {
             if (building == null)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] Building is null, either not built or not properly scanned.");
+                GarrisonButler.Diagnostic("[ShipmentStart] Building is null, either not built or not properly scanned.");
             }
 
             building.Refresh();
@@ -323,21 +323,21 @@ namespace GarrisonBuddy
             // No Shipment left to start
             if (building.NumberShipmentLeftToStart() <= 0)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] No shipment left to start: {0}", building.name);
+                GarrisonButler.Diagnostic("[ShipmentStart] No shipment left to start: {0}", building.name);
                 return new Tuple<bool, Building>(false, null);
             }
 
             // Activated by user ?
             if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
+                GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
                 return new Tuple<bool, Building>(false, null);
             }
 
             // Under construction
             if (building.isBuilding || building.canActivate)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] Building under construction, can't start work order: {0}",
+                GarrisonButler.Diagnostic("[ShipmentStart] Building under construction, can't start work order: {0}",
                     building.name);
                 return new Tuple<bool, Building>(false, null);
             }
@@ -346,7 +346,7 @@ namespace GarrisonBuddy
             if (GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder != 0
                 && GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder <= building.shipmentsTotal)
             {
-                GarrisonBuddy.Diagnostic(
+                GarrisonButler.Diagnostic(
                     "[ShipmentStart] Reached limit of work orders started: {0} - current# {1} max {2} ",
                     building.name,
                     building.shipmentsTotal - building.shipmentCapacity - building.shipmentsReady,
@@ -357,12 +357,12 @@ namespace GarrisonBuddy
             // Do I fulfill the conditions to complete the order? 
             if (!building.canCompleteOrder())
             {
-                GarrisonBuddy.Diagnostic(
+                GarrisonButler.Diagnostic(
                     "[ShipmentStart] Do not fulfill the requirements to start a new work order: {0}", building.name);
                 return new Tuple<bool, Building>(false, null);
             }
 
-            GarrisonBuddy.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
+            GarrisonButler.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
                 building.shipmentCapacity, building.name);
             return new Tuple<bool, Building>(true, building);
         }
@@ -372,7 +372,7 @@ namespace GarrisonBuddy
         {
             if (building == null)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentPickUp] Building is null, either not built or not properly scanned.");
+                GarrisonButler.Diagnostic("[ShipmentPickUp] Building is null, either not built or not properly scanned.");
             }
 
             building.Refresh();
@@ -380,14 +380,14 @@ namespace GarrisonBuddy
             // No Shipment ready
             if (building.shipmentsReady <= 0)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.name);
+                GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.name);
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             // Activated by user ?
             if (!GaBSettings.Get().GetBuildingSettings(building.id).CanCollectOrder)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.name);
+                GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.name);
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
@@ -399,27 +399,27 @@ namespace GarrisonBuddy
                     .FirstOrDefault();
             if (buildingAsObject == default(WoWGameObject))
             {
-                GarrisonBuddy.Diagnostic("[ShipmentPickUp] Building could not be found in the area: {0}", building.name);
+                GarrisonButler.Diagnostic("[ShipmentPickUp] Building could not be found in the area: {0}", building.name);
                 foreach (uint id in building.Displayids)
                 {
-                    GarrisonBuddy.Diagnostic("[ShipmentPickUp]     ID {0}", id);
+                    GarrisonButler.Diagnostic("[ShipmentPickUp]     ID {0}", id);
                 }
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
-            GarrisonBuddy.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}", building.shipmentsReady,
+            GarrisonButler.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}", building.shipmentsReady,
                 building.name);
             return new Tuple<bool, WoWGameObject>(true, buildingAsObject);
         }
 
         private static async Task<bool> StartShipment(Building building)
         {
-            GarrisonBuddy.Log("[ShipmentStart] Moving to start work order:" + building.name);
+            GarrisonButler.Log("[ShipmentStart] Moving to start work order:" + building.name);
 
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] Could not find unit (" + building.PnjId +
+                GarrisonButler.Diagnostic("[ShipmentStart] Could not find unit (" + building.PnjId +
                                          "), moving to default location.\n" +
                                          "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
 
@@ -431,7 +431,7 @@ namespace GarrisonBuddy
             if (await MoveTo(unit.Location))
                 return true;
 
-            GarrisonBuddy.Diagnostic("[ShipmentStart] Arrived at location.");
+            GarrisonButler.Diagnostic("[ShipmentStart] Arrived at location.");
             unit.Interact();
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             if (!await Buddy.Coroutines.Coroutine.Wait(500, () =>
@@ -444,11 +444,11 @@ namespace GarrisonBuddy
                 return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
             }))
             {
-                GarrisonBuddy.Warning("[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
+                GarrisonButler.Warning("[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
                 await WorkAroundBugFrame();
                 return true;
             }
-            GarrisonBuddy.Log("[ShipmentStart] Work order frame opened.");
+            GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  
@@ -473,11 +473,11 @@ namespace GarrisonBuddy
 
             if (await Buddy.Coroutines.Coroutine.Wait(5000, () => BuildingsLua.GetShipmentTotal(building.id) == building.shipmentsTotal + NumberToStart))
             {
-                GarrisonBuddy.Log("Successfully started {0} work orders.", NumberToStart);
+                GarrisonButler.Log("Successfully started {0} work orders.", NumberToStart);
             }
             else
             {
-                GarrisonBuddy.Diagnostic("Mismatch between number to start and actually started.");
+                GarrisonButler.Diagnostic("Mismatch between number to start and actually started.");
             }
 
             StartOrderTriggered = false;
@@ -546,16 +546,16 @@ namespace GarrisonBuddy
                 //{
 
                 //} 
-                GarrisonBuddy.Diagnostic(
+                GarrisonButler.Diagnostic(
                     "[ShipmentCollect] Could not Find shipment location in world for building {0} - {1}",
                     building.SafeName, building.Location);
-                GarrisonBuddy.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
+                GarrisonButler.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
                 if (await MoveTo(building.Location))
                     return true;
             }
             else
             {
-                GarrisonBuddy.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}",
+                GarrisonButler.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}",
                     shipmentToCollect.Name, shipmentToCollect.Location);
                 await HarvestWoWGameOject(shipmentToCollect);
                 return false; // Done here
@@ -609,14 +609,14 @@ namespace GarrisonBuddy
         //        //{
 
         //        //} 
-        //        GarrisonBuddy.Diagnostic("[ShipmentCollect] Could not Find shipment location in world for building {0} - {1}", buildingAsObject.SafeName, buildingAsObject.Location);
-        //        GarrisonBuddy.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
+        //        GarrisonButler.Diagnostic("[ShipmentCollect] Could not Find shipment location in world for building {0} - {1}", buildingAsObject.SafeName, buildingAsObject.Location);
+        //        GarrisonButler.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
         //        if (await MoveTo(buildingAsObject.Location))
         //            return true;
         //    }
         //    else
         //    {
-        //        GarrisonBuddy.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}", shipmentToCollect.Name, shipmentToCollect.Location);
+        //        GarrisonButler.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}", shipmentToCollect.Name, shipmentToCollect.Location);
         //        await HarvestWoWGameOject(shipmentToCollect);
         //        RefreshBuildings(true);
         //        return true;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonBuddy;
+using GarrisonButler;
 using Styx;
 using Styx.Common;
 using Styx.Helpers;
@@ -187,7 +187,7 @@ namespace GarrisonLua
                 "end;" +
                 "return tostring(amount);";
             float res = Lua.GetReturnValues(lua)[0].ToFloat();
-            GarrisonBuddy.GarrisonBuddy.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
+            GarrisonButler.GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
             return (int)res;
         }
     }

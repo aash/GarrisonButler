@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonBuddy;
+using GarrisonButler;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -42,13 +42,13 @@ namespace GarrisonLua
 
         public static List<string> GetListMissionsId()
         {
-            global::GarrisonBuddy.GarrisonBuddy.Diagnostic("GetListMissionsId LUA");
+            global::GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
             String lua =
                 "local available_missions = {}; local RetInfo = {}; C_Garrison.GetAvailableMissions(available_missions);" +
                 "for idx = 1, #available_missions do table.insert(RetInfo,tostring(available_missions[idx].missionID));end;" +
                 "return unpack(RetInfo)";
             List<string> missionsId = Lua.GetReturnValues(lua);
-            global::GarrisonBuddy.GarrisonBuddy.Diagnostic("GetListMissionsId LUA");
+            global::GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
             return missionsId;
         }
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -36,7 +36,7 @@ namespace GarrisonBuddy
             if (!CanRunLastRound())
                 return false;
 
-            GarrisonBuddy.Log("Doing a last round to check if something was not too far to see before.");
+            GarrisonButler.Log("Doing a last round to check if something was not too far to see before.");
             List<WoWPoint> myLastRoundPoints = Me.IsAlliance ? LastRoundWaypointsAlly : LastRoundWaypointsHorde;
             if (_lastRoundTemp > myLastRoundPoints.Count - 1)
             {

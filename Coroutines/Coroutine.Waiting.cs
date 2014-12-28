@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
@@ -12,7 +12,7 @@ using Styx.CommonBot;
 using Styx.CommonBot.Profiles.Quest.Order;
 using Tripper.RecastManaged.Recast;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -45,7 +45,7 @@ namespace GarrisonBuddy
                 if (botBase.PrimaryBot.Name.ToLower().Contains("angler"))
                 {
                     WoWPoint fishingSpot = Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde;
-                    GarrisonBuddy.Log(
+                    GarrisonButler.Log(
                         "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
                     if (Me.Location.Distance(fishingSpot) > 2)
                     {
@@ -60,7 +60,7 @@ namespace GarrisonBuddy
             }
             else
             {
-                GarrisonBuddy.Log("You Garrison has been taken care of! Waiting for orders...");
+                GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
 
                 /*
                  * if (await MoveTo(myFactionWaitingPoints[townHallLevel - 1]))
@@ -169,10 +169,10 @@ namespace GarrisonBuddy
 
         public override async Task<bool> ExecuteAction()
         {
-            //GarrisonBuddy.Diagnostic("Starting main sequence.");
+            //GarrisonButler.Diagnostic("Starting main sequence.");
             foreach (var actionBasic in Actions)
             {
-                //GarrisonBuddy.Diagnostic("Starting main sequence: executing action");
+                //GarrisonButler.Diagnostic("Starting main sequence: executing action");
                 if (await actionBasic.ExecuteAction())
                     return true;
             }
@@ -200,13 +200,13 @@ namespace GarrisonBuddy
 
         public override async Task<bool> ExecuteAction()
         {
-            //GarrisonBuddy.Diagnostic("Execute ActionOnTimer.");
+            //GarrisonButler.Diagnostic("Execute ActionOnTimer.");
             if (!_lastResult && !_waitTimer.IsFinished)
             {
-                //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
+                //GarrisonButler.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
                 return false;
             }
-            //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
+            //GarrisonButler.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
                         
                 var result = _condition();
                 if (result.Item1)
@@ -243,16 +243,16 @@ namespace GarrisonBuddy
         { }
         public override async Task<bool> ExecuteAction()
         {
-            //GarrisonBuddy.Diagnostic("Execute ExecuteAction.");
+            //GarrisonButler.Diagnostic("Execute ExecuteAction.");
             if (!_lastResult && !_waitTimer.IsFinished)
             {
-                //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
+                //GarrisonButler.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
                 return false;
             }
 
-            //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Executing");
+            //GarrisonButler.Diagnostic("Execute ExecuteAction: Executing");
             _lastResult = await _action();
-            //GarrisonBuddy.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
+            //GarrisonButler.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
 
             _waitTimer.Reset();
             return _lastResult;

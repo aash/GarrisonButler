@@ -8,7 +8,7 @@ using Bots.Professionbuddy.Components;
 using Styx.CommonBot;
 using Styx.Helpers;
 
-namespace GarrisonBuddy.Config
+namespace GarrisonButler.Config
 {
     public class BuildingSettings
     {

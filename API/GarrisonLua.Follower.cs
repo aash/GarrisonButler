@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonBuddy;
+using GarrisonButler;
 using Styx.Helpers;
 using Styx.WoWInternals;
 

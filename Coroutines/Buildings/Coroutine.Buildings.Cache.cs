@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -51,8 +51,8 @@ namespace GarrisonBuddy
             if (cacheFound != null)
             {
                 cacheCachedLocation = cacheFound.Location;
-                GarrisonBuddy.Log("Detected garrison cache available, moving to collect.");
-                GarrisonBuddy.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " + cacheFound.DisplayId + ": " +
+                GarrisonButler.Log("Detected garrison cache available, moving to collect.");
+                GarrisonButler.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " + cacheFound.DisplayId + ": " +
                                          cacheFound.Location);
 
 

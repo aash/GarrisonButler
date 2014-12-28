@@ -14,7 +14,7 @@ using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.World;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -29,16 +29,16 @@ namespace GarrisonBuddy
             switch (_lastMoveResult)
             {
                 case MoveResult.UnstuckAttempt:
-                    GarrisonBuddy.Diagnostic("[Navigation] MoveResult: UnstuckAttempt.");
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: UnstuckAttempt.");
                     await Buddy.Coroutines.Coroutine.Sleep(500);
                     break;
 
                     case MoveResult.Failed:
-                    GarrisonBuddy.Diagnostic("[Navigation] MoveResult: Failed.");
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: Failed.");
                     return false;
 
                     case MoveResult.ReachedDestination:
-                    GarrisonBuddy.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
                     return false;
             }
                 return true;
@@ -54,7 +54,7 @@ namespace GarrisonBuddy
                 if (CurrentWaypointsList.Count == 0)
                 {
                     if (Me.Location.Distance(destination) > 5)
-                        GarrisonBuddy.Warning("[Navigation] Couldn't generate path from " + Me.Location + " to " + destination);
+                        GarrisonButler.Warning("[Navigation] Couldn't generate path from " + Me.Location + " to " + destination);
                     return false;
                 }
                 _lastMoveTo = CurrentWaypointsList.First();
@@ -71,14 +71,14 @@ namespace GarrisonBuddy
                 {
                     if (CurrentWaypointsList.Count == 0)
                     {
-                        GarrisonBuddy.Diagnostic("[Navigation] Waypoints list empty, assuming at destination: " + destinationName);
+                        GarrisonButler.Diagnostic("[Navigation] Waypoints list empty, assuming at destination: " + destinationName);
                         return false;
                     }
 
                     waypoint = CurrentWaypointsList.First();
 
                     CurrentWaypointsList.Remove(waypoint);
-                    GarrisonBuddy.Diagnostic("[Navigation] Loading next waypoint to " + destinationName + ": " + waypoint);
+                    GarrisonButler.Diagnostic("[Navigation] Loading next waypoint to " + destinationName + ": " + waypoint);
                 }
                 _lastMoveTo = waypoint;
                 {
@@ -114,7 +114,7 @@ namespace GarrisonBuddy
             }
             indexToKeep -= 1;
             left.AddRange(waypoints.Skip(indexToKeep));
-            GarrisonBuddy.Diagnostic("ENS skipped " + (waypoints.Count - left.Count) + " waypoints.");
+            GarrisonButler.Diagnostic("ENS skipped " + (waypoints.Count - left.Count) + " waypoints.");
             return left.Any() ? left : waypoints;
         }
 
@@ -139,7 +139,7 @@ namespace GarrisonBuddy
                 }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            GarrisonBuddy.Diagnostic("ENS2 skipped " + cpt + " waypoints.");
+            GarrisonButler.Diagnostic("ENS2 skipped " + cpt + " waypoints.");
             return res;
         }
 
@@ -157,7 +157,7 @@ namespace GarrisonBuddy
 
         private static bool MinimalIsValidWaypoint(WoWPoint from, WoWPoint waypoint)
         {
-            GarrisonBuddy.Diagnostic("height:" + Me.BoundingHeight);
+            GarrisonButler.Diagnostic("height:" + Me.BoundingHeight);
             var height = Me.BoundingHeight/2;
             var tempFrom = from + new WoWPoint(0, 0, height);
             var tempWaypoint = waypoint + new WoWPoint(0, 0, height);

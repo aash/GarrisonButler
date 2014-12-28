@@ -4,7 +4,7 @@ using System.Linq;
 using GarrisonLua;
 using Styx;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -13827,36 +13827,36 @@ new WoWPoint(5412.519,4455.054,83.45592),
         internal static List<WoWPoint> GetGarrisonPoints()
         {
             var points = new List<WoWPoint>();
-            GarrisonBuddy.Diagnostic("Generating Custom points for movement in Garrison.");
+            GarrisonButler.Diagnostic("Generating Custom points for movement in Garrison.");
 
             // Adding Town Hall
             int TownHallLvl = BuildingsLua.GetTownHallLevel();
-            GarrisonBuddy.Diagnostic("Generating Custom points: Town Hall level " + TownHallLvl + " detected.");
+            GarrisonButler.Diagnostic("Generating Custom points: Town Hall level " + TownHallLvl + " detected.");
             points.AddRange(Me.IsAlliance ? AllianceTownHall[TownHallLvl - 1]() : HordeTownHall[TownHallLvl - 1]());
-            GarrisonBuddy.Diagnostic("Generating Custom points: Town Hall level " + TownHallLvl + " DONE.");
+            GarrisonButler.Diagnostic("Generating Custom points: Town Hall level " + TownHallLvl + " DONE.");
 
             // Adding Mine
             Building mine = _buildings.FirstOrDefault(b => ShipmentsMap[0].buildingIds.Contains(b.id));
             if (mine != null)
             {
-                GarrisonBuddy.Diagnostic("Generating Custom points: Mine level " + mine.rank + " detected.");
+                GarrisonButler.Diagnostic("Generating Custom points: Mine level " + mine.rank + " detected.");
                 points.AddRange(Me.IsAlliance
                     ? AllianceBuildings[TownHallLvl - 1][(int) Buildings.Mine][mine.rank - 1]()
                     : HordeBuildings[TownHallLvl - 1][(int)Buildings.Mine][mine.rank - 1]());
-                GarrisonBuddy.Diagnostic("Generating Custom points: Mine level " + mine.rank + " DONE.");
+                GarrisonButler.Diagnostic("Generating Custom points: Mine level " + mine.rank + " DONE.");
             }
 
             // Adding Garden
             Building garden = _buildings.FirstOrDefault(b => ShipmentsMap[1].buildingIds.Contains(b.id));
             if (garden != null)
             {
-                GarrisonBuddy.Diagnostic("Generating Custom points: Garden level " + garden.rank + " detected.");
+                GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.rank + " detected.");
                 points.AddRange(Me.IsAlliance
                     ? AllianceBuildings[TownHallLvl - 1][(int) Buildings.Garden][garden.rank - 1]()
                     : HordeBuildings[TownHallLvl - 1][(int)Buildings.Garden][garden.rank - 1]());
-                GarrisonBuddy.Diagnostic("Generating Custom points: Garden level " + garden.rank + " DONE.");
+                GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.rank + " DONE.");
             }
-            GarrisonBuddy.Diagnostic("Generating Custom points: Done with " + points.Count + " points.");
+            GarrisonButler.Diagnostic("Generating Custom points: Done with " + points.Count + " points.");
             return points;
         }
 

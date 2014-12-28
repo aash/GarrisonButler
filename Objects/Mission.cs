@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonLua;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     public class Mission
     {
@@ -51,7 +51,7 @@ namespace GarrisonBuddy
             Type = type;
             Xp = xp;
             Environment = environment;
-            GarrisonBuddy.Diagnostic(ToString());
+            GarrisonButler.Diagnostic(ToString());
         }
 
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level, int iLevel,
@@ -119,7 +119,7 @@ namespace GarrisonBuddy
             {
                 report = "MISSION FAILED\n" + ToString();
             }
-            GarrisonBuddy.Log(report);
+            GarrisonButler.Log(report);
         }
 
         public Follower[] FindMatch(List<Follower> followers)
@@ -208,7 +208,7 @@ namespace GarrisonBuddy
                 MaterialMultiplier = materialMultiplier;
                 SuccessChance = successChance;
                 XpBonus = xpBonus;
-                GarrisonBuddy.Diagnostic(ToString());
+                GarrisonButler.Diagnostic(ToString());
             }
 
             public override string ToString()

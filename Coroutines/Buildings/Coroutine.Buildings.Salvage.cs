@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -32,13 +32,13 @@ namespace GarrisonBuddy
 
             if (!GaBSettings.Get().SalvageCrates)
             {
-                GarrisonBuddy.Diagnostic("[Salvage] Deactivated in user settings.");
+                GarrisonButler.Diagnostic("[Salvage] Deactivated in user settings.");
                 return false;
             }
             var salvageBuildings = _buildings.Where(b => b.id == 52 || b.id == 140 || b.id == 141);
             if (!salvageBuildings.Any())
             {
-                GarrisonBuddy.Diagnostic("[Salvage] No recycle center detected.");
+                GarrisonButler.Diagnostic("[Salvage] No recycle center detected.");
                 return false;
             }
             building = salvageBuildings.First();
@@ -47,11 +47,11 @@ namespace GarrisonBuddy
             int numSalvageCrates = salvageCratesFound.Count();
             if (numSalvageCrates == 0)
             {
-                GarrisonBuddy.Diagnostic("[Salvage] Recycle center detected but no salvage crates detected in bags.");
+                GarrisonButler.Diagnostic("[Salvage] Recycle center detected but no salvage crates detected in bags.");
                 return false;
             }
 
-            GarrisonBuddy.Diagnostic("[Salvage] Found Recycle center and salvage crates - #{0}", numSalvageCrates);
+            GarrisonButler.Diagnostic("[Salvage] Found Recycle center and salvage crates - #{0}", numSalvageCrates);
             return true;
         }
 

@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
-using GarrisonBuddy.Config;
-using GarrisonBuddy.Objects;
+using GarrisonButler.Config;
+using GarrisonButler.Objects;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
@@ -20,7 +20,7 @@ using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -155,13 +155,13 @@ namespace GarrisonBuddy
             try
             {
                 InitializeShipments();
-                GarrisonBuddy.Diagnostic("InitializeShipments");
+                GarrisonButler.Diagnostic("InitializeShipments");
                 InitializeMissions();
-                GarrisonBuddy.Diagnostic("InitializeMissions");
+                GarrisonButler.Diagnostic("InitializeMissions");
                 InitializationMove();
-                GarrisonBuddy.Diagnostic("InitializationMove");
+                GarrisonButler.Diagnostic("InitializationMove");
                 InitializeDailies();
-                GarrisonBuddy.Diagnostic("InitializeDailies");
+                GarrisonButler.Diagnostic("InitializeDailies");
 
                 mainSequence = new ActionsSequence();
                 mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
@@ -176,7 +176,7 @@ namespace GarrisonBuddy
             }
             catch (Exception e)
             {
-                GarrisonBuddy.Warning(e.ToString());
+                GarrisonButler.Warning(e.ToString());
             }
         }
 
@@ -236,18 +236,18 @@ namespace GarrisonBuddy
         public static async Task<bool> RootLogic()
         {
             var configVersion = GaBSettings.Get().ConfigVersion;
-            if (configVersion.Build != GarrisonBuddy.Version.Build ||
-                configVersion.Major != GarrisonBuddy.Version.Major ||
-                configVersion.Minor != GarrisonBuddy.Version.Minor ||
-                configVersion.Revision != GarrisonBuddy.Version.Revision)
+            if (configVersion.Build != GarrisonButler.Version.Build ||
+                configVersion.Major != GarrisonButler.Version.Major ||
+                configVersion.Minor != GarrisonButler.Version.Minor ||
+                configVersion.Revision != GarrisonButler.Version.Revision)
             {
                 // Popup to explain this is a beta and they need to reconfigure their configs.
-                Bots.DungeonBuddy.Helpers.Alert.Show("GarrisonBuddy Public Beta",
+                Bots.DungeonBuddy.Helpers.Alert.Show("GarrisonButler Public Beta",
                     "Hey!\n" +
                     "Thanks for your support and your help testing out this new botBase.\n" +
-                    "Since GarrisonBuddy is still on heavy development you are required to verify your settings foe each new build you install.\n" +
+                    "Since GarrisonButler is still on heavy development you are required to verify your settings foe each new build you install.\n" +
                     "Be sure to restart the bot after doing so!" +
-                    "If you have any issues, please post a full log on the GarrisonBuddy Forum page.\n" +
+                    "If you have any issues, please post a full log on the GarrisonButler Forum page.\n" +
                     "Bot safe,\n" +
                     "Deams\n",
                     60, true, false);
@@ -321,26 +321,26 @@ namespace GarrisonBuddy
                 {
                     if (stone.CooldownTimeLeft.TotalSeconds > 0)
                     {
-                        GarrisonBuddy.Warning("UseGarrisonHearthstone: On cooldown, " +
+                        GarrisonButler.Warning("UseGarrisonHearthstone: On cooldown, " +
                                               stone.CooldownTimeLeft.TotalSeconds + " secs left.");
                         return true;
                     }
-                    GarrisonBuddy.Log("Using garrison hearthstone.");
+                    GarrisonButler.Log("Using garrison hearthstone.");
                     if (Me.IsMoving)
                         WoWMovement.MoveStop();
                     await Buddy.Coroutines.Coroutine.Wait(1000, () => !Me.IsMoving);
                     stone.Use();
                     if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
                     {
-                        GarrisonBuddy.Warning("Used garrison hearthstone but not in garrison yet.");
+                        GarrisonButler.Warning("Used garrison hearthstone but not in garrison yet.");
                         return false;
                     }
                 }
-                else GarrisonBuddy.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
+                else GarrisonButler.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
             }
             else
             {
-                GarrisonBuddy.Warning(
+                GarrisonButler.Warning(
                     "Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
                 return false;
             }
@@ -364,7 +364,7 @@ namespace GarrisonBuddy
         {
             if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
             {
-                GarrisonBuddy.Diagnostic("RestoreUiIfNeeded RestoreCompletedMission called");
+                GarrisonButler.Diagnostic("RestoreUiIfNeeded RestoreCompletedMission called");
                 // Restore UI
                 Lua.DoString("GarrisonMissionFrame.MissionTab.MissionList.CompleteDialog:Hide();" +
                              "GarrisonMissionFrame.MissionComplete:Hide();" +
@@ -381,7 +381,7 @@ namespace GarrisonBuddy
         private static async Task<bool> CheckLootFrame()
         {
             // loot everything.
-            if (!GarrisonBuddy.LootIsOpen) return false;
+            if (!GarrisonButler.LootIsOpen) return false;
 
             var lootSlotInfos = new List<LootSlotInfo>();
             for (int i = 0; i < LootFrame.Instance.LootItems; i++)
@@ -392,18 +392,18 @@ namespace GarrisonBuddy
             if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
                 LootFrame.Instance.LootAll();
-                return !GarrisonBuddy.LootIsOpen;
+                return !GarrisonButler.LootIsOpen;
             }))
             {
-                GarrisonBuddy.Log("Succesfully looted: ");
+                GarrisonButler.Log("Succesfully looted: ");
                 foreach (LootSlotInfo lootinfo in lootSlotInfos)
                 {
-                    GarrisonBuddy.Log(lootinfo.LootQuantity + "x " + lootinfo.LootName);
+                    GarrisonButler.Log(lootinfo.LootQuantity + "x " + lootinfo.LootName);
                 }
             }
             else
             {
-                GarrisonBuddy.Warning("Failed to loot from Frame.");
+                GarrisonButler.Warning("Failed to loot from Frame.");
             }
             await CommonCoroutines.SleepForLagDuration();
             return true;

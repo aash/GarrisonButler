@@ -7,14 +7,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-using GarrisonBuddy.Libraries;
-using GarrisonBuddy.Objects;
+using GarrisonButler.Libraries;
+using GarrisonButler.Objects;
 using JetBrains.Annotations;
 using Styx.Helpers;
 
 #endregion
 
-namespace GarrisonBuddy.Config
+namespace GarrisonButler.Config
 {
     public class GaBSettings
     {
@@ -79,7 +79,7 @@ namespace GarrisonBuddy.Config
         {
             if (currentSettings == null)
             {
-                GarrisonBuddy.Diagnostic("No settings loaded, creating default configuration file.");
+                GarrisonButler.Diagnostic("No settings loaded, creating default configuration file.");
                 Load();
             }
             return currentSettings;
@@ -90,7 +90,7 @@ namespace GarrisonBuddy.Config
             var settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if(settings  == default(BuildingSettings))
             {
-              GarrisonBuddy.Warning("Building with id: {0} not found in config.",id);  
+              GarrisonButler.Warning("Building with id: {0} not found in config.",id);  
                 throw new Exception();
             }
             return settings;
@@ -99,12 +99,12 @@ namespace GarrisonBuddy.Config
 
         public static void Save()
         {
-            Get().ConfigVersion = GarrisonBuddy.Version;
+            Get().ConfigVersion = GarrisonButler.Version;
 
             var writer =
                 new XmlSerializer(typeof(GaBSettings));
             var file =
-                new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonBuddySettings.xml"), false);
+                new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"), false);
             writer.Serialize(file, currentSettings);
             file.Close();
         }
@@ -113,18 +113,18 @@ namespace GarrisonBuddy.Config
         {
             try
             {
-                GarrisonBuddy.Diagnostic("Loading configuration");
+                GarrisonButler.Diagnostic("Loading configuration");
                 var reader =
                     new XmlSerializer(typeof (GaBSettings));
                 var file =
-                    new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonBuddySettings.xml"));
+                    new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
                 currentSettings = (GaBSettings) reader.Deserialize(file);
-                GarrisonBuddy.Diagnostic("Configuration successfully loaded.");
+                GarrisonButler.Diagnostic("Configuration successfully loaded.");
             }
             catch (Exception e)
             {
-                GarrisonBuddy.Diagnostic("Failed to load configuration, creating default configuration.");
-                GarrisonBuddy.Diagnostic("Exception: " + e);
+                GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
+                GarrisonButler.Diagnostic("Exception: " + e);
                 currentSettings = DefaultConfig();
             }
         }

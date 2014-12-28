@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using GarrisonLua;
 using MainDev.RemoteASM.Handlers;
 using Styx;
@@ -11,7 +11,7 @@ using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -31,7 +31,7 @@ namespace GarrisonBuddy
         private static void RefreshMissions(bool forced = false)
         {
             if (!refreshMissionsTimer.IsFinished && _followers != null && !forced) return;
-            GarrisonBuddy.Log("Refreshing Missions database.");
+            GarrisonButler.Log("Refreshing Missions database.");
             _missions = MissionLua.GetAllAvailableMissions();
             refreshMissionsTimer.Reset();
         }
@@ -39,7 +39,7 @@ namespace GarrisonBuddy
         private static void RefreshFollowers(bool forced = false)
         {
             if (!refreshFollowerTimer.IsFinished && _followers != null && !forced) return;
-            GarrisonBuddy.Log("Refreshing Followers database.");
+            GarrisonButler.Log("Refreshing Followers database.");
             _followers = FollowersLua.GetAllFollowers();
             refreshFollowerTimer.Reset();
         }
@@ -53,7 +53,7 @@ namespace GarrisonBuddy
         {
             if (!GaBSettings.Get().StartMissions)
             {
-                GarrisonBuddy.Diagnostic("[Missions] Deactivated in user settings.");
+                GarrisonButler.Diagnostic("[Missions] Deactivated in user settings.");
                 return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
             }
 
@@ -62,7 +62,7 @@ namespace GarrisonBuddy
             // Is there mission available to start
             if (numberMissionAvailable == 0)
             {
-                GarrisonBuddy.Diagnostic("[Missions] No missions available to start.");
+                GarrisonButler.Diagnostic("[Missions] No missions available to start.");
                 return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
             }
 
@@ -74,7 +74,7 @@ namespace GarrisonBuddy
             var Missions = _missions.Where(m => m.Cost < garrisonRessources);
             if (!Missions.Any())
             {
-                GarrisonBuddy.Diagnostic("[Missions] Not enough ressources to start a mission.");
+                GarrisonButler.Diagnostic("[Missions] Not enough ressources to start a mission.");
                 return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
             }
 
@@ -94,7 +94,7 @@ namespace GarrisonBuddy
 
             var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
                        "Can succesfully complete: " + ToStart.Count + " missions.";
-            GarrisonBuddy.Log(mess);
+            GarrisonButler.Log(mess);
 
             if (!ToStart.Any())
             {
@@ -111,28 +111,28 @@ namespace GarrisonBuddy
 
             if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
-                GarrisonBuddy.Diagnostic("Mission tab not visible, clicking.");
+                GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
                 InterfaceLua.ClickTabMission();
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
                 {
-                    GarrisonBuddy.Warning("Couldn't display GarrisonMissionTab.");
+                    GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
                     return true;
                 }
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
-                GarrisonBuddy.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId + " - " +
+                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId + " - " +
                                          missionToStart.Item1.Name);
                 InterfaceLua.OpenMission(missionToStart.Item1);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
-                    GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame.");
+                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
                     return true;
                 }
             }
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
             {
-                GarrisonBuddy.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
+                GarrisonButler.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
                                          missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
                 InterfaceLua.ClickCloseMission();
                 InterfaceLua.OpenMission(missionToStart.Item1);
@@ -141,7 +141,7 @@ namespace GarrisonBuddy
                         Buddy.Coroutines.Coroutine.Wait(2000,
                             () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
                 {
-                    GarrisonBuddy.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
                     return true;
                 }
             }
@@ -162,7 +162,7 @@ namespace GarrisonBuddy
                 WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != null)
                 {
-                    GarrisonBuddy.Diagnostic("Found Command table location, not using default anymore.");
+                    GarrisonButler.Diagnostic("Found Command table location, not using default anymore.");
                     TablePosition = tableForLoc.Location;
                 }
             }
@@ -188,7 +188,7 @@ namespace GarrisonBuddy
             }
             catch (Exception e)
             {
-                GarrisonBuddy.Warning(e.ToString());
+                GarrisonButler.Warning(e.ToString());
             }
             return true;
         }
@@ -205,7 +205,7 @@ namespace GarrisonBuddy
 
         public static async Task<bool> DoTurnInCompletedMissions(int osef)
         {
-            GarrisonBuddy.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
+            GarrisonButler.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
             // are we at the action table?
             if (await MoveToTable())
                 return true;
@@ -220,16 +220,16 @@ namespace GarrisonBuddy
 
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
         {
-            GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED");
+            GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED");
             string missionId = args.Args[0].ToString();
-            //GarrisonBuddy.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
         }
 
         public static ActionsSequence InitializeMissionsCoroutines()
         {
             // Initializing coroutines
-            GarrisonBuddy.Diagnostic("Initialization Missions coroutines...");
+            GarrisonButler.Diagnostic("Initialization Missions coroutines...");
             var missionsActionsSequence = new ActionsSequence();
 
             // DoTurnInCompletedMissions
@@ -240,7 +240,7 @@ namespace GarrisonBuddy
             missionsActionsSequence.AddAction(
                 new ActionOnTimer<Tuple<Mission, Follower[]>>(StartMission, CanRunStartMission));
 
-            GarrisonBuddy.Diagnostic("Initialization Missions coroutines done!");
+            GarrisonButler.Diagnostic("Initialization Missions coroutines done!");
             return missionsActionsSequence;
         }
     }

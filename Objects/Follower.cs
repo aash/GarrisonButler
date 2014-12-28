@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     public class Follower
     {
@@ -32,7 +32,7 @@ namespace GarrisonBuddy
             Xp = xp;
             LevelXp = levelXp;
             Counters = counters;
-            GarrisonBuddy.Diagnostic(ToString());
+            GarrisonButler.Diagnostic(ToString());
         }
 
         public override string ToString()

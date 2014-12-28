@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using GarrisonLua;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -45,7 +45,7 @@ namespace GarrisonBuddy
         {
             
             // Initializing coroutines
-            GarrisonBuddy.Diagnostic("Initialization Buildings coroutines...");
+            GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
             var buildingsActionsSequence = new ActionsSequence();
 
             var mine = _buildings.FirstOrDefault(
@@ -109,7 +109,7 @@ namespace GarrisonBuddy
             buildingsActionsSequence.AddAction(
                 new ActionOnTimer<WoWGameObject>(ActivateFinishedBuildings, CanActivateAtLeastOneBuilding));
         
-            GarrisonBuddy.Diagnostic("Initialization Buildings done!");
+            GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;
         }
 
@@ -117,7 +117,7 @@ namespace GarrisonBuddy
         {
             if (BuildingsActions == null)
             {
-                GarrisonBuddy.Warning("[Buildings] Buildings actions not initialized!");
+                GarrisonButler.Warning("[Buildings] Buildings actions not initialized!");
                 return false;
             }
 
@@ -134,7 +134,7 @@ namespace GarrisonBuddy
         {
             if (!RefreshBuildingsTimer.IsFinished && _buildings != null && !forced) return;
 
-            GarrisonBuddy.Log("Refreshing Buildings and shipments databases.");
+            GarrisonButler.Log("Refreshing Buildings and shipments databases.");
             _buildings = BuildingsLua.GetAllBuildings();
             RefreshBuildingsTimer.Reset();
         }
@@ -156,8 +156,8 @@ namespace GarrisonBuddy
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
             WoWGameObject toActivate = allToActivate.First();
-            GarrisonBuddy.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
-            GarrisonBuddy.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
+            GarrisonButler.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
+            GarrisonButler.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
                                      toActivate.DisplayId + ": " + toActivate.Location);
             return new Tuple<bool, WoWGameObject>(true, toActivate);
         }
@@ -169,7 +169,7 @@ namespace GarrisonBuddy
 
             await Buddy.Coroutines.Coroutine.Sleep(300);
             toActivate.Interact();
-            GarrisonBuddy.Log("Activating " + toActivate.SafeName + ", waiting...");
+            GarrisonButler.Log("Activating " + toActivate.SafeName + ", waiting...");
             if (await Buddy.Coroutines.Coroutine.Wait(5000, () =>
             {
                 toActivate.Interact();
@@ -178,7 +178,7 @@ namespace GarrisonBuddy
                         .Any(o => FinalizeGarrisonPlotIds.Contains(o.Entry) && o.Guid == toActivate.Guid);
             }))
             {
-                GarrisonBuddy.Warning("Failed to activate building: " + toActivate.Name);
+                GarrisonButler.Warning("Failed to activate building: " + toActivate.Name);
             }
             return true;
         }

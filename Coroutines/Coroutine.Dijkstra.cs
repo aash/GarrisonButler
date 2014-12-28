@@ -7,7 +7,7 @@ using Styx;
 using Styx.Pathing;
 using Tripper.Tools.Math;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -82,7 +82,7 @@ namespace GarrisonBuddy
                 PathGenerationStopwatch.Reset();
                 PathGenerationStopwatch.Start();
 
-                GarrisonBuddy.Diagnostic("Starting path generation.");
+                GarrisonButler.Diagnostic("Starting path generation.");
                 WoWPoint starting = ClosestToNodes(from);
 
                 WoWPoint ending = ClosestToNodes(to);
@@ -101,7 +101,7 @@ namespace GarrisonBuddy
                 {
                     res[index] = tempPath[index];
                 }
-                GarrisonBuddy.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                GarrisonButler.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
                 PathGenerationStopwatch.Stop();
                 return res;
             }
@@ -112,7 +112,7 @@ namespace GarrisonBuddy
                 PathGenerationStopwatch.Reset();
                 PathGenerationStopwatch.Start();
 
-                GarrisonBuddy.Diagnostic("Starting path generation.");
+                GarrisonButler.Diagnostic("Starting path generation.");
                 WoWPoint starting = ClosestToNodes(from);
                 WoWPoint ending = ClosestToNodes(to);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
@@ -122,7 +122,7 @@ namespace GarrisonBuddy
                 WoWPoint[] tempPath = ExtractPathWoW(_movementGraph, ending);
 
                 PathGenerationStopwatch.Stop();
-                GarrisonBuddy.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                GarrisonButler.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
                 return tempPath;
             }
 

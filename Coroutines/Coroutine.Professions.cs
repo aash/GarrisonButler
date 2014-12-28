@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
-using GarrisonBuddy.Config;
-using GarrisonBuddy.Objects;
+using GarrisonButler.Config;
+using GarrisonButler.Objects;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -30,7 +30,7 @@ namespace GarrisonBuddy
         {
             //if (_detectedDailyProfessions != null) return;
 
-            //GarrisonBuddy.Log("Loading Professions dailies, please wait.");
+            //GarrisonButler.Log("Loading Professions dailies, please wait.");
             if (_detectedDailyProfessions == null)
                 _detectedDailyProfessions = new List<DailyProfession>();
             var dailyNotAdded = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d) && d.Activated);
@@ -43,12 +43,12 @@ namespace GarrisonBuddy
                 daily.Initialize();
                 if (daily.Spell != null)
                 {
-                    GarrisonBuddy.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Spell.Name);
+                    GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Spell.Name);
                     _detectedDailyProfessions.Add(daily);
                 }
             }
 
-            //GarrisonBuddy.Log("Loading Professions dailies done.");
+            //GarrisonButler.Log("Loading Professions dailies done.");
         }
 
         private static bool ShouldRunDailies()
@@ -63,13 +63,13 @@ namespace GarrisonBuddy
 
             if (!_detectedDailyProfessions.Any())
             {
-                GarrisonBuddy.Diagnostic("[Profession] No daily profession CD detected.");
+                GarrisonButler.Diagnostic("[Profession] No daily profession CD detected.");
                 return new Tuple<bool, DailyProfession>(false, null);
             }
 
             if (_detectedDailyProfessions == null)
             {
-                GarrisonBuddy.Diagnostic("[Profession] DetectedDailyProfessions not initialized.");
+                GarrisonButler.Diagnostic("[Profession] DetectedDailyProfessions not initialized.");
                 return new Tuple<bool, DailyProfession>(false, null);
             }
 
@@ -80,11 +80,11 @@ namespace GarrisonBuddy
             if (possibleDailies.Any())
             {
                 var daily = possibleDailies.First();
-                GarrisonBuddy.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1} - #{2}",
+                GarrisonButler.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1} - #{2}",
                     daily.TradeskillId, daily.Spell.Name, daily.GetMaxRepeat());
                 return new Tuple<bool, DailyProfession>(true, daily);
             }
-            GarrisonBuddy.Diagnostic("[Profession] No possible daily CD found.");
+            GarrisonButler.Diagnostic("[Profession] No possible daily CD found.");
             return new Tuple<bool, DailyProfession>(false, null);
         }
 
@@ -115,11 +115,11 @@ namespace GarrisonBuddy
                     .FirstOrDefault();
             if (anvil == null)
             {
-                GarrisonBuddy.Warning("Can't find an Anvil around, skipping for now.");
+                GarrisonButler.Warning("Can't find an Anvil around, skipping for now.");
             }
             else
             {
-                GarrisonBuddy.Warning("[Profession] Current CD requires an anvil, moving to the safest one.");
+                GarrisonButler.Warning("[Profession] Current CD requires an anvil, moving to the safest one.");
                 if (await MoveTo(anvil.Location))
                     return true;
 
@@ -131,7 +131,7 @@ namespace GarrisonBuddy
 
         private static async Task<bool> DoCd(DailyProfession daily)
         {
-            GarrisonBuddy.Log("[Profession] Realizing daily CD: " + daily.Spell.Name);
+            GarrisonButler.Log("[Profession] Realizing daily CD: " + daily.Spell.Name);
             if (Me.IsMoving)
                 WoWMovement.MoveStop();
             if (Me.Mounted)

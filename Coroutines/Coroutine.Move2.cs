@@ -16,7 +16,7 @@ using Tripper.Navigation;
 using Tripper.RecastManaged.Detour;
 using Vector3 = Tripper.Tools.Math.Vector3;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     public class NavigationGaB : MeshNavigator
     {
@@ -86,7 +86,7 @@ namespace GarrisonBuddy
 
         public override void OnRemoveAsCurrent()
         {
-            GarrisonBuddy.Log("Custom navigation System removed!");
+            GarrisonButler.Log("Custom navigation System removed!");
             base.OnRemoveAsCurrent();
         }
 
@@ -105,7 +105,7 @@ namespace GarrisonBuddy
         {
             base.OnSetAsCurrent();
             stuckHandlerGaB = new StuckHandlerGaB(Coroutine.oldNavigation.StuckHandler);
-            GarrisonBuddy.Log("Custom navigation System activated!");
+            GarrisonButler.Log("Custom navigation System activated!");
         }
 
         public override bool CanNavigateWithin(WoWPoint @from, WoWPoint to, float distanceTolerancy)
@@ -140,7 +140,7 @@ namespace GarrisonBuddy
 
             if (stuckHandlerGaB.IsStuck())
             {
-                GarrisonBuddy.Diagnostic("Is stuck :O ! ");
+                GarrisonButler.Diagnostic("Is stuck :O ! ");
                 stuckHandlerGaB.Unstick();
                 return MoveResult.UnstuckAttempt;
             }

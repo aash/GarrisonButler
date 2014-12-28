@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.DungeonBuddy.Helpers;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
@@ -12,7 +12,7 @@ using Styx.CommonBot.Profiles.Quest.Order;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -31,7 +31,7 @@ namespace GarrisonBuddy
             //    WoWMovement.MoveStop();
             //}
             //await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
-            //GarrisonBuddy.Diagnostic("sleep");
+            //GarrisonButler.Diagnostic("sleep");
             //await Buddy.Coroutines.Coroutine.Sleep(200);
 
             //if (!Me.IsMoving && !Me.IsCasting && BotPoi.Current.AsObject != toHarvest)

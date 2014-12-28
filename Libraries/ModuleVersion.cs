@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GarrisonBuddy.Libraries
+namespace GarrisonButler.Libraries
 {
    /// <summary>
     /// Serializable version of the System.Version class.

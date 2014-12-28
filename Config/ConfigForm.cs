@@ -11,7 +11,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
-using GarrisonBuddy.Objects;
+using GarrisonButler.Objects;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -21,7 +21,7 @@ using TabControl = System.Windows.Controls.TabControl;
 using TextBox = System.Windows.Controls.TextBox;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
-namespace GarrisonBuddy.Config
+namespace GarrisonButler.Config
 {
     public partial class ConfigForm : Form
     {
@@ -47,7 +47,7 @@ namespace GarrisonBuddy.Config
                 Height = 400;
                 MinHeight = 300;
                 MinHeight = 300;
-                this.Title = "GarrisonBuddy Beta v" + GarrisonBuddy.Version;
+                this.Title = "GarrisonButler Beta v" + GarrisonButler.Version;
 
                 TabControl tabControl = new TabControl();
                 tabControl.Height = double.NaN;

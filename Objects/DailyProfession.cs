@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx;
 using Styx.CommonBot;
 using Styx.Patchables;
@@ -12,7 +12,7 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.DBC;
 using System.Runtime.Serialization;
 
-namespace GarrisonBuddy.Objects
+namespace GarrisonButler.Objects
 {
     public class DailyProfession
     {
@@ -47,8 +47,8 @@ namespace GarrisonBuddy.Objects
         {
             string name = Enum.GetName(typeof(DailyProfession.tradeskillID), TradeskillId);
             var TradeSkillSpell = (DailyProfession.tradeskillSpell)Enum.Parse(typeof(DailyProfession.tradeskillSpell), name);
-            GarrisonBuddy.Diagnostic("[Profession] Name:" + name);
-            GarrisonBuddy.Diagnostic("[Profession] TradeSkillSpell:" + TradeSkillSpell);
+            GarrisonButler.Diagnostic("[Profession] Name:" + name);
+            GarrisonButler.Diagnostic("[Profession] TradeSkillSpell:" + TradeSkillSpell);
 
             if (!SpellManager.HasSpell((int)TradeSkillSpell))
                 return null;

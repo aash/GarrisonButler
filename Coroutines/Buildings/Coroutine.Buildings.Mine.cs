@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.DungeonBuddy.Helpers;
-using GarrisonBuddy.Config;
+using GarrisonButler.Config;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
@@ -13,7 +13,7 @@ using Styx.CommonBot.Profiles.Quest.Order;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     partial class Coroutine
     {
@@ -53,14 +53,14 @@ namespace GarrisonBuddy
             // Settings
             if (!GaBSettings.Get().HarvestMine)
             {
-                GarrisonBuddy.Diagnostic("[Mine] Deactivated in user settings.");
+                GarrisonButler.Diagnostic("[Mine] Deactivated in user settings.");
                 return new Tuple<bool,WoWGameObject>(false,null);
             }
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
             {
-                GarrisonBuddy.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
+                GarrisonButler.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
@@ -68,11 +68,11 @@ namespace GarrisonBuddy
             WoWGameObject node = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.Distance).FirstOrDefault();
             if (node == default(WoWGameObject))
             {
-                GarrisonBuddy.Diagnostic("[Mine] No ore found to harvest.");
+                GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
-            GarrisonBuddy.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
+            GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
             return new Tuple<bool, WoWGameObject>(true, node);
         }
 
@@ -91,11 +91,11 @@ namespace GarrisonBuddy
         //        if (await UseItemInbags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1))
         //            return true;
 
-        //        GarrisonBuddy.Log("[Mine] In mine, moving to harvest ore at: " + nodeToCollect.Location);
+        //        GarrisonButler.Log("[Mine] In mine, moving to harvest ore at: " + nodeToCollect.Location);
         //        return await HarvestWoWGameOject(nodeToCollect);
         //    }
 
-        //    GarrisonBuddy.Log("[Mine] Not in mine yet, moving to harvest ore at: " + nodeToCollect.Location);
+        //    GarrisonButler.Log("[Mine] Not in mine yet, moving to harvest ore at: " + nodeToCollect.Location);
         //    return await MoveTo(nodeToCollect.Location);
         //}
 
@@ -114,19 +114,19 @@ namespace GarrisonBuddy
                     var Aura = auras.First().Value;
                     if (Aura == null)
                     {
-                        GarrisonBuddy.Diagnostic("[Item] Aura null skipping.");
+                        GarrisonButler.Diagnostic("[Item] Aura null skipping.");
                         return new Tuple<bool,
                             WoWItem>(false,
                                 null);
                     }
                     if (Aura.StackCount >= maxStack)
                     {
-                        GarrisonBuddy.Diagnostic("[Item] Number of stacks: {0} - too high to use item {1}",
+                        GarrisonButler.Diagnostic("[Item] Number of stacks: {0} - too high to use item {1}",
                             Aura.StackCount,
                             Aura.Name);
                         return new Tuple<bool, WoWItem>(false, null);
                     }
-                    GarrisonBuddy.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", Aura.Name, Aura.StackCount);
+                    GarrisonButler.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", Aura.Name, Aura.StackCount);
                 }
 
                 if (item.CooldownTimeLeft.TotalSeconds > 0)
@@ -138,7 +138,7 @@ namespace GarrisonBuddy
         public static async Task<bool> UseItemInbags(WoWItem item)
         {
             item.Use();
-            GarrisonBuddy.Log("[Item] Using: {0}", item.Name);
+            GarrisonButler.Log("[Item] Using: {0}", item.Name);
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);
             return true;

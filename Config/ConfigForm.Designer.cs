@@ -1,4 +1,4 @@
-﻿namespace GarrisonBuddy.Config
+﻿namespace GarrisonButler.Config
 {
     partial class ConfigForm
     {

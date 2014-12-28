@@ -4,8 +4,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
-using GarrisonBuddy.Config;
-using GarrisonBuddy.Libraries;
+using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 using GarrisonLua;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -14,22 +14,22 @@ using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
-    public class GarrisonBuddy : BotBase
+    public class GarrisonButler : BotBase
     {
         internal static readonly ModuleVersion Version = new ModuleVersion(0, 7, 2);
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
 
-        public GarrisonBuddy()
+        public GarrisonButler()
         {
             Instance = this;
         }
 
         // internal AutoAnglerProfile Profile { get; private set; }
-        internal static GarrisonBuddy Instance { get; private set; }
+        internal static GarrisonButler Instance { get; private set; }
 
 
         private void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
@@ -98,7 +98,7 @@ namespace GarrisonBuddy
         private static WaitTimer logTimer=new WaitTimer(TimeSpan.FromSeconds(5));
         internal static void Log(string message, params object[] args)
         {
-            var messFormat = String.Format("[GarrisonBuddy] {0}: {1}", Version, message);
+            var messFormat = String.Format("[GarrisonButler] {0}: {1}", Version, message);
             if (LogBak == messFormat && !logTimer.IsFinished) return;
 
             Logging.Write(Colors.LightSeaGreen, messFormat, args);
@@ -108,12 +108,12 @@ namespace GarrisonBuddy
 
         internal static void Warning(string message, params object[] args)
         {
-            Logging.Write(Colors.Red, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
+            Logging.Write(Colors.Red, String.Format("[GarrisonButler] {0}: {1}", Version, message), args);
         }
 
         internal static void Diagnostic(string message, params object[] args)
         {
-            Logging.WriteDiagnostic(Colors.Orange, String.Format("[GarrisonBuddy] {0}: {1}", Version, message), args);
+            Logging.WriteDiagnostic(Colors.Orange, String.Format("[GarrisonButler] {0}: {1}", Version, message), args);
         }
 
         #region overrides
@@ -123,7 +123,7 @@ namespace GarrisonBuddy
 
         public override string Name
         {
-            get { return "GarrisonBuddy"; }
+            get { return "GarrisonButler"; }
         }
 
         public override PulseFlags PulseFlags
@@ -172,33 +172,33 @@ namespace GarrisonBuddy
             // Loading configuration from file or default
             GaBSettings.Load();
 
-            GarrisonBuddy.Diagnostic("Attaching to GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+            GarrisonButler.Diagnostic("Attaching to GARRISON_MISSION_BONUS_ROLL_COMPLETE");
             Lua.Events.AttachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
 
-            GarrisonBuddy.Diagnostic("Attaching to GARRISON_MISSION_COMPLETE_RESPONSE");
+            GarrisonButler.Diagnostic("Attaching to GARRISON_MISSION_COMPLETE_RESPONSE");
             Lua.Events.AttachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
 
-            GarrisonBuddy.Diagnostic("Attaching to GARRISON_MISSION_STARTED");
+            GarrisonButler.Diagnostic("Attaching to GARRISON_MISSION_STARTED");
             Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
 
-            GarrisonBuddy.Diagnostic("Attaching to LOOT_OPENED");
+            GarrisonButler.Diagnostic("Attaching to LOOT_OPENED");
             Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
 
-            GarrisonBuddy.Diagnostic("Attaching to LOOT_CLOSED");
+            GarrisonButler.Diagnostic("Attaching to LOOT_CLOSED");
             Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
         }
 
         public override void OnDeselected()
         {
-            GarrisonBuddy.Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+            GarrisonButler.Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
             Lua.Events.DetachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
-            GarrisonBuddy.Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
+            GarrisonButler.Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
             Lua.Events.DetachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
-            GarrisonBuddy.Diagnostic("Detaching from GARRISON_MISSION_STARTED");
+            GarrisonButler.Diagnostic("Detaching from GARRISON_MISSION_STARTED");
             Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
-            GarrisonBuddy.Diagnostic("Detaching from LOOT_OPENED");
+            GarrisonButler.Diagnostic("Detaching from LOOT_OPENED");
             Lua.Events.DetachEvent("LOOT_OPENED", LootOpened);
-            GarrisonBuddy.Diagnostic("Detaching from LOOT_CLOSED");
+            GarrisonButler.Diagnostic("Detaching from LOOT_CLOSED");
             Lua.Events.DetachEvent("LOOT_CLOSED", LootClosed);
             base.OnDeselected();
         }
@@ -207,13 +207,13 @@ namespace GarrisonBuddy
         {
             try
             {
-                GarrisonBuddy.Diagnostic("Coroutine OnStart");
+                GarrisonButler.Diagnostic("Coroutine OnStart");
                 Coroutine.OnStart();
             }
             catch (Exception e)
             {
 
-                GarrisonBuddy.Diagnostic(e.ToString());
+                GarrisonButler.Diagnostic(e.ToString());
             }
         }
 

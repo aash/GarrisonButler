@@ -10,7 +10,7 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonBuddy
+namespace GarrisonButler
 {
     public class Building
     {
@@ -99,7 +99,7 @@ namespace GarrisonBuddy
             this.itemQuality = itemQuality;
             itemID = itemId ?? "None";
             GetOrderInfo(MeIsAlliance);
-            GarrisonBuddy.Diagnostic(ToString());
+            GarrisonButler.Diagnostic(ToString());
         }
 
         public override string ToString()
@@ -149,19 +149,19 @@ namespace GarrisonBuddy
             WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
             if (itemInBags != null)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name, itemInBags.StackCount);
+                GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name, itemInBags.StackCount);
                 count += itemInBags.StackCount;
             }
 
             WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
             if (itemInReagentBank != null)
             {
-                GarrisonBuddy.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
+                GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
                     itemInReagentBank.StackCount);
                 count += itemInReagentBank.StackCount;
             }
 
-            GarrisonBuddy.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
+            GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
                 NumberReagent, count >= NumberReagent);
             return count >= NumberReagent;
         }
@@ -174,7 +174,7 @@ namespace GarrisonBuddy
                 WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == reagentId);
                 if (itemInBags != null)
                 {
-                    GarrisonBuddy.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
+                    GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
                         itemInBags.StackCount);
                     count += itemInBags.StackCount;
                 }
@@ -182,12 +182,12 @@ namespace GarrisonBuddy
                 WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == reagentId);
                 if (itemInReagentBank != null)
                 {
-                    GarrisonBuddy.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
+                    GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
                         itemInReagentBank.StackCount);
                     count += itemInReagentBank.StackCount;
                 }
 
-                GarrisonBuddy.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
+                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
                     NumberReagent);
                 if (count >= NumberReagent)
                     return true;
