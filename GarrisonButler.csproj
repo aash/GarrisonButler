@@ -7,8 +7,8 @@
     <ProjectGuid>{1441053B-4D09-45A3-9602-087A7F143AEE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GarrisonBuddy</RootNamespace>
-    <AssemblyName>GarrisonBuddy</AssemblyName>
+    <RootNamespace>GarrisonButler</RootNamespace>
+    <AssemblyName>GarrisonButler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coroutines\Coroutine.Move.cs" />
+    <Compile Include="GarrisonButler.cs" />
     <Compile Include="Libraries\HeapPriorityQueue.cs" />
     <Compile Include="Libraries\IPriorityQueue.cs" />
     <Compile Include="Libraries\ModuleVersion.cs" />
@@ -73,7 +74,6 @@
     <Compile Include="Coroutines\Coroutine.cs" />
     <Compile Include="Objects\DailyProfession.cs" />
     <Compile Include="Objects\Follower.cs" />
-    <Compile Include="GarrisonBuddy.cs" />
     <Compile Include="Objects\Mission.cs" />
   </ItemGroup>
   <ItemGroup>
