@@ -376,7 +376,7 @@ namespace GarrisonButler
             }
 
             building.Refresh();
-            
+
             // No Shipment ready
             if (building.shipmentsReady <= 0)
             {
@@ -420,8 +420,8 @@ namespace GarrisonButler
             if (unit == null)
             {
                 GarrisonButler.Diagnostic("[ShipmentStart] Could not find unit (" + building.PnjId +
-                                         "), moving to default location.\n" +
-                                         "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
+                                          "), moving to default location.\n" +
+                                          "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
 
                 ObjectManager.Update();
                 await MoveTo(building.Pnj);
@@ -444,7 +444,8 @@ namespace GarrisonButler
                 return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
             }))
             {
-                GarrisonButler.Warning("[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
+                GarrisonButler.Warning(
+                    "[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
                 await WorkAroundBugFrame();
                 return true;
             }
@@ -471,7 +472,10 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
             }
 
-            if (await Buddy.Coroutines.Coroutine.Wait(5000, () => BuildingsLua.GetShipmentTotal(building.id) == building.shipmentsTotal + NumberToStart))
+            if (
+                await
+                    Buddy.Coroutines.Coroutine.Wait(5000,
+                        () => BuildingsLua.GetShipmentTotal(building.id) == building.shipmentsTotal + NumberToStart))
             {
                 GarrisonButler.Log("Successfully started {0} work orders.", NumberToStart);
             }
@@ -484,15 +488,15 @@ namespace GarrisonButler
             return false; // done here
         }
 
-        private async static Task WorkAroundBugFrame()
+        private static async Task WorkAroundBugFrame()
         {
             Buddy.Coroutines.Coroutine.Wait(3000, () =>
-                {
-                    MoveToTable();
-                    return false;
-                });
-            return;
+            {
+                MoveToTable();
+                return false;
+            });
         }
+
         private static async Task<bool> IfGossip(WoWUnit pnj)
         {
             if (GossipFrame.Instance != null)

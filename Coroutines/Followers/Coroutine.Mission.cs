@@ -1,15 +1,18 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
 using GarrisonLua;
-using MainDev.RemoteASM.Handlers;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -22,6 +25,7 @@ namespace GarrisonButler
         private static bool CheckedMissions;
         private static readonly WaitTimer refreshMissionsTimer = new WaitTimer(TimeSpan.FromMinutes(5));
         private static readonly WaitTimer refreshFollowerTimer = new WaitTimer(TimeSpan.FromMinutes(5));
+        private static WoWPoint TablePosition = WoWPoint.Empty;
 
         private static void InitializeMissions()
         {
@@ -71,7 +75,7 @@ namespace GarrisonButler
 
 
             int garrisonRessources = BuildingsLua.GetGarrisonRessources();
-            var Missions = _missions.Where(m => m.Cost < garrisonRessources);
+            IEnumerable<Mission> Missions = _missions.Where(m => m.Cost < garrisonRessources);
             if (!Missions.Any())
             {
                 GarrisonButler.Diagnostic("[Missions] Not enough ressources to start a mission.");
@@ -85,15 +89,12 @@ namespace GarrisonButler
                     mission.FindMatch(_followers.Where(f => f.IsCollected && f.Status == "nil").ToList());
                 if (match == null)
                     continue;
-                else
-                {
-                    ToStart.Add(new Tuple<Mission, Follower[]>(mission, match));
-                    _followers.RemoveAll(match.Contains);
-                }                
+                ToStart.Add(new Tuple<Mission, Follower[]>(mission, match));
+                _followers.RemoveAll(match.Contains);
             }
 
-            var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
-                       "Can succesfully complete: " + ToStart.Count + " missions.";
+            string mess = "Found " + numberMissionAvailable + " available missions to complete. " +
+                          "Can succesfully complete: " + ToStart.Count + " missions.";
             GarrisonButler.Log(mess);
 
             if (!ToStart.Any())
@@ -105,7 +106,7 @@ namespace GarrisonButler
         }
 
         public static async Task<bool> StartMission(Tuple<Mission, Follower[]> missionToStart)
-        {            
+        {
             if (await MoveToTable())
                 return true;
 
@@ -121,8 +122,9 @@ namespace GarrisonButler
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
             {
-                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId + " - " +
-                                         missionToStart.Item1.Name);
+                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId +
+                                          " - " +
+                                          missionToStart.Item1.Name);
                 InterfaceLua.OpenMission(missionToStart.Item1);
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
@@ -133,7 +135,7 @@ namespace GarrisonButler
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
             {
                 GarrisonButler.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
-                                         missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
+                                          missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
                 InterfaceLua.ClickCloseMission();
                 InterfaceLua.OpenMission(missionToStart.Item1);
                 if (
@@ -152,8 +154,6 @@ namespace GarrisonButler
             return true;
         }
 
-
-        private static WoWPoint TablePosition = WoWPoint.Empty;
 
         public static async Task<bool> MoveToTable()
         {
@@ -195,7 +195,9 @@ namespace GarrisonButler
 
         private static Tuple<bool, int> CanRunTurnInMissions()
         {
-            return new Tuple<bool, int>(GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0, 0);
+            return
+                new Tuple<bool, int>(
+                    GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0, 0);
         }
 
         private static bool ShouldRunTurnInMissions()

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,6 +8,8 @@ using Priority_Queue;
 using Styx;
 using Styx.Pathing;
 using Tripper.Tools.Math;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -96,7 +100,7 @@ namespace GarrisonButler
                 ProcessGraph(_movementGraph, starting);
 
                 WoWPoint[] tempPath = ExtractPath(_movementGraph, ending);
-                Vector3[] res = new Vector3[tempPath.Count()];
+                var res = new Vector3[tempPath.Count()];
                 for (int index = 0; index < tempPath.Length; index++)
                 {
                     res[index] = tempPath[index];
@@ -165,7 +169,7 @@ namespace GarrisonButler
             private static WoWPoint[] ExtractPath(Graph graph, WoWPoint target)
             {
                 var path = new List<WoWPoint>();
-                var u = graph.Nodes.First(n => n.Key == target).Value;
+                Node u = graph.Nodes.First(n => n.Key == target).Value;
 
                 while (u.Previous != null)
                 {

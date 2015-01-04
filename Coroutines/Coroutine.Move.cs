@@ -1,18 +1,19 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using GreyMagic;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
 using Styx.CommonBot;
-using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.World;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -33,15 +34,15 @@ namespace GarrisonButler
                     await Buddy.Coroutines.Coroutine.Sleep(500);
                     break;
 
-                    case MoveResult.Failed:
+                case MoveResult.Failed:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: Failed.");
                     return false;
 
-                    case MoveResult.ReachedDestination:
+                case MoveResult.ReachedDestination:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
                     return false;
             }
-                return true;
+            return true;
         }
 
         public static bool MoveTo2(WoWPoint destination, string destinationName = null)
@@ -54,7 +55,8 @@ namespace GarrisonButler
                 if (CurrentWaypointsList.Count == 0)
                 {
                     if (Me.Location.Distance(destination) > 5)
-                        GarrisonButler.Warning("[Navigation] Couldn't generate path from " + Me.Location + " to " + destination);
+                        GarrisonButler.Warning("[Navigation] Couldn't generate path from " + Me.Location + " to " +
+                                               destination);
                     return false;
                 }
                 _lastMoveTo = CurrentWaypointsList.First();
@@ -71,14 +73,16 @@ namespace GarrisonButler
                 {
                     if (CurrentWaypointsList.Count == 0)
                     {
-                        GarrisonButler.Diagnostic("[Navigation] Waypoints list empty, assuming at destination: " + destinationName);
+                        GarrisonButler.Diagnostic("[Navigation] Waypoints list empty, assuming at destination: " +
+                                                  destinationName);
                         return false;
                     }
 
                     waypoint = CurrentWaypointsList.First();
 
                     CurrentWaypointsList.Remove(waypoint);
-                    GarrisonButler.Diagnostic("[Navigation] Loading next waypoint to " + destinationName + ": " + waypoint);
+                    GarrisonButler.Diagnostic("[Navigation] Loading next waypoint to " + destinationName + ": " +
+                                              waypoint);
                 }
                 _lastMoveTo = waypoint;
                 {
@@ -118,7 +122,7 @@ namespace GarrisonButler
             return left.Any() ? left : waypoints;
         }
 
-        private async static Task<List<WoWPoint>>  GetFurthestWaypoint2(List<WoWPoint> waypoints)
+        private static async Task<List<WoWPoint>> GetFurthestWaypoint2(List<WoWPoint> waypoints)
         {
             if (waypoints == null) throw new ArgumentNullException("waypoints");
             if (waypoints.Count < 3) return waypoints;
@@ -126,8 +130,8 @@ namespace GarrisonButler
             var res = new List<WoWPoint>(waypoints);
             for (int index = 2; index < res.Count - 1; index++)
             {
-                var waypoint = res[index];
-                var old = res[index - 2];
+                WoWPoint waypoint = res[index];
+                WoWPoint old = res[index - 2];
                 if (MinimalIsValidWaypoint(old, waypoint))
                 {
                     if (IsValidWaypoint(old, waypoint))
@@ -158,19 +162,19 @@ namespace GarrisonButler
         private static bool MinimalIsValidWaypoint(WoWPoint from, WoWPoint waypoint)
         {
             GarrisonButler.Diagnostic("height:" + Me.BoundingHeight);
-            var height = Me.BoundingHeight/2;
-            var tempFrom = from + new WoWPoint(0, 0, height);
-            var tempWaypoint = waypoint + new WoWPoint(0, 0, height);
+            float height = Me.BoundingHeight/2;
+            WoWPoint tempFrom = from + new WoWPoint(0, 0, height);
+            WoWPoint tempWaypoint = waypoint + new WoWPoint(0, 0, height);
 
-            var quickTest = GameWorld.TraceLine(tempFrom, tempWaypoint, TraceLineHitFlags.Collision);
+            bool quickTest = GameWorld.TraceLine(tempFrom, tempWaypoint, TraceLineHitFlags.Collision);
             return !quickTest && Slope(from, waypoint) < 1.2;
         }
 
         private static bool IsValidWaypoint(WoWPoint from, WoWPoint waypoint)
         {
             var lines = new List<WorldLine>();
-            var height = Me.BoundingHeight+Me.BoundingHeight/10;
-            var width = Me.BoundingRadius +Me.BoundingHeight/10;
+            float height = Me.BoundingHeight + Me.BoundingHeight/10;
+            float width = Me.BoundingRadius + Me.BoundingHeight/10;
             for (float p = 0; p <= 1; p += (1/(from.Distance(waypoint))))
             {
                 WoWPoint pOrigin = from + (waypoint - from)*p;
@@ -179,7 +183,7 @@ namespace GarrisonButler
                     WoWPoint pTo = waypoint + new WoWPoint(0, 0, i);
                     pOrigin.Z = GetGroundZ(pTo) + i;
 
-                    for (float j = -width; j <= width; j += width / 10)
+                    for (float j = -width; j <= width; j += width/10)
                     {
                         WoWPoint perpTo = GetPerpPointsBeginning(pTo, pOrigin, j);
                         WoWPoint perpOrigin = GetPerpPointsBeginning(pOrigin, pTo, j);
@@ -218,7 +222,5 @@ namespace GarrisonButler
                 TraceLineHitFlags.Collision, out ground);
             return ground != WoWPoint.Empty ? ground.Z : float.MinValue;
         }
-
     }
 }
-

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +9,8 @@ using Styx;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -27,20 +31,22 @@ namespace GarrisonButler
         private static WoWPoint cacheCachedLocation;
         private static WaitTimer cacheWaitTimer;
 
-        private static Tuple<bool,WoWGameObject> CanRunCache()
+        private static Tuple<bool, WoWGameObject> CanRunCache()
         {
             if (!GaBSettings.Get().GarrisonCache)
-                return new Tuple<bool, WoWGameObject>(false,null);
+                return new Tuple<bool, WoWGameObject>(false, null);
             // Check
-            var cache =
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
+            WoWGameObject cache =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
             if (cache == null && !Found)
                 return new Tuple<bool, WoWGameObject>(false, null);
-            
+
             Found = true;
             if (cache != null) cacheCachedLocation = cache.Location;
             return new Tuple<bool, WoWGameObject>(true, cache);
         }
+
         private static bool ShouldRunCache()
         {
             return CanRunCache().Item1;
@@ -52,8 +58,9 @@ namespace GarrisonButler
             {
                 cacheCachedLocation = cacheFound.Location;
                 GarrisonButler.Log("Detected garrison cache available, moving to collect.");
-                GarrisonButler.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " + cacheFound.DisplayId + ": " +
-                                         cacheFound.Location);
+                GarrisonButler.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " +
+                                          cacheFound.DisplayId + ": " +
+                                          cacheFound.Location);
 
 
                 await HarvestWoWGameOject(cacheFound);

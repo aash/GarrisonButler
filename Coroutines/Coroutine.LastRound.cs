@@ -1,8 +1,12 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
 using Styx;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -10,12 +14,14 @@ namespace GarrisonButler
     {
         private static DateTime lastRoundCheckTime = DateTime.MinValue;
         private static int _lastRoundTemp;
+
         private static readonly List<WoWPoint> LastRoundWaypointsHorde = new List<WoWPoint>
         {
             new WoWPoint(5595.488, 4530.896, 126.0771),
             new WoWPoint(5502.666, 4475.98, 138.9149),
             new WoWPoint(5440.396, 4572.317, 135.7494),
         };
+
         private static readonly List<WoWPoint> LastRoundWaypointsAlly = new List<WoWPoint>
         {
             new WoWPoint(1917.989, 127.5877, 83.37553),
@@ -30,7 +36,7 @@ namespace GarrisonButler
                 return true;
             return false;
         }
-        
+
         private static async Task<bool> LastRound()
         {
             if (!CanRunLastRound())

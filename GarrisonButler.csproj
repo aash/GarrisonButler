@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Coroutines\Coroutine.Move.cs" />
     <Compile Include="GarrisonButler.cs" />
+    <Compile Include="Libraries\FreshDesk.cs" />
     <Compile Include="Libraries\HeapPriorityQueue.cs" />
     <Compile Include="Libraries\IPriorityQueue.cs" />
     <Compile Include="Libraries\ModuleVersion.cs" />

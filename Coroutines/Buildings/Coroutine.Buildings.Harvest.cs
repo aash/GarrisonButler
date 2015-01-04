@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
 using System.Threading.Tasks;
-using Bots.DungeonBuddy.Helpers;
-using GarrisonButler.Config;
-using Styx;
-using Styx.Common.Helpers;
-using Styx.CommonBot;
 using Styx.CommonBot.POI;
-using Styx.CommonBot.Profiles.Quest.Order;
-using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private async static Task<bool> HarvestWoWGameOject(WoWGameObject toHarvest)
+        private static async Task<bool> HarvestWoWGameOject(WoWGameObject toHarvest)
         {
             var node = BotPoi.Current.AsObject as WoWGameObject;
             if (node == null || !node.IsValid)
@@ -36,9 +30,9 @@ namespace GarrisonButler
 
             //if (!Me.IsMoving && !Me.IsCasting && BotPoi.Current.AsObject != toHarvest)
             //    toHarvest.Interact();
-            if(node != toHarvest)
+            if (node != toHarvest)
                 BotPoi.Current = new BotPoi(toHarvest, PoiType.Harvest);
-            
+
             return true;
         }
     }

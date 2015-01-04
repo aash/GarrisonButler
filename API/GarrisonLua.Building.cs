@@ -1,11 +1,14 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler;
 using Styx;
-using Styx.Common;
 using Styx.Helpers;
 using Styx.WoWInternals;
+
+#endregion
 
 namespace GarrisonLua
 {
@@ -188,7 +191,7 @@ namespace GarrisonLua
                 "return tostring(amount);";
             float res = Lua.GetReturnValues(lua)[0].ToFloat();
             GarrisonButler.GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
-            return (int)res;
+            return (int) res;
         }
     }
 }

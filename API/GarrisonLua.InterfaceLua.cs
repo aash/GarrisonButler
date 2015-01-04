@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +8,8 @@ using GarrisonButler;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
+
+#endregion
 
 namespace GarrisonLua
 {
@@ -138,7 +142,7 @@ namespace GarrisonLua
             Lua.DoString(luaAdd);
         }
 
-        public async static Task AddFollowersToMission(string missionId, List<string> followersId)
+        public static async Task AddFollowersToMission(string missionId, List<string> followersId)
         {
             foreach (string followerId in followersId)
             {

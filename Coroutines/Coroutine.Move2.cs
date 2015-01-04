@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using GreyMagic;
 using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -16,72 +16,20 @@ using Tripper.Navigation;
 using Tripper.RecastManaged.Detour;
 using Vector3 = Tripper.Tools.Math.Vector3;
 
+#endregion
+
 namespace GarrisonButler
 {
     public class NavigationGaB : MeshNavigator
     {
+        internal static WoWPoint CurrentDestination;
+        private static readonly Stopwatch StuckWatch = new Stopwatch();
         private readonly WaitTimer waitTimer1 = new WaitTimer(TimeSpan.FromSeconds(1.0));
         private readonly WaitTimer waitTimer2 = WaitTimer.FiveSeconds;
-        internal static WoWPoint CurrentDestination;
         private MeshMovePath CurrentMovePath2;
         private StuckHandlerGaB stuckHandlerGaB;
 
 
-        public class StuckHandlerGaB : StuckHandler
-        {
-            private StuckHandler Native;
-            private Stopwatch stopwatch = new Stopwatch();
-            private int cpt = 0;
-            private WoWPoint lastCheckedLocation = new WoWPoint(0,0,0);
-            private WoWPoint cacheDestination = WoWPoint.Empty;
-            public StuckHandlerGaB(StuckHandler native)
-            {
-                Native = native;
-                lastCheckedLocation = StyxWoW.Me.Location;
-                stopwatch.Start();
-            }
-            public override bool IsStuck()
-            {
-                if (stopwatch.ElapsedMilliseconds > 7000)
-                {
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    if (CurrentDestination != cacheDestination)
-                    {
-                        lastCheckedLocation = StyxWoW.Me.Location;
-                        cacheDestination = CurrentDestination;
-                        return false;
-                    }
-                    else if (StyxWoW.Me.Location.Distance(lastCheckedLocation) < 3)
-                    {
-                        cpt++;
-                        return true;
-                    }
-                    lastCheckedLocation = StyxWoW.Me.Location;
-                }
-                return false;
-            }
-
-            public override void Reset()
-            {
-                stopwatch.Reset();
-                stopwatch.Start();
-                cpt = 0;
-                cacheDestination = CurrentDestination;
-            }
-
-            public override void Unstick()
-            {
-                for (int i = 0; i < cpt; i++)
-                {
-                    Native.Unstick();                    
-                }
-            }
-        }
-        public NavigationGaB()
-        {
-
-        }
         public override float PathPrecision { get; set; }
 
         public override void OnRemoveAsCurrent()
@@ -97,7 +45,7 @@ namespace GarrisonButler
 
         public override MoveResult MovePath(MeshMovePath path)
         {
-            var res = base.MovePath(path);
+            MoveResult res = base.MovePath(path);
             return res;
         }
 
@@ -115,7 +63,6 @@ namespace GarrisonButler
 
         public override bool CanNavigateFully(WoWPoint @from, WoWPoint to)
         {
-
             return true;
         }
 
@@ -123,8 +70,6 @@ namespace GarrisonButler
         {
             return CurrentDestination;
         }
-
-        private static readonly Stopwatch StuckWatch = new Stopwatch();
 
         public override MoveResult MoveTo(WoWPoint location)
         {
@@ -193,21 +138,21 @@ namespace GarrisonButler
             {
                 return MovePath(CurrentMovePath2);
             }
-            
-                WoWPoint startFp;
-                WoWPoint endFp;
-                stuckHandlerGaB.Reset();
-                if (MoverLocation.DistanceSqr(location) > 100000 &&
-                    FlightPaths.ShouldTakeFlightpath(MoverLocation, location, activeMover.MovementInfo.RunSpeed) &&
-                    FlightPaths.SetFlightPathUsage(MoverLocation, location, out startFp, out endFp))
-                    return MoveResult.PathGenerated;
-                PathFindResult path2 = FindPath(MoverLocation, location);
-                if (!path2.Succeeded)
-                {
-                    return MoveResult.PathGenerationFailed;
-                }
-                CurrentMovePath2 = new MeshMovePath(path2);
+
+            WoWPoint startFp;
+            WoWPoint endFp;
+            stuckHandlerGaB.Reset();
+            if (MoverLocation.DistanceSqr(location) > 100000 &&
+                FlightPaths.ShouldTakeFlightpath(MoverLocation, location, activeMover.MovementInfo.RunSpeed) &&
+                FlightPaths.SetFlightPathUsage(MoverLocation, location, out startFp, out endFp))
                 return MoveResult.PathGenerated;
+            PathFindResult path2 = FindPath(MoverLocation, location);
+            if (!path2.Succeeded)
+            {
+                return MoveResult.PathGenerationFailed;
+            }
+            CurrentMovePath2 = new MeshMovePath(path2);
+            return MoveResult.PathGenerated;
         }
 
         private bool Unnamed2(MeshMovePath param0, Vector3 param1)
@@ -322,6 +267,60 @@ namespace GarrisonButler
         public override bool AtLocation(WoWPoint point1, WoWPoint point2)
         {
             return Coroutine.Dijkstra.ClosestToNodes(point1).Distance(Coroutine.Dijkstra.ClosestToNodes(point2)) < 3;
+        }
+
+        public class StuckHandlerGaB : StuckHandler
+        {
+            private readonly StuckHandler Native;
+            private readonly Stopwatch stopwatch = new Stopwatch();
+            private WoWPoint cacheDestination = WoWPoint.Empty;
+            private int cpt;
+            private WoWPoint lastCheckedLocation = new WoWPoint(0, 0, 0);
+
+            public StuckHandlerGaB(StuckHandler native)
+            {
+                Native = native;
+                lastCheckedLocation = StyxWoW.Me.Location;
+                stopwatch.Start();
+            }
+
+            public override bool IsStuck()
+            {
+                if (stopwatch.ElapsedMilliseconds > 7000)
+                {
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    if (CurrentDestination != cacheDestination)
+                    {
+                        lastCheckedLocation = StyxWoW.Me.Location;
+                        cacheDestination = CurrentDestination;
+                        return false;
+                    }
+                    if (StyxWoW.Me.Location.Distance(lastCheckedLocation) < 3)
+                    {
+                        cpt++;
+                        return true;
+                    }
+                    lastCheckedLocation = StyxWoW.Me.Location;
+                }
+                return false;
+            }
+
+            public override void Reset()
+            {
+                stopwatch.Reset();
+                stopwatch.Start();
+                cpt = 0;
+                cacheDestination = CurrentDestination;
+            }
+
+            public override void Unstick()
+            {
+                for (int i = 0; i < cpt; i++)
+                {
+                    Native.Unstick();
+                }
+            }
         }
     }
 }

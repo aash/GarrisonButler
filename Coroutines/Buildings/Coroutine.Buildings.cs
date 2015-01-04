@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +9,8 @@ using GarrisonLua;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -40,22 +44,22 @@ namespace GarrisonButler
             236193,
         };
 
-        private static List<ActionBasic> BuildingsActions; 
+        private static List<ActionBasic> BuildingsActions;
+
         public static ActionsSequence InitializeBuildingsCoroutines()
         {
-            
             // Initializing coroutines
             GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
             var buildingsActionsSequence = new ActionsSequence();
 
-            var mine = _buildings.FirstOrDefault(
-                 b =>
-                     (b.id == (int)buildings.MineLvl1) || (b.id == (int)buildings.MineLvl2) ||
-                     (b.id == (int)buildings.MineLvl3));
-            var garden = _buildings.FirstOrDefault(
-                 b =>
-                     (b.id == (int)buildings.GardenLvl1) || (b.id == (int)buildings.GardenLvl2) ||
-                     (b.id == (int)buildings.GardenLvl3));
+            Building mine = _buildings.FirstOrDefault(
+                b =>
+                    (b.id == (int) buildings.MineLvl1) || (b.id == (int) buildings.MineLvl2) ||
+                    (b.id == (int) buildings.MineLvl3));
+            Building garden = _buildings.FirstOrDefault(
+                b =>
+                    (b.id == (int) buildings.GardenLvl1) || (b.id == (int) buildings.GardenLvl2) ||
+                    (b.id == (int) buildings.GardenLvl3));
             if (mine != null)
             {
                 // Harvest mine
@@ -70,15 +74,20 @@ namespace GarrisonButler
                             UseItemInbags,
                             () =>
                             {
-                                var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 2)();
-                                return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
+                                Tuple<bool, WoWItem> canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 2)();
+                                return
+                                    new Tuple<bool, WoWItem>(
+                                        canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
                             }),
                         new ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
                             {
-                                var canUse = CanUseItemInBags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1)();
-                                return new Tuple<bool, WoWItem>(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
+                                Tuple<bool, WoWItem> canUse =
+                                    CanUseItemInBags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1)();
+                                return
+                                    new Tuple<bool, WoWItem>(
+                                        canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
                             })));
 
                 // Take care of mine shipments
@@ -102,14 +111,14 @@ namespace GarrisonButler
                 new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
                     PickUpOrStartAtLeastOneShipment, CanPickUpOrStartAtLeastOneShipmentFromAll));
 
-                        // Garrison cache
+            // Garrison cache
             buildingsActionsSequence.AddAction(
                 new ActionOnTimer<WoWGameObject>(PickUpGarrisonCache, CanRunCache));
 
-                        // Buildings activation
+            // Buildings activation
             buildingsActionsSequence.AddAction(
                 new ActionOnTimer<WoWGameObject>(ActivateFinishedBuildings, CanActivateAtLeastOneBuilding));
-        
+
             GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;
         }
@@ -122,7 +131,7 @@ namespace GarrisonButler
                 return false;
             }
 
-            foreach (var action in BuildingsActions)
+            foreach (ActionBasic action in BuildingsActions)
             {
                 if (await action.ExecuteAction())
                     return true;
@@ -141,11 +150,10 @@ namespace GarrisonButler
         }
 
 
-
         internal static Tuple<bool, WoWGameObject> CanActivateAtLeastOneBuilding()
         {
             if (!GaBSettings.Get().ActivateBuildings)
-                return new Tuple<bool, WoWGameObject>(false,null);
+                return new Tuple<bool, WoWGameObject>(false, null);
 
             IOrderedEnumerable<WoWGameObject> allToActivate =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
@@ -159,7 +167,7 @@ namespace GarrisonButler
             WoWGameObject toActivate = allToActivate.First();
             GarrisonButler.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
             GarrisonButler.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
-                                     toActivate.DisplayId + ": " + toActivate.Location);
+                                      toActivate.DisplayId + ": " + toActivate.Location);
             return new Tuple<bool, WoWGameObject>(true, toActivate);
         }
 

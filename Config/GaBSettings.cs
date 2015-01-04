@@ -2,16 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
-using JetBrains.Annotations;
 using Styx.Helpers;
-using System.Text;
 
 #endregion
 
@@ -21,11 +17,36 @@ namespace GarrisonButler.Config
     {
         private GaBSettings()
         {
-            
         }
+
+        [XmlIgnore]
+        public static GaBSettings currentSettings { get; set; }
+
+        public List<BuildingSettings> BuildingsSettings { get; set; }
+
+        public List<DailyProfession> DailySettings { get; set; }
+
+        public bool UseGarrisonHearthstone { get; set; }
+
+        public bool GarrisonCache { get; set; }
+        public bool HarvestGarden { get; set; }
+        public bool HarvestMine { get; set; }
+        public bool UseCoffee { get; set; }
+        public bool UseMiningPick { get; set; }
+        public bool ActivateBuildings { get; set; }
+        public bool SalvageCrates { get; set; }
+        public bool StartMissions { get; set; }
+        public bool CompletedMissions { get; set; }
+
+
+        public int TimeMinBetweenRun { get; set; }
+
+        public ModuleVersion ConfigVersion { get; set; }
+        public bool HBRelogMode { get; set; }
+
         private static GaBSettings DefaultConfig()
         {
-            GaBSettings ret = new GaBSettings();
+            var ret = new GaBSettings();
             ret.ConfigVersion = new ModuleVersion();
             ret.TimeMinBetweenRun = 60;
             // Buildings generation, Ugly... but dynamic
@@ -52,29 +73,6 @@ namespace GarrisonButler.Config
             return ret;
         }
 
-        [XmlIgnore] public static GaBSettings currentSettings { get; set; }
-        public List<BuildingSettings> BuildingsSettings { get; set; }
-
-        public List<DailyProfession> DailySettings { get; set; }
-
-        public bool UseGarrisonHearthstone { get; set; }
-        
-        public bool GarrisonCache { get; set; }
-        public bool HarvestGarden { get; set; }
-        public bool HarvestMine { get; set; }
-        public bool UseCoffee { get; set; }
-        public bool UseMiningPick { get; set; }
-        public bool ActivateBuildings { get; set; }
-        public bool SalvageCrates { get; set; }
-        public bool StartMissions { get; set; }
-        public bool CompletedMissions { get; set; }
-
-
-        public int TimeMinBetweenRun { get; set; }
-
-        public ModuleVersion ConfigVersion { get; set; }
-        public bool HBRelogMode { get; set; }
-
         public static GaBSettings Get()
         {
             if (currentSettings == null)
@@ -87,10 +85,10 @@ namespace GarrisonButler.Config
 
         public BuildingSettings GetBuildingSettings(int id)
         {
-            var settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
-            if(settings  == default(BuildingSettings))
+            BuildingSettings settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            if (settings == default(BuildingSettings))
             {
-              GarrisonButler.Warning("Building with id: {0} not found in config.",id);  
+                GarrisonButler.Warning("Building with id: {0} not found in config.", id);
                 throw new Exception();
             }
             return settings;
@@ -102,13 +100,13 @@ namespace GarrisonButler.Config
             Get().ConfigVersion = GarrisonButler.Version;
 
             var writer =
-                new XmlSerializer(typeof(GaBSettings));
+                new XmlSerializer(typeof (GaBSettings));
             var file =
                 new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"), false);
             writer.Serialize(file, currentSettings);
             file.Close();
         }
-        
+
         public static void Load()
         {
             try
@@ -120,7 +118,6 @@ namespace GarrisonButler.Config
                     new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
                 currentSettings = (GaBSettings) reader.Deserialize(file);
                 GarrisonButler.Diagnostic("Configuration successfully loaded.");
-
             }
             catch (Exception e)
             {

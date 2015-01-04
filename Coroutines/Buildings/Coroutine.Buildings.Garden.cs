@@ -1,11 +1,13 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using GarrisonButler.Config;
-using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -28,12 +30,12 @@ namespace GarrisonButler
             return CanRunGarden().Item1;
         }
 
-        private static Tuple<bool,WoWGameObject> CanRunGarden()
+        private static Tuple<bool, WoWGameObject> CanRunGarden()
         {
             if (!GaBSettings.Get().HarvestGarden)
             {
                 GarrisonButler.Diagnostic("[Garden] Deactivated in user settings.");
-                return new Tuple<bool, WoWGameObject>(false,null);
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
@@ -43,7 +45,11 @@ namespace GarrisonButler
             }
 
             // Is there something to gather? 
-            var herbToGather = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => GardenItems.Contains(o.Entry)).OrderBy(o=> o.DistanceSqr).FirstOrDefault();
+            WoWGameObject herbToGather =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .Where(o => GardenItems.Contains(o.Entry))
+                    .OrderBy(o => o.DistanceSqr)
+                    .FirstOrDefault();
             if (herbToGather == null)
             {
                 GarrisonButler.Diagnostic("[Garden] No herb detected.");
@@ -51,7 +57,7 @@ namespace GarrisonButler
             }
 
             GarrisonButler.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
-            return new Tuple<bool, WoWGameObject>(true,herbToGather);
+            return new Tuple<bool, WoWGameObject>(true, herbToGather);
         }
 
         //public static async Task<bool> CleanGarden()

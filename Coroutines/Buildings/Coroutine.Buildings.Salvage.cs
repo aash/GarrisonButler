@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
@@ -6,16 +8,17 @@ using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
+#endregion
+
 namespace GarrisonButler
 {
     partial class Coroutine
     {
-
         private static readonly List<int> SalvageCratesIds = new List<int>
         {
             114120, // Big Crate of Salvage lvl 3
             114119, // Crate of Salvage lvl 2
-	        114116 // Bag of Salvaged Goods lvl 1
+            114116 // Bag of Salvaged Goods lvl 1
         };
 
         private static bool ShouldRunSalvage()
@@ -35,7 +38,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[Salvage] Deactivated in user settings.");
                 return false;
             }
-            var salvageBuildings = _buildings.Where(b => b.id == 52 || b.id == 140 || b.id == 141);
+            IEnumerable<Building> salvageBuildings = _buildings.Where(b => b.id == 52 || b.id == 140 || b.id == 141);
             if (!salvageBuildings.Any())
             {
                 GarrisonButler.Diagnostic("[Salvage] No recycle center detected.");
@@ -43,7 +46,7 @@ namespace GarrisonButler
             }
             building = salvageBuildings.First();
 
-            salvageCratesFound = Me.BagItems.Where(i => SalvageCratesIds.Contains((int)i.Entry));
+            salvageCratesFound = Me.BagItems.Where(i => SalvageCratesIds.Contains((int) i.Entry));
             int numSalvageCrates = salvageCratesFound.Count();
             if (numSalvageCrates == 0)
             {
@@ -57,12 +60,12 @@ namespace GarrisonButler
 
         private static async Task<bool> DoSalvages()
         {
-           IEnumerable<WoWItem> salvageCrates;
+            IEnumerable<WoWItem> salvageCrates;
             Building building;
 
             if (!CanRunSalvage(out salvageCrates, out building))
                 return false;
-            
+
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             // can't find it? Let's try to get closer to the default location.
             if (unit == null)

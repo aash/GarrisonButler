@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -12,17 +14,20 @@ using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 2, 4);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 2, 5);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
+        private static String LogBak = "";
+        private static readonly WaitTimer logTimer = new WaitTimer(TimeSpan.FromSeconds(5));
 
         public GarrisonButler()
         {
@@ -100,11 +105,9 @@ namespace GarrisonButler
             }
         }
 
-        private static String LogBak = "";
-        private static WaitTimer logTimer=new WaitTimer(TimeSpan.FromSeconds(5));
         internal static void Log(string message, params object[] args)
         {
-            var messFormat = String.Format("[{0}] {1}: {2}", NameStatic, Version, message);
+            string messFormat = String.Format("[{0}] {1}: {2}", NameStatic, Version, message);
             if (LogBak == messFormat && !logTimer.IsFinished) return;
 
             Logging.Write(Colors.LightSeaGreen, messFormat, args);
@@ -122,10 +125,21 @@ namespace GarrisonButler
             Logging.WriteDiagnostic(Colors.Orange, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
+        private static void LootClosed(object sender, LuaEventArgs args)
+        {
+            LootIsOpen = false;
+        }
+
+        private static void LootOpened(object sender, LuaEventArgs args)
+        {
+            LootIsOpen = true;
+        }
+
         #region overrides
 
         internal static bool LootIsOpen = false;
         private Composite _root;
+        private DateTime lastRunTime = DateTime.MinValue;
 
         public override string Name
         {
@@ -148,7 +162,6 @@ namespace GarrisonButler
             get { return false; }
         }
 
-        private DateTime lastRunTime = DateTime.MinValue;
         public override bool RequirementsMet
         {
             get
@@ -156,7 +169,7 @@ namespace GarrisonButler
                 TimeSpan timeElapsed = DateTime.Now - lastRunTime;
                 if (timeElapsed.TotalMinutes > GaBSettings.Get().TimeMinBetweenRun)
                 {
-                    var anyToDo = Coroutine.AnythingTodo();
+                    bool anyToDo = Coroutine.AnythingTodo();
                     if (anyToDo)
                     {
                         lastRunTime = DateTime.Now;
@@ -179,33 +192,33 @@ namespace GarrisonButler
             // Loading configuration from file or default
             GaBSettings.Load();
 
-            GarrisonButler.Diagnostic("Attaching to GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+            Diagnostic("Attaching to GARRISON_MISSION_BONUS_ROLL_COMPLETE");
             Lua.Events.AttachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
 
-            GarrisonButler.Diagnostic("Attaching to GARRISON_MISSION_COMPLETE_RESPONSE");
+            Diagnostic("Attaching to GARRISON_MISSION_COMPLETE_RESPONSE");
             Lua.Events.AttachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
 
-            GarrisonButler.Diagnostic("Attaching to GARRISON_MISSION_STARTED");
+            Diagnostic("Attaching to GARRISON_MISSION_STARTED");
             Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
 
-            GarrisonButler.Diagnostic("Attaching to LOOT_OPENED");
+            Diagnostic("Attaching to LOOT_OPENED");
             Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
 
-            GarrisonButler.Diagnostic("Attaching to LOOT_CLOSED");
+            Diagnostic("Attaching to LOOT_CLOSED");
             Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
         }
 
         public override void OnDeselected()
         {
-            GarrisonButler.Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+            Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
             Lua.Events.DetachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
-            GarrisonButler.Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
+            Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
             Lua.Events.DetachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
-            GarrisonButler.Diagnostic("Detaching from GARRISON_MISSION_STARTED");
+            Diagnostic("Detaching from GARRISON_MISSION_STARTED");
             Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
-            GarrisonButler.Diagnostic("Detaching from LOOT_OPENED");
+            Diagnostic("Detaching from LOOT_OPENED");
             Lua.Events.DetachEvent("LOOT_OPENED", LootOpened);
-            GarrisonButler.Diagnostic("Detaching from LOOT_CLOSED");
+            Diagnostic("Detaching from LOOT_CLOSED");
             Lua.Events.DetachEvent("LOOT_CLOSED", LootClosed);
             base.OnDeselected();
         }
@@ -214,30 +227,20 @@ namespace GarrisonButler
         {
             try
             {
-                GarrisonButler.Diagnostic("Coroutine OnStart");
+                Diagnostic("Coroutine OnStart");
                 Coroutine.OnStart();
             }
             catch (Exception e)
             {
-
-                GarrisonButler.Diagnostic(e.ToString());
+                Diagnostic(e.ToString());
             }
         }
 
         public override void Stop()
         {
-           Coroutine.OnStop();
+            Coroutine.OnStop();
         }
 
         #endregion
-        private static void LootClosed(object sender, LuaEventArgs args)
-        {
-            LootIsOpen = false;
-        }
-
-        private static void LootOpened(object sender, LuaEventArgs args)
-        {
-            LootIsOpen = true;
-        }
     }
 }

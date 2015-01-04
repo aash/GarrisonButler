@@ -1,10 +1,13 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using GarrisonLua;
 using NewMixedMode;
@@ -19,6 +22,8 @@ using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -71,6 +76,10 @@ namespace GarrisonButler
 
         public static bool ReadyToSwitch = false;
 
+        private static bool RestoreCompletedMission;
+        private static ActionsSequence mainSequence;
+        private static Stopwatch testStopwatch = new Stopwatch();
+
         #region MixedModeTimers
 
         private static bool DailiesTriggered;
@@ -122,8 +131,6 @@ namespace GarrisonButler
 
         #endregion
 
-        private static bool RestoreCompletedMission = false;
-        
         private static LocalPlayer Me
         {
             get { return StyxWoW.Me; }
@@ -149,7 +156,6 @@ namespace GarrisonButler
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
         }
 
-        private static ActionsSequence mainSequence;
         internal static void OnStart()
         {
             try
@@ -164,7 +170,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializeDailies");
 
                 mainSequence = new ActionsSequence();
-                mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
+                mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison));
                 mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
@@ -191,7 +197,6 @@ namespace GarrisonButler
 
         internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
         {
-
             if (StyxWoW.Me.Combat)
                 return;
 
@@ -230,12 +235,10 @@ namespace GarrisonButler
                 outgoingUnits.Add(unit);
             }
         }
-        
-        private static Stopwatch testStopwatch = new Stopwatch();
 
         public static async Task<bool> RootLogic()
         {
-            var configVersion = GaBSettings.Get().ConfigVersion;
+            ModuleVersion configVersion = GaBSettings.Get().ConfigVersion;
             /*if (configVersion.Build != GarrisonButler.Version.Build ||
                 configVersion.Major != GarrisonButler.Version.Major ||
                 configVersion.Minor != GarrisonButler.Version.Minor ||
@@ -288,31 +291,31 @@ namespace GarrisonButler
             return false;
         }
 
-        internal static Tuple<bool, WoWItem> CanTPToGarrison()
+        internal static Tuple<bool, WoWItem> ShouldTPToGarrison()
         {
-            if (!GaBSettings.Get().UseGarrisonHearthstone)
+            if (!GarrisonsZonesId.Contains(Me.ZoneId))
             {
-                return new Tuple<bool, WoWItem>(false, null);
+                if (!GaBSettings.Get().UseGarrisonHearthstone)
+                {
+                    TreeRoot.Stop("Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
+                }
+                else
+                {
+                    WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
+                    if (stone == null)
+                        return new Tuple<bool, WoWItem>(false, null);
+
+                    if (stone.CooldownTimeLeft.TotalSeconds > 0)
+                        return new Tuple<bool, WoWItem>(false, null);
+
+                    return new Tuple<bool, WoWItem>(true, stone);
+                }
             }
-
-            if (GarrisonsZonesId.Contains(Me.ZoneId))
-            {
-                return new Tuple<bool, WoWItem>(false, null);
-            }
-
-            WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
-            if(stone == null)
-                return new Tuple<bool, WoWItem>(false, null);
-
-             if (stone.CooldownTimeLeft.TotalSeconds > 0)
-                return new Tuple<bool, WoWItem>(false, null);
-
-            return new Tuple<bool, WoWItem>(true,stone);
+            return new Tuple<bool, WoWItem>(false, null);
         }
 
         private static async Task<bool> TransportToGarrison()
         {
-
             if (GaBSettings.Get().UseGarrisonHearthstone)
             {
                 WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
@@ -321,7 +324,7 @@ namespace GarrisonButler
                     if (stone.CooldownTimeLeft.TotalSeconds > 0)
                     {
                         GarrisonButler.Warning("UseGarrisonHearthstone: On cooldown, " +
-                                              stone.CooldownTimeLeft.TotalSeconds + " secs left.");
+                                               stone.CooldownTimeLeft.TotalSeconds + " secs left.");
                         return true;
                     }
                     GarrisonButler.Log("Using garrison hearthstone.");
@@ -329,10 +332,17 @@ namespace GarrisonButler
                         WoWMovement.MoveStop();
                     await Buddy.Coroutines.Coroutine.Wait(1000, () => !Me.IsMoving);
                     stone.Use();
+
+                    if (!await Buddy.Coroutines.Coroutine.Wait(15000, () => !Me.IsCasting))
+                    {
+                        GarrisonButler.Log("Casting Garrison Hearthstone.");
+                        return true;
+                    }
+
                     if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
                     {
-                        GarrisonButler.Warning("Used garrison hearthstone but not in garrison yet.");
-                        return false;
+                        GarrisonButler.Log("Waiting after casting Garrison Hearthstone...");
+                        return true;
                     }
                 }
                 else GarrisonButler.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
@@ -341,9 +351,9 @@ namespace GarrisonButler
             {
                 GarrisonButler.Warning(
                     "Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
-                return false;
+                return true;
             }
-            return false;
+            return true;
         }
 
         private static bool IsAutoAngler()

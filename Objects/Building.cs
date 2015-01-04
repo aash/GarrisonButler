@@ -46,13 +46,12 @@ namespace GarrisonButler
         public int ReagentId;
         public List<int> ReagentIds;
 
-        private String timeStart;
-        private String nameShipment;
-        private String plotId;
         private String _buildTime;
         private String buildingLevel;
         internal bool canActivate;
+        public CanCompleteOrderD canCompleteOrder = () => false;
         private String canUpgrade;
+        public String creationTime;
         private int currencyId;
         private String duration;
         public int id;
@@ -62,13 +61,14 @@ namespace GarrisonButler
         private String itemQuality;
         public int millItemPnj;
         public String name;
+        private String nameShipment;
+        private String plotId;
         public int rank;
         public int shipmentCapacity;
         public int shipmentsReady;
 
         public int shipmentsTotal;
-        public String creationTime;
-        public CanCompleteOrderD canCompleteOrder = () => false;
+        private String timeStart;
         // Settings
 
 
@@ -444,7 +444,7 @@ namespace GarrisonButler
                     PnjId = alliance ? 77775 : 79830;
                     ReagentId = 109118;
                     NumberReagent = 5;
-                    Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5630.081,4526.252,119.2066);
+                    Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5630.081, 4526.252, 119.2066);
                     canCompleteOrder = canCompleteOrderItem;
                     Displayids = new List<uint>
                     {

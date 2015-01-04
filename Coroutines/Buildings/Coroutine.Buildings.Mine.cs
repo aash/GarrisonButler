@@ -1,22 +1,26 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bots.DungeonBuddy.Helpers;
 using GarrisonButler.Config;
-using Styx;
-using Styx.Common.Helpers;
-using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
-using Styx.CommonBot.POI;
-using Styx.CommonBot.Profiles.Quest.Order;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 namespace GarrisonButler
 {
     partial class Coroutine
     {
+        private const int PreserverdMiningPickItemId = 118903;
+        private const int PreserverdMiningPickAura = 176061;
+
+        private const int MinersCofeeItemId = 118897;
+        private const int MinersCofeeAura = 176049;
+
         private static readonly List<uint> MineItems = new List<uint>
         {
             232541, // Mine cart
@@ -36,12 +40,6 @@ namespace GarrisonButler
             7329, // horde 3
         };
 
-        private const int PreserverdMiningPickItemId = 118903;
-        private const int PreserverdMiningPickAura = 176061;
-
-        private const int MinersCofeeItemId = 118897;
-        private const int MinersCofeeAura = 176049;
-
 
         private static bool ShouldRunMine()
         {
@@ -54,7 +52,7 @@ namespace GarrisonButler
             if (!GaBSettings.Get().HarvestMine)
             {
                 GarrisonButler.Diagnostic("[Mine] Deactivated in user settings.");
-                return new Tuple<bool,WoWGameObject>(false,null);
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             // Do i have a mine?
@@ -65,7 +63,11 @@ namespace GarrisonButler
             }
 
             // Is there something to mine? 
-            WoWGameObject node = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().Where(o => MineItems.Contains(o.Entry)).OrderBy(o=> o.Distance).FirstOrDefault();
+            WoWGameObject node =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .Where(o => MineItems.Contains(o.Entry))
+                    .OrderBy(o => o.Distance)
+                    .FirstOrDefault();
             if (node == default(WoWGameObject))
             {
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
@@ -101,17 +103,17 @@ namespace GarrisonButler
 
         public static Func<Tuple<bool, WoWItem>> CanUseItemInBags(uint entry, uint auraId = 0, int maxStack = 0)
         {
-            return new Func<Tuple<bool, WoWItem>>(() =>
+            return () =>
             {
                 WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
                 if (item == null || !item.IsValid || !item.Usable)
                     return new Tuple<bool,
                         WoWItem>(false,
                             null);
-                var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
+                IEnumerable<KeyValuePair<string, WoWAura>> auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
                 if (auraId != 0 && maxStack != 0 && auras.Any())
                 {
-                    var Aura = auras.First().Value;
+                    WoWAura Aura = auras.First().Value;
                     if (Aura == null)
                     {
                         GarrisonButler.Diagnostic("[Item] Aura null skipping.");
@@ -132,7 +134,7 @@ namespace GarrisonButler
                 if (item.CooldownTimeLeft.TotalSeconds > 0)
                     return new Tuple<bool, WoWItem>(false, null);
                 return new Tuple<bool, WoWItem>(true, item);
-            });
+            };
         }
 
         public static async Task<bool> UseItemInbags(WoWItem item)

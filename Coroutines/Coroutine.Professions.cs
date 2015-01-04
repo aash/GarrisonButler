@@ -34,12 +34,14 @@ namespace GarrisonButler
             //if (_detectedDailyProfessions == null)
             //{
             //    GarrisonButler.Diagnostic("[Profession] Creating daily CD list.");
-                _detectedDailyProfessions = new List<DailyProfession>();
+            _detectedDailyProfessions = new List<DailyProfession>();
             //}
 
-                //var dailyActivated = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d)
-                //    && GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
-            var dailyActivated = DailyProfession.AllDailies.Where(d => GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
+            //var dailyActivated = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d)
+            //    && GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
+            IEnumerable<DailyProfession> dailyActivated =
+                DailyProfession.AllDailies.Where(
+                    d => GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
 
             //GarrisonButler.Diagnostic("[Profession] AllDailies:");
             //ObjectDumper.WriteToHB(DailyProfession.AllDailies, 1); 
@@ -90,11 +92,11 @@ namespace GarrisonButler
 
             IEnumerable<DailyProfession> possibleDailies =
                 _detectedDailyProfessions.Where(d => Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
-                    .Where(d => d.GetMaxRepeat() > 0).OrderBy(d=>d.TradeskillId);
+                    .Where(d => d.GetMaxRepeat() > 0).OrderBy(d => d.TradeskillId);
 
             if (possibleDailies.Any())
             {
-                var daily = possibleDailies.First();
+                DailyProfession daily = possibleDailies.First();
                 GarrisonButler.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1} - #{2}",
                     daily.TradeskillId, daily.Spell.Name, daily.GetMaxRepeat());
                 return new Tuple<bool, DailyProfession>(true, daily);
@@ -109,11 +111,8 @@ namespace GarrisonButler
             {
                 return await FindAnvilAndDoCd(daily);
             }
-            else
-            {
-                if (await DoCd(daily))
-                    return true;
-            }
+            if (await DoCd(daily))
+                return true;
 
             DailiesTriggered = false;
             return true;

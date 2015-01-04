@@ -1,18 +1,18 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
-using Buddy.Coroutines;
 using GarrisonButler.Config;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
-using Styx.CommonBot.Coroutines;
-using Styx.CommonBot.Profiles.Quest.Order;
-using Tripper.RecastManaged.Recast;
+
+#endregion
 
 namespace GarrisonButler
 {
@@ -32,10 +32,11 @@ namespace GarrisonButler
 
             if (myFactionWaitingPoints[townHallLevel - 1] == new WoWPoint())
             {
-                throw new NotImplementedException("This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
+                throw new NotImplementedException(
+                    "This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
 
-            Bots.Professionbuddy.Dynamic.HBRelogApi hbRelogApi = new HBRelogApi();
+            var hbRelogApi = new HBRelogApi();
 
             if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
             {
@@ -56,10 +57,6 @@ namespace GarrisonButler
                         if (await MoveTo(fishingSpot))
                             return true;
                     }
-                }
-                else
-                {
-                    // Go out of garrison! 
                 }
             }
             else
@@ -86,7 +83,8 @@ namespace GarrisonButler
         {
             RefreshBuildings();
             // dailies cd
-            if (helperTriggerWithTimer(ShouldRunDailies, ref DailiesWaitTimer, ref DailiesTriggered, DailiesWaitTimerValue))
+            if (helperTriggerWithTimer(ShouldRunDailies, ref DailiesWaitTimer, ref DailiesTriggered,
+                DailiesWaitTimerValue))
                 return true;
             // Cache
             if (helperTriggerWithTimer(ShouldRunCache, ref CacheWaitTimer, ref CacheTriggered, CacheWaitTimerValue))
@@ -116,7 +114,8 @@ namespace GarrisonButler
                 return true;
 
             // Salvage
-            if (helperTriggerWithTimer(ShouldRunSalvage, ref SalvageWaitTimer, ref SalvageTriggered, SalvageWaitTimerValue))
+            if (helperTriggerWithTimer(ShouldRunSalvage, ref SalvageWaitTimer, ref SalvageTriggered,
+                SalvageWaitTimerValue))
                 return true;
 
             // Salvage
@@ -145,22 +144,24 @@ namespace GarrisonButler
 
             return toModify;
         }
+
         // The trigger must be set off by someone else to avoid pauses in the behavior! 
-       
     }
 
     internal class ActionsSequence : Action
     {
-        private List<Action> Actions;
+        private readonly List<Action> Actions;
 
         public ActionsSequence(params Action[] actions)
         {
             Actions = actions.ToList();
         }
+
         public ActionsSequence(ActionsSequence actionsSequence)
         {
             Actions = actionsSequence.Actions;
         }
+
         public ActionsSequence()
         {
             Actions = new List<Action>();
@@ -174,7 +175,7 @@ namespace GarrisonButler
         public override async Task<bool> ExecuteAction()
         {
             //GarrisonButler.Diagnostic("Starting main sequence.");
-            foreach (var actionBasic in Actions)
+            foreach (Action actionBasic in Actions)
             {
                 //GarrisonButler.Diagnostic("Starting main sequence: executing action");
                 if (await actionBasic.ExecuteAction())
@@ -183,18 +184,20 @@ namespace GarrisonButler
             return false;
         }
     }
+
     internal class ActionOnTimer<T> : Action
     {
         private readonly Func<T, Task<bool>> _action;
+        private readonly bool _caching;
         private readonly Func<Tuple<bool, T>> _condition;
-        private Tuple<bool, T> _tempStorage;
-        private Action[] _preActions;
-        private WaitTimer _waitTimer;
+        private readonly Action[] _preActions;
+        private readonly WaitTimer _waitTimer;
         private bool _lastResult;
-        private bool _caching;
         private bool _needToCache = false;
+        private Tuple<bool, T> _tempStorage;
 
-        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 3000, bool instantStart = false, bool caching = false, params Action[] preAction)
+        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 3000,
+            bool instantStart = false, bool caching = false, params Action[] preAction)
         {
             _action = action;
             _condition = condition;
@@ -222,16 +225,16 @@ namespace GarrisonButler
 
             if (result.Item1)
             {
-                foreach (var preAction in _preActions)
+                foreach (Action preAction in _preActions)
                 {
-                    if(await preAction.ExecuteAction())
+                    if (await preAction.ExecuteAction())
                         await Buddy.Coroutines.Coroutine.Yield();
                 }
                 _lastResult = await _action(result.Item2);
             }
             else
                 _lastResult = result.Item1;
-            
+
             _waitTimer.Reset();
             return _lastResult;
         }
@@ -241,8 +244,8 @@ namespace GarrisonButler
     {
         private readonly Func<Task<bool>> _action;
         private readonly Func<bool> _condition;
-        protected WaitTimer _waitTimer;
         protected bool _lastResult;
+        protected WaitTimer _waitTimer;
 
         public ActionBasic(Func<Task<bool>> action, int waitTimeMs = 3000, bool instantStart = false)
         {
@@ -250,8 +253,11 @@ namespace GarrisonButler
             _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
             _lastResult = instantStart;
         }
+
         public ActionBasic()
-        { }
+        {
+        }
+
         public override async Task<bool> ExecuteAction()
         {
             //GarrisonButler.Diagnostic("Execute ExecuteAction.");
@@ -269,9 +275,9 @@ namespace GarrisonButler
             return _lastResult;
         }
     }
+
     internal abstract class Action
     {
         public abstract Task<bool> ExecuteAction();
-
     }
 }
