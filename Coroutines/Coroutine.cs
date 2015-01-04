@@ -165,7 +165,7 @@ namespace GarrisonButler
 
                 mainSequence = new ActionsSequence();
                 mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, CanTPToGarrison));
-                mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies));
+                mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
                 mainSequence.AddAction(new ActionBasic(DoSalvages));
@@ -236,7 +236,7 @@ namespace GarrisonButler
         public static async Task<bool> RootLogic()
         {
             var configVersion = GaBSettings.Get().ConfigVersion;
-            if (configVersion.Build != GarrisonButler.Version.Build ||
+            /*if (configVersion.Build != GarrisonButler.Version.Build ||
                 configVersion.Major != GarrisonButler.Version.Major ||
                 configVersion.Minor != GarrisonButler.Version.Minor ||
                 configVersion.Revision != GarrisonButler.Version.Revision)
@@ -252,6 +252,7 @@ namespace GarrisonButler
                 TreeRoot.Stop("Configuration of GarrisonButler outdated or inexistant.");
                 return true;
             }
+            */
             // Fast checks
             CheckResetAfk();
 

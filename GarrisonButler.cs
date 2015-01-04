@@ -18,7 +18,8 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 0, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 2, 4);
+
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
@@ -26,6 +27,11 @@ namespace GarrisonButler
         public GarrisonButler()
         {
             Instance = this;
+        }
+
+        public static string NameStatic
+        {
+            get { return "GarrisonButler ICE"; }
         }
 
         // internal AutoAnglerProfile Profile { get; private set; }
@@ -126,10 +132,6 @@ namespace GarrisonButler
             get { return NameStatic; }
         }
 
-        public static string NameStatic
-        {
-            get { return "GarrisonButler Lite"; }
-        }
 
         public override PulseFlags PulseFlags
         {

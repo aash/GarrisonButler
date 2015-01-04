@@ -37,7 +37,12 @@ namespace GarrisonButler.Objects
         public void Initialize()
         {
             if (GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId).Activated)
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] {0}: loading spell.", this.Name);
                 Spell = HasRecipe();
+            }
+            else
+                GarrisonButler.Diagnostic("[DailyProfession] {0}: not activated.", this.Name);
         }
         public bool needAnvil()
         {
@@ -47,8 +52,8 @@ namespace GarrisonButler.Objects
         {
             string name = Enum.GetName(typeof(DailyProfession.tradeskillID), TradeskillId);
             var TradeSkillSpell = (DailyProfession.tradeskillSpell)Enum.Parse(typeof(DailyProfession.tradeskillSpell), name);
-            GarrisonButler.Diagnostic("[Profession] Name:" + name);
-            GarrisonButler.Diagnostic("[Profession] TradeSkillSpell:" + TradeSkillSpell);
+            GarrisonButler.Diagnostic("[DailyProfession] Name:" + name);
+            GarrisonButler.Diagnostic("[DailyProfession] TradeSkillSpell:" + TradeSkillSpell);
 
             if (!SpellManager.HasSpell((int)TradeSkillSpell))
                 return null;
@@ -109,7 +114,7 @@ namespace GarrisonButler.Objects
             var skillLine = (SkillLine)TradeskillId;
             if (!Enum.GetValues(typeof(SkillLine)).Cast<SkillLine>().Contains(skillLine))
             {
-                //QBCLog.ProfileError("TradeSkillId {0} is not a valid tradeskill Id.", TradeSkillId);
+                GarrisonButler.Diagnostic("[DailyProfession] TradeSkillId {0} is not a valid tradeskill Id.", TradeskillId);
             }
 
             int skillLineId = (int)TradeskillId;

@@ -65,6 +65,7 @@ namespace GarrisonButler
                         CanRunMine,
                         1000,
                         false,
+                        true,
                         new ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>

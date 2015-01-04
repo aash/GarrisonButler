@@ -30,15 +30,29 @@ namespace GarrisonButler
         {
             //if (_detectedDailyProfessions != null) return;
 
-            //GarrisonButler.Log("Loading Professions dailies, please wait.");
-            if (_detectedDailyProfessions == null)
+            //GarrisonButler.Diagnostic("[Profession] Loading Professions dailies.");
+            //if (_detectedDailyProfessions == null)
+            //{
+            //    GarrisonButler.Diagnostic("[Profession] Creating daily CD list.");
                 _detectedDailyProfessions = new List<DailyProfession>();
-            var dailyNotAdded = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d) && d.Activated);
-            
-            if (!dailyNotAdded.Any())
-                return;
+            //}
 
-            foreach (DailyProfession daily in dailyNotAdded)
+                //var dailyActivated = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d)
+                //    && GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
+            var dailyActivated = DailyProfession.AllDailies.Where(d => GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
+
+            //GarrisonButler.Diagnostic("[Profession] AllDailies:");
+            //ObjectDumper.WriteToHB(DailyProfession.AllDailies, 1); 
+            //GarrisonButler.Diagnostic("[Profession] _detectedDailyProfessions:");
+            //ObjectDumper.WriteToHB(_detectedDailyProfessions, 1);
+
+            if (!dailyActivated.Any())
+            {
+                GarrisonButler.Diagnostic("[Profession] No daily activated in settings.");
+                return;
+            }
+
+            foreach (DailyProfession daily in dailyActivated)
             {
                 daily.Initialize();
                 if (daily.Spell != null)
@@ -46,9 +60,10 @@ namespace GarrisonButler
                     GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Spell.Name);
                     _detectedDailyProfessions.Add(daily);
                 }
+                //else
+                //    GarrisonButler.Diagnostic("[Profession] Spell null: {0}", daily.Name);
             }
-
-            //GarrisonButler.Log("Loading Professions dailies done.");
+            //GarrisonButler.Diagnostic("[Profession] Loading Professions dailies done.");
         }
 
         private static bool ShouldRunDailies()
@@ -92,8 +107,7 @@ namespace GarrisonButler
         {
             if (daily.needAnvil())
             {
-                if (await FindAnvilAndDoCd(daily))
-                    return true;
+                return await FindAnvilAndDoCd(daily);
             }
             else
             {

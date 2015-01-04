@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
+using Buddy.Coroutines;
 using GarrisonButler.Config;
 using GarrisonLua;
 using NewMixedMode;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
+using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Profiles.Quest.Order;
 using Tripper.RecastManaged.Recast;
 
@@ -37,7 +39,9 @@ namespace GarrisonButler
 
             if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
             {
-                hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);                
+                GarrisonButler.Diagnostic("[HBRelogMode] Skipping current task.");
+                hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);
+                await Buddy.Coroutines.Coroutine.Sleep(1000);
             }
             else if (BotManager.Current.Name == "Mixed Mode")
             {
@@ -183,19 +187,22 @@ namespace GarrisonButler
     {
         private readonly Func<T, Task<bool>> _action;
         private readonly Func<Tuple<bool, T>> _condition;
-        private readonly T _tempStorage;
+        private Tuple<bool, T> _tempStorage;
         private Action[] _preActions;
         private WaitTimer _waitTimer;
         private bool _lastResult;
+        private bool _caching;
+        private bool _needToCache = false;
 
-        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 3000, bool instantStart = false, params Action[] preAction)
+        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 3000, bool instantStart = false, bool caching = false, params Action[] preAction)
         {
             _action = action;
             _condition = condition;
-            _tempStorage = default(T);
+            _tempStorage = default(Tuple<bool, T>);
             _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
             _lastResult = instantStart;
             _preActions = preAction;
+            _caching = caching;
         }
 
         public override async Task<bool> ExecuteAction()
@@ -207,19 +214,23 @@ namespace GarrisonButler
                 return false;
             }
             //GarrisonButler.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
-                        
-                var result = _condition();
-                if (result.Item1)
+            Tuple<bool, T> result;
+            if (_caching && !_lastResult)
+                _tempStorage = _condition();
+
+            result = _caching ? _tempStorage : _condition();
+
+            if (result.Item1)
+            {
+                foreach (var preAction in _preActions)
                 {
-                    foreach (var preAction in _preActions)
-                    {
-                        if(await preAction.ExecuteAction())
-                            await Buddy.Coroutines.Coroutine.Yield();
-                    }
-                    _lastResult = await _action(result.Item2);
+                    if(await preAction.ExecuteAction())
+                        await Buddy.Coroutines.Coroutine.Yield();
                 }
-                else
-                    _lastResult = result.Item1;
+                _lastResult = await _action(result.Item2);
+            }
+            else
+                _lastResult = result.Item1;
             
             _waitTimer.Reset();
             return _lastResult;

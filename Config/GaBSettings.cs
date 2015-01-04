@@ -11,6 +11,7 @@ using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using JetBrains.Annotations;
 using Styx.Helpers;
+using System.Text;
 
 #endregion
 
@@ -57,7 +58,6 @@ namespace GarrisonButler.Config
         public List<DailyProfession> DailySettings { get; set; }
 
         public bool UseGarrisonHearthstone { get; set; }
-
         
         public bool GarrisonCache { get; set; }
         public bool HarvestGarden { get; set; }
@@ -108,7 +108,7 @@ namespace GarrisonButler.Config
             writer.Serialize(file, currentSettings);
             file.Close();
         }
-
+        
         public static void Load()
         {
             try
@@ -120,13 +120,15 @@ namespace GarrisonButler.Config
                     new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
                 currentSettings = (GaBSettings) reader.Deserialize(file);
                 GarrisonButler.Diagnostic("Configuration successfully loaded.");
+
             }
             catch (Exception e)
             {
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
-                GarrisonButler.Diagnostic("Exception: " + e);
                 currentSettings = DefaultConfig();
             }
+            //ObjectDumper.Write(currentSettings);
+            ObjectDumper.WriteToHB(currentSettings, 3);
         }
     }
 }
