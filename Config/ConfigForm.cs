@@ -229,7 +229,9 @@ namespace GarrisonButler.Config
                 mainWrapPanel.Orientation = Orientation.Horizontal;
                 mainWrapPanel.Width = double.NaN;
 
-                foreach (BuildingSettings buildingsSetting in GaBSettings.Get().BuildingsSettings.OrderBy(b => b.Name))
+                foreach (BuildingSettings buildingsSetting in 
+                    GaBSettings.Get().BuildingsSettings.Where(bs=> Building.HasOrder((buildings)bs.BuildingIds.First()))
+                    .OrderBy(b => b.Name))
                 {
                     UIElement b = BuildingBox(buildingsSetting);
                     mainWrapPanel.Children.Add(b);
@@ -435,6 +437,13 @@ namespace GarrisonButler.Config
                 CheckBox UseMiningPick = CreateCheckBoxWithBinding("Use mining pick in mine", "UseMiningPick",
                     GaBSettings.Get());
                 mainWrapPanel.Children.Add(UseMiningPick);
+
+                CheckBox DeleteCoffee = CreateCheckBoxWithBinding("Delete coffee when at 5.", "DeleteCoffee", GaBSettings.Get());
+                mainWrapPanel.Children.Add(DeleteCoffee);
+
+                CheckBox DeleteMiningPick = CreateCheckBoxWithBinding("Delete mining when at 5.", "DeleteMiningPick",
+                    GaBSettings.Get());
+                mainWrapPanel.Children.Add(DeleteMiningPick);
 
 
                 CheckBox ActivateBuildings = CreateCheckBoxWithBinding("Activate finished buildings",

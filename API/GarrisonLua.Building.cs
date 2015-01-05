@@ -54,7 +54,7 @@ namespace GarrisonLua
                     "return unpack(RetInfo)", buildingId);
             List<String> building = Lua.GetReturnValues(lua);
             int id = building[0].ToInt32();
-            String plotId = building[1];
+            int plotId = building[1].ToInt32();
             String buildingLevel = building[2];
             String name = building[3];
             int rank = building[4].ToInt32();

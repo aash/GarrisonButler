@@ -1,6 +1,8 @@
 ﻿#region
 
+using System;
 using System.Threading.Tasks;
+using Styx;
 using Styx.CommonBot.POI;
 using Styx.WoWInternals.WoWObjects;
 
@@ -17,23 +19,30 @@ namespace GarrisonButler
             {
                 BotPoi.Clear();
             }
-            //if (await MoveTo(toHarvest.Location))
-            //    return true;
 
-            //if (!await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsMoving || Me.Location.Distance(toHarvest.Location) < 1))
-            //{
-            //    WoWMovement.MoveStop();
-            //}
-            //await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
-            //GarrisonButler.Diagnostic("sleep");
-            //await Buddy.Coroutines.Coroutine.Sleep(200);
-
-            //if (!Me.IsMoving && !Me.IsCasting && BotPoi.Current.AsObject != toHarvest)
-            //    toHarvest.Interact();
             if (node != toHarvest)
                 BotPoi.Current = new BotPoi(toHarvest, PoiType.Harvest);
 
             return true;
+        }
+
+        private static WoWPoint CachedToHarvestLocation = WoWPoint.Empty;
+        private static async Task<bool> HarvestWoWGameObjectCachedLocation(WoWGameObject toHarvest)
+        {
+            if (toHarvest != null && toHarvest.IsValid)
+            {
+                CachedToHarvestLocation = toHarvest.Location;
+                return await HarvestWoWGameOject(toHarvest);
+            }
+
+            // First moving to cached location
+            if(CachedToHarvestLocation != WoWPoint.Empty)
+                if (await MoveTo(CachedToHarvestLocation))
+                    return true;
+
+            CachedToHarvestLocation = WoWPoint.Empty;
+
+            return await HarvestWoWGameOject(toHarvest);
         }
     }
 }

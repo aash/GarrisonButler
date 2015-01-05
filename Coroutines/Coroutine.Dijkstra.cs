@@ -30,6 +30,7 @@ namespace GarrisonButler
             if (_zonePoints == null)
             {
                 _zonePoints = GetGarrisonPoints();
+
                 //navigation.UpdateMaps();
             }
             if (navigation == null)

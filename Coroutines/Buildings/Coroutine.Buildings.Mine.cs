@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -45,7 +46,7 @@ namespace GarrisonButler
         {
             return CanRunMine().Item1;
         }
-
+ 
         private static Tuple<bool, WoWGameObject> CanRunMine()
         {
             // Settings
@@ -121,10 +122,11 @@ namespace GarrisonButler
                             WoWItem>(false,
                                 null);
                     }
-                    if (Aura.StackCount >= maxStack)
+                    if (Aura.StackCount >= maxStack || maxStack == 1)
                     {
-                        GarrisonButler.Diagnostic("[Item] Number of stacks: {0} - too high to use item {1}",
+                        GarrisonButler.Diagnostic("[Item] Number of stacks/Max: {0}/{1} - too high to use item {2}",
                             Aura.StackCount,
+                            maxStack,
                             Aura.Name);
                         return new Tuple<bool, WoWItem>(false, null);
                     }
@@ -144,6 +146,33 @@ namespace GarrisonButler
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);
             return true;
+        }
+
+        public static async Task<bool> DeleteItemInbags(WoWItem item)
+        {
+            GarrisonButler.Log("[Item] Deleting: {0}", item.Name);
+            Lua.DoString("ClearCursor()");
+            item.PickUp();
+            Lua.DoString("DeleteCursorItem()"); 
+            return true;
+        }
+
+
+        public static Func<Tuple<bool, WoWItem>> TooManyItemInBags(uint entry, int max = 0)
+        {
+            return () =>
+            {
+                WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
+                if(item == null || !item.IsValid || !item.Usable)
+                    return new Tuple<bool,
+                        WoWItem>(false,
+                            null);
+                
+                if(item.StackCount > max)
+                    return new Tuple<bool, WoWItem>(true, item);
+
+                return new Tuple<bool, WoWItem>(false, item);
+            };
         }
     }
 }

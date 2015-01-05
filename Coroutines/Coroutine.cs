@@ -298,6 +298,7 @@ namespace GarrisonButler
                 if (!GaBSettings.Get().UseGarrisonHearthstone)
                 {
                     TreeRoot.Stop("Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
+                    return new Tuple<bool, WoWItem>(true, null);
                 }
                 else
                 {
@@ -306,7 +307,7 @@ namespace GarrisonButler
                         return new Tuple<bool, WoWItem>(false, null);
 
                     if (stone.CooldownTimeLeft.TotalSeconds > 0)
-                        return new Tuple<bool, WoWItem>(false, null);
+                        return new Tuple<bool, WoWItem>(true, stone);
 
                     return new Tuple<bool, WoWItem>(true, stone);
                 }
@@ -336,13 +337,12 @@ namespace GarrisonButler
                     if (!await Buddy.Coroutines.Coroutine.Wait(15000, () => !Me.IsCasting))
                     {
                         GarrisonButler.Log("Casting Garrison Hearthstone.");
-                        return true;
-                    }
 
-                    if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
-                    {
-                        GarrisonButler.Log("Waiting after casting Garrison Hearthstone...");
-                        return true;
+                        if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
+                        {
+                            GarrisonButler.Log("Waiting after casting Garrison Hearthstone...");
+                            return true;
+                        }
                     }
                 }
                 else GarrisonButler.Warning("UseGarrisonHearthstone set to true but can't find it in bags.");
@@ -369,7 +369,7 @@ namespace GarrisonButler
             return false;
         }
 
-        public static async Task<bool> RestoreUiIfNeeded()
+        private static async Task<bool> RestoreUiIfNeeded()
         {
             if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
             {

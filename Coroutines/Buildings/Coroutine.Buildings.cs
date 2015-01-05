@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
 using GarrisonLua;
+using Styx;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -65,20 +66,22 @@ namespace GarrisonButler
                 // Harvest mine
                 buildingsActionsSequence.AddAction(
                     new ActionOnTimer<WoWGameObject>(
-                        HarvestWoWGameOject,
+                        HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
                         1000,
                         false,
-                        true,
+                        false,
+                        // Drink coffee
                         new ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
                             {
-                                Tuple<bool, WoWItem> canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 2)();
+                                Tuple<bool, WoWItem> canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 1)();
                                 return
                                     new Tuple<bool, WoWItem>(
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
                             }),
+                        // Use Mining Pick 
                         new ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
@@ -88,6 +91,28 @@ namespace GarrisonButler
                                 return
                                     new Tuple<bool, WoWItem>(
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
+                            }),
+                        // Delete Coffee 
+                        new ActionOnTimer<WoWItem>(
+                            DeleteItemInbags,
+                            () =>
+                            {
+                                Tuple<bool, WoWItem> tooMany =
+                                    TooManyItemInBags(MinersCofeeItemId, 5)();
+                                return
+                                    new Tuple<bool, WoWItem>(
+                                        tooMany.Item1 && GaBSettings.Get().DeleteCoffee, tooMany.Item2);
+                            }),
+                        // Delete Mining Pick 
+                        new ActionOnTimer<WoWItem>(
+                            DeleteItemInbags,
+                            () =>
+                            {
+                                Tuple<bool, WoWItem> tooMany =
+                                    TooManyItemInBags(PreserverdMiningPickItemId, 5)();
+                                return
+                                    new Tuple<bool, WoWItem>(
+                                        tooMany.Item1 && GaBSettings.Get().DeleteMiningPick, tooMany.Item2);
                             })));
 
                 // Take care of mine shipments

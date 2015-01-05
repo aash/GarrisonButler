@@ -45,7 +45,7 @@ namespace GarrisonButler
         public PrepOrderD PrepOrder = () => new Task<bool>(() => false);
         public int ReagentId;
         public List<int> ReagentIds;
-
+        public bool hasOrder = false;
         private String _buildTime;
         private String buildingLevel;
         internal bool canActivate;
@@ -62,7 +62,7 @@ namespace GarrisonButler
         public int millItemPnj;
         public String name;
         private String nameShipment;
-        private String plotId;
+        public int plotId;
         public int rank;
         public int shipmentCapacity;
         public int shipmentsReady;
@@ -72,7 +72,7 @@ namespace GarrisonButler
         // Settings
 
 
-        public Building(bool MeIsAlliance, int id, string plotId, string buildingLevel, string name, int rank,
+        public Building(bool MeIsAlliance, int id, int plotId, string buildingLevel, string name, int rank,
             bool isBuilding,
             string timeStart, string buildTime, bool canActivate, string canUpgrade, string isPrebuilt,
             string nameShipment, int shipmentCapacity, int shipmentsReady, int shipmentsTotal,
@@ -290,6 +290,7 @@ namespace GarrisonButler
                 case (int) buildings.AlchemyLabLvl1:
                 case (int) buildings.AlchemyLabLvl2:
                 case (int) buildings.AlchemyLabLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77791 : 79814;
                     ReagentId = 109124;
                     NumberReagent = 5;
@@ -310,7 +311,8 @@ namespace GarrisonButler
                     // horde   <Vendor Name="Farmer Lok'lub" Entry="85048" Type="Repair" X="5541.159" Y="4516.299" Z="131.7173" />
                 case (int) buildings.BarnLvl1:
                 case (int) buildings.BarnLvl2:
-                case (int) buildings.BarnLvl3:
+                case (int)buildings.BarnLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 84524 : 85048;
                     ReagentIds = new List<int> {119810, 119813, 119814};
                     NumberReagent = 1;
@@ -331,7 +333,7 @@ namespace GarrisonButler
 
                 case (int) buildings.BarracksLvl1:
                 case (int) buildings.BarracksLvl2:
-                case (int) buildings.BarracksLvl3:
+                case (int)buildings.BarracksLvl3:
                     Displayids = new List<uint>
                     {
                         14398, // Garrison Building Barracks V1
@@ -348,7 +350,8 @@ namespace GarrisonButler
                     //ally 2: <Vendor Name="Dalana Clarke" Entry="89065" Type="Repair" X="1924.622" Y="225.1501" Z="76.96214" />
                 case (int) buildings.DwarvenBunkerLvl1:
                 case (int) buildings.DwarvenBunkerLvl2:
-                case (int) buildings.DwarvenBunkerLvl3:
+                case (int)buildings.DwarvenBunkerLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 89065 : 89066;
                     currencyId = 824;
                     NumberReagent = 20;
@@ -372,7 +375,8 @@ namespace GarrisonButler
                     // ally 2 <Vendor Name="Garm" Entry="77781" Type="Repair" X="1806.123" Y="188.0837" Z="70.84762" />
                 case (int) buildings.EnchanterStudyLvl1:
                 case (int) buildings.EnchanterStudyLvl2:
-                case (int) buildings.EnchanterStudyLvl3:
+                case (int)buildings.EnchanterStudyLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77781 : 79820;
                     ReagentId = 109693;
                     NumberReagent = 5;
@@ -397,13 +401,17 @@ namespace GarrisonButler
                 case (int) buildings.EngineeringWorksLvl1:
                 case (int) buildings.EngineeringWorksLvl2:
                 case (int) buildings.EngineeringWorksLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77831 : 86696;
-                    ReagentId = 111366;
-                    NumberReagent = 5;
+                    ReagentIds = new List<int>(){
+                        109118, // Blackrock Ore
+                        109119 // True Iron Ore
+                    };
+                    NumberReagent = 2;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
-                    canCompleteOrder = canCompleteOrderItem;
+                    canCompleteOrder = canCompleteOrderItems;
                     Displayids = new List<uint>
                     {
                         15142, // Garrison Building Engineering Level 3
@@ -419,7 +427,8 @@ namespace GarrisonButler
                     //horde lvl 2 : <Vendor Name="Nali Softsoil" Entry="85783" Type="Repair" X="5410.738" Y="4568.479" Z="138.3254" />
                 case (int) buildings.GardenLvl1:
                 case (int) buildings.GardenLvl2:
-                case (int) buildings.GardenLvl3:
+                case (int)buildings.GardenLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 85514 : 85783;
                     ReagentId = 116053;
                     NumberReagent = 5;
@@ -440,7 +449,8 @@ namespace GarrisonButler
                     // horde 1 <Vendor Name="Elrondir Surrion" Entry="79830" Type="Repair" X="5649.468" Y="4509.388" Z="120.1563" />
                 case (int) buildings.GemBoutiqueLvl1:
                 case (int) buildings.GemBoutiqueLvl2:
-                case (int) buildings.GemBoutiqueLvl3:
+                case (int)buildings.GemBoutiqueLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77775 : 79830;
                     ReagentId = 109118;
                     NumberReagent = 5;
@@ -460,7 +470,8 @@ namespace GarrisonButler
                     //ally 2 <WoWUnit Name="Altar of Bones" Entry="86639" X="1865.334" Y="313.169" Z="83.95637" />
                 case (int) buildings.GladiatorSanctumLvl1:
                 case (int) buildings.GladiatorSanctumLvl2:
-                case (int) buildings.GladiatorSanctumLvl3:
+                case (int)buildings.GladiatorSanctumLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 86639 : 86639;
                     ReagentId = 118043;
                     NumberReagent = 10;
@@ -497,7 +508,8 @@ namespace GarrisonButler
                     // ally 2 : <Vendor Name="Justin Timberlord" Entry="84248" Type="Repair" X="1872.647" Y="310.0204" Z="82.61102" />
                 case (int) buildings.LumberMillLvl1:
                 case (int) buildings.LumberMillLvl2:
-                case (int) buildings.LumberMillLvl3:
+                case (int)buildings.LumberMillLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 84248 : 84247;
                     ReagentId = 114781; // Wood
                     NumberReagent = 10;
@@ -525,7 +537,8 @@ namespace GarrisonButler
                     //horde 3 : <Vendor Name="Gorsol" Entry="81688" Type="Repair" X="5467.965" Y="4449.892" Z="144.6722" />
                 case (int) buildings.MineLvl1:
                 case (int) buildings.MineLvl2:
-                case (int) buildings.MineLvl3:
+                case (int)buildings.MineLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77730 : 81688;
                     ReagentId = 115508;
                     NumberReagent = 5;
@@ -567,7 +580,8 @@ namespace GarrisonButler
                     // Horde lvl 2 <Vendor Name="Y'rogg" Entry="79831" Type="Repair" X="5666.928" Y="4545.664" Z="120.0819" />
                 case (int) buildings.ScribeQuartersLvl1:
                 case (int) buildings.ScribeQuartersLvl2:
-                case (int) buildings.ScribeQuartersLvl3:
+                case (int)buildings.ScribeQuartersLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77777 : 79831;
                     ReagentId = 114931; // Cerulean Pigment
                     NumberReagent = 2;
@@ -612,7 +626,8 @@ namespace GarrisonButler
                     // Horde : <Vendor Name="Turga" Entry="79863" Type="Repair" X="5643.418" Y="4507.895" Z="119.9948" />
                 case (int) buildings.TailoringEmporiumLvl1:
                 case (int) buildings.TailoringEmporiumLvl2:
-                case (int) buildings.TailoringEmporiumLvl3:
+                case (int)buildings.TailoringEmporiumLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77778 : 79863;
                     ReagentId = 111557; // Sumptuous fur
                     NumberReagent = 5;
@@ -633,7 +648,8 @@ namespace GarrisonButler
                     // <Vendor Name="Kinja" Entry="79817" Type="Repair" X="5641.551" Y="4508.724" Z="119.9587" />
                 case (int) buildings.TheForgeLvl1:
                 case (int) buildings.TheForgeLvl2:
-                case (int) buildings.TheForgeLvl3:
+                case (int)buildings.TheForgeLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 77792 : 79817;
                     ReagentId = 109119; // True iron ore
                     NumberReagent = 5;
@@ -654,7 +670,8 @@ namespace GarrisonButler
 
                 case (int) buildings.TheTanneryLvl1:
                 case (int) buildings.TheTanneryLvl2:
-                case (int) buildings.TheTanneryLvl3:
+                case (int)buildings.TheTanneryLvl3:
+                    hasOrder = true;
                     PnjId = alliance ? 78207 : 79833;
                     ReagentId = 110609;
                     NumberReagent = 5;
@@ -690,6 +707,88 @@ namespace GarrisonButler
                     break; // This one changes everyday... 
             }
         }
+
+
+        
+        public static bool HasOrder(buildings b)
+        {
+            switch (b)
+            {
+                case buildings.AlchemyLabLvl1:
+                case buildings.AlchemyLabLvl2:
+                case buildings.AlchemyLabLvl3:
+                case buildings.BarnLvl1:
+                case buildings.BarnLvl2:
+                case buildings.BarnLvl3:
+                case buildings.DwarvenBunkerLvl1:
+                case buildings.DwarvenBunkerLvl2:
+                case buildings.DwarvenBunkerLvl3:
+                case buildings.EnchanterStudyLvl1:
+                case buildings.EnchanterStudyLvl2:
+                case buildings.EnchanterStudyLvl3:
+                case buildings.EngineeringWorksLvl1:
+                case buildings.EngineeringWorksLvl2:
+                case buildings.EngineeringWorksLvl3:
+                case buildings.GardenLvl1:
+                case buildings.GardenLvl2:
+                case buildings.GardenLvl3:
+                case buildings.GemBoutiqueLvl1:
+                case buildings.GemBoutiqueLvl2:
+                case buildings.GemBoutiqueLvl3:
+                case buildings.GladiatorSanctumLvl1:
+                case buildings.GladiatorSanctumLvl2:
+                case buildings.GladiatorSanctumLvl3:
+                case buildings.TailoringEmporiumLvl1:
+                case buildings.TailoringEmporiumLvl2:
+                case buildings.TailoringEmporiumLvl3:
+                case buildings.TheForgeLvl1:
+                case buildings.TheForgeLvl2:
+                case buildings.TheForgeLvl3:
+                case buildings.TheTanneryLvl1:
+                case buildings.TheTanneryLvl2:
+                case buildings.TheTanneryLvl3:
+                case buildings.LumberMillLvl1:
+                case buildings.LumberMillLvl2:
+                case buildings.LumberMillLvl3:
+                case buildings.MineLvl1:
+                case buildings.MineLvl2:
+                case buildings.MineLvl3:
+                case buildings.ScribeQuartersLvl1:
+                case buildings.ScribeQuartersLvl2:
+                case buildings.ScribeQuartersLvl3:
+                    return true;
+                case buildings.GnomishGearworksLvl1:
+                case buildings.GnomishGearworksLvl2:
+                case buildings.GnomishGearworksLvl3:
+                   break;
+                case buildings.MageTowerLvl1:
+                case buildings.MageTowerLvl2:
+                case buildings.MageTowerLvl3:
+                   break;
+                case buildings.BarracksLvl1:
+                case buildings.BarracksLvl2:
+                case buildings.BarracksLvl3:
+                   break;
+                case buildings.SalvageYardLvl1:
+                case buildings.SalvageYardLvl2:
+                case buildings.SalvageYardLvl3:
+                    break;
+                case buildings.StablesLvl1:
+                case buildings.StablesLvl2:
+                case buildings.StablesLvl3:
+                   break;
+                case buildings.StorehouseLvl1:
+                case buildings.StorehouseLvl2:
+                case buildings.StorehouseLvl3:
+                    break;
+                case buildings.TradingPostLvl1:
+                case buildings.TradingPostLvl2:
+                case buildings.TradingPostLvl3:
+                    break; // This one changes everyday... 
+            }
+            return false;
+        }
+    
     }
 
     public enum buildings

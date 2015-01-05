@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -45,6 +46,26 @@ namespace GarrisonButler
 
         public override MoveResult MovePath(MeshMovePath path)
         {
+            if (StyxWoW.Me.Mounted)
+            {
+                if (path == null || path.Path == null || (path.Index < 0 || path.Index >= path.Path.Points.Length))
+                    return MoveResult.Failed;
+
+                WoWUnit activeMover = WoWMovement.ActiveMover;
+                if ((WoWObject) activeMover == (WoWObject) null)
+                    return MoveResult.Failed;
+                double pathPrecision = StyxWoW.Me.Mounted ? 7 : 3;
+                if (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision)
+                {
+                    ++path.Index;
+                    return MoveResult.Moved;
+                }
+
+                Tripper.Tools.Math.Vector3 vector3 = path.Path.Points[path.Index];
+                Navigator.PlayerMover.MoveTowards((WoWPoint) vector3);
+                return MoveResult.Moved;
+            }
+
             MoveResult res = base.MovePath(path);
             return res;
         }
@@ -95,10 +116,9 @@ namespace GarrisonButler
                 stuckHandlerGaB.Reset();
                 return MoveResult.ReachedDestination;
             }
-            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
+            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 8f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
-                stuckHandlerGaB.Reset();
                 return MoveResult.Moved;
             }
             if (Mount.ShouldMount(location))
@@ -107,7 +127,7 @@ namespace GarrisonButler
             }
             if (waitTimer1.IsFinished)
             {
-                WoWGameObject woWgameObject =
+                WoWGameObject wowgameObject =
                     ObjectManager.GetObjectsOfType<WoWGameObject>(false, false)
                         .FirstOrDefault(param0 =>
                         {
@@ -116,17 +136,13 @@ namespace GarrisonButler
                                 return param0.CanUseNow();
                             return false;
                         });
-                if (woWgameObject != null)
+                if (wowgameObject != null)
                 {
-                    woWgameObject.Interact();
+                    wowgameObject.Interact();
                 }
                 waitTimer1.Reset();
             }
-            bool flag = false;
-            if (CurrentMovePath2 == null || CurrentMovePath2.Path.End.DistanceSqr(location) > 9.0f)
-            {
-                flag = true;
-            }
+            bool flag = CurrentMovePath2 == null || CurrentMovePath2.Path.End.DistanceSqr(location) > 9.0f;
 
             //else if (waitTimer2.IsFinished && Unnamed2(CurrentMovePath2, MoverLocation))
             //{
@@ -286,7 +302,7 @@ namespace GarrisonButler
 
             public override bool IsStuck()
             {
-                if (stopwatch.ElapsedMilliseconds > 7000)
+                if (stopwatch.ElapsedMilliseconds > 4000)
                 {
                     stopwatch.Reset();
                     stopwatch.Start();

@@ -18,6 +18,8 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
+        private static bool HBRelogSkipped = false;
+        private static int HBRelogSkippedCounter = 0;
         private static async Task<bool> Waiting()
         {
             int townHallLevel = BuildingsLua.GetTownHallLevel();
@@ -40,9 +42,23 @@ namespace GarrisonButler
 
             if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
             {
-                GarrisonButler.Diagnostic("[HBRelogMode] Skipping current task.");
-                hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);
-                await Buddy.Coroutines.Coroutine.Sleep(1000);
+                if (HBRelogSkipped == false)
+                {
+                    GarrisonButler.Diagnostic("[HBRelogMode] Skipping current task.");
+                    hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);
+                    HBRelogSkipped = true;
+                }
+                else if (HBRelogSkippedCounter > 10)
+                {
+                    GarrisonButler.Diagnostic("[HBRelogMode] Still not closed by HBRelog after 10 ticks, shutting down honorbuddy.");
+                    TreeRoot.Shutdown(); 
+                    HBRelogSkippedCounter = 0;
+                }
+                else
+                {
+                    HBRelogSkippedCounter++;
+                    GarrisonButler.Diagnostic("[HBRelogMode] Task skipped, waiting...");
+                }
             }
             else if (BotManager.Current.Name == "Mixed Mode")
             {
@@ -217,11 +233,10 @@ namespace GarrisonButler
                 return false;
             }
             //GarrisonButler.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
-            Tuple<bool, T> result;
             if (_caching && !_lastResult)
                 _tempStorage = _condition();
 
-            result = _caching ? _tempStorage : _condition();
+            var result = _caching ? _tempStorage : _condition();
 
             if (result.Item1)
             {

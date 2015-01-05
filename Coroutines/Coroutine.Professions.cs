@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.Config;
 using GarrisonButler.Objects;
 using Styx.CommonBot.Coroutines;
@@ -17,28 +16,13 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static bool lastCheckCd = false;
-        private static List<Helpers.TradeskillHelper> tradeskillHelpers;
-
-        private static List<Tuple<int, DailyProfession.tradeskillID, WoWSpell>> DailyProfessionCD;
-
-
         private static List<DailyProfession> _detectedDailyProfessions;
-
-
+        
         private static void InitializeDailies()
         {
-            //if (_detectedDailyProfessions != null) return;
+            if(_detectedDailyProfessions == null)
+                _detectedDailyProfessions = new List<DailyProfession>();
 
-            //GarrisonButler.Diagnostic("[Profession] Loading Professions dailies.");
-            //if (_detectedDailyProfessions == null)
-            //{
-            //    GarrisonButler.Diagnostic("[Profession] Creating daily CD list.");
-            _detectedDailyProfessions = new List<DailyProfession>();
-            //}
-
-            //var dailyActivated = DailyProfession.AllDailies.Where(d => !_detectedDailyProfessions.Contains(d)
-            //    && GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
             IEnumerable<DailyProfession> dailyActivated =
                 DailyProfession.AllDailies.Where(
                     d => GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
@@ -56,16 +40,16 @@ namespace GarrisonButler
 
             foreach (DailyProfession daily in dailyActivated)
             {
-                daily.Initialize();
-                if (daily.Spell != null)
+                if (!_detectedDailyProfessions.Any(d => d.ItemId == daily.ItemId && d.Spell == null))
                 {
-                    GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Spell.Name);
-                    _detectedDailyProfessions.Add(daily);
+                    daily.Initialize();
+                    if (daily.Spell != null)
+                    {
+                        GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Spell.Name);
+                        _detectedDailyProfessions.Add(daily);
+                    }
                 }
-                //else
-                //    GarrisonButler.Diagnostic("[Profession] Spell null: {0}", daily.Name);
             }
-            //GarrisonButler.Diagnostic("[Profession] Loading Professions dailies done.");
         }
 
         private static bool ShouldRunDailies()
@@ -84,11 +68,11 @@ namespace GarrisonButler
                 return new Tuple<bool, DailyProfession>(false, null);
             }
 
-            if (_detectedDailyProfessions == null)
-            {
-                GarrisonButler.Diagnostic("[Profession] DetectedDailyProfessions not initialized.");
-                return new Tuple<bool, DailyProfession>(false, null);
-            }
+            //if (_detectedDailyProfessions == null)
+            //{
+            //    GarrisonButler.Diagnostic("[Profession] DetectedDailyProfessions not initialized.");
+            //    return new Tuple<bool, DailyProfession>(false, null);
+            //}
 
             IEnumerable<DailyProfession> possibleDailies =
                 _detectedDailyProfessions.Where(d => Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
@@ -128,11 +112,11 @@ namespace GarrisonButler
                     .FirstOrDefault();
             if (anvil == null)
             {
-                GarrisonButler.Warning("Can't find an Anvil around, skipping for now.");
+                GarrisonButler.Diagnostic("Can't find an Anvil around, skipping for now.");
             }
             else
             {
-                GarrisonButler.Warning("[Profession] Current CD requires an anvil, moving to the safest one.");
+                GarrisonButler.Log("[Profession] Current CD requires an anvil, moving to the safest one.");
                 if (await MoveTo(anvil.Location))
                     return true;
 

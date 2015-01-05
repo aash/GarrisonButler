@@ -43,53 +43,53 @@ namespace GarrisonButler.Libraries
 
         public void SendBugReport(string title, string body)
         {
-               // Command line argument must the the SMTP host.
-            GarrisonButler.Diagnostic("aaaaaaaaaaaaaa");
-            SmtpClient client = new SmtpClient("smtp.bifrost.ws");
-            NetworkCredential basicCredential =
-                new NetworkCredential("InAppSupport", "InAppSupport");
-            client.UseDefaultCredentials = false;
-            client.Credentials = basicCredential; 
-            // Specify the e-mail sender. 
-            // Create a mailing address that includes a UTF8 character 
-            // in the display name.
-            GarrisonButler.Diagnostic("bbbbbbbbbbbbbb");
-            MailAddress from = new MailAddress("InAppSupport@Bifrost.ws", 
-               "In " + (char)0xD8+ " Soft", 
-            System.Text.Encoding.UTF8);
-            // Set destinations for the e-mail message.
-            GarrisonButler.Diagnostic("ccccccccccc");
-            MailAddress to = new MailAddress("support@bifrost.ws");
-            // Specify the message content.
-            MailMessage message = new MailMessage(from, to);
-            message.Body = body;
-            // Include some non-ASCII characters in body and subject. 
-            GarrisonButler.Diagnostic("ddddddddddd");
-            message.Body += Environment.NewLine;
-            message.BodyEncoding =  System.Text.Encoding.UTF8;
-            message.Subject = title;
-            message.SubjectEncoding = System.Text.Encoding.UTF8;
-            //message.Attachments.Add(new Attachment(Styx.Common.Logging.LogFilePath));
-            // Set the method that is called back when the send operation ends.
-            GarrisonButler.Diagnostic("eeeeeeeeeeeee");
-            client.SendCompleted += new 
-            SendCompletedEventHandler(SendCompletedCallback);
-            // The userState can be any object that allows your callback  
-            // method to identify this send operation. 
-            // For this example, the userToken is a string constant. 
-            GarrisonButler.Diagnostic("fffffffffffff");
-            string userState = "test message1";
-            client.SendAsync(message, userState);
-            //Console.WriteLine("Sending message... press c to cancel mail. Press any other key to exit.");
-            //string answer = Console.ReadLine();
-            // If the user canceled the send, and mail hasn't been sent yet, 
-            // then cancel the pending operation. 
-            //if (answer.StartsWith("c") && mailSent == false)
-            //{
-            //    client.SendAsyncCancel();
-            //}
-            // Clean up.
-            message.Dispose();
+            //   // Command line argument must the the SMTP host.
+            //GarrisonButler.Diagnostic("aaaaaaaaaaaaaa");
+            //SmtpClient client = new SmtpClient("smtp.bifrost.ws");
+            //NetworkCredential basicCredential =
+            //    new NetworkCredential("InAppSupport", "InAppSupport");
+            //client.UseDefaultCredentials = false;
+            //client.Credentials = basicCredential; 
+            //// Specify the e-mail sender. 
+            //// Create a mailing address that includes a UTF8 character 
+            //// in the display name.
+            //GarrisonButler.Diagnostic("bbbbbbbbbbbbbb");
+            //MailAddress from = new MailAddress("InAppSupport@Bifrost.ws", 
+            //   "In " + (char)0xD8+ " Soft", 
+            //System.Text.Encoding.UTF8);
+            //// Set destinations for the e-mail message.
+            //GarrisonButler.Diagnostic("ccccccccccc");
+            //MailAddress to = new MailAddress("support@bifrost.ws");
+            //// Specify the message content.
+            //MailMessage message = new MailMessage(from, to);
+            //message.Body = body;
+            //// Include some non-ASCII characters in body and subject. 
+            //GarrisonButler.Diagnostic("ddddddddddd");
+            //message.Body += Environment.NewLine;
+            //message.BodyEncoding =  System.Text.Encoding.UTF8;
+            //message.Subject = title;
+            //message.SubjectEncoding = System.Text.Encoding.UTF8;
+            ////message.Attachments.Add(new Attachment(Styx.Common.Logging.LogFilePath));
+            //// Set the method that is called back when the send operation ends.
+            //GarrisonButler.Diagnostic("eeeeeeeeeeeee");
+            //client.SendCompleted += new 
+            //SendCompletedEventHandler(SendCompletedCallback);
+            //// The userState can be any object that allows your callback  
+            //// method to identify this send operation. 
+            //// For this example, the userToken is a string constant. 
+            //GarrisonButler.Diagnostic("fffffffffffff");
+            //string userState = "test message1";
+            //client.SendAsync(message, userState);
+            ////Console.WriteLine("Sending message... press c to cancel mail. Press any other key to exit.");
+            ////string answer = Console.ReadLine();
+            //// If the user canceled the send, and mail hasn't been sent yet, 
+            //// then cancel the pending operation. 
+            ////if (answer.StartsWith("c") && mailSent == false)
+            ////{
+            ////    client.SendAsyncCancel();
+            ////}
+            //// Clean up.
+            //message.Dispose();
             GarrisonButler.Diagnostic("Goodbye.");
         }
     }
