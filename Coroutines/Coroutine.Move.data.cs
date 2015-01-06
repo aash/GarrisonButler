@@ -14815,7 +14815,7 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.rank + " detected.");
                 points.AddRange(DwarvenBunkerPaths(Me.IsAlliance, bunker.plotId, TownHallLvl));
-                GarrisonButler.Diagnostic("Generating Custom points: bunker level " + garden.rank + " DONE.");
+                GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.rank + " DONE.");
             }
             GarrisonButler.Diagnostic("Generating Custom points: Done with " + points.Count + " points.");
             return points;

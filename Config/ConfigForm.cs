@@ -4,21 +4,33 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
+using Styx.Helpers;
 using Binding = System.Windows.Data.Binding;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Label = System.Windows.Controls.Label;
+using ListView = System.Windows.Controls.ListView;
 using Orientation = System.Windows.Controls.Orientation;
 using TabControl = System.Windows.Controls.TabControl;
 using TextBox = System.Windows.Controls.TextBox;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 #endregion
 
@@ -29,6 +41,7 @@ namespace GarrisonButler.Config
         private static MyWindow _myWindow;
         private static List<CheckBox> collectCheckBoxes;
         private static List<CheckBox> startCheckBoxes;
+        private static MailingTab mailingTab;
 
         public ConfigForm()
         {
@@ -62,15 +75,18 @@ namespace GarrisonButler.Config
 
                 var ProfessionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
                 tabControl.Items.Add(ProfessionTabItem);
-
+                
+                mailingTab = new MailingTab();
+                var Mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
+                tabControl.Items.Add(Mailing);
 
                 var aboutTabItem = new TabItem { Header = "About", Content = ContentTabAbout() };
                 tabControl.Items.Add(aboutTabItem);
-
+                
                 Content = tabControl;
             }
 
-            public List<CheckBox> AlldailiesCheckkbox { get; set; }
+            public List<CheckBox> AlldailiesCheckbox { get; set; }
 
             private UIElement ProfessionBox(List<DailyProfession> dailies)
             {
@@ -99,12 +115,12 @@ namespace GarrisonButler.Config
                 CheckBox daily1 = CreateCheckBoxWithBindingBuilding(dailies.ElementAt(0).Name, "Activated",
                     dailies.ElementAt(0));
                 daily1.Margin = new Thickness(10, 33, 0, 0);
-                AlldailiesCheckkbox.Add(daily1);
+                AlldailiesCheckbox.Add(daily1);
 
                 CheckBox daily2 = CreateCheckBoxWithBindingBuilding(dailies.ElementAt(1).Name, "Activated",
                     dailies.ElementAt(1));
                 daily2.Margin = new Thickness(10, 60, 0, 0);
-                AlldailiesCheckkbox.Add(daily2);
+                AlldailiesCheckbox.Add(daily2);
 
 
                 grid.Children.Add(name);
@@ -118,7 +134,7 @@ namespace GarrisonButler.Config
 
             protected object ContentTabProfession()
             {
-                AlldailiesCheckkbox = new List<CheckBox>();
+                AlldailiesCheckbox = new List<CheckBox>();
 
                 var grid = new Grid();
                 grid.Height = double.NaN;
@@ -299,7 +315,7 @@ namespace GarrisonButler.Config
                 var btn = sender as Button;
                 if (btn != null)
                 {
-                    foreach (CheckBox checkBox in AlldailiesCheckkbox)
+                    foreach (CheckBox checkBox in AlldailiesCheckbox)
                     {
                         checkBox.IsChecked = true;
                     }
@@ -311,7 +327,7 @@ namespace GarrisonButler.Config
                 var btn = sender as Button;
                 if (btn != null)
                 {
-                    foreach (CheckBox checkBox in AlldailiesCheckkbox)
+                    foreach (CheckBox checkBox in AlldailiesCheckbox)
                     {
                         checkBox.IsChecked = false;
                     }

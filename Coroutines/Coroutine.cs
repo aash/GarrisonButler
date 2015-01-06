@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using GarrisonLua;
@@ -24,6 +25,8 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
+
+// ReSharper disable once CheckNamespace
 
 namespace GarrisonButler
 {
@@ -77,7 +80,7 @@ namespace GarrisonButler
         public static bool ReadyToSwitch = false;
 
         private static bool RestoreCompletedMission;
-        private static ActionsSequence mainSequence;
+        private static ActionHelpers.ActionsSequence mainSequence;
         private static Stopwatch testStopwatch = new Stopwatch();
 
         #region MixedModeTimers
@@ -166,17 +169,16 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializeMissions");
                 InitializationMove();
                 GarrisonButler.Diagnostic("InitializationMove");
-                InitializeDailies();
-                GarrisonButler.Diagnostic("InitializeDailies");
 
-                mainSequence = new ActionsSequence();
-                mainSequence.AddAction(new ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison));
-                mainSequence.AddAction(new ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
+                mainSequence = new ActionHelpers.ActionsSequence();
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison));
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
-                mainSequence.AddAction(new ActionBasic(DoSalvages));
-                mainSequence.AddAction(new ActionBasic(LastRound));
-                mainSequence.AddAction(new ActionBasic(Waiting));
+                mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<MailItem>(MailItem, CanMailItem));
+                mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
+                mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
             }
@@ -297,20 +299,18 @@ namespace GarrisonButler
             {
                 if (!GaBSettings.Get().UseGarrisonHearthstone)
                 {
-                    TreeRoot.Stop("Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
+                    TreeRoot.Stop(
+                        "Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
                     return new Tuple<bool, WoWItem>(true, null);
                 }
-                else
-                {
-                    WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
-                    if (stone == null)
-                        return new Tuple<bool, WoWItem>(false, null);
+                WoWItem stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
+                if (stone == null)
+                    return new Tuple<bool, WoWItem>(false, null);
 
-                    if (stone.CooldownTimeLeft.TotalSeconds > 0)
-                        return new Tuple<bool, WoWItem>(true, stone);
-
+                if (stone.CooldownTimeLeft.TotalSeconds > 0)
                     return new Tuple<bool, WoWItem>(true, stone);
-                }
+
+                return new Tuple<bool, WoWItem>(true, stone);
             }
             return new Tuple<bool, WoWItem>(false, null);
         }

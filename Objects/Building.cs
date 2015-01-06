@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonLua;
 using Styx;
+using Styx.Common.Helpers;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
@@ -99,7 +100,7 @@ namespace GarrisonButler
             this.itemQuality = itemQuality;
             itemID = itemId ?? "None";
             GetOrderInfo(MeIsAlliance);
-            GarrisonButler.Diagnostic(ToString());
+            //GarrisonButler.Diagnostic(ToString());
         }
 
         public override string ToString()
@@ -117,9 +118,14 @@ namespace GarrisonButler
             return shipmentCapacity - shipmentsTotal;
             // return BuildingsLua.GetNumberShipmentLeftToStart(id);
         }
-
+        private readonly WaitTimer _refreshTimer = new WaitTimer(TimeSpan.FromMilliseconds(30000));
         public void Refresh()
         {
+            if (!_refreshTimer.IsFinished)
+                return;
+            _refreshTimer.Reset();
+            GarrisonButler.Diagnostic("Refreshing " + name);
+            
             Building b = BuildingsLua.GetBuildingById(id.ToString());
             id = b.id;
             plotId = b.plotId;
@@ -165,8 +171,36 @@ namespace GarrisonButler
                 NumberReagent, count >= NumberReagent);
             return count >= NumberReagent;
         }
-
+        
         private bool canCompleteOrderItems()
+        {
+            foreach (int reagentId in ReagentIds)
+            {
+                long count = 0;
+                WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == reagentId);
+                if (itemInBags != null)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
+                        itemInBags.StackCount);
+                    count += itemInBags.StackCount;
+                }
+
+                WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == reagentId);
+                if (itemInReagentBank != null)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
+                        itemInReagentBank.StackCount);
+                    count += itemInReagentBank.StackCount;
+                }
+
+                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
+                    NumberReagent);
+                if (count < NumberReagent)
+                    return false;
+            }
+            return true;
+        }
+        private bool canCompleteOrderOneOfItems()
         {
             foreach (int reagentId in ReagentIds)
             {
@@ -194,7 +228,7 @@ namespace GarrisonButler
             }
             return false;
         }
-
+        
         private bool CanCompleteOrderCurrency()
         {
             return BuildingsLua.GetGarrisonRessources() > NumberReagent;
@@ -319,7 +353,7 @@ namespace GarrisonButler
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
-                    canCompleteOrder = canCompleteOrderItems;
+                    canCompleteOrder = canCompleteOrderOneOfItems;
                     Displayids = new List<uint>
                     {
                         14609, // Garrison Building Barn V1

@@ -36,7 +36,7 @@ namespace GarrisonButler
             Xp = xp;
             LevelXp = levelXp;
             Counters = counters;
-            GarrisonButler.Diagnostic(ToString());
+            //GarrisonButler.Diagnostic(ToString());
         }
 
         public override string ToString()

@@ -35,6 +35,11 @@ namespace GarrisonLua
         {
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
         }
+        
+        public static void ClickSendMail()
+        {
+            Lua.DoString("SendMailFrame_SendMail();");
+        }
 
         public static bool IsGarrisonMissionTabVisible()
         {

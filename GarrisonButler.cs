@@ -21,7 +21,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 2, 13, 2);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 3, 0, 4);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
@@ -36,7 +36,7 @@ namespace GarrisonButler
 
         public static string NameStatic
         {
-            get { return "GarrisonButler Lite"; }
+            get { return "GarrisonButler ICE"; }
         }
 
         // internal AutoAnglerProfile Profile { get; private set; }
@@ -108,11 +108,7 @@ namespace GarrisonButler
         internal static void Log(string message, params object[] args)
         {
             string messFormat = String.Format("[{0}] {1}: {2}", NameStatic, Version, message);
-            if (LogBak == messFormat && !logTimer.IsFinished) return;
-
             Logging.Write(Colors.LightSeaGreen, messFormat, args);
-            LogBak = messFormat;
-            logTimer.Reset();
         }
 
         internal static void Warning(string message, params object[] args)

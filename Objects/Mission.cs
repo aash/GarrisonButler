@@ -55,7 +55,7 @@ namespace GarrisonButler
             Type = type;
             Xp = xp;
             Environment = environment;
-            GarrisonButler.Diagnostic(ToString());
+            //GarrisonButler.Diagnostic(ToString());
         }
 
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level, int iLevel,

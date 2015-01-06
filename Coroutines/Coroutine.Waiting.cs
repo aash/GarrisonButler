@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.Config;
@@ -14,12 +13,15 @@ using Styx.CommonBot;
 
 #endregion
 
+// ReSharper disable once CheckNamespace
+
 namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static bool HBRelogSkipped = false;
-        private static int HBRelogSkippedCounter = 0;
+        private static bool _hbRelogSkipped;
+        private static int _hbRelogSkippedCounter;
+
         private static async Task<bool> Waiting()
         {
             int townHallLevel = BuildingsLua.GetTownHallLevel();
@@ -42,21 +44,22 @@ namespace GarrisonButler
 
             if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
             {
-                if (HBRelogSkipped == false)
+                if (_hbRelogSkipped == false)
                 {
                     GarrisonButler.Diagnostic("[HBRelogMode] Skipping current task.");
                     hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);
-                    HBRelogSkipped = true;
+                    _hbRelogSkipped = true;
                 }
-                else if (HBRelogSkippedCounter > 10)
+                else if (_hbRelogSkippedCounter > 10)
                 {
-                    GarrisonButler.Diagnostic("[HBRelogMode] Still not closed by HBRelog after 10 ticks, shutting down honorbuddy.");
-                    TreeRoot.Shutdown(); 
-                    HBRelogSkippedCounter = 0;
+                    GarrisonButler.Diagnostic(
+                        "[HBRelogMode] Still not closed by HBRelog after 10 ticks, shutting down honorbuddy.");
+                    TreeRoot.Shutdown();
+                    _hbRelogSkippedCounter = 0;
                 }
                 else
                 {
-                    HBRelogSkippedCounter++;
+                    _hbRelogSkippedCounter++;
                     GarrisonButler.Diagnostic("[HBRelogMode] Task skipped, waiting...");
                 }
             }
@@ -78,11 +81,6 @@ namespace GarrisonButler
             else
             {
                 GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
-
-                /*
-                 * if (await MoveTo(myFactionWaitingPoints[townHallLevel - 1]))
-                    return true;
-                */
             }
             return false;
         }
@@ -90,7 +88,6 @@ namespace GarrisonButler
         private static bool AnythingLeftToDoBeforeEnd()
         {
             if (ReadyToSwitch)
-                // && Location.Distance(Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde) > 10 || Me.IsMoving)
                 return false;
             return true;
         }
@@ -162,137 +159,5 @@ namespace GarrisonButler
         }
 
         // The trigger must be set off by someone else to avoid pauses in the behavior! 
-    }
-
-    internal class ActionsSequence : Action
-    {
-        private readonly List<Action> Actions;
-
-        public ActionsSequence(params Action[] actions)
-        {
-            Actions = actions.ToList();
-        }
-
-        public ActionsSequence(ActionsSequence actionsSequence)
-        {
-            Actions = actionsSequence.Actions;
-        }
-
-        public ActionsSequence()
-        {
-            Actions = new List<Action>();
-        }
-
-        public void AddAction(Action action)
-        {
-            Actions.Add(action);
-        }
-
-        public override async Task<bool> ExecuteAction()
-        {
-            //GarrisonButler.Diagnostic("Starting main sequence.");
-            foreach (Action actionBasic in Actions)
-            {
-                //GarrisonButler.Diagnostic("Starting main sequence: executing action");
-                if (await actionBasic.ExecuteAction())
-                    return true;
-            }
-            return false;
-        }
-    }
-
-    internal class ActionOnTimer<T> : Action
-    {
-        private readonly Func<T, Task<bool>> _action;
-        private readonly bool _caching;
-        private readonly Func<Tuple<bool, T>> _condition;
-        private readonly Action[] _preActions;
-        private readonly WaitTimer _waitTimer;
-        private bool _lastResult;
-        private bool _needToCache = false;
-        private Tuple<bool, T> _tempStorage;
-
-        public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeMs = 3000,
-            bool instantStart = false, bool caching = false, params Action[] preAction)
-        {
-            _action = action;
-            _condition = condition;
-            _tempStorage = default(Tuple<bool, T>);
-            _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
-            _lastResult = instantStart;
-            _preActions = preAction;
-            _caching = caching;
-        }
-
-        public override async Task<bool> ExecuteAction()
-        {
-            //GarrisonButler.Diagnostic("Execute ActionOnTimer.");
-            if (!_lastResult && !_waitTimer.IsFinished)
-            {
-                //GarrisonButler.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
-                return false;
-            }
-            //GarrisonButler.Diagnostic("Execute ExecuteAction: Return true : {0} || {1}", !_lastResult, !_waitTimer.IsFinished); 
-            if (_caching && !_lastResult)
-                _tempStorage = _condition();
-
-            var result = _caching ? _tempStorage : _condition();
-
-            if (result.Item1)
-            {
-                foreach (Action preAction in _preActions)
-                {
-                    if (await preAction.ExecuteAction())
-                        await Buddy.Coroutines.Coroutine.Yield();
-                }
-                _lastResult = await _action(result.Item2);
-            }
-            else
-                _lastResult = result.Item1;
-
-            _waitTimer.Reset();
-            return _lastResult;
-        }
-    }
-
-    internal class ActionBasic : Action
-    {
-        private readonly Func<Task<bool>> _action;
-        private readonly Func<bool> _condition;
-        protected bool _lastResult;
-        protected WaitTimer _waitTimer;
-
-        public ActionBasic(Func<Task<bool>> action, int waitTimeMs = 3000, bool instantStart = false)
-        {
-            _action = action;
-            _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
-            _lastResult = instantStart;
-        }
-
-        public ActionBasic()
-        {
-        }
-
-        public override async Task<bool> ExecuteAction()
-        {
-            //GarrisonButler.Diagnostic("Execute ExecuteAction.");
-            if (!_lastResult && !_waitTimer.IsFinished)
-            {
-                //GarrisonButler.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
-                return false;
-            }
-
-            //GarrisonButler.Diagnostic("Execute ExecuteAction: Executing");
-            _lastResult = await _action();
-            //GarrisonButler.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
-
-            _waitTimer.Reset();
-            return _lastResult;
-        }
-    }
-
-    internal abstract class Action
-    {
-        public abstract Task<bool> ExecuteAction();
     }
 }

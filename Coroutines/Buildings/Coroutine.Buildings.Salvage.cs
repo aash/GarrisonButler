@@ -74,7 +74,7 @@ namespace GarrisonButler
                 return true;
             }
 
-            if (await MoveTo(unit.Location))
+            if (await MoveToInteract(unit))
                 return true;
 
             if (Me.Mounted)

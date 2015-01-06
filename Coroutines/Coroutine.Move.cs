@@ -12,6 +12,7 @@ using Styx.Helpers;
 using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.World;
+using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
@@ -26,6 +27,7 @@ namespace GarrisonButler
         public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
         {
             _lastMoveResult = Navigator.MoveTo(destination);
+
             Navigator.GetRunStatusFromMoveResult(_lastMoveResult);
             switch (_lastMoveResult)
             {
@@ -43,6 +45,15 @@ namespace GarrisonButler
                     return false;
             }
             return true;
+        }
+        public static async Task<bool> MoveToInteract(WoWObject woWObject, string destinationName = null)
+        {
+            if (woWObject.WithinInteractRange)
+            {
+                GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact.");
+                return false;
+            }
+            return await MoveTo(woWObject.Location, destinationName);
         }
 
         public static bool MoveTo2(WoWPoint destination, string destinationName = null)

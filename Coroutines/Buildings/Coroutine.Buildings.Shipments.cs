@@ -308,7 +308,7 @@ namespace GarrisonButler
                 if (await StartShipment(canStart.Item2))
                     return true;
 
-            return true; // Done
+            return false; // Done
         }
 
         internal static Tuple<bool, Building> CanStartShipment(Building building)
@@ -316,6 +316,7 @@ namespace GarrisonButler
             if (building == null)
             {
                 GarrisonButler.Diagnostic("[ShipmentStart] Building is null, either not built or not properly scanned.");
+                return new Tuple<bool, Building>(false,null);
             }
 
             building.Refresh();
@@ -419,16 +420,12 @@ namespace GarrisonButler
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
-                GarrisonButler.Diagnostic("[ShipmentStart] Could not find unit (" + building.PnjId +
-                                          "), moving to default location.\n" +
-                                          "If this message is spammed, please post the ID of the PNJ for your work orders on the forum post of Garrison Buddy!");
-
-                ObjectManager.Update();
+                GarrisonButler.Diagnostic("[ShipmentStart] Could not find unit (" + building.PnjId +"), moving to default location.");
                 await MoveTo(building.Pnj);
                 return true;
             }
 
-            if (await MoveTo(unit.Location))
+            if (await MoveToInteract(unit))
                 return true;
 
             GarrisonButler.Diagnostic("[ShipmentStart] Arrived at location.");
@@ -454,36 +451,28 @@ namespace GarrisonButler
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  
 
-            int NumberToStart = 0;
+            int MaxInProgress;
             int maxPossible = building.shipmentCapacity - building.shipmentsTotal;
             int MaxSettings = GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder;
             if (MaxSettings == 0)
             {
-                NumberToStart = maxPossible;
+                MaxInProgress = building.shipmentCapacity;
             }
             else
             {
-                NumberToStart = Math.Min(maxPossible, MaxSettings - building.shipmentsTotal);
+                MaxInProgress = Math.Min(building.shipmentCapacity, MaxSettings);
             }
 
-            for (int i = NumberToStart; i > 0; i--)
+            for (int i = 0; i < MaxInProgress-building.shipmentsTotal; i++)
             {
                 InterfaceLua.ClickStartOrderButton();
+                building.Refresh();
+                if (building.shipmentsTotal >= MaxInProgress)
+                    break;
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
+                await Buddy.Coroutines.Coroutine.Yield();
             }
-
-            if (
-                await
-                    Buddy.Coroutines.Coroutine.Wait(5000,
-                        () => BuildingsLua.GetShipmentTotal(building.id) == building.shipmentsTotal + NumberToStart))
-            {
-                GarrisonButler.Log("Successfully started {0} work orders.", NumberToStart);
-            }
-            else
-            {
-                GarrisonButler.Diagnostic("Mismatch between number to start and actually started.");
-            }
-
+            building.Refresh();
             StartOrderTriggered = false;
             return false; // done here
         }
@@ -496,7 +485,7 @@ namespace GarrisonButler
                 return false;
             });
         }
-
+        
         private static async Task<bool> IfGossip(WoWUnit pnj)
         {
             if (GossipFrame.Instance != null)
@@ -506,8 +495,7 @@ namespace GarrisonButler
                 {
                     Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
                 }
-                frame.SelectGossipOption(1);
-                frame.SelectGossipOption(0);
+                frame.SelectGossipOption(frame.GossipOptionEntries.Count-1);
             }
             return true;
         }
@@ -550,9 +538,6 @@ namespace GarrisonButler
                 //{
 
                 //} 
-                GarrisonButler.Diagnostic(
-                    "[ShipmentCollect] Could not Find shipment location in world for building {0} - {1}",
-                    building.SafeName, building.Location);
                 GarrisonButler.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
                 if (await MoveTo(building.Location))
                     return true;
@@ -562,6 +547,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}",
                     shipmentToCollect.Name, shipmentToCollect.Location);
                 await HarvestWoWGameOject(shipmentToCollect);
+                RefreshBuildings(true); 
                 return false; // Done here
             }
             return false; // should never reach that point!

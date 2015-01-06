@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -23,6 +24,7 @@ namespace GarrisonButler.Config
         public static GaBSettings currentSettings { get; set; }
 
         public List<BuildingSettings> BuildingsSettings { get; set; }
+        public ObservableCollection<MailItem> MailItems { get; set; }
 
         public List<DailyProfession> DailySettings { get; set; }
 
@@ -51,6 +53,7 @@ namespace GarrisonButler.Config
             var ret = new GaBSettings();
             ret.ConfigVersion = new ModuleVersion();
             ret.TimeMinBetweenRun = 60;
+            ret.MailItems = new ObservableCollection<MailItem>();
             // Buildings generation, Ugly... but dynamic
             ret.BuildingsSettings = new List<BuildingSettings>();
             foreach (buildings building in (buildings[]) Enum.GetValues((typeof (buildings))))

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonLua;
 using Styx;
 using Styx.Common.Helpers;
@@ -45,13 +46,13 @@ namespace GarrisonButler
             236193,
         };
 
-        private static List<ActionBasic> BuildingsActions;
+        private static List<ActionHelpers.ActionBasic> BuildingsActions;
 
-        public static ActionsSequence InitializeBuildingsCoroutines()
+        public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
         {
             // Initializing coroutines
             GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
-            var buildingsActionsSequence = new ActionsSequence();
+            var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
 
             Building mine = _buildings.FirstOrDefault(
                 b =>
@@ -65,14 +66,14 @@ namespace GarrisonButler
             {
                 // Harvest mine
                 buildingsActionsSequence.AddAction(
-                    new ActionOnTimer<WoWGameObject>(
+                    new ActionHelpers.ActionOnTimer<WoWGameObject>(
                         HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
                         1000,
                         false,
                         false,
                         // Drink coffee
-                        new ActionOnTimer<WoWItem>(
+                        new ActionHelpers.ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
                             {
@@ -82,7 +83,7 @@ namespace GarrisonButler
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
                             }),
                         // Use Mining Pick 
-                        new ActionOnTimer<WoWItem>(
+                        new ActionHelpers.ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
                             {
@@ -93,7 +94,7 @@ namespace GarrisonButler
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
                             }),
                         // Delete Coffee 
-                        new ActionOnTimer<WoWItem>(
+                        new ActionHelpers.ActionOnTimer<WoWItem>(
                             DeleteItemInbags,
                             () =>
                             {
@@ -104,7 +105,7 @@ namespace GarrisonButler
                                         tooMany.Item1 && GaBSettings.Get().DeleteCoffee, tooMany.Item2);
                             }),
                         // Delete Mining Pick 
-                        new ActionOnTimer<WoWItem>(
+                        new ActionHelpers.ActionOnTimer<WoWItem>(
                             DeleteItemInbags,
                             () =>
                             {
@@ -117,32 +118,32 @@ namespace GarrisonButler
 
                 // Take care of mine shipments
                 buildingsActionsSequence.AddAction(
-                    new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
+                    new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
                         PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine)));
             }
             if (garden != null)
             {
                 // Harvest garden
                 buildingsActionsSequence.AddAction(
-                    new ActionOnTimer<WoWGameObject>(HarvestWoWGameOject, CanRunGarden));
+                    new ActionHelpers.ActionOnTimer<WoWGameObject>(HarvestWoWGameOject, CanRunGarden));
 
                 // Take care of garden shipments
                 buildingsActionsSequence.AddAction(
-                    new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
+                    new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
                         PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden)));
             }
             // Take care of all shipments
             buildingsActionsSequence.AddAction(
-                new ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
+                new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
                     PickUpOrStartAtLeastOneShipment, CanPickUpOrStartAtLeastOneShipmentFromAll));
 
             // Garrison cache
             buildingsActionsSequence.AddAction(
-                new ActionOnTimer<WoWGameObject>(PickUpGarrisonCache, CanRunCache));
+                new ActionHelpers.ActionOnTimer<WoWGameObject>(PickUpGarrisonCache, CanRunCache));
 
             // Buildings activation
             buildingsActionsSequence.AddAction(
-                new ActionOnTimer<WoWGameObject>(ActivateFinishedBuildings, CanActivateAtLeastOneBuilding));
+                new ActionHelpers.ActionOnTimer<WoWGameObject>(ActivateFinishedBuildings, CanActivateAtLeastOneBuilding));
 
             GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;
@@ -156,7 +157,7 @@ namespace GarrisonButler
                 return false;
             }
 
-            foreach (ActionBasic action in BuildingsActions)
+            foreach (ActionHelpers.ActionBasic action in BuildingsActions)
             {
                 if (await action.ExecuteAction())
                     return true;
@@ -168,8 +169,7 @@ namespace GarrisonButler
         private static void RefreshBuildings(bool forced = false)
         {
             if (!RefreshBuildingsTimer.IsFinished && _buildings != null && !forced) return;
-
-            GarrisonButler.Log("Refreshing Buildings and shipments databases.");
+            GarrisonButler.Log("Refreshing Buildings database.");
             _buildings = BuildingsLua.GetAllBuildings();
             RefreshBuildingsTimer.Reset();
         }
@@ -198,7 +198,7 @@ namespace GarrisonButler
 
         private static async Task<bool> ActivateFinishedBuildings(WoWGameObject toActivate)
         {
-            if (await MoveTo(toActivate.Location, "Building activation"))
+            if (await MoveToInteract(toActivate, "Building activation"))
                 return true;
 
             await Buddy.Coroutines.Coroutine.Sleep(300);

@@ -54,7 +54,7 @@ namespace GarrisonButler
                 WoWUnit activeMover = WoWMovement.ActiveMover;
                 if ((WoWObject) activeMover == (WoWObject) null)
                     return MoveResult.Failed;
-                double pathPrecision = StyxWoW.Me.Mounted ? 7 : 3;
+                double pathPrecision = StyxWoW.Me.Mounted ? 5 : 3;
                 if (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision)
                 {
                     ++path.Index;
