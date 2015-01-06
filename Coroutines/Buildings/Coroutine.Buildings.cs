@@ -71,7 +71,7 @@ namespace GarrisonButler
                         CanRunMine,
                         1000,
                         false,
-                        false,
+                        true,
                         // Drink coffee
                         new ActionHelpers.ActionOnTimer<WoWItem>(
                             UseItemInbags,

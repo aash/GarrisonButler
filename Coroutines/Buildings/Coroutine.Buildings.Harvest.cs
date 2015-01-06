@@ -32,13 +32,13 @@ namespace GarrisonButler
             if (toHarvest != null && toHarvest.IsValid)
             {
                 CachedToHarvestLocation = toHarvest.Location;
-                return await HarvestWoWGameOject(toHarvest);
+                    return await HarvestWoWGameOject(toHarvest);
             }
 
             // First moving to cached location
-            if(CachedToHarvestLocation != WoWPoint.Empty)
-                if (await MoveTo(CachedToHarvestLocation))
-                    return true;
+            if (CachedToHarvestLocation != WoWPoint.Empty)
+                return await MoveTo(CachedToHarvestLocation);
+            
 
             CachedToHarvestLocation = WoWPoint.Empty;
 
