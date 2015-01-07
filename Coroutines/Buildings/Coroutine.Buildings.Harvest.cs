@@ -69,10 +69,10 @@ namespace GarrisonButler
             return false;
 
 
-            WoWPoint startLocation = Me.Location;
-            WoWGameObject mineToGet = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
-            System.Diagnostics.Stopwatch stuckWatch = new System.Diagnostics.Stopwatch();
-            stuckWatch.Start();
+            //WoWPoint startLocation = Me.Location;
+            //WoWGameObject mineToGet = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
+            //System.Diagnostics.Stopwatch stuckWatch = new System.Diagnostics.Stopwatch();
+            //stuckWatch.Start();
 
             //while(true)
             //{
