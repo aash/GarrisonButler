@@ -84,24 +84,6 @@ namespace GarrisonButler
             return MinesId.Contains(Me.SubZoneId);
         }
 
-        //public static async Task<bool> CollectOreInMine(WoWGameObject nodeToCollect)
-        //{
-        //    if (MinesId.Contains(Me.SubZoneId))
-        //    {
-        //        if (await UseItemInbags(MinersCofeeItemId, MinersCofeeAura, 2))
-        //            return true;
-
-        //        if (await UseItemInbags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1))
-        //            return true;
-
-        //        GarrisonButler.Log("[Mine] In mine, moving to harvest ore at: " + nodeToCollect.Location);
-        //        return await HarvestWoWGameOject(nodeToCollect);
-        //    }
-
-        //    GarrisonButler.Log("[Mine] Not in mine yet, moving to harvest ore at: " + nodeToCollect.Location);
-        //    return await MoveTo(nodeToCollect.Location);
-        //}
-
         public static Func<Tuple<bool, WoWItem>> CanUseItemInBags(uint entry, uint auraId = 0, int maxStack = 0)
         {
             return () =>
