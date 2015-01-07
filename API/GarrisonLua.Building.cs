@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler;
+using GarrisonButler.Libraries;
 using Styx;
 using Styx.Helpers;
 using Styx.WoWInternals;
@@ -52,7 +53,12 @@ namespace GarrisonLua
                     "end;" +
                     "for j_=0,20 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", buildingId);
+
             List<String> building = Lua.GetReturnValues(lua);
+
+            if (building.IsNullOrEmpty())
+                return null;
+
             int id = building[0].ToInt32();
             int plotId = building[1].ToInt32();
             String buildingLevel = building[2];
@@ -87,13 +93,14 @@ namespace GarrisonLua
                 "table.insert(RetInfo,tostring(buildings[i].buildingID));" +
                 "end;" +
                 "return unpack(RetInfo)";
+
             List<string> followerId = Lua.GetReturnValues(lua);
             return followerId;
         }
 
         public static List<Building> GetAllBuildings()
         {
-            return GetListBuildingsId().Select(GetBuildingById).ToList();
+            return GetListBuildingsId().GetEmptyIfNull().Select(GetBuildingById).SkipWhile(b => b == null).ToList();
         }
 
         public static int GetTownHallLevel()
@@ -101,7 +108,8 @@ namespace GarrisonLua
             const string lua = "local level, mapTexture, townHallX, townHallY = C_Garrison.GetGarrisonInfo();" +
                                "if (not level) then return tostring(0);" +
                                "else return tostring(level); end;";
-            return Lua.GetReturnValues(lua)[0].ToInt32();
+
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static int GetNumberShipmentReadyByBuildingId(int buildingId)
@@ -119,8 +127,8 @@ namespace GarrisonLua
                     "end;" +
                     "end;" +
                     "return tostring(0);", buildingId);
-            List<String> res = Lua.GetReturnValues(lua);
-            return res[0].ToInt32();
+
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static int GetNumberShipmentLeftToStart(int buildingId)
@@ -139,8 +147,8 @@ namespace GarrisonLua
                     "end;" +
                     "end;" +
                     "return tostring(0);", buildingId);
-            List<String> res = Lua.GetReturnValues(lua);
-            return res[0].ToInt32();
+
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static int GetShipmentTotal(int buildingId)
@@ -159,8 +167,8 @@ namespace GarrisonLua
                     "end;" +
                     "end;" +
                     "return tostring(0);", buildingId);
-            List<String> res = Lua.GetReturnValues(lua);
-            return res[0].ToInt32();
+
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static int GetGarrisonRessources()
@@ -169,8 +177,7 @@ namespace GarrisonLua
                 "local name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered = GetCurrencyInfo(824)" +
                 "return tostring(amount);";
 
-            List<String> res = Lua.GetReturnValues(lua);
-            return res[0].ToInt32();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         // Must be using a capacitive frame!
@@ -189,7 +196,8 @@ namespace GarrisonLua
                 "end;" +
                 "end;" +
                 "return tostring(amount);";
-            float res = Lua.GetReturnValues(lua)[0].ToFloat();
+
+            float res = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToFloat();
             GarrisonButler.GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
             return (int) res;
         }

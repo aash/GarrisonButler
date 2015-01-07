@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler;
+using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -35,7 +36,7 @@ namespace GarrisonLua
 
         public static WoWObject GetCommandTableOrDefault()
         {
-            return ObjectManager.ObjectList.FirstOrDefault(o => CommandTables.Contains(o.Entry));
+            return ObjectManager.ObjectList.GetEmptyIfNull().FirstOrDefault(o => CommandTables.GetEmptyIfNull().Contains(o.Entry));
         }
 
         // Click on View Accepted Mission button
@@ -47,11 +48,14 @@ namespace GarrisonLua
         public static List<string> GetListMissionsId()
         {
             GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
+
             String lua =
                 "local available_missions = {}; local RetInfo = {}; C_Garrison.GetAvailableMissions(available_missions);" +
                 "for idx = 1, #available_missions do table.insert(RetInfo,tostring(available_missions[idx].missionID));end;" +
                 "return unpack(RetInfo)";
+
             List<string> missionsId = Lua.GetReturnValues(lua);
+
             GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
             return missionsId;
         }
@@ -62,6 +66,7 @@ namespace GarrisonLua
                 "local complete_missions = C_Garrison.GetCompleteMissions(); local RetInfo = {};" +
                 "for idx = 1, #complete_missions do table.insert(RetInfo,tostring(complete_missions[idx].missionID));end;" +
                 "return unpack(RetInfo)";
+
             List<string> missionsId = Lua.GetReturnValues(lua);
             return missionsId;
         }
@@ -69,29 +74,29 @@ namespace GarrisonLua
         public static int GetNumberCompletedMissions()
         {
             String lua = "return tostring(#(C_Garrison.GetCompleteMissions()))";
-            return Lua.GetReturnValues(lua)[0].ToInt32();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static int GetNumberAvailableMissions()
         {
             String lua = "local am = {}; C_Garrison.GetAvailableMissions(am); return tostring(#am);";
-            return Lua.GetReturnValues(lua)[0].ToInt32();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static List<Mission> GetAllCompletedMissions()
         {
-            return GetListCompletedMissionsId().Select(GetCompletedMissionById).ToList();
+            return GetListCompletedMissionsId().GetEmptyIfNull().Select(GetCompletedMissionById).SkipWhile(m => m == null).ToList();
         }
 
         // Return list of all available missions
         public static List<Mission> GetAllAvailableMissions()
         {
-            return GetListMissionsId().Select(GetMissionById).ToList();
+            return GetListMissionsId().GetEmptyIfNull().Select(GetMissionById).SkipWhile(m => m == null).ToList();
         }
 
         public static List<Mission> GetAllAvailableMissionsReport()
         {
-            return GetListMissionsId().Select(GetMissionById).ToList();
+            return GetListMissionsId().GetEmptyIfNull().Select(GetMissionById).SkipWhile(m => m == null).ToList();
         }
 
         private static List<string> GetEnemies(String missionId)
@@ -108,6 +113,7 @@ namespace GarrisonLua
                 "end;" +
                 "end;" +
                 "return unpack(RetInfo)";
+
             List<string> enemies = Lua.GetReturnValues(lua);
             return enemies ?? new List<string>();
         }
@@ -146,6 +152,9 @@ namespace GarrisonLua
                 "for j_=0,cpt do table.insert(RetInfo,tostring(b[j_]));end; " +
                 "return unpack(RetInfo)";
             List<string> mission = Lua.GetReturnValues(lua);
+
+            if (mission.IsNullOrEmpty())
+                return null;
 
             List<string> enemies = GetEnemies(missionId);
             string description = mission[0];
@@ -208,6 +217,9 @@ namespace GarrisonLua
                 "return unpack(RetInfo)";
             List<string> mission = Lua.GetReturnValues(lua);
 
+            if (mission.IsNullOrEmpty())
+                return null;
+
             List<string> enemies = GetEnemies(missionId);
             string description = mission[0];
             int cost = mission[1].ToInt32();
@@ -268,6 +280,9 @@ namespace GarrisonLua
                 "for j_=0,20 do table.insert(RetInfo,tostring(b[j_]));end; " +
                 "return unpack(RetInfo)";
             List<string> mission = Lua.GetReturnValues(lua);
+
+            if (mission.IsNullOrEmpty())
+                return null;
 
             List<string> enemies = GetEnemies(missionId);
             string description = mission[0];

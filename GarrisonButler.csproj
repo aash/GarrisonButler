@@ -5,34 +5,36 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1441053B-4D09-45A3-9602-087A7F143AEE}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GarrisonButler</RootNamespace>
     <AssemblyName>GarrisonButler</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -72,6 +74,7 @@
     <Compile Include="Libraries\FreshDesk.cs" />
     <Compile Include="Libraries\HeapPriorityQueue.cs" />
     <Compile Include="Libraries\IPriorityQueue.cs" />
+    <Compile Include="Libraries\IsNullOrEmptyExtension.cs" />
     <Compile Include="Libraries\ModuleVersion.cs" />
     <Compile Include="Libraries\ObjectDumper.cs" />
     <Compile Include="Libraries\PriorityQueueNode.cs" />
@@ -84,21 +87,22 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="GreyMagic">
-      <HintPath>..\..\GreyMagic.dll</HintPath>
+      <HintPath>References\GreyMagic.dll</HintPath>
     </Reference>
     <Reference Include="Honorbuddy">
-      <HintPath>..\..\Honorbuddy.exe</HintPath>
+      <HintPath>References\Honorbuddy.exe</HintPath>
     </Reference>
     <Reference Include="Honorbuddy.Launcher">
       <HintPath>..\..\Honorbuddy.Launcher.exe</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RemoteASM">
-      <HintPath>..\..\RemoteASM.dll</HintPath>
+      <HintPath>References\RemoteASM.dll</HintPath>
     </Reference>
     <Reference Include="RemoteASMNative">
       <HintPath>..\..\RemoteASMNative.dll</HintPath>
@@ -113,10 +117,10 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="Tripper.RecastManaged">
-      <HintPath>..\..\Tripper.RecastManaged.dll</HintPath>
+      <HintPath>References\Tripper.RecastManaged.dll</HintPath>
     </Reference>
     <Reference Include="Tripper.Tools">
-      <HintPath>..\..\Tripper.Tools.dll</HintPath>
+      <HintPath>References\Tripper.Tools.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>

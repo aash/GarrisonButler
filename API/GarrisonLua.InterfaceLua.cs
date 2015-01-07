@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler;
+using GarrisonButler.Libraries;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
@@ -19,7 +20,8 @@ namespace GarrisonLua
         {
             const string lua =
                 "if not GarrisonMissionFrame then return false; else return tostring(GarrisonMissionFrame:IsVisible());end;";
-            string t = Lua.GetReturnValues(lua)[0];
+            
+            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -27,7 +29,8 @@ namespace GarrisonLua
         {
             const string lua =
                 "if not GarrisonCapacitiveDisplayFrame then return false; else return tostring(GarrisonCapacitiveDisplayFrame:IsVisible());end;";
-            string t = Lua.GetReturnValues(lua)[0];
+            
+            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -45,7 +48,8 @@ namespace GarrisonLua
         {
             const string lua =
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab then return false; else return tostring(GarrisonMissionFrame.MissionTab:IsVisible()); end;";
-            string t = Lua.GetReturnValues(lua)[0];
+            
+            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -54,7 +58,8 @@ namespace GarrisonLua
             const string lua =
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab or not GarrisonMissionFrame.MissionTab.MissionPage then return false;end;" +
                 "return tostring(GarrisonMissionFrame.MissionTab.MissionPage:IsShown())";
-            string t = Lua.GetReturnValues(lua)[0];
+
+            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -65,7 +70,8 @@ namespace GarrisonLua
                     "if not GarrisonMissionFrame.MissionTab.MissionPage or not GarrisonMissionFrame.MissionTab.MissionPage.missionInfo or not GarrisonMissionFrame.MissionTab.MissionPage:IsShown() then return false;end;" +
                     "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )",
                     missionId);
-            string t = Lua.GetReturnValues(lua)[0];
+
+            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -106,20 +112,24 @@ namespace GarrisonLua
                 "GarrisonMissionPage_ClearParty();" +
                 "GarrisonMissionFrame.followerCounters = nil;" +
                 "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo = nil;";
+
             Lua.DoString(lua);
         }
 
         public static void AddFollowersToMissionOld(string missionId, List<string> followersId)
         {
             GarrisonButler.GarrisonButler.Diagnostic("Cleaning mission Followers");
+
             String luaClear = String.Format(
                 "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
                 "for idx = 1, #MissionPageFollowers do " +
                 "GarrisonMissionPage_ClearFollower(MissionPageFollowers[idx]);" +
                 "end;");
+
             Lua.DoString(luaClear);
 
             GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers: " + followersId.Count);
+
             foreach (string t in followersId)
             {
                 GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
@@ -144,6 +154,7 @@ namespace GarrisonLua
                     "GarrisonMissionPage_SetFollower(followerFrame, follower);" +
                     "end;" +
                     "end;";
+
             Lua.DoString(luaAdd);
         }
 
@@ -178,12 +189,14 @@ namespace GarrisonLua
                 luaAdd = "DropDownList1Button1:Click();";
                 Lua.DoString(luaAdd);
             }
+
             await CommonCoroutines.SleepForRandomReactionTime();
         }
 
         public static void ClickStartMission()
         {
             String lua = "GarrisonMissionFrame.MissionTab.MissionPage.StartMissionButton:Click();";
+
             Lua.DoString(lua);
         }
 
@@ -191,7 +204,9 @@ namespace GarrisonLua
         {
             GarrisonButler.GarrisonButler.Diagnostic("StartMission: ");
             GarrisonButler.GarrisonButler.Diagnostic(mission.ToString());
+
             String lua = String.Format("C_Garrison.StartMission(\"{0}\");", mission.MissionId);
+
             Lua.DoString(lua);
         }
     }

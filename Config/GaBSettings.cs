@@ -23,9 +23,11 @@ namespace GarrisonButler.Config
         [XmlIgnore]
         public static GaBSettings currentSettings { get; set; }
 
+        [XmlArray]
         public List<BuildingSettings> BuildingsSettings { get; set; }
         public ObservableCollection<MailItem> MailItems { get; set; }
 
+        [XmlArray]
         public List<DailyProfession> DailySettings { get; set; }
 
         public bool UseGarrisonHearthstone { get; set; }
@@ -104,12 +106,20 @@ namespace GarrisonButler.Config
         {
             Get().ConfigVersion = GarrisonButler.Version;
 
-            var writer =
-                new XmlSerializer(typeof (GaBSettings));
-            var file =
-                new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"), false);
-            writer.Serialize(file, currentSettings);
-            file.Close();
+            try
+            {
+                var writer =
+                    new XmlSerializer(typeof(GaBSettings));
+                var file =
+                    new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"), false);
+                writer.Serialize(file, currentSettings);
+                file.Close();
+            }
+            catch(Exception e)
+            {
+                GarrisonButler.Diagnostic("Failed to save configuration");
+                GarrisonButler.Diagnostic("Exception: " + e.GetType());
+            }
         }
 
         public static void Load()
@@ -127,6 +137,7 @@ namespace GarrisonButler.Config
             catch (Exception e)
             {
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
+                GarrisonButler.Diagnostic("Exception: " + e.GetType());
                 currentSettings = DefaultConfig();
             }
             //ObjectDumper.Write(currentSettings);

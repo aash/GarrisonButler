@@ -2,6 +2,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
 using GarrisonButler.Objects;
+using GarrisonButler.Libraries;
 using Styx.Helpers;
 
 #endregion
@@ -310,15 +312,18 @@ namespace GarrisonButler.Config
                         GarrisonButler.Warning("No value for ItemID, item not added.");
                         return;
                     }
-                    if (GaBSettings.Get().MailItems.Any(i => i.ItemId == _addItemIdTextBox.Text.ToInt32()))
+                    if (GaBSettings.Get().MailItems.GetEmptyIfNull().Any(i => i.ItemId == _addItemIdTextBox.Text.ToInt32()))
                     {
                         GarrisonButler.Warning("Item already added to list.");
                         return;
                     }
 
-                    GaBSettings.Get()
-                        .MailItems.Add(new MailItem(_addItemIdTextBox.Text.ToInt32(), _addRecipientTextBox.Text,
+                    ObservableCollection<MailItem> mailItems = GaBSettings.Get().MailItems;
+
+                    if (!mailItems.IsNullOrEmpty())
+                        mailItems.Add(new MailItem(_addItemIdTextBox.Text.ToInt32(), _addRecipientTextBox.Text,
                             _addCommentTextBox.Text));
+
                     _myListView.View.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                     GarrisonButler.Diagnostic("Added mail Item");
                     ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);

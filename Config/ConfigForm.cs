@@ -103,7 +103,9 @@ namespace GarrisonButler.Config
                 grid.VerticalAlignment = VerticalAlignment.Top;
 
                 var name = new Label();
-                name.Content = dailies.First().TradeskillId.ToString();
+                name.Content = dailies.GetEmptyIfNull().FirstOrDefault() == default(DailyProfession)
+                    ? "Error"
+                    : dailies.GetEmptyIfNull().FirstOrDefault().TradeskillId.ToString();
                 name.FontSize = 14;
                 name.FontWeight = FontWeights.Black;
                 name.HorizontalAlignment = HorizontalAlignment.Left;
@@ -112,12 +114,14 @@ namespace GarrisonButler.Config
                 name.Height = 28;
                 name.Margin = new Thickness(10, 5, 0, 0);
 
-                CheckBox daily1 = CreateCheckBoxWithBindingBuilding(dailies.ElementAt(0).Name, "Activated",
-                    dailies.ElementAt(0));
+                CheckBox daily1 = CreateCheckBoxWithBindingBuilding(dailies.GetEmptyIfNull().FirstOrDefault() == default(DailyProfession)
+                    ? "Error" : dailies.GetEmptyIfNull().FirstOrDefault().Name, "Activated",
+                    dailies.GetEmptyIfNull().FirstOrDefault());
                 daily1.Margin = new Thickness(10, 33, 0, 0);
                 AlldailiesCheckbox.Add(daily1);
 
-                CheckBox daily2 = CreateCheckBoxWithBindingBuilding(dailies.ElementAt(1).Name, "Activated",
+                CheckBox daily2 = CreateCheckBoxWithBindingBuilding(dailies.GetEmptyIfNull().Count() < 2
+                    ? "Error" : dailies.GetEmptyIfNull().ElementAt(1).Name, "Activated",
                     dailies.ElementAt(1));
                 daily2.Margin = new Thickness(10, 60, 0, 0);
                 AlldailiesCheckbox.Add(daily2);
@@ -158,6 +162,7 @@ namespace GarrisonButler.Config
                 mainWrapPanel.Orientation = Orientation.Horizontal;
                 mainWrapPanel.Width = double.NaN;
                 List<List<DailyProfession>> listOflists = GaBSettings.Get().DailySettings
+                    .GetEmptyIfNull()
                     .Select((x, i) => new {Index = x.TradeskillId, Value = x})
                     .GroupBy(x => x.Index)
                     .Select(x => x.Select(v => v.Value).ToList())
@@ -246,7 +251,7 @@ namespace GarrisonButler.Config
                 mainWrapPanel.Width = double.NaN;
 
                 foreach (BuildingSettings buildingsSetting in 
-                    GaBSettings.Get().BuildingsSettings.Where(bs=> Building.HasOrder((buildings)bs.BuildingIds.First()))
+                    GaBSettings.Get().BuildingsSettings.GetEmptyIfNull().Where(bs=> Building.HasOrder((buildings)bs.BuildingIds.GetEmptyIfNull().FirstOrDefault()))
                     .OrderBy(b => b.Name))
                 {
                     UIElement b = BuildingBox(buildingsSetting);

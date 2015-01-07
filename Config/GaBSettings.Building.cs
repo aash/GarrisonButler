@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GarrisonButler.Libraries;
 
 #endregion
 
@@ -18,7 +19,7 @@ namespace GarrisonButler.Config
             CanStartOrder = canStartOrder;
             MaxCanStartOrder = maxCanStartOrder;
             CanCollectOrder = canCollectOrder;
-            Name = nameFromBuildingID(buildingIds.First());
+            Name = nameFromBuildingID(buildingIds.GetEmptyIfNull().FirstOrDefault());
         }
 
         public BuildingSettings()

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler;
+using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
 
@@ -17,37 +18,37 @@ namespace GarrisonLua
 
         public static List<Follower> GetAllFollowers()
         {
-            return GetListFollowersId().Select(GetFollowerById).ToList();
+            return GetListFollowersId().GetEmptyIfNull().Select(GetFollowerById).SkipWhile(f => f == null).ToList();
         }
 
         public static string GetFollowerName(string follower)
         {
             String lua = String.Format("return C_Garrison.GetFollowerName(\"{0}\");", follower);
-            return Lua.GetReturnValues(lua).FirstOrDefault();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerNameById(string followerId)
         {
             String lua = String.Format("return C_Garrison.GetFollowerNameByID(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).FirstOrDefault();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerClassSpecName(string follower)
         {
             String lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", follower);
-            return Lua.GetReturnValues(lua).FirstOrDefault();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerClassSpecById(string followerId)
         {
             String lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).FirstOrDefault();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerDisplayIdbyId(string followerId)
         {
             String lua = String.Format("return C_Garrison.GetFollowerDisplayIDByID(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).FirstOrDefault();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerStatus(string followerId)
@@ -59,15 +60,18 @@ namespace GarrisonLua
                               "if (followerID == {0}) then table.insert(RetInfo,tostring(v.status)); end;" +
                               "end;" +
                               "return unpack(RetInfo)", followerId);
-            return Lua.GetReturnValues(lua).FirstOrDefault() == "nil"
+
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault() == "nil"
                 ? "None"
-                : Lua.GetReturnValues(lua).FirstOrDefault();
+                : (Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault() == default(string)
+                    ? "None"
+                    : Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault());
         }
 
         public static string GetFollowerInfo(string followerId)
         {
             String lua = String.Format("return {0} and C_Garrison.GetFollowerInfo(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).FirstOrDefault();
+            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         // Return the follower corresponding to the id
@@ -95,6 +99,10 @@ namespace GarrisonLua
                     "for j_=0,9 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", followerId);
             List<String> follower = Lua.GetReturnValues(lua);
+
+            if (follower.IsNullOrEmpty())
+                return null;
+
             String Name = follower[1];
             String Status = follower[2];
             String ClassSpecName = follower[3];
@@ -114,6 +122,7 @@ namespace GarrisonLua
                   "end;" +
                   "end;" +
                   "return unpack(RetInfo)";
+
             List<String> abilities = Lua.GetReturnValues(lua);
 
             return new Follower(followerId, Name, Status, ClassSpecName, quality, level, isCollected, iLevel, xp,
@@ -130,6 +139,7 @@ namespace GarrisonLua
                 "table.insert(RetInfo,tostring( (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID));" +
                 "end;" +
                 "return unpack(RetInfo)";
+
             List<string> followerId = Lua.GetReturnValues(lua);
             return followerId;
         }
@@ -138,7 +148,7 @@ namespace GarrisonLua
         {
             String lua = String.Format("return C_Garrison.GetNumFollowersOnMission(\"{0}\");", missionId);
             List<string> luaRet = Lua.GetReturnValues(lua);
-            return Convert.ToInt32(luaRet[0]);
+            return Convert.ToInt32(luaRet.GetEmptyIfNull().FirstOrDefault());
         }
 
         public static void AddFollowerToMission(int missionId, int followerId)

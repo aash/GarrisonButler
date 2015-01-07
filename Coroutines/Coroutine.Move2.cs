@@ -108,6 +108,7 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("Is stuck :O ! ");
                 stuckHandlerGaB.Unstick();
+                stuckHandlerGaB.Reset();
                 return MoveResult.UnstuckAttempt;
             }
             if (MoverLocation.Distance(location) < 2.4f)
@@ -191,7 +192,7 @@ namespace GarrisonButler
             var straightpaths = new StraightPathFlags[points.Count()];
             var AreaTypes = new AreaType[points.Count()];
 
-
+            //TODO - JUSTIN - Investigate if this takes a long time
             for (int index = 0; index < points.Length; index++)
             {
                 straightpaths[index] = StraightPathFlags.None;
@@ -260,6 +261,8 @@ namespace GarrisonButler
                         Logging.WriteException(ex);
                     }
                 }
+                
+                GarrisonButler.Log("Took " + (DateTime.Now - startedAt).TotalMilliseconds.ToString() + "ms to fully create path.");
                 //StyxWoW.Memory.AcquireFrame();
                 return task.Result;
             }
