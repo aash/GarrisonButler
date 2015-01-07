@@ -143,6 +143,9 @@ namespace GarrisonButler.Objects
                 case Conditions.KeepNumberInBags:
                     return IsKeepNumberInBags(itemId, _checkValue);
 
+                case Conditions.None:
+                    return false;
+
                 default:
                     GarrisonButler.Diagnostic("This rule has not been implemented!");
                     break;
@@ -176,6 +179,9 @@ namespace GarrisonButler.Objects
 
                 case Conditions.KeepNumberInBags:
                     return GetNumberKeepNumberInBags(itemId, _checkValue);
+
+                case Conditions.None:
+                    return null;
 
                 default:
                     GarrisonButler.Diagnostic("This rule has not been implemented!");
