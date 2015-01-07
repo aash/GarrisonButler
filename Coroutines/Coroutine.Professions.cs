@@ -102,7 +102,7 @@ namespace GarrisonButler
                 return true;
 
             DailiesTriggered = false;
-            return true;
+            return false;
         }
 
         private static async Task<bool> FindAnvilAndDoCd(DailyProfession daily)
@@ -144,7 +144,7 @@ namespace GarrisonButler
             daily.Spell.Cast();
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(10000, () => !Me.IsCasting);
-            return true;
+            return false;
         }
     }
 }
