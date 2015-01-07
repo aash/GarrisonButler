@@ -38,7 +38,7 @@ namespace GarrisonButler
         }
 
         public static async Task<bool> MailItem(MailItem mailItem)
-        {-
+        {
             if (!Styx.CommonBot.Frames.MailFrame.Instance.IsVisible)
             {
                 List<WoWGameObject> MailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
