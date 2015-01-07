@@ -127,6 +127,7 @@ namespace GarrisonButler.Objects
                 .Select(s => (SkillLine) s.ID)
                 .ToList();
 
+            DateTime startTime = DateTime.Now;
             List<WoWSpell> recipes = SkillLineAbility.GetAbilities()
                 .Where(
                     a =>
@@ -135,6 +136,7 @@ namespace GarrisonButler.Objects
                 .Select(a => WoWSpell.FromId(a.SpellId))
                 .Where(s => s != null && s.IsValid)
                 .ToList();
+            GarrisonButler.Diagnostic("Took " + (DateTime.Now - startTime).TotalMilliseconds + "ms to get recipes");
 
             return recipes.FirstOrDefault(s => s.CreatesItemId == ItemId)
                    ?? recipes.FirstOrDefault(s => s.Id == ItemId);

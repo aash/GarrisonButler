@@ -2,6 +2,10 @@
 
 using System;
 using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using GarrisonButler.Libraries;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
@@ -38,47 +42,71 @@ namespace GarrisonButler
             if (toHarvest == null)
                 return false;
 
-            // Original passed in toHarvest object will remain invalid since
-            // paramters are not passed by refrence with an async method
+            // STEP 1 - Attempt to harvest original node
             if (toHarvest.IsValid)
             {
                 CachedToHarvestLocation = toHarvest.Location;
-                if (await HarvestWoWGameOject(toHarvest))
+                if (await HarvestWoWGameOject(toHarvest))   // returns false if toHarvest becomes null or invalid
                     return true;
-
-                CachedToHarvestLocation = WoWPoint.Empty;
-                return false;
             }
 
-            if (Blacklist.Contains(toHarvest, BlacklistFlags.All))
-                return false;
-
-            // First moving to cached location
+            // STEP 2 - Make sure we are within 5 yards of the location of toHarvest
             if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.Distance(CachedToHarvestLocation) > 5))
                 if (await MoveTo(CachedToHarvestLocation)) // returns false for Failed and ReachedDestination
                     return true;
 
-            CachedToHarvestLocation = WoWPoint.Empty;
+            // STEP 3 - See if the location of toHarvest still exists in all currently "seen" nodes
+            //List<WoWGameObject> mineNodes = GetAllMineNodesIfCanRunMine();
 
-            // Get the new game object since the old one will be destroyed
-            Tuple<bool, WoWGameObject> mineToGetTuple = CanRunMine();
+            WoWGameObject foundNodeStillExists =
+                GetAllMineNodesIfCanRunMine()
+                .GetEmptyIfNull()
+                .Where(o => o.Location == CachedToHarvestLocation)
+                .FirstOrDefault();
 
-            toHarvest = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
-
-            // No object found
-            if (toHarvest == null)
-                return false;
-
-            // Valid object found
-            if (toHarvest.IsValid)
+            if (foundNodeStillExists == default(WoWGameObject))
             {
-                CachedToHarvestLocation = toHarvest.Location;
-                if (await HarvestWoWGameOject(toHarvest))
-                    return true;
+                CachedToHarvestLocation = WoWPoint.Empty;
+                return false;
             }
 
-            CachedToHarvestLocation = WoWPoint.Empty;
+            // STEP 4 - toHarvest still exists, try to harvest
+            if (foundNodeStillExists == null)
+            {
+                CachedToHarvestLocation = WoWPoint.Empty;
+                return false;
+            }
+
+            if (!foundNodeStillExists.IsValid)
+            {
+                CachedToHarvestLocation = WoWPoint.Empty;
+                return false;
+            }
+
+            CachedToHarvestLocation = foundNodeStillExists.Location;
+            if (await HarvestWoWGameOject(foundNodeStillExists))
+                return true;
+
             return false;
+            // Get the new game object since the old one will be destroyed
+            //Tuple<bool, WoWGameObject> mineToGetTuple = CanRunMine();
+
+            //toHarvest = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
+
+            // No object found
+            //if (toHarvest == null)
+            //    return false;
+
+            // Valid object found
+            //if (toHarvest.IsValid)
+            //{
+            //    CachedToHarvestLocation = toHarvest.Location;
+            //    if (await HarvestWoWGameOject(toHarvest))
+            //        return true;
+            //}
+
+            //CachedToHarvestLocation = WoWPoint.Empty;
+            //return false;
 
 
             //WoWPoint startLocation = Me.Location;
