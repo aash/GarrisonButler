@@ -18,12 +18,12 @@ namespace GarrisonButler
     partial class Coroutine
     {
         private static List<DailyProfession> _detectedDailyProfessions;
-        
+
         private static void InitializeDailies()
         {
             if (_detectedDailyProfessions != null)
                 return;
-            
+
             _detectedDailyProfessions = new List<DailyProfession>();
 
             IEnumerable<DailyProfession> dailyActivated =
@@ -48,7 +48,7 @@ namespace GarrisonButler
                     daily.Initialize();
                     if (daily.Spell == null)
                         continue;
-                    
+
                     GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Name);
                     _detectedDailyProfessions.Add(daily);
                 }
@@ -79,8 +79,7 @@ namespace GarrisonButler
 
             IEnumerable<DailyProfession> possibleDailies =
                 _detectedDailyProfessions.Where(d => Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
-                    .Where(d => d.GetMaxRepeat() > 0).OrderBy(d => d.TradeskillId)
-                    .Where(d=> d.Attempts < 10);
+                    .Where(d => d.GetMaxRepeat() > 0).OrderBy(d => d.TradeskillId);
 
             if (possibleDailies.Any())
             {
@@ -119,15 +118,12 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("Can't find an Anvil around, moving inside Garrison.");
                 return await MoveToMine();
             }
-            else
-            {
-                GarrisonButler.Log("[Profession] Current CD requires an anvil, moving to the safest one.");
-                if (await MoveToInteract(anvil))
-                    return true;
+            GarrisonButler.Log("[Profession] Current CD requires an anvil, moving to the safest one.");
+            if (await MoveToInteract(anvil))
+                return true;
 
-                if (await DoCd(daily))
-                    return true;
-            }
+            if (await DoCd(daily))
+                return true;
             return false;
         }
 
@@ -139,12 +135,6 @@ namespace GarrisonButler
 
         private static async Task<bool> DoCd(DailyProfession daily)
         {
-            if (daily.Attempts > 10)
-            {
-                GarrisonButler.Warning("More than 10 Failed attempts at realizing CD: " + daily.Spell.Name + ". Won't try again this session.");
-                return false;
-            }
-
             GarrisonButler.Log("[Profession] Realizing daily CD: " + daily.Spell.Name);
             if (Me.IsMoving)
                 WoWMovement.MoveStop();
@@ -154,7 +144,6 @@ namespace GarrisonButler
             daily.Spell.Cast();
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(10000, () => !Me.IsCasting);
-            daily.Attempts++;
             return true;
         }
     }

@@ -1,57 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Bots.Professionbuddy.Components;
 using JetBrains.Annotations;
+
+#endregion
 
 namespace GarrisonButler.Objects
 {
     public class MailItem : INotifyPropertyChanged
     {
+        private string _comment;
         private int _itemId;
         private string _recipient;
-        private string _comment;
-        public int ItemId
-        {
-            get { return this._itemId; }
-            set
-            {
-                if (value != this._itemId)
-                {
-                    this._itemId = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string Recipient
-        {
-            get { return this._recipient; }
-            set
-            {
-                if (value != this._recipient)
-                {
-                    this._recipient = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        public string Comment
-        {
-            get { return this._comment; }
-            set
-            {
-                if (value != this._comment)
-                {
-                    this._comment = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
 
         public MailItem(int itemId, string recipient, string comment = "")
         {
@@ -59,9 +20,48 @@ namespace GarrisonButler.Objects
             Recipient = recipient;
             Comment = comment;
         }
+
         public MailItem()
         {
+        }
 
+        public int ItemId
+        {
+            get { return _itemId; }
+            set
+            {
+                if (value != _itemId)
+                {
+                    _itemId = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string Recipient
+        {
+            get { return _recipient; }
+            set
+            {
+                if (value != _recipient)
+                {
+                    _recipient = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string Comment
+        {
+            get { return _comment; }
+            set
+            {
+                if (value != _comment)
+                {
+                    _comment = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

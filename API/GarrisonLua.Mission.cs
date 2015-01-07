@@ -36,7 +36,9 @@ namespace GarrisonLua
 
         public static WoWObject GetCommandTableOrDefault()
         {
-            return ObjectManager.ObjectList.GetEmptyIfNull().FirstOrDefault(o => CommandTables.GetEmptyIfNull().Contains(o.Entry));
+            return
+                ObjectManager.ObjectList.GetEmptyIfNull()
+                    .FirstOrDefault(o => CommandTables.GetEmptyIfNull().Contains(o.Entry));
         }
 
         // Click on View Accepted Mission button
@@ -85,7 +87,12 @@ namespace GarrisonLua
 
         public static List<Mission> GetAllCompletedMissions()
         {
-            return GetListCompletedMissionsId().GetEmptyIfNull().Select(GetCompletedMissionById).SkipWhile(m => m == null).ToList();
+            return
+                GetListCompletedMissionsId()
+                    .GetEmptyIfNull()
+                    .Select(GetCompletedMissionById)
+                    .SkipWhile(m => m == null)
+                    .ToList();
         }
 
         // Return list of all available missions

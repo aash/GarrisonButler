@@ -285,7 +285,7 @@ namespace GarrisonButler
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
 
-            if(mainSequence == null)
+            if (mainSequence == null)
             {
                 GarrisonButler.Warning("ERROR: mainSequence NULL");
                 return false;

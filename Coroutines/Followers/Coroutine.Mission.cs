@@ -73,7 +73,7 @@ namespace GarrisonButler
             }
 
             RefreshMissions();
-            RefreshFollowers(   );
+            RefreshFollowers();
 
 
             int garrisonRessources = BuildingsLua.GetGarrisonRessources();
@@ -85,7 +85,7 @@ namespace GarrisonButler
             }
 
             var ToStart = new List<Tuple<Mission, Follower[]>>();
-            var followersTemp = _followers.ToList();
+            List<Follower> followersTemp = _followers.ToList();
             foreach (Mission mission in Missions)
             {
                 Follower[] match =
@@ -98,8 +98,12 @@ namespace GarrisonButler
 
             string mess = "Found " + numberMissionAvailable + " available missions to complete. " +
                           "Can successfully complete: " + ToStart.Count + " missions.";
-            GarrisonButler.Log(mess);
-
+            if (ToStart.Count > 0)
+                GarrisonButler.Log(mess);
+            else
+            {
+                GarrisonButler.Diagnostic(mess);
+            }
             if (!ToStart.Any())
             {
                 return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
@@ -229,7 +233,15 @@ namespace GarrisonButler
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             MissionLua.TurnInAllCompletedMissions();
-            RestoreCompletedMission = true;
+            //RestoreCompletedMission = true;
+            // Restore UI
+            Lua.DoString("GarrisonMissionFrame.MissionTab.MissionList.CompleteDialog:Hide();" +
+                         "GarrisonMissionFrame.MissionComplete:Hide();" +
+                         "GarrisonMissionFrame.MissionCompleteBackground:Hide();" +
+                         "GarrisonMissionFrame.MissionComplete.currentIndex = nil;" +
+                         "GarrisonMissionFrame.MissionTab:Show();" +
+                         "GarrisonMissionList_UpdateMissions();");
+
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             TurnInMissionsTriggered = false;
             RefreshFollowers(true);

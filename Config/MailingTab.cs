@@ -1,18 +1,17 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
-using GarrisonButler.Objects;
 using GarrisonButler.Libraries;
+using GarrisonButler.Objects;
 using Styx.Helpers;
 
 #endregion
@@ -21,6 +20,7 @@ namespace GarrisonButler.Config
 {
     internal class MailingTab
     {
+        private static readonly Action EmptyDelegate = delegate { };
         private readonly Grid _mainGrid;
         private readonly ListView _myListView = new ListView();
         private TextBox _addCommentTextBox = new TextBox();
@@ -55,7 +55,7 @@ namespace GarrisonButler.Config
             columnHeader0.Click += MailColumnHeader_Click;
             column0.Header = columnHeader0;
             column0.Width = double.NaN;
-           
+
             column0.DisplayMemberBinding = new Binding("ItemId");
             gridView.Columns.Add(column0);
 
@@ -100,6 +100,8 @@ namespace GarrisonButler.Config
             StackPanel stackpanelTextBox = InputBoxes();
             barPanel.Children.Add(stackpanelTextBox);
         }
+
+        private Button AddNewMailItemButton { get; set; }
 
         public object ContentTabMailing()
         {
@@ -218,8 +220,6 @@ namespace GarrisonButler.Config
             return barPanel;
         }
 
-        private Button AddNewMailItemButton { get; set; }
-
         private void myListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var listview = sender as ListView;
@@ -288,19 +288,21 @@ namespace GarrisonButler.Config
                 }
                 GarrisonButler.Diagnostic("Deleted selected Items.");
                 ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);
-                //ICollectionView view = CollectionViewSource.GetDefaultView(myListView.ItemsSource);
-                //view.Refresh();
-                //BindingExpression binding = _myWindow.GetBindingExpression(ListView.DataContextProperty);
+                ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
+                view.Refresh();
+                //BindingExpression binding = _myListView.GetBindingExpression(ListView.DataContextProperty);
                 //binding.UpdateSource();
             }
+            _myListView.View.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
         }
+
 
         private void AddNewMailItem_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
             if (btn != null)
             {
-                if ((int)btn.Tag == 1)
+                if ((int) btn.Tag == 1)
                 {
                     if (_addRecipientTextBox.Text == "")
                     {
@@ -312,18 +314,24 @@ namespace GarrisonButler.Config
                         GarrisonButler.Warning("No value for ItemID, item not added.");
                         return;
                     }
-                    if (GaBSettings.Get().MailItems.GetEmptyIfNull().Any(i => i.ItemId == _addItemIdTextBox.Text.ToInt32()))
+                    if (
+                        GaBSettings.Get()
+                            .MailItems.GetEmptyIfNull()
+                            .Any(i => i.ItemId == _addItemIdTextBox.Text.ToInt32()))
                     {
                         GarrisonButler.Warning("Item already added to list.");
                         return;
                     }
 
-                    ObservableCollection<MailItem> mailItems = GaBSettings.Get().MailItems;
+                    List<MailItem> mailItems = GaBSettings.Get().MailItems;
 
                     if (!mailItems.IsNullOrEmpty())
                         mailItems.Add(new MailItem(_addItemIdTextBox.Text.ToInt32(), _addRecipientTextBox.Text,
                             _addCommentTextBox.Text));
 
+
+                    ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
+                    view.Refresh();
                     _myListView.View.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                     GarrisonButler.Diagnostic("Added mail Item");
                     ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);
@@ -334,7 +342,6 @@ namespace GarrisonButler.Config
                 }
             }
         }
-        private static System.Action EmptyDelegate = delegate() { };
 
         public class SortAdorner : Adorner
         {

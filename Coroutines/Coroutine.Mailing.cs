@@ -4,19 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bots.GatherBuddy;
-using Bots.Professionbuddy.Components;
-using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.Config;
 using GarrisonButler.Objects;
 using GarrisonLua;
-using NewMixedMode;
 using Styx;
-using Styx.Common.Helpers;
-using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
-using Styx.CommonBot.POI;
-using Styx.CommonBot.Profiles;
+using Styx.CommonBot.Frames;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -28,26 +21,27 @@ namespace GarrisonButler
     {
         private static Tuple<bool, MailItem> CanMailItem()
         {
-            var toMail = GaBSettings.Get().MailItems.Where(m => Me.BagItems.Any(i => i.Entry == m.ItemId));
+            IEnumerable<MailItem> toMail =
+                GaBSettings.Get().MailItems.Where(m => Me.BagItems.Any(i => i.Entry == m.ItemId));
             if (!toMail.Any())
             {
                 GarrisonButler.Diagnostic("[Mailing] No items to mail.");
                 return new Tuple<bool, MailItem>(false, null);
             }
-                return new Tuple<bool, MailItem>(true, toMail.First());
+            return new Tuple<bool, MailItem>(true, toMail.First());
         }
 
         public static async Task<bool> MailItem(MailItem mailItem)
         {
-            if (!Styx.CommonBot.Frames.MailFrame.Instance.IsVisible)
+            if (!MailFrame.Instance.IsVisible)
             {
                 List<WoWGameObject> MailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .Where(o => o.SubType == WoWGameObjectType.Mailbox).ToList();
 
-                var mailbox = MailboxList.FirstOrDefault();
+                WoWGameObject mailbox = MailboxList.FirstOrDefault();
                 if (mailbox == default(WoWGameObject))
                 {
-                    var mailboxLocation = Me.IsAlliance ? allyMailbox : hordeMailbox;
+                    WoWPoint mailboxLocation = Me.IsAlliance ? allyMailbox : hordeMailbox;
                     return await MoveTo(mailboxLocation, "[Mailing] Moving to mailbox at " + mailboxLocation);
                 }
 
@@ -59,10 +53,10 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
             }
 
-            var mailFrame = Styx.CommonBot.Frames.MailFrame.Instance;
-            foreach (var mail in GaBSettings.Get().MailItems)
+            MailFrame mailFrame = MailFrame.Instance;
+            foreach (MailItem mail in GaBSettings.Get().MailItems)
             {
-                var item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == mail.ItemId);
+                WoWItem item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == mail.ItemId);
                 if (item == default(WoWItem))
                 {
                     GarrisonButler.Diagnostic("Error, Item null: {0}", mail.ItemId);
@@ -75,6 +69,5 @@ namespace GarrisonButler
             }
             return true;
         }
-        
     }
 }

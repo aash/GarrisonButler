@@ -78,12 +78,10 @@ namespace GarrisonButler.Objects
             TradeskillId = tradeskillId;
             ItemId = itemId;
             Spell = null;
-            Attempts = 0;
         }
 
         private DailyProfession()
         {
-            Attempts = 0;
         }
 
         public string Name { get; set; }
@@ -92,14 +90,11 @@ namespace GarrisonButler.Objects
         public bool Activated { get; set; }
 
         [XmlIgnore]
-        public int Attempts { get; set; }
-
-        [XmlIgnore]
         public WoWSpell Spell { get; set; }
 
         public void Initialize()
         {
-            var firstOrDefault = GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId);
+            DailyProfession firstOrDefault = GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId);
             if (firstOrDefault != null && firstOrDefault.Activated)
             {
                 GarrisonButler.Diagnostic("[DailyProfession] {0}: loading spell.", Name);

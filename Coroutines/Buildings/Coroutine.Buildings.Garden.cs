@@ -40,13 +40,14 @@ namespace GarrisonButler
             }
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap.GetEmptyIfNull().Count() < 2
-                                    ? false : ShipmentsMap
-                                                .GetEmptyIfNull()
-                                                .ElementAt(1) // struct so no need to check for null
-                                                .buildingIds
-                                                .GetEmptyIfNull()
-                                                .Contains(b.id)
-                                                ))
+                ? false
+                : ShipmentsMap
+                    .GetEmptyIfNull()
+                    .ElementAt(1) // struct so no need to check for null
+                    .buildingIds
+                    .GetEmptyIfNull()
+                    .Contains(b.id)
+                ))
             {
                 GarrisonButler.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
                 return new Tuple<bool, WoWGameObject>(false, null);

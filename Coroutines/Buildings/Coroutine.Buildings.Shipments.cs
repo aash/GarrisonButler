@@ -316,7 +316,7 @@ namespace GarrisonButler
             if (building == null)
             {
                 GarrisonButler.Diagnostic("[ShipmentStart] Building is null, either not built or not properly scanned.");
-                return new Tuple<bool, Building>(false,null);
+                return new Tuple<bool, Building>(false, null);
             }
 
             building.Refresh();
@@ -342,10 +342,10 @@ namespace GarrisonButler
                     building.name);
                 return new Tuple<bool, Building>(false, null);
             }
+            int MaxToStart = GetMaxShipmentToStart(building);
 
             // max start by user ?
-            if (GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder != 0
-                && GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder <= building.shipmentsTotal)
+            if (MaxToStart <= 0)
             {
                 GarrisonButler.Diagnostic(
                     "[ShipmentStart] Reached limit of work orders started: {0} - current# {1} max {2} ",
@@ -364,7 +364,7 @@ namespace GarrisonButler
             }
 
             GarrisonButler.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
-                building.shipmentCapacity, building.name);
+                MaxToStart, building.name);
             return new Tuple<bool, Building>(true, building);
         }
 
@@ -374,6 +374,7 @@ namespace GarrisonButler
             if (building == null)
             {
                 GarrisonButler.Diagnostic("[ShipmentPickUp] Building is null, either not built or not properly scanned.");
+                return new Tuple<bool, WoWGameObject>(false, null);
             }
 
             building.Refresh();
@@ -418,7 +419,9 @@ namespace GarrisonButler
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
-                await MoveTo(building.Pnj,"[ShipmentStart] Could not find unit (" + building.PnjId +"), moving to default location.");
+                await
+                    MoveTo(building.Pnj,
+                        "[ShipmentStart] Could not find unit (" + building.PnjId + "), moving to default location.");
                 return true;
             }
 
@@ -447,6 +450,24 @@ namespace GarrisonButler
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  
 
+            int MaxToStart = GetMaxShipmentToStart(building);
+
+            for (int i = 0; i < MaxToStart - building.shipmentsTotal; i++)
+            {
+                InterfaceLua.ClickStartOrderButton();
+                building.Refresh();
+                if (building.shipmentsTotal >= MaxToStart)
+                    break;
+                await CommonCoroutines.SleepForRandomUiInteractionTime();
+                await Buddy.Coroutines.Coroutine.Yield();
+            }
+            building.Refresh();
+            StartOrderTriggered = false;
+            return false; // done here
+        }
+
+        private static int GetMaxShipmentToStart(Building building)
+        {
             int MaxInProgress;
             int maxPossible = building.shipmentCapacity - building.shipmentsTotal;
             int MaxSettings = GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder;
@@ -458,21 +479,8 @@ namespace GarrisonButler
             {
                 MaxInProgress = Math.Min(building.shipmentCapacity, MaxSettings);
             }
-
-            for (int i = 0; i < MaxInProgress-building.shipmentsTotal; i++)
-            {
-                InterfaceLua.ClickStartOrderButton();
-                building.Refresh();
-                if (building.shipmentsTotal >= MaxInProgress)
-                    break;
-                await CommonCoroutines.SleepForRandomUiInteractionTime();
-                await Buddy.Coroutines.Coroutine.Yield();
-            }
-            building.Refresh();
-            StartOrderTriggered = false;
-            return false; // done here
+            return MaxInProgress - building.shipmentsTotal;
         }
-
         private static async Task WorkAroundBugFrame()
         {
             Buddy.Coroutines.Coroutine.Wait(6000, () =>
@@ -481,7 +489,7 @@ namespace GarrisonButler
                 return false;
             });
         }
-        
+
         private static void IfGossip(WoWUnit pnj)
         {
             if (GossipFrame.Instance != null)
@@ -491,7 +499,7 @@ namespace GarrisonButler
                 {
                     Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
                 }
-                frame.SelectGossipOption(frame.GossipOptionEntries.Count-1);
+                frame.SelectGossipOption(frame.GossipOptionEntries.Count - 1);
             }
         }
 
@@ -522,13 +530,16 @@ namespace GarrisonButler
 
             if (shipmentToCollect == null)
             {
-                if (await MoveTo(building.Location, "[ShipmentCollect] Moving to Building to search for shipment to pick up."))
+                if (
+                    await
+                        MoveTo(building.Location,
+                            "[ShipmentCollect] Moving to Building to search for shipment to pick up."))
                     return true;
             }
             else
             {
                 await HarvestWoWGameOject(shipmentToCollect);
-                RefreshBuildings(true); 
+                RefreshBuildings(true);
                 return false; // Done here
             }
             return false; // should never reach that point!

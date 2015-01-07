@@ -8,7 +8,6 @@ using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonLua;
-using Styx;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -73,7 +72,7 @@ namespace GarrisonButler
                         HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
                         1000,
-                        1000,
+                        100,
                         false,
                         // Drink coffee
                         new ActionHelpers.ActionOnTimer<WoWItem>(
@@ -122,18 +121,19 @@ namespace GarrisonButler
                 // Take care of mine shipments
                 buildingsActionsSequence.AddAction(
                     new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine),5000,10000));
+                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine), 5000, 10000));
             }
             if (garden != null)
             {
                 // Harvest garden
                 buildingsActionsSequence.AddAction(
-                    new ActionHelpers.ActionOnTimer<WoWGameObject>(HarvestWoWGameOject, CanRunGarden));
+                    new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation,
+                        CanRunGarden, 1000, 200));
 
                 // Take care of garden shipments
                 buildingsActionsSequence.AddAction(
                     new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden),5000,10000));
+                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden), 5000, 10000));
             }
             // Take care of all shipments
             buildingsActionsSequence.AddAction(
@@ -146,7 +146,8 @@ namespace GarrisonButler
 
             // Buildings activation
             buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation, CanActivateAtLeastOneBuilding));
+                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation,
+                    CanActivateAtLeastOneBuilding));
 
             GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;

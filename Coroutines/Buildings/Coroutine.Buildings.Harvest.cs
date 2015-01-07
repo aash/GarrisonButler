@@ -6,7 +6,6 @@ using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
 using Styx.WoWInternals.WoWObjects;
-using Styx.WoWInternals;
 
 #endregion
 
@@ -14,6 +13,8 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
+        private static WoWPoint CachedToHarvestLocation = WoWPoint.Empty;
+
         private static async Task<bool> HarvestWoWGameOject(WoWGameObject toHarvest)
         {
             var node = BotPoi.Current.AsObject as WoWGameObject;
@@ -25,10 +26,13 @@ namespace GarrisonButler
             if (node != toHarvest)
                 BotPoi.Current = new BotPoi(toHarvest, PoiType.Harvest);
 
+            node = BotPoi.Current.AsObject as WoWGameObject;
+            if (node == null || !node.IsValid)
+                return false;
+
             return true;
         }
 
-        private static WoWPoint CachedToHarvestLocation = WoWPoint.Empty;
         private static async Task<bool> HarvestWoWGameObjectCachedLocation(WoWGameObject toHarvest)
         {
             if (toHarvest == null)
@@ -39,15 +43,15 @@ namespace GarrisonButler
             if (toHarvest.IsValid)
             {
                 CachedToHarvestLocation = toHarvest.Location;
-                await HarvestWoWGameOject(toHarvest);
+                if (await HarvestWoWGameOject(toHarvest))
+                    return true;
 
-                var node = BotPoi.Current.AsObject as WoWGameObject;
-                if (node == null || !node.IsValid)
-                {
-                    CachedToHarvestLocation = WoWPoint.Empty;
-                }
+                CachedToHarvestLocation = WoWPoint.Empty;
                 return false;
             }
+
+            if (Blacklist.Contains(toHarvest, BlacklistFlags.All))
+                return false;
 
             // First moving to cached location
             if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.Distance(CachedToHarvestLocation) > 5))
@@ -62,18 +66,18 @@ namespace GarrisonButler
             toHarvest = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
 
             // No object found
-            if(toHarvest == null)
+            if (toHarvest == null)
                 return false;
 
             // Valid object found
             if (toHarvest.IsValid)
             {
                 CachedToHarvestLocation = toHarvest.Location;
-                return await HarvestWoWGameOject(toHarvest);
+                if (await HarvestWoWGameOject(toHarvest))
+                    return true;
             }
 
             CachedToHarvestLocation = WoWPoint.Empty;
-
             return false;
 
 

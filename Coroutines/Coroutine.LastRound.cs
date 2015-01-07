@@ -49,7 +49,10 @@ namespace GarrisonButler
                 lastRoundCheckTime = DateTime.Now;
                 return false;
             }
-            if (await MoveTo(myLastRoundPoints[_lastRoundTemp], "Doing a last round to check if something was not too far to see before."))
+            if (
+                await
+                    MoveTo(myLastRoundPoints[_lastRoundTemp],
+                        "Doing a last round to check if something was not too far to see before."))
             {
                 return true;
             }

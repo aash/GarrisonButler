@@ -20,7 +20,7 @@ namespace GarrisonLua
         {
             const string lua =
                 "if not GarrisonMissionFrame then return false; else return tostring(GarrisonMissionFrame:IsVisible());end;";
-            
+
             string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
@@ -29,7 +29,7 @@ namespace GarrisonLua
         {
             const string lua =
                 "if not GarrisonCapacitiveDisplayFrame then return false; else return tostring(GarrisonCapacitiveDisplayFrame:IsVisible());end;";
-            
+
             string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
@@ -38,7 +38,7 @@ namespace GarrisonLua
         {
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
         }
-        
+
         public static void ClickSendMail()
         {
             Lua.DoString("SendMailFrame_SendMail();");
@@ -48,7 +48,7 @@ namespace GarrisonLua
         {
             const string lua =
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab then return false; else return tostring(GarrisonMissionFrame.MissionTab:IsVisible()); end;";
-            
+
             string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }

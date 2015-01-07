@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
-using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -46,7 +45,7 @@ namespace GarrisonButler
         {
             return CanRunMine().Item1;
         }
- 
+
         private static Tuple<bool, WoWGameObject> CanRunMine()
         {
             // Settings
@@ -142,7 +141,7 @@ namespace GarrisonButler
             GarrisonButler.Log("[Item] Deleting: {0}", item.Name);
             Lua.DoString("ClearCursor()");
             item.PickUp();
-            Lua.DoString("DeleteCursorItem()"); 
+            Lua.DoString("DeleteCursorItem()");
             return true;
         }
 
@@ -152,12 +151,12 @@ namespace GarrisonButler
             return () =>
             {
                 WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
-                if(item == null || !item.IsValid || !item.Usable)
+                if (item == null || !item.IsValid || !item.Usable)
                     return new Tuple<bool,
                         WoWItem>(false,
                             null);
-                
-                if(item.StackCount >= max)
+
+                if (item.StackCount >= max)
                     return new Tuple<bool, WoWItem>(true, item);
 
                 return new Tuple<bool, WoWItem>(false, item);

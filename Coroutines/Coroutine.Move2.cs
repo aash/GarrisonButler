@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Styx;
 using Styx.Common;
 using Styx.Common.Helpers;
@@ -52,7 +51,7 @@ namespace GarrisonButler
                     return MoveResult.Failed;
 
                 WoWUnit activeMover = WoWMovement.ActiveMover;
-                if ((WoWObject) activeMover == (WoWObject) null)
+                if (activeMover == null)
                     return MoveResult.Failed;
                 double pathPrecision = StyxWoW.Me.Mounted ? 5 : 3;
                 if (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision)
@@ -61,8 +60,8 @@ namespace GarrisonButler
                     return MoveResult.Moved;
                 }
 
-                Tripper.Tools.Math.Vector3 vector3 = path.Path.Points[path.Index];
-                Navigator.PlayerMover.MoveTowards((WoWPoint) vector3);
+                Vector3 vector3 = path.Path.Points[path.Index];
+                Navigator.PlayerMover.MoveTowards(vector3);
                 return MoveResult.Moved;
             }
 
@@ -117,7 +116,7 @@ namespace GarrisonButler
                 stuckHandlerGaB.Reset();
                 return MoveResult.ReachedDestination;
             }
-            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 8f)
+            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
                 return MoveResult.Moved;
@@ -261,8 +260,8 @@ namespace GarrisonButler
                         Logging.WriteException(ex);
                     }
                 }
-                
-                GarrisonButler.Log("Took " + (DateTime.Now - startedAt).TotalMilliseconds.ToString() + "ms to fully create path.");
+
+                GarrisonButler.Log("Took " + (DateTime.Now - startedAt).TotalMilliseconds + "ms to fully create path.");
                 //StyxWoW.Memory.AcquireFrame();
                 return task.Result;
             }

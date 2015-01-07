@@ -25,7 +25,7 @@ namespace GarrisonButler.Config
 
         [XmlArray]
         public List<BuildingSettings> BuildingsSettings { get; set; }
-        public ObservableCollection<MailItem> MailItems { get; set; }
+        public List<MailItem> MailItems { get; set; }
 
         [XmlArray]
         public List<DailyProfession> DailySettings { get; set; }
@@ -55,7 +55,7 @@ namespace GarrisonButler.Config
             var ret = new GaBSettings();
             ret.ConfigVersion = new ModuleVersion();
             ret.TimeMinBetweenRun = 60;
-            ret.MailItems = new ObservableCollection<MailItem>();
+            ret.MailItems = new List<MailItem>();
             // Buildings generation, Ugly... but dynamic
             ret.BuildingsSettings = new List<BuildingSettings>();
             foreach (buildings building in (buildings[]) Enum.GetValues((typeof (buildings))))

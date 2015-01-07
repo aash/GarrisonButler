@@ -7,10 +7,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
-using Styx.CommonBot;
-using Styx.Helpers;
 using Styx.Pathing;
-using Styx.WoWInternals;
 using Styx.WoWInternals.World;
 using Styx.WoWInternals.WoWObjects;
 
@@ -29,7 +26,7 @@ namespace GarrisonButler
             if (destinationMessage != null && destinationMessage != oldDestMessage)
             {
                 oldDestMessage = destinationMessage;
-                GarrisonButler.Log(destinationMessage);                
+                GarrisonButler.Log(destinationMessage);
             }
 
             _lastMoveResult = Navigator.MoveTo(destination);
@@ -52,16 +49,18 @@ namespace GarrisonButler
             }
             return true;
         }
+
         public static async Task<bool> MoveToInteract(WoWObject woWObject)
         {
             if (woWObject.WithinInteractRange)
             {
-                GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact with " + woWObject.SafeName);
+                GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact with " +
+                                          woWObject.SafeName);
                 return false;
             }
             return await MoveTo(woWObject.Location, "[Navigation] Moving to interact with " + woWObject.SafeName);
         }
-        
+
         private static async Task<List<WoWPoint>> GetFurthestWaypoint([NotNull] List<WoWPoint> waypoints)
         {
             if (waypoints == null) throw new ArgumentNullException("waypoints");
