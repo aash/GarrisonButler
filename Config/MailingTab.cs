@@ -374,7 +374,7 @@ namespace GarrisonButler.Config
                     }
                     // Check that a correct rule is selected
                     var mailcondition = (_addRuleListBox.SelectedItem as MailCondition);
-                    if (mailcondition == null || mailcondition.Name != "")
+                    if (mailcondition == null || mailcondition.Name == "")
                     {
                         GarrisonButler.Warning("Value for checkValue is not valid.");
                         return;
