@@ -246,7 +246,7 @@ namespace GarrisonButler
             TurnInMissionsTriggered = false;
             RefreshFollowers(true);
             RefreshMissions(true);
-            return true;
+            return false;
         }
 
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
