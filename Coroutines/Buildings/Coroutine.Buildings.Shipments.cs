@@ -350,7 +350,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic(
                     "[ShipmentStart] Reached limit of work orders started: {0} - current# {1} max {2} ",
                     building.name,
-                    building.shipmentsTotal - building.shipmentCapacity - building.shipmentsReady,
+                    building.shipmentsTotal,
                     GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder);
                 return new Tuple<bool, Building>(false, null);
             }
@@ -459,6 +459,13 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
                 await Buddy.Coroutines.Coroutine.Yield();
             }
+            if(!await Buddy.Coroutines.Coroutine.Wait(5000, () =>
+            {
+                building.Refresh();
+                var max = GetMaxShipmentToStart(building);
+                return max == 0;
+            }))
+                GarrisonButler.Diagnostic("Mismatch starting work orders.");
             building.Refresh();
             StartOrderTriggered = false;
             return false; // done here

@@ -83,7 +83,7 @@ namespace GarrisonButler
                                 return
                                     new Tuple<bool, WoWItem>(
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
-                            }),
+                            },3000, 100),
                         // Use Mining Pick 
                         new ActionHelpers.ActionOnTimer<WoWItem>(
                             UseItemInbags,
@@ -94,7 +94,7 @@ namespace GarrisonButler
                                 return
                                     new Tuple<bool, WoWItem>(
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
-                            }),
+                            },3000,100),
                         // Delete Coffee 
                         new ActionHelpers.ActionOnTimer<WoWItem>(
                             DeleteItemInbags,
@@ -105,7 +105,7 @@ namespace GarrisonButler
                                 return
                                     new Tuple<bool, WoWItem>(
                                         tooMany.Item1 && GaBSettings.Get().DeleteCoffee, tooMany.Item2);
-                            }),
+                            },3000,100),
                         // Delete Mining Pick 
                         new ActionHelpers.ActionOnTimer<WoWItem>(
                             DeleteItemInbags,
@@ -116,7 +116,7 @@ namespace GarrisonButler
                                 return
                                     new Tuple<bool, WoWItem>(
                                         tooMany.Item1 && GaBSettings.Get().DeleteMiningPick, tooMany.Item2);
-                            })));
+                            }, 3000, 100)));
 
                 // Take care of mine shipments
                 buildingsActionsSequence.AddAction(

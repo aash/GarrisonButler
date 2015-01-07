@@ -123,9 +123,6 @@ namespace GarrisonButler
 
         public void Refresh()
         {
-            if (!_refreshTimer.IsFinished)
-                return;
-            _refreshTimer.Reset();
             GarrisonButler.Diagnostic("Refreshing " + name);
 
             Building b = BuildingsLua.GetBuildingById(id.ToString());

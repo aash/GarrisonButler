@@ -78,7 +78,7 @@ namespace GarrisonButler
             //}
 
             IEnumerable<DailyProfession> possibleDailies =
-                _detectedDailyProfessions.Where(d => Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
+                _detectedDailyProfessions.Where(d => d.Spell.CanCast && Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
                     .Where(d => d.GetMaxRepeat() > 0).OrderBy(d => d.TradeskillId);
 
             if (possibleDailies.Any())
