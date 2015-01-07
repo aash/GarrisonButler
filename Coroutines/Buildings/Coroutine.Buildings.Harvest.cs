@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Styx;
+using Styx.CommonBot;
 using Styx.CommonBot.POI;
 using Styx.WoWInternals.WoWObjects;
 using Styx.WoWInternals;
@@ -37,14 +38,25 @@ namespace GarrisonButler
             // paramters are not passed by refrence with an async method
             if (toHarvest.IsValid)
             {
+                GarrisonButler.Diagnostic("IsValid");
                 CachedToHarvestLocation = toHarvest.Location;
-                return await HarvestWoWGameOject(toHarvest);
+                await HarvestWoWGameOject(toHarvest);
+                GarrisonButler.Diagnostic("HarvestWoWGameOject");
+
+                var node = BotPoi.Current.AsObject as WoWGameObject;
+                if (node == null || !node.IsValid)
+                {
+                    GarrisonButler.Diagnostic("node == null || !node.IsValid");
+                    CachedToHarvestLocation = WoWPoint.Empty;
+                }
+                return false;
             }
 
             // First moving to cached location
             if (CachedToHarvestLocation != WoWPoint.Empty)
                 if (await MoveTo(CachedToHarvestLocation)) // returns false for Failed and ReachedDestination
                     return true;
+            GarrisonButler.Diagnostic("CachedToHarvestLocation");
 
             CachedToHarvestLocation = WoWPoint.Empty;
 
@@ -60,6 +72,7 @@ namespace GarrisonButler
             // Valid object found
             if (toHarvest.IsValid)
             {
+                GarrisonButler.Diagnostic("CachedToHarvestLocation22222222");
                 CachedToHarvestLocation = toHarvest.Location;
                 return await HarvestWoWGameOject(toHarvest);
             }

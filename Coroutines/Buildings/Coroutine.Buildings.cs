@@ -69,12 +69,12 @@ namespace GarrisonButler
             {
                 // Harvest mine
                 buildingsActionsSequence.AddAction(
-                    new ActionHelpers.ActionOnTimer<WoWGameObject>(
+                    new ActionHelpers.ActionOnTimerCached<WoWGameObject>(
                         HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
                         1000,
+                        1000,
                         false,
-                        true,
                         // Drink coffee
                         new ActionHelpers.ActionOnTimer<WoWItem>(
                             UseItemInbags,
