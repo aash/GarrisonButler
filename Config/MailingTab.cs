@@ -286,8 +286,20 @@ namespace GarrisonButler.Config
                     var bindingRecipient = new Binding("Recipient") {Source = item};
                     _addRecipientTextBox.SetBinding(TextBox.TextProperty, bindingRecipient);
 
-                    var bindingComment = new Binding("Comment") {Source = item};
+                    var bindingComment = new Binding("Comment") { Source = item };
                     _addCommentTextBox.SetBinding(TextBox.TextProperty, bindingComment);
+
+                    var bindingCheckValue = new Binding("CheckValue") { Source = item };
+                    _addRuleValueTextBox.SetBinding(TextBox.TextProperty, bindingCheckValue);
+
+                    var toSelect =
+                        MailCondition.GetAllPossibleConditions().FirstOrDefault(c => c.Name == item.Condition.Name);
+                    //var bindingCondition = new Binding("Condition") { Source = item };
+                    //_addRuleListBox.SetBinding(TextBox.TextProperty, bindingCondition);
+                    //if (toSelect != null)
+                    _addRuleListBox.SelectedItem = toSelect;
+
+
                     AddNewMailItemButton.Content = "Edit";
                     AddNewMailItemButton.Tag = 2;
                 }
@@ -299,6 +311,7 @@ namespace GarrisonButler.Config
                     _addRecipientTextBox.Text = "";
                     BindingOperations.ClearBinding(_addCommentTextBox, TextBox.TextProperty);
                     _addCommentTextBox.Text = "";
+
                     AddNewMailItemButton.Content = "Add new item";
                     AddNewMailItemButton.Tag = 1;
                 }
@@ -348,64 +361,78 @@ namespace GarrisonButler.Config
         {
             var btn = sender as Button;
             if (btn == null) return;
+            ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
             switch ((int) btn.Tag)
             {
                 case 1:
                 {
-                    // Check recipient
-                    if (_addRecipientTextBox.Text == "")
-                    {
-                        GarrisonButler.Warning("No value for Recipient, item not added.");
-                        return;
-                    }
-                    // Check itemId
                     uint itemId;
-                    if (!uint.TryParse(_addItemIdTextBox.Text, out itemId))
-                    {
-                        GarrisonButler.Warning("Value for itemId is not valid.");
-                        return;
-                    }
-                    // Check itemId
                     int checkValue;
-                    if (!int.TryParse(_addRuleValueTextBox.Text, out checkValue))
-                    {
-                        GarrisonButler.Warning("Value for checkValue is not valid.");
+                    MailCondition mailCondition;
+                    if (!checkValuesInputs(out itemId, out checkValue, out mailCondition))
                         return;
-                    }
-                    // Check that a correct rule is selected
-                    var mailcondition = (_addRuleListBox.SelectedItem as MailCondition);
-                    if (mailcondition == null || mailcondition.Name == "")
-                    {
-                        GarrisonButler.Warning("Value for checkValue is not valid.");
-                        return;
-                    }
-                    // Check if already in list
-                    if (
-                        GaBSettings.Get()
-                            .MailItems.GetEmptyIfNull()
-                            .Any(i => i.ItemId == _addItemIdTextBox.Text.ToInt32()))
-                    {
-                        GarrisonButler.Warning("Item already added to list.");
-                        return;
-                    }
 
                     var mailItems = GaBSettings.Get().MailItems;
                     var recipient = _addRecipientTextBox.Text;
                     var comment = _addCommentTextBox.Text;
 
                     if (mailItems != null)
-                        mailItems.Add(new MailItem(itemId, recipient, mailcondition, checkValue, comment));
+                        mailItems.Add(new MailItem(itemId, recipient, mailCondition, checkValue, comment));
 
                     GarrisonButler.Diagnostic("Added mail Item");
                     ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);
-                    ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
                     view.Refresh();
                 }
                     break;
                 case 2:
+                    var item = (MailItem)_myListView.SelectedItem;
+                    item.SetCondition(_addRuleListBox.SelectedValue.ToString());
+                    view.Refresh();
                     _myListView.SelectedItem = null;
                     break;
             }
+        }
+
+        private bool checkValuesInputs(out uint itemId, out int checkValue, out MailCondition mailCondition)
+        {
+            itemId = 0;
+            checkValue = 0;
+            mailCondition = null;
+            // Check recipient
+            if (_addRecipientTextBox.Text == "")
+            {
+                GarrisonButler.Warning("No value for Recipient, item not added.");
+                return false;
+            }
+            // Check itemId
+            if (!uint.TryParse(_addItemIdTextBox.Text, out itemId))
+            {
+                GarrisonButler.Warning("Value for itemId is not valid.");
+                return false;
+            }
+            // Check itemId
+            if (!int.TryParse(_addRuleValueTextBox.Text, out checkValue))
+            {
+                GarrisonButler.Warning("Value for checkValue is not valid.");
+                return false;
+            }
+            // Check that a correct rule is selected
+            mailCondition = (_addRuleListBox.SelectedItem as MailCondition);
+            if (mailCondition == null || mailCondition.Name == "")
+            {
+                GarrisonButler.Warning("Value for checkValue is not valid.");
+                return false;
+            }
+            // Check if already in list
+            if (
+                GaBSettings.Get()
+                    .MailItems.GetEmptyIfNull()
+                    .Any(i => i.ItemId == _addItemIdTextBox.Text.ToInt32()))
+            {
+                GarrisonButler.Warning("Item already added to list.");
+                return false;
+            }
+            return true;
         }
 
         public class SortAdorner : Adorner

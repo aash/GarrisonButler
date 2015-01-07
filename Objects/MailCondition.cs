@@ -28,6 +28,7 @@ namespace GarrisonButler.Objects
         private string _name;
         private Conditions _condition;
         private int _checkValue;
+        private static List<MailCondition> _allPossibleConditions;
 
         #region GetSet
         /// <summary>
@@ -41,6 +42,7 @@ namespace GarrisonButler.Objects
                 if (value != _name)
                 {
                     _name = value;
+                    _condition = GetCondition(_name);
                     OnPropertyChanged1();
                 }
             }
@@ -110,7 +112,7 @@ namespace GarrisonButler.Objects
 
                 case Conditions.KeepNumberInBags:
                     return "Keep in Bags at least";
-                    
+
                 case Conditions.None:
                     return "Deactivated";
                 default:
@@ -118,6 +120,28 @@ namespace GarrisonButler.Objects
                     break;
             }
             return "Not Implemented";
+        }
+        private Conditions GetCondition(String name)
+        {
+            switch (name)
+            {
+                case "if > in Bags":
+                    return Conditions.NumberInBagsSuperiorTo;
+
+                case "if >= in Bags":
+                    return Conditions.NumberInBagsSuperiorOrEqualTo;
+
+                case "Keep in Bags at least":
+                    return Conditions.KeepNumberInBags;
+
+                case "Deactivated":
+                    return Conditions.None;
+
+                default:
+                    GarrisonButler.Diagnostic("This rule has not been implemented! Defaulting to None.");
+                    break;
+            }
+            return Conditions.None;
         }
         
         public override string ToString()
@@ -154,12 +178,16 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Returns a list of all the possible conditions implemented
+        /// Returns a static list of all the possible conditions implemented
         /// </summary>
         /// <returns></returns>
         public static List<MailCondition> GetAllPossibleConditions()
         {
-            return (from object condition in Enum.GetValues(typeof(Conditions)) select new MailCondition((Conditions)condition, 0)).ToList();
+            if (_allPossibleConditions != null)
+                return _allPossibleConditions;
+            
+            _allPossibleConditions = (from object condition in Enum.GetValues(typeof(Conditions)) select new MailCondition((Conditions)condition, 0)).ToList();
+            return _allPossibleConditions;
         }
 
         /// <summary>

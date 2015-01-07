@@ -75,10 +75,7 @@ namespace GarrisonButler.Objects
         {
             get
             {
-                if (_condition != null)
-                    return _condition.CheckValue;
-                return 0;
-;
+                return _condition != null ? _condition.CheckValue : 0;
             }
             set
             {
@@ -122,5 +119,10 @@ namespace GarrisonButler.Objects
         }
 
 
+        public void SetCondition(string name)
+        {
+            _condition.Name = name;
+            OnPropertyChanged("Condition");
+        }
     }
 }
