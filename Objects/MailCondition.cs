@@ -103,16 +103,16 @@ namespace GarrisonButler.Objects
             switch (condition)
             {
                 case Conditions.NumberInBagsSuperiorTo:
-                    return "if > to in Bags";
+                    return "if > in Bags";
 
                 case Conditions.NumberInBagsSuperiorOrEqualTo:
-                    return "if >= to in Bags";
+                    return "if >= in Bags";
 
                 case Conditions.KeepNumberInBags:
                     return "Keep in Bags at least";
                     
                 case Conditions.None:
-                    return "None/Deactivated";
+                    return "Deactivated";
                 default:
                     GarrisonButler.Diagnostic("This rule has not been implemented!");
                     break;
