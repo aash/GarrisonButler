@@ -56,6 +56,12 @@ namespace GarrisonButler
 
         private static async Task<bool> PickUpGarrisonCache(WoWGameObject cacheFound)
         {
+            if (cacheFound == null && cacheCachedLocation != WoWPoint.Empty)
+            {
+                if (await MoveTo(cacheCachedLocation, "Collecting garrison cache"))
+                    return true;
+            }
+
             if (cacheFound != null)
             {
                 cacheCachedLocation = cacheFound.Location;
@@ -63,19 +69,11 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " +
                                           cacheFound.DisplayId + ": " +
                                           cacheFound.Location);
-
-
                 await HarvestWoWGameOject(cacheFound);
             }
-            else
-            {
-                if (await MoveTo(cacheCachedLocation, "Collecting garrison cache"))
-                    return true;
-            }
-
             Found = false;
             CacheTriggered = false;
-            return true;
+            return false;
         }
     }
 }

@@ -122,7 +122,7 @@ namespace GarrisonButler
                 // Take care of mine shipments
                 buildingsActionsSequence.AddAction(
                     new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine)));
+                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine),5000,10000));
             }
             if (garden != null)
             {
@@ -133,20 +133,20 @@ namespace GarrisonButler
                 // Take care of garden shipments
                 buildingsActionsSequence.AddAction(
                     new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden)));
+                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden),5000,10000));
             }
             // Take care of all shipments
             buildingsActionsSequence.AddAction(
                 new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                    PickUpOrStartAtLeastOneShipment, CanPickUpOrStartAtLeastOneShipmentFromAll));
+                    PickUpOrStartAtLeastOneShipment, CanPickUpOrStartAtLeastOneShipmentFromAll, 5000, 10000));
 
             // Garrison cache
             buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer<WoWGameObject>(PickUpGarrisonCache, CanRunCache));
+                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation, CanRunCache));
 
             // Buildings activation
             buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer<WoWGameObject>(ActivateFinishedBuildings, CanActivateAtLeastOneBuilding));
+                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation, CanActivateAtLeastOneBuilding));
 
             GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;

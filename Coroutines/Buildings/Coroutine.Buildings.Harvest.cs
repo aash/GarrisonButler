@@ -38,15 +38,12 @@ namespace GarrisonButler
             // paramters are not passed by refrence with an async method
             if (toHarvest.IsValid)
             {
-                GarrisonButler.Diagnostic("IsValid");
                 CachedToHarvestLocation = toHarvest.Location;
                 await HarvestWoWGameOject(toHarvest);
-                GarrisonButler.Diagnostic("HarvestWoWGameOject");
 
                 var node = BotPoi.Current.AsObject as WoWGameObject;
                 if (node == null || !node.IsValid)
                 {
-                    GarrisonButler.Diagnostic("node == null || !node.IsValid");
                     CachedToHarvestLocation = WoWPoint.Empty;
                 }
                 return false;

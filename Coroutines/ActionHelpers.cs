@@ -95,7 +95,7 @@ namespace GarrisonButler.Coroutines
             protected bool _needToCache = false;
             protected Tuple<bool, T> _tempStorage;
 
-            public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeActionMs = 3000, int waitTimeConditionMs = 100,
+            public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeActionMs = 3000, int waitTimeConditionMs = 3500,
                 bool instantStart = false, params Action[] preAction)
             {
                 _action = action;
@@ -112,7 +112,7 @@ namespace GarrisonButler.Coroutines
                 if (!_lastResult && !_waitTimerAction.IsFinished)
                     return false;
 
-                if (_waitTimerCondition.IsFinished)
+                if (!_lastResult && _waitTimerCondition.IsFinished)
                 {
                     _tempStorage = _condition();
                     _waitTimerCondition.Reset();

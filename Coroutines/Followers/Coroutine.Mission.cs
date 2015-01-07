@@ -73,7 +73,7 @@ namespace GarrisonButler
             }
 
             RefreshMissions();
-            RefreshFollowers();
+            RefreshFollowers(   );
 
 
             int garrisonRessources = BuildingsLua.GetGarrisonRessources();
@@ -156,7 +156,7 @@ namespace GarrisonButler
             InterfaceLua.ClickCloseMission();
             RefreshFollowers(true);
             RefreshMissions(true);
-            return true;
+            return false;
         }
 
 
