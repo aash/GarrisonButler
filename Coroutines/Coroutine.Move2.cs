@@ -192,7 +192,6 @@ namespace GarrisonButler
             var straightpaths = new StraightPathFlags[points.Count()];
             var AreaTypes = new AreaType[points.Count()];
 
-            //TODO - JUSTIN - Investigate if this takes a long time
             for (int index = 0; index < points.Length; index++)
             {
                 straightpaths[index] = StraightPathFlags.None;

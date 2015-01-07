@@ -53,7 +53,7 @@ namespace GarrisonButler
             }
 
             // First moving to cached location
-            if (CachedToHarvestLocation != WoWPoint.Empty)
+            if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.Distance(CachedToHarvestLocation) > 5))
                 if (await MoveTo(CachedToHarvestLocation)) // returns false for Failed and ReachedDestination
                     return true;
             GarrisonButler.Diagnostic("CachedToHarvestLocation");
