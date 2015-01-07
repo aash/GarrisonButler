@@ -325,16 +325,14 @@ namespace GarrisonButler.Config
 
                     List<MailItem> mailItems = GaBSettings.Get().MailItems;
 
-                    if (!mailItems.IsNullOrEmpty())
+                    if (mailItems != null)
                         mailItems.Add(new MailItem(_addItemIdTextBox.Text.ToInt32(), _addRecipientTextBox.Text,
                             _addCommentTextBox.Text));
 
-
-                    ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
-                    view.Refresh();
-                    _myListView.View.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                     GarrisonButler.Diagnostic("Added mail Item");
                     ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);
+                    ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
+                    view.Refresh();
                 }
                 else if ((int) btn.Tag == 2)
                 {

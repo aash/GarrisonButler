@@ -176,7 +176,7 @@ namespace GarrisonButler
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<MailItem>(MailItem, CanMailItem));
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 

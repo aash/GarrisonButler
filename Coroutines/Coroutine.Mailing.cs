@@ -19,19 +19,20 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static Tuple<bool, MailItem> CanMailItem()
+        private static Tuple<bool, List<MailItem>> CanMailItem()
         {
-            IEnumerable<MailItem> toMail =
-                GaBSettings.Get().MailItems.Where(m => Me.BagItems.Any(i => i.Entry == m.ItemId));
+            List<MailItem> toMail =
+                GaBSettings.Get().MailItems.Where(m => Me.BagItems.Any(i => i.Entry == m.ItemId)).ToList();
+
             if (!toMail.Any())
             {
                 GarrisonButler.Diagnostic("[Mailing] No items to mail.");
-                return new Tuple<bool, MailItem>(false, null);
+                return new Tuple<bool, List<MailItem>>(false, null);
             }
-            return new Tuple<bool, MailItem>(true, toMail.First());
+            return new Tuple<bool, List<MailItem>>(true, toMail);
         }
 
-        public static async Task<bool> MailItem(MailItem mailItem)
+        public static async Task<bool> MailItem(List<MailItem> mailItems)
         {
             if (!MailFrame.Instance.IsVisible)
             {
@@ -54,20 +55,33 @@ namespace GarrisonButler
             }
 
             MailFrame mailFrame = MailFrame.Instance;
-            foreach (MailItem mail in GaBSettings.Get().MailItems)
+
+            //Splitting list based on recipients
+            var MailsPerRecipient = mailItems.GroupBy(i => i.Recipient).Select(x=> x.Select(i=> i)).ToList();
+            foreach (var mailsRecipient in MailsPerRecipient)
             {
-                WoWItem item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == mail.ItemId);
-                if (item == default(WoWItem))
+                // list all items to send to this recipient
+                var listItems = new List<WoWItem>();
+                foreach (MailItem mail in mailsRecipient)
                 {
-                    GarrisonButler.Diagnostic("Error, Item null: {0}", mail.ItemId);
-                    continue;
+                    WoWItem item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == mail.ItemId);
+                    if (item == default(WoWItem))
+                    {
+                        GarrisonButler.Diagnostic("Error, Item null: {0}", mail.ItemId);
+                        continue;
+                    }
+                    listItems.Add(item);
                 }
-                mailFrame.SendMail(mail.Recipient, "", "", 0, item);
-                await CommonCoroutines.SleepForRandomUiInteractionTime();
-                InterfaceLua.ClickSendMail();
+                // send if any to send
+                if (listItems.Any())
+                {
+                    mailFrame.SendMail(mailsRecipient.First().Recipient, "", "", 0, listItems.ToArray());
+                    await CommonCoroutines.SleepForRandomUiInteractionTime();
+                    InterfaceLua.ClickSendMail();
+                }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            return true;
+            return false;
         }
     }
 }
