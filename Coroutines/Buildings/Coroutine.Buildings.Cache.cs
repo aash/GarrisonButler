@@ -35,45 +35,27 @@ namespace GarrisonButler
         private static Tuple<bool, WoWGameObject> CanRunCache()
         {
             if (!GaBSettings.Get().GarrisonCache)
+            {
+                GarrisonButler.Diagnostic("[Cache] Cache deactivated in user settings"); 
                 return new Tuple<bool, WoWGameObject>(false, null);
+            }
             // Check
             WoWGameObject cache =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .FirstOrDefault(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry));
-            if (cache == default(WoWGameObject) && !Found)
+            if (cache == default(WoWGameObject))
+            {
+                GarrisonButler.Diagnostic("[Cache] Cache not found, skipping...");
                 return new Tuple<bool, WoWGameObject>(false, null);
+            }
 
-            Found = true;
-            if (cache != default(WoWGameObject)) cacheCachedLocation = cache.Location;
             return new Tuple<bool, WoWGameObject>(true, cache);
         }
 
         private static bool ShouldRunCache()
         {
             return CanRunCache().Item1;
-        }
-
-        private static async Task<bool> PickUpGarrisonCache(WoWGameObject cacheFound)
-        {
-            if (cacheFound == null && cacheCachedLocation != WoWPoint.Empty)
-            {
-                if (await MoveTo(cacheCachedLocation, "Collecting garrison cache"))
-                    return true;
-            }
-
-            if (cacheFound != null)
-            {
-                cacheCachedLocation = cacheFound.Location;
-                GarrisonButler.Log("Detected garrison cache available, moving to collect.");
-                GarrisonButler.Diagnostic("Shipment " + cacheFound.SafeName + " - " + cacheFound.Entry + " - " +
-                                          cacheFound.DisplayId + ": " +
-                                          cacheFound.Location);
-                await HarvestWoWGameOject(cacheFound);
-            }
-            Found = false;
-            CacheTriggered = false;
-            return false;
         }
     }
 }
