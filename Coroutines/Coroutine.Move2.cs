@@ -304,7 +304,7 @@ namespace GarrisonButler
 
             public override bool IsStuck()
             {
-                if (stopwatch.ElapsedMilliseconds > 4000)
+                if (stopwatch.ElapsedMilliseconds > 2000)
                 {
                     stopwatch.Reset();
                     stopwatch.Start();
