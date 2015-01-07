@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -65,6 +66,7 @@ namespace GarrisonButler
             // Is there something to mine? 
             WoWGameObject node =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
                     .Where(o => MineItems.Contains(o.Entry))
                     .OrderBy(o => o.Distance)
                     .FirstOrDefault();
@@ -76,6 +78,33 @@ namespace GarrisonButler
 
             GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
             return new Tuple<bool, WoWGameObject>(true, node);
+        }
+
+        private static List<WoWGameObject> GetAllMineNodesIfCanRunMine()
+        {
+            // Settings
+            if (!GaBSettings.Get().HarvestMine)
+            {
+                //GarrisonButler.Diagnostic("[Mine] Deactivated in user settings.");
+                return new List<WoWGameObject>();
+            }
+
+            // Do i have a mine?
+            if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
+            {
+                //GarrisonButler.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
+                return new List<WoWGameObject>();
+            }
+
+            // Is there something to mine? 
+            List<WoWGameObject> returnList = 
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
+                    .Where(o => MineItems.Contains(o.Entry))
+                    .OrderBy(o => o.Distance)
+                    .ToList();
+
+            return returnList;
         }
 
         private static bool MeIsInMine()
