@@ -22,7 +22,7 @@ namespace GarrisonButler
         private static Tuple<bool, List<MailItem>> CanMailItem()
         {
             List<MailItem> toMail =
-                GaBSettings.Get().MailItems.Where(m => Me.BagItems.Any(i => i.Entry == m.ItemId)).ToList();
+                GaBSettings.Get().MailItems.Where(m => m.CanMail()).ToList();
 
             if (!toMail.Any())
             {
@@ -64,18 +64,12 @@ namespace GarrisonButler
                 var listItems = new List<WoWItem>();
                 foreach (MailItem mail in mailsRecipient)
                 {
-                    WoWItem item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == mail.ItemId);
-                    if (item == default(WoWItem))
-                    {
-                        GarrisonButler.Diagnostic("Error, Item null: {0}", mail.ItemId);
-                        continue;
-                    }
-                    listItems.Add(item);
+                    listItems.AddRange(mail.GetItemsToSend());
                 }
                 // send if any to send
                 if (listItems.Any())
                 {
-                    mailFrame.SendMail(mailsRecipient.First().Recipient, "", "", 0, listItems.ToArray());
+                    await mailFrame.SendMailWithManyAttachmentsCoroutine(mailsRecipient.First().Recipient, listItems.ToArray());
                     await CommonCoroutines.SleepForRandomUiInteractionTime();
                     InterfaceLua.ClickSendMail();
                 }

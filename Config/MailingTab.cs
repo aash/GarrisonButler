@@ -8,11 +8,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Media;
 using System.Windows.Threading;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using Styx.Helpers;
+using VerticalAlignment = System.Windows.VerticalAlignment;
 
 #endregion
 
@@ -26,6 +28,8 @@ namespace GarrisonButler.Config
         private TextBox _addCommentTextBox = new TextBox();
         private TextBox _addItemIdTextBox = new TextBox();
         private TextBox _addRecipientTextBox = new TextBox();
+        private ComboBox _addRuleListBox = new ComboBox();
+        private TextBox _addRuleValueTextBox = new TextBox();
         private SortAdorner _listViewSortAdorner;
         private GridViewColumnHeader _listViewSortCol;
 
@@ -34,57 +38,83 @@ namespace GarrisonButler.Config
             _mainGrid = new Grid();
             _mainGrid.Height = double.NaN;
             _mainGrid.Width = double.NaN;
+            _mainGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            _mainGrid.RowDefinitions.Add(new RowDefinition());
+            _mainGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(30)});
+            _mainGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(60)});
 
-            var gridmainCol1 = new ColumnDefinition();
-            _mainGrid.ColumnDefinitions.Add(gridmainCol1);
-
-            var gridmainRow1 = new RowDefinition();
-            _mainGrid.RowDefinitions.Add(gridmainRow1);
-
-            var gridmainRow2 = new RowDefinition();
-            gridmainRow2.Height = new GridLength(60);
-            _mainGrid.RowDefinitions.Add(gridmainRow2);
 
             var gridView = new GridView();
 
-            var column0 = new GridViewColumn();
-            var columnHeader0 = new GridViewColumnHeader();
-            columnHeader0.Tag = "ItemID";
-            columnHeader0.Content = "Item ID";
-            columnHeader0.Width = double.NaN;
+            var columnHeader0 = new GridViewColumnHeader {Tag = "ItemID", Content = "Item ID", Width = double.NaN};
             columnHeader0.Click += MailColumnHeader_Click;
-            column0.Header = columnHeader0;
-            column0.Width = double.NaN;
-
-            column0.DisplayMemberBinding = new Binding("ItemId");
+            var column0 = new GridViewColumn
+            {
+                Header = columnHeader0,
+                Width = double.NaN,
+                DisplayMemberBinding = new Binding("ItemId")
+            };
             gridView.Columns.Add(column0);
 
-            var column1 = new GridViewColumn();
-            var columnHeader1 = new GridViewColumnHeader();
-            columnHeader1.Tag = "Recipient";
-            columnHeader1.Content = "Recipient";
-            columnHeader1.Width = double.NaN;
+            var columnHeader1 = new GridViewColumnHeader {Tag = "Recipient", Content = "Recipient", Width = double.NaN};
             columnHeader1.Click += MailColumnHeader_Click;
-            column1.Header = columnHeader1;
-            column1.Width = double.NaN;
-            column1.DisplayMemberBinding = new Binding("Recipient");
+            var column1 = new GridViewColumn
+            {
+                Header = columnHeader1,
+                Width = double.NaN,
+                DisplayMemberBinding = new Binding("Recipient")
+            };
             gridView.Columns.Add(column1);
 
-            var column2 = new GridViewColumn();
-            var columnHeader2 = new GridViewColumnHeader();
-            columnHeader2.Tag = "Comment";
-            columnHeader2.Content = "Comment";
-            columnHeader2.Width = double.NaN;
-            columnHeader2.HorizontalAlignment = HorizontalAlignment.Stretch;
+            var columnHeader2 = new GridViewColumnHeader
+            {
+                Tag = "Comment",
+                Content = "Comment",
+                Width = double.NaN,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
             columnHeader2.Click += MailColumnHeader_Click;
-            column2.Header = columnHeader2;
-            column2.Width = double.NaN;
-            column2.DisplayMemberBinding = new Binding("Comment");
+            var column2 = new GridViewColumn
+            {
+                Header = columnHeader2,
+                Width = double.NaN,
+                DisplayMemberBinding = new Binding("Comment")
+            };
             gridView.Columns.Add(column2);
 
-            _myListView = new ListView();
-            _myListView.View = gridView;
-            _myListView.ItemsSource = GaBSettings.Get().MailItems;
+            var columnHeader3 = new GridViewColumnHeader
+            {
+                Tag = "Condition",
+                Content = "Condition",
+                Width = double.NaN,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            columnHeader3.Click += MailColumnHeader_Click;
+            var column3 = new GridViewColumn
+            {
+                Header = columnHeader3,
+                Width = double.NaN,
+                DisplayMemberBinding = new Binding("Condition")
+            };
+            gridView.Columns.Add(column3);
+
+            var columnHeader4 = new GridViewColumnHeader
+            {
+                Tag = "Value",
+                Content = "Value",
+                Width = double.NaN,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            columnHeader4.Click += MailColumnHeader_Click;
+            var column4 = new GridViewColumn
+            {
+                Header = columnHeader4,
+                Width = double.NaN,
+                DisplayMemberBinding = new Binding("CheckValue")
+            };
+            gridView.Columns.Add(column4);
+
+            _myListView = new ListView {View = gridView, ItemsSource = GaBSettings.Get().MailItems};
             _myListView.SelectionChanged += myListView_OnSelectionChanged;
 
             //mainFrame.Content = myListView;
@@ -94,11 +124,15 @@ namespace GarrisonButler.Config
 
             // Buttons
             Grid barPanel = Buttons();
+            Grid.SetRow(barPanel, 1);
+            Grid.SetColumn(barPanel, 0);
             _mainGrid.Children.Add(barPanel);
 
             // Input data
-            StackPanel stackpanelTextBox = InputBoxes();
-            barPanel.Children.Add(stackpanelTextBox);
+            Grid Inputs = InputBoxes();
+            Grid.SetRow(Inputs, 2);
+            Grid.SetColumn(Inputs, 0);
+            _mainGrid.Children.Add(Inputs);
         }
 
         private Button AddNewMailItemButton { get; set; }
@@ -108,8 +142,20 @@ namespace GarrisonButler.Config
             return _mainGrid;
         }
 
-        private StackPanel InputBoxes()
+        private Grid InputBoxes()
         {
+            var grid = new Grid();
+
+            grid = new Grid();
+            grid.Height = double.NaN;
+            grid.Width = double.NaN;
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(30)});
+            grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(30)});
+
+            Grid.SetRow(grid, 1);
+            Grid.SetColumn(grid, 0);
+
             var stackpanelTextBox = new StackPanel();
             stackpanelTextBox.Orientation = Orientation.Horizontal;
 
@@ -152,71 +198,77 @@ namespace GarrisonButler.Config
             _addCommentTextBox.VerticalContentAlignment = VerticalAlignment.Center;
             stackpanelTextBox.Children.Add(_addCommentTextBox);
 
-            Grid.SetRow(stackpanelTextBox, 1);
+            Grid.SetRow(stackpanelTextBox, 0);
             Grid.SetColumn(stackpanelTextBox, 0);
-            return stackpanelTextBox;
+            grid.Children.Add(stackpanelTextBox);
+
+
+            var stackpanelTextBox2 = new StackPanel();
+            stackpanelTextBox2.Orientation = Orientation.Horizontal;
+
+            var AddRule = new Label();
+            AddRule.VerticalAlignment = VerticalAlignment.Center;
+            AddRule.Content = "AddRule:";
+            AddRule.Margin = new Thickness(5, 0, 5, 0);
+            stackpanelTextBox2.Children.Add(AddRule);
+
+            _addRuleListBox = new ComboBox();
+            _addRuleListBox.Width = double.NaN;
+            _addRuleListBox.MinWidth = 40;
+            _addRuleListBox.VerticalContentAlignment = VerticalAlignment.Center;
+            _addRuleListBox.ItemsSource = MailCondition.GetAllPossibleConditions();
+            stackpanelTextBox2.Children.Add(_addRuleListBox);
+
+
+            var AddRuleValue = new Label();
+            AddRuleValue.VerticalAlignment = VerticalAlignment.Center;
+            AddRuleValue.Content = "AddRuleValue:";
+            AddRuleValue.Margin = new Thickness(5, 0, 5, 0);
+            stackpanelTextBox2.Children.Add(AddRuleValue);
+
+            _addRuleValueTextBox = new TextBox();
+            _addRuleValueTextBox.Width = 40;
+            _addRuleValueTextBox.MinWidth = 30;
+            _addRuleValueTextBox.TextWrapping = TextWrapping.Wrap;
+            _addRuleValueTextBox.VerticalContentAlignment = VerticalAlignment.Center;
+            stackpanelTextBox2.Children.Add(_addRuleValueTextBox);
+
+            Grid.SetRow(stackpanelTextBox2, 1);
+            Grid.SetColumn(stackpanelTextBox2, 0);
+            grid.Children.Add(stackpanelTextBox2);
+
+
+            return grid;
         }
 
         private Grid Buttons()
         {
-            var barPanel = new Grid();
-            barPanel.Width = double.NaN;
-            barPanel.Height = 60;
-            barPanel.MinHeight = 60;
-            barPanel.MinWidth = 250;
-            barPanel.VerticalAlignment = VerticalAlignment.Bottom;
-            barPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            var barPanel = new Grid
+            {
+                Width = double.NaN,
+                Height = 30,
+                MinHeight = 30,
+                MinWidth = 250,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
 
-            var gridCol1 = new ColumnDefinition();
-            barPanel.ColumnDefinitions.Add(gridCol1);
+            barPanel.ColumnDefinitions.Add(new ColumnDefinition());
+            barPanel.ColumnDefinitions.Add(new ColumnDefinition());
+            barPanel.RowDefinitions.Add(new RowDefinition {Height = new GridLength(30)});
 
-            var gridRow1 = new RowDefinition();
-            gridRow1.Height = new GridLength(30);
-            var gridRow2 = new RowDefinition();
-            gridRow2.Height = new GridLength(30);
-            barPanel.RowDefinitions.Add(gridRow1);
-            barPanel.RowDefinitions.Add(gridRow2);
-
-
-            // BUTTONS to add and delete
-            var GridButtons = new Grid();
-            GridButtons.Width = double.NaN;
-            GridButtons.Height = double.NaN;
-            GridButtons.MinHeight = 30;
-            GridButtons.VerticalAlignment = VerticalAlignment.Stretch;
-            GridButtons.HorizontalAlignment = HorizontalAlignment.Stretch;
-
-            var GridButtonsCol0 = new ColumnDefinition();
-            GridButtons.ColumnDefinitions.Add(GridButtonsCol0);
-            var GridButtonsCol1 = new ColumnDefinition();
-            GridButtons.ColumnDefinitions.Add(GridButtonsCol1);
-
-            var GridButtonsRow0 = new RowDefinition();
-            GridButtonsRow0.Height = new GridLength(30);
-            barPanel.RowDefinitions.Add(GridButtonsRow0);
-
-            AddNewMailItemButton = new Button();
-            AddNewMailItemButton.Content = "Add new item";
-            AddNewMailItemButton.Tag = 1;
+            AddNewMailItemButton = new Button {Content = "Add new item", Tag = 1};
             AddNewMailItemButton.Click += AddNewMailItem_Click;
             Grid.SetRow(AddNewMailItemButton, 0);
             Grid.SetColumn(AddNewMailItemButton, 0);
-            GridButtons.Children.Add(AddNewMailItemButton);
+            barPanel.Children.Add(AddNewMailItemButton);
 
-            var DeleteSelected = new Button();
-            DeleteSelected.Content = "Delete Selected";
-            DeleteSelected.Tag = 3;
+            var DeleteSelected = new Button {Content = "Delete Selected", Tag = 3};
             DeleteSelected.Click += DeleteSelected_Click;
             Grid.SetRow(DeleteSelected, 0);
             Grid.SetColumn(DeleteSelected, 1);
-            GridButtons.Children.Add(DeleteSelected);
+            barPanel.Children.Add(DeleteSelected);
 
-            Grid.SetRow(GridButtons, 0);
-            Grid.SetColumn(GridButtons, 0);
-            barPanel.Children.Add(GridButtons);
-
-            Grid.SetRow(barPanel, 1);
-            Grid.SetColumn(barPanel, 0);
             return barPanel;
         }
 
@@ -228,16 +280,13 @@ namespace GarrisonButler.Config
                 var item = listview.SelectedItem as MailItem;
                 if (item != null)
                 {
-                    var bindingId = new Binding("ItemId");
-                    bindingId.Source = item;
+                    var bindingId = new Binding("ItemId") {Source = item};
                     _addItemIdTextBox.SetBinding(TextBox.TextProperty, bindingId);
 
-                    var bindingRecipient = new Binding("Recipient");
-                    bindingRecipient.Source = item;
+                    var bindingRecipient = new Binding("Recipient") {Source = item};
                     _addRecipientTextBox.SetBinding(TextBox.TextProperty, bindingRecipient);
 
-                    var bindingComment = new Binding("Comment");
-                    bindingComment.Source = item;
+                    var bindingComment = new Binding("Comment") {Source = item};
                     _addCommentTextBox.SetBinding(TextBox.TextProperty, bindingComment);
                     AddNewMailItemButton.Content = "Edit";
                     AddNewMailItemButton.Tag = 2;
@@ -260,7 +309,7 @@ namespace GarrisonButler.Config
         private void MailColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             var column = (sender as GridViewColumnHeader);
-            string sortBy = column.Tag.ToString();
+            var sortBy = column.Tag.ToString();
             if (_listViewSortCol != null)
             {
                 AdornerLayer.GetAdornerLayer(_listViewSortCol).Remove(_listViewSortAdorner);
@@ -282,16 +331,14 @@ namespace GarrisonButler.Config
             var btn = sender as Button;
             if (btn != null)
             {
-                foreach (object selected in _myListView.SelectedItems)
+                foreach (var selected in _myListView.SelectedItems)
                 {
                     GaBSettings.Get().MailItems.Remove((MailItem) selected);
                 }
                 GarrisonButler.Diagnostic("Deleted selected Items.");
                 ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);
-                ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
+                var view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
                 view.Refresh();
-                //BindingExpression binding = _myListView.GetBindingExpression(ListView.DataContextProperty);
-                //binding.UpdateSource();
             }
             _myListView.View.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
         }
@@ -300,20 +347,39 @@ namespace GarrisonButler.Config
         private void AddNewMailItem_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
-            if (btn != null)
+            if (btn == null) return;
+            switch ((int) btn.Tag)
             {
-                if ((int) btn.Tag == 1)
+                case 1:
                 {
+                    // Check recipient
                     if (_addRecipientTextBox.Text == "")
                     {
                         GarrisonButler.Warning("No value for Recipient, item not added.");
                         return;
                     }
-                    if (_addItemIdTextBox.Text == "")
+                    // Check itemId
+                    uint itemId;
+                    if (!uint.TryParse(_addItemIdTextBox.Text, out itemId))
                     {
-                        GarrisonButler.Warning("No value for ItemID, item not added.");
+                        GarrisonButler.Warning("Value for itemId is not valid.");
                         return;
                     }
+                    // Check itemId
+                    int checkValue;
+                    if (!int.TryParse(_addRuleValueTextBox.Text, out checkValue))
+                    {
+                        GarrisonButler.Warning("Value for checkValue is not valid.");
+                        return;
+                    }
+                    // Check that a correct rule is selected
+                    var mailcondition = (_addRuleListBox.SelectedItem as MailCondition);
+                    if (mailcondition == null || mailcondition.Name != "")
+                    {
+                        GarrisonButler.Warning("Value for checkValue is not valid.");
+                        return;
+                    }
+                    // Check if already in list
                     if (
                         GaBSettings.Get()
                             .MailItems.GetEmptyIfNull()
@@ -323,30 +389,31 @@ namespace GarrisonButler.Config
                         return;
                     }
 
-                    List<MailItem> mailItems = GaBSettings.Get().MailItems;
+                    var mailItems = GaBSettings.Get().MailItems;
+                    var recipient = _addRecipientTextBox.Text;
+                    var comment = _addCommentTextBox.Text;
 
                     if (mailItems != null)
-                        mailItems.Add(new MailItem(_addItemIdTextBox.Text.ToInt32(), _addRecipientTextBox.Text,
-                            _addCommentTextBox.Text));
+                        mailItems.Add(new MailItem(itemId, recipient, mailcondition, checkValue, comment));
 
                     GarrisonButler.Diagnostic("Added mail Item");
                     ObjectDumper.WriteToHB(GaBSettings.Get().MailItems, 3);
                     ICollectionView view = CollectionViewSource.GetDefaultView(_myListView.ItemsSource);
                     view.Refresh();
                 }
-                else if ((int) btn.Tag == 2)
-                {
+                    break;
+                case 2:
                     _myListView.SelectedItem = null;
-                }
+                    break;
             }
         }
 
         public class SortAdorner : Adorner
         {
-            private static readonly Geometry ascGeometry =
+            private static readonly Geometry AscGeometry =
                 Geometry.Parse("M 0 4 L 3.5 0 L 7 4 Z");
 
-            private static readonly Geometry descGeometry =
+            private static readonly Geometry DescGeometry =
                 Geometry.Parse("M 0 0 L 3.5 4 L 7 0 Z");
 
             public SortAdorner(UIElement element, ListSortDirection dir)
@@ -371,9 +438,9 @@ namespace GarrisonButler.Config
                     );
                 drawingContext.PushTransform(transform);
 
-                Geometry geometry = ascGeometry;
+                Geometry geometry = AscGeometry;
                 if (Direction == ListSortDirection.Descending)
-                    geometry = descGeometry;
+                    geometry = DescGeometry;
                 drawingContext.DrawGeometry(Brushes.Black, null, geometry);
 
                 drawingContext.Pop();

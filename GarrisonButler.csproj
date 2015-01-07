@@ -82,6 +82,7 @@
     <Compile Include="Coroutines\Coroutine.cs" />
     <Compile Include="Objects\DailyProfession.cs" />
     <Compile Include="Objects\Follower.cs" />
+    <Compile Include="Objects\MailCondition.cs" />
     <Compile Include="Objects\MailItem.cs" />
     <Compile Include="Objects\Mission.cs" />
   </ItemGroup>

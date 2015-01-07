@@ -138,6 +138,9 @@ namespace GarrisonButler.Config
             {
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
+                // TO DELETE
+                GarrisonButler.Diagnostic(e.ToString());
+                // TO DELETE end
                 currentSettings = DefaultConfig();
             }
             //ObjectDumper.Write(currentSettings);
