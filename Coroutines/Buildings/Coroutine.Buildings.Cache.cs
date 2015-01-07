@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.WoWInternals;
@@ -38,12 +39,13 @@ namespace GarrisonButler
             // Check
             WoWGameObject cache =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .FirstOrDefault(o => GarrisonCaches.Contains(o.Entry));
-            if (cache == null && !Found)
+                    .GetEmptyIfNull()
+                    .FirstOrDefault(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry));
+            if (cache == default(WoWGameObject) && !Found)
                 return new Tuple<bool, WoWGameObject>(false, null);
 
             Found = true;
-            if (cache != null) cacheCachedLocation = cache.Location;
+            if (cache != default(WoWGameObject)) cacheCachedLocation = cache.Location;
             return new Tuple<bool, WoWGameObject>(true, cache);
         }
 

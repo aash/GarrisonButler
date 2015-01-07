@@ -123,10 +123,17 @@ namespace GarrisonButler
 
         public static async Task<bool> UseItemInbags(WoWItem item)
         {
+            if (item == null)
+                return true;
+
+            if (!item.IsValid)
+                return true;
+
             item.Use();
             GarrisonButler.Log("[Item] Using: {0}", item.Name);
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);
+
             return true;
         }
 

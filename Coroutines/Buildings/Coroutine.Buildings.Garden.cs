@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -38,7 +39,14 @@ namespace GarrisonButler
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
             // Do i have a garden?
-            if (!_buildings.Any(b => ShipmentsMap[1].buildingIds.Contains(b.id)))
+            if (!_buildings.Any(b => ShipmentsMap.GetEmptyIfNull().Count() < 2
+                                    ? false : ShipmentsMap
+                                                .GetEmptyIfNull()
+                                                .ElementAt(1) // struct so no need to check for null
+                                                .buildingIds
+                                                .GetEmptyIfNull()
+                                                .Contains(b.id)
+                                                ))
             {
                 GarrisonButler.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
                 return new Tuple<bool, WoWGameObject>(false, null);

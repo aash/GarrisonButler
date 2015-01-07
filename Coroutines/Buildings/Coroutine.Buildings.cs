@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
+using GarrisonButler.Libraries;
 using GarrisonLua;
 using Styx;
 using Styx.Common.Helpers;
@@ -54,15 +55,17 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
             var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
 
-            Building mine = _buildings.FirstOrDefault(
+            Building mine = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
                     (b.id == (int) buildings.MineLvl1) || (b.id == (int) buildings.MineLvl2) ||
                     (b.id == (int) buildings.MineLvl3));
-            Building garden = _buildings.FirstOrDefault(
+
+            Building garden = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
                     (b.id == (int) buildings.GardenLvl1) || (b.id == (int) buildings.GardenLvl2) ||
                     (b.id == (int) buildings.GardenLvl3));
-            if (mine != null)
+
+            if (mine != default(Building))
             {
                 // Harvest mine
                 buildingsActionsSequence.AddAction(
@@ -169,7 +172,9 @@ namespace GarrisonButler
         private static void RefreshBuildings(bool forced = false)
         {
             if (!RefreshBuildingsTimer.IsFinished && _buildings != null && !forced) return;
+
             GarrisonButler.Log("Refreshing Buildings database.");
+
             _buildings = BuildingsLua.GetAllBuildings();
             RefreshBuildingsTimer.Reset();
         }
@@ -182,17 +187,22 @@ namespace GarrisonButler
 
             IOrderedEnumerable<WoWGameObject> allToActivate =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
                     .ToList()
                     .OrderBy(o => o.Location.X);
+
             if (!allToActivate.Any())
             {
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
+
             WoWGameObject toActivate = allToActivate.First();
+
             GarrisonButler.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
             GarrisonButler.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
                                       toActivate.DisplayId + ": " + toActivate.Location);
+
             return new Tuple<bool, WoWGameObject>(true, toActivate);
         }
 
@@ -203,12 +213,15 @@ namespace GarrisonButler
 
             await Buddy.Coroutines.Coroutine.Sleep(300);
             toActivate.Interact();
+
             GarrisonButler.Log("Activating " + toActivate.SafeName + ", waiting...");
+
             if (await Buddy.Coroutines.Coroutine.Wait(5000, () =>
             {
                 toActivate.Interact();
                 return
                     !ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                        .GetEmptyIfNull()
                         .Any(o => FinalizeGarrisonPlotIds.Contains(o.Entry) && o.Guid == toActivate.Guid);
             }))
             {

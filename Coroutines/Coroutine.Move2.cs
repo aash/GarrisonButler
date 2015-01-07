@@ -240,6 +240,7 @@ namespace GarrisonButler
             }
             //this.\u0001 = false;
             // ISSUE: reference to a compiler-generated method
+            //TODO - JUSTIN - This is causing graphical lag / FPS drops
             Task<PathFindResult> task = Task<PathFindResult>.Factory.StartNew(() => FindPathInner(obj));
             DateTime startedAt = DateTime.Now;
             try
