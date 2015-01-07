@@ -150,7 +150,7 @@ namespace GarrisonButler
                         WoWItem>(false,
                             null);
                 
-                if(item.StackCount > max)
+                if(item.StackCount >= max)
                     return new Tuple<bool, WoWItem>(true, item);
 
                 return new Tuple<bool, WoWItem>(false, item);
