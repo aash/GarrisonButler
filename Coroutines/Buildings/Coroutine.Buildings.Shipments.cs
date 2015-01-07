@@ -452,12 +452,10 @@ namespace GarrisonButler
 
             int MaxToStart = GetMaxShipmentToStart(building);
 
-            for (int i = 0; i < MaxToStart - building.shipmentsTotal; i++)
+            for (int i = 0; i < MaxToStart; i++)
             {
                 InterfaceLua.ClickStartOrderButton();
                 building.Refresh();
-                if (building.shipmentsTotal >= MaxToStart)
-                    break;
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
                 await Buddy.Coroutines.Coroutine.Yield();
             }
