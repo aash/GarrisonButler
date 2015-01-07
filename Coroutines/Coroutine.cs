@@ -457,25 +457,3 @@ namespace GarrisonButler
         }
     }
 }
-
-//var hasItemTomail = Styx.CommonBot.Inventory.InventoryManager.HaveItemsToMail;
-//if (hasItemTomail && Styx.Helpers.CharacterSettings.Instance.MailRecipient.Any())
-//{
-//    var mailBox =
-//        ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-//            .Where(o => o.SubType == WoWGameObjectType.Mailbox)
-//            .FirstOrDefault();
-//    if(mailBox == null)
-//        if (await MoveTo(Me.IsAlliance ? allyMailbox : hordeMailbox))
-//            return true;
-//    if (await MoveTo(mailBox.Location))
-//        return true;
-//    await Buddy.Coroutines.Coroutine.Wait(1000, () => !Me.IsMoving);
-//    mailBox.Interact();
-//    await CommonCoroutines.SleepForLagDuration();
-//    var items = Styx.CommonBot.Inventory.InventoryManager.GetItemsToMail();
-//    var mailFrame = MailFrame.Instance;
-//    await mailFrame.SendMailWithManyAttachmentsCoroutine(
-//        Styx.Helpers.CharacterSettings.Instance.MailRecipient,
-//        items);
-//}

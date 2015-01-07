@@ -134,7 +134,7 @@ namespace GarrisonButler
         public static async Task<bool> MoveToMine()
         {
             WoWPoint locationToLookAt = Me.IsAlliance ? new WoWPoint(1907, 93, 83) : new WoWPoint(5473, 4444, 144);
-            return await MoveTo(locationToLookAt, "Moving to default position for mine to search for an Anvil.");
+            return await MoveTo(locationToLookAt, "[Profession] Moving to mine to search for an Anvil.");
         }
 
         private static async Task<bool> DoCd(DailyProfession daily)

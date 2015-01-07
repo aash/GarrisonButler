@@ -70,7 +70,7 @@ namespace GarrisonButler
             // can't find it? Let's try to get closer to the default location.
             if (unit == null)
             {
-                await MoveTo(building.Pnj);
+                await MoveTo(building.Pnj, "[Salvage] Moving to building at " + building.Pnj);
                 return true;
             }
 

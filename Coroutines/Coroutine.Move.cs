@@ -21,11 +21,17 @@ namespace GarrisonButler
     partial class Coroutine
     {
         private static readonly List<WoWPoint> CurrentWaypointsList = new List<WoWPoint>();
-        private static WoWPoint _target;
+        private static string oldDestMessage;
         private static MoveResult _lastMoveResult;
 
-        public static async Task<bool> MoveTo(WoWPoint destination, string destinationName = null)
+        public static async Task<bool> MoveTo(WoWPoint destination, string destinationMessage = null)
         {
+            if (destinationMessage != null && destinationMessage != oldDestMessage)
+            {
+                oldDestMessage = destinationMessage;
+                GarrisonButler.Log(destinationMessage);                
+            }
+
             _lastMoveResult = Navigator.MoveTo(destination);
 
             Navigator.GetRunStatusFromMoveResult(_lastMoveResult);
@@ -46,70 +52,16 @@ namespace GarrisonButler
             }
             return true;
         }
-        public static async Task<bool> MoveToInteract(WoWObject woWObject, string destinationName = null)
+        public static async Task<bool> MoveToInteract(WoWObject woWObject)
         {
             if (woWObject.WithinInteractRange)
             {
-                GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact.");
+                GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact with " + woWObject.SafeName);
                 return false;
             }
-            return await MoveTo(woWObject.Location, destinationName);
+            return await MoveTo(woWObject.Location, "[Navigation] Moving to interact with " + woWObject.SafeName);
         }
-
-        public static bool MoveTo2(WoWPoint destination, string destinationName = null)
-        {
-            if (Me.Location == destination || Me.Location.Distance(destination) < 2)
-                return false;
-
-            if (_target != destination || _lastMoveTo == new WoWPoint())
-            {
-                if (CurrentWaypointsList.Count == 0)
-                {
-                    if (Me.Location.Distance(destination) > 5)
-                        GarrisonButler.Warning("[Navigation] Couldn't generate path from " + Me.Location + " to " +
-                                               destination);
-                    return false;
-                }
-                _lastMoveTo = CurrentWaypointsList.First();
-                _target = destination;
-            }
-            if (Me.Location.Distance(destination) > 5 + (Me.Mounted ? 3 : 0))
-            {
-                WoWPoint waypoint;
-                if (Me.Location.Distance(_lastMoveTo) >= 2 + (Me.Mounted ? 1 : 0))
-                {
-                    waypoint = _lastMoveTo;
-                }
-                else
-                {
-                    if (CurrentWaypointsList.Count == 0)
-                    {
-                        GarrisonButler.Diagnostic("[Navigation] Waypoints list empty, assuming at destination: " +
-                                                  destinationName);
-                        return false;
-                    }
-
-                    waypoint = CurrentWaypointsList.First();
-
-                    CurrentWaypointsList.Remove(waypoint);
-                    GarrisonButler.Diagnostic("[Navigation] Loading next waypoint to " + destinationName + ": " +
-                                              waypoint);
-                }
-                _lastMoveTo = waypoint;
-                {
-                    if (Me.IsMoving && !Me.Mounted && Mount.CanMount() &&
-                        Me.Location.Distance(destination) >= CharacterSettings.Instance.MountDistance)
-                    {
-                        WoWMovement.MoveStop();
-                        Mount.GetMountSpell().Cast();
-                    }
-                    WoWMovement.ClickToMove(waypoint);
-                }
-                return true;
-            }
-            return false;
-        }
-
+        
         private static async Task<List<WoWPoint>> GetFurthestWaypoint([NotNull] List<WoWPoint> waypoints)
         {
             if (waypoints == null) throw new ArgumentNullException("waypoints");

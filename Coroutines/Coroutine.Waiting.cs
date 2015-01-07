@@ -73,7 +73,7 @@ namespace GarrisonButler
                         "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
                     if (Me.Location.Distance(fishingSpot) > 2)
                     {
-                        if (await MoveTo(fishingSpot))
+                        if (await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot."))
                             return true;
                     }
                 }

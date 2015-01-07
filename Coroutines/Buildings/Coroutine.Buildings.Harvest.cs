@@ -56,7 +56,6 @@ namespace GarrisonButler
             if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.Distance(CachedToHarvestLocation) > 5))
                 if (await MoveTo(CachedToHarvestLocation)) // returns false for Failed and ReachedDestination
                     return true;
-            GarrisonButler.Diagnostic("CachedToHarvestLocation");
 
             CachedToHarvestLocation = WoWPoint.Empty;
 
@@ -72,7 +71,6 @@ namespace GarrisonButler
             // Valid object found
             if (toHarvest.IsValid)
             {
-                GarrisonButler.Diagnostic("CachedToHarvestLocation22222222");
                 CachedToHarvestLocation = toHarvest.Location;
                 return await HarvestWoWGameOject(toHarvest);
             }

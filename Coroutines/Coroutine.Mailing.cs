@@ -38,9 +38,7 @@ namespace GarrisonButler
         }
 
         public static async Task<bool> MailItem(MailItem mailItem)
-        {
-            GarrisonButler.Diagnostic("[Mailing] Running ...");
-
+        {-
             if (!Styx.CommonBot.Frames.MailFrame.Instance.IsVisible)
             {
                 List<WoWGameObject> MailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
@@ -50,7 +48,7 @@ namespace GarrisonButler
                 if (mailbox == default(WoWGameObject))
                 {
                     var mailboxLocation = Me.IsAlliance ? allyMailbox : hordeMailbox;
-                    return await MoveTo(mailboxLocation);
+                    return await MoveTo(mailboxLocation, "[Mailing] Moving to mailbox at " + mailboxLocation);
                 }
 
                 if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)

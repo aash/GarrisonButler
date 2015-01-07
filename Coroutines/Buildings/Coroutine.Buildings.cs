@@ -208,7 +208,7 @@ namespace GarrisonButler
 
         private static async Task<bool> ActivateFinishedBuildings(WoWGameObject toActivate)
         {
-            if (await MoveToInteract(toActivate, "Building activation"))
+            if (await MoveToInteract(toActivate))
                 return true;
 
             await Buddy.Coroutines.Coroutine.Sleep(300);

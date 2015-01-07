@@ -415,20 +415,16 @@ namespace GarrisonButler
 
         private static async Task<bool> StartShipment(Building building)
         {
-            GarrisonButler.Log("[ShipmentStart] Moving to start work order:" + building.name);
-
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
-                GarrisonButler.Diagnostic("[ShipmentStart] Could not find unit (" + building.PnjId +"), moving to default location.");
-                await MoveTo(building.Pnj);
+                await MoveTo(building.Pnj,"[ShipmentStart] Could not find unit (" + building.PnjId +"), moving to default location.");
                 return true;
             }
 
             if (await MoveToInteract(unit))
                 return true;
 
-            GarrisonButler.Diagnostic("[ShipmentStart] Arrived at location.");
             unit.Interact();
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             if (!await Buddy.Coroutines.Coroutine.Wait(500, () =>
@@ -486,7 +482,7 @@ namespace GarrisonButler
             });
         }
         
-        private static async Task<bool> IfGossip(WoWUnit pnj)
+        private static void IfGossip(WoWUnit pnj)
         {
             if (GossipFrame.Instance != null)
             {
@@ -497,7 +493,6 @@ namespace GarrisonButler
                 }
                 frame.SelectGossipOption(frame.GossipOptionEntries.Count-1);
             }
-            return true;
         }
 
 
@@ -527,93 +522,17 @@ namespace GarrisonButler
 
             if (shipmentToCollect == null)
             {
-                //// Fix for the mine position
-                ////list of all the mines IDs
-                //var minesIds = _buildings.Where(
-                //    b =>
-                //        (b.id == (int)buildings.MineLvl1) || (b.id == (int)buildings.MineLvl2) ||
-                //        (b.id == (int)buildings.MineLvl3)).SelectMany(b => b.Displayids);
-
-                //if (minesIds.Contains(buildingAsObject.DisplayId))
-                //{
-
-                //} 
-                GarrisonButler.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
-                if (await MoveTo(building.Location))
+                if (await MoveTo(building.Location, "[ShipmentCollect] Moving to Building to search for shipment to pick up."))
                     return true;
             }
             else
             {
-                GarrisonButler.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}",
-                    shipmentToCollect.Name, shipmentToCollect.Location);
                 await HarvestWoWGameOject(shipmentToCollect);
                 RefreshBuildings(true); 
                 return false; // Done here
             }
             return false; // should never reach that point!
         }
-
-
-        //private static async Task<bool> PickUpAllWorkOrder()
-        //{
-        //    WoWGameObject buildingAsObject = null;
-
-        //    if (!CanRunPickUpOrder(ref buildingAsObject))
-        //        return false;
-
-        //    WoWPoint locationToLookAt = WoWPoint.Empty;
-        //    // Fix for the mine position
-        //    //list of all the mines IDs
-        //    var minesIds = _buildings.Where(
-        //        b =>
-        //            (b.id == (int)buildings.MineLvl1) || (b.id == (int)buildings.MineLvl2) ||
-        //            (b.id == (int)buildings.MineLvl3)).SelectMany(b => b.Displayids);
-
-        //    if (minesIds.Contains(buildingAsObject.DisplayId))
-        //        locationToLookAt = Me.IsAlliance ? new WoWPoint(1907, 93, 83) : new WoWPoint(5473, 4444, 144);
-        //    else
-        //        locationToLookAt = buildingAsObject.Location;
-
-
-        //    // Search for shipment next to building
-        //    var shipmentToCollect =
-        //        ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-        //            .Where(
-        //                o =>
-        //                    o.SubType == WoWGameObjectType.GarrisonShipment &&
-        //                    o.Location.DistanceSqr(locationToLookAt) < 400f)
-        //            .OrderBy(o => o.Location.DistanceSqr(locationToLookAt))
-        //            .FirstOrDefault();
-
-        //    if (shipmentToCollect == null)
-        //    {
-
-        //        //// Fix for the mine position
-        //        ////list of all the mines IDs
-        //        //var minesIds = _buildings.Where(
-        //        //    b =>
-        //        //        (b.id == (int)buildings.MineLvl1) || (b.id == (int)buildings.MineLvl2) ||
-        //        //        (b.id == (int)buildings.MineLvl3)).SelectMany(b => b.Displayids);
-
-        //        //if (minesIds.Contains(buildingAsObject.DisplayId))
-        //        //{
-
-        //        //} 
-        //        GarrisonButler.Diagnostic("[ShipmentCollect] Could not Find shipment location in world for building {0} - {1}", buildingAsObject.SafeName, buildingAsObject.Location);
-        //        GarrisonButler.Log("[ShipmentCollect] Moving to Building to search for shipment to pick up.");
-        //        if (await MoveTo(buildingAsObject.Location))
-        //            return true;
-        //    }
-        //    else
-        //    {
-        //        GarrisonButler.Diagnostic("[ShipmentCollect] Moving to harvest shipment {0} - {1}", shipmentToCollect.Name, shipmentToCollect.Location);
-        //        await HarvestWoWGameOject(shipmentToCollect);
-        //        RefreshBuildings(true);
-        //        return true;
-        //    }
-        //    return false; // should never reach that point!
-        //}
-
 
         private struct Shipment
         {

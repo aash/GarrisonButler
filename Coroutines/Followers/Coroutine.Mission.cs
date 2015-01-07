@@ -177,18 +177,18 @@ namespace GarrisonButler
                 WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != null)
                 {
-                    if (await MoveToInteract(tableForLoc, "Command table"))
+                    if (await MoveToInteract(tableForLoc))
                         return true;
                 }
                 else
                 {
-                    if (await MoveTo(TablePosition, "Command table"))
+                    if (await MoveTo(TablePosition, "[Missions] Moving to command table"))
                         return true;
                 }
             }
             else
             {
-                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "Command table"))
+                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table"))
                     return true;
             }
 
