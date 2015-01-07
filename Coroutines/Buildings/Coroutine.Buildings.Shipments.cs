@@ -479,7 +479,7 @@ namespace GarrisonButler
 
         private static async Task WorkAroundBugFrame()
         {
-            Buddy.Coroutines.Coroutine.Wait(3000, () =>
+            Buddy.Coroutines.Coroutine.Wait(6000, () =>
             {
                 MoveToTable();
                 return false;
