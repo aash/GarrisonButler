@@ -167,10 +167,29 @@ namespace GarrisonButler
 
         public static async Task<bool> DeleteItemInbags(WoWItem item)
         {
-            GarrisonButler.Log("[Item] Deleting: {0}", item.Name);
-            Lua.DoString("ClearCursor()");
-            item.PickUp();
-            Lua.DoString("DeleteCursorItem()");
+            GarrisonButler.Log("[Item] Deleting one of: {0}", item.Name);
+            Lua.DoString(
+                string.Format(
+                    "local amount = {0}; ", 1) +
+                string.Format(
+                    "local item = {0}; ", item.Entry) +
+                    "local ItemBagNr = 0; " +
+                    "local ItemSlotNr = 1; " +
+                    "for b=0,4 do " +
+                        "for s=1,GetContainerNumSlots(b) do " +
+                            "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */ "then " +
+                                "ItemBagNr = b; " +
+                                "ItemSlotNr = s; " +
+                            "end; " +
+                        "end; " +
+                    "end; " +
+                    "ClearCursor(); " +
+                    "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
+                    "if CursorHasItem() then " +
+                        "DeleteCursorItem(); " +
+                    "end;"
+            );
+
             return true;
         }
 
