@@ -730,6 +730,7 @@ namespace GarrisonButler
                 case (int) buildings.TradingPostLvl1:
                 case (int) buildings.TradingPostLvl2:
                 case (int) buildings.TradingPostLvl3:
+                    hasOrder = true;
                     Displayids = new List<uint>
                     {
                         18574, // Garrison Building  Trading Post V1
@@ -790,6 +791,9 @@ namespace GarrisonButler
                 case buildings.ScribeQuartersLvl1:
                 case buildings.ScribeQuartersLvl2:
                 case buildings.ScribeQuartersLvl3:
+                case buildings.TradingPostLvl1:
+                case buildings.TradingPostLvl2:
+                case buildings.TradingPostLvl3:// This one changes everyday... 
                     return true;
                 case buildings.GnomishGearworksLvl1:
                 case buildings.GnomishGearworksLvl2:
@@ -815,10 +819,6 @@ namespace GarrisonButler
                 case buildings.StorehouseLvl2:
                 case buildings.StorehouseLvl3:
                     break;
-                case buildings.TradingPostLvl1:
-                case buildings.TradingPostLvl2:
-                case buildings.TradingPostLvl3:
-                    break; // This one changes everyday... 
             }
             return false;
         }
