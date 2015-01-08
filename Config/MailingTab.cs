@@ -303,7 +303,7 @@ namespace GarrisonButler.Config
                     _addRuleListBox.SelectedItem = toSelect;
 
 
-                    AddNewMailItemButton.Content = "Edit";
+                    AddNewMailItemButton.Content = "Save Edit";
                     AddNewMailItemButton.Tag = 2;
                 }
                 else
