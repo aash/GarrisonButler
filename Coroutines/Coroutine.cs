@@ -344,10 +344,10 @@ namespace GarrisonButler
                     {
                         GarrisonButler.Log("Casting Garrison Hearthstone.");
 
+                        GarrisonButler.Log("Waiting after casting Garrison Hearthstone...");
                         if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
                         {
-                            GarrisonButler.Log("Waiting after casting Garrison Hearthstone...");
-                            return true;
+                            return false;
                         }
                     }
                 }
@@ -359,7 +359,7 @@ namespace GarrisonButler
                     "Character not in garrison and UseGarrisonHearthstone set to false, doing nothing.");
                 return true;
             }
-            return true;
+            return false;
         }
 
         private static bool IsAutoAngler()
