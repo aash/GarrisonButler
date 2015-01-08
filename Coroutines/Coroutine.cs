@@ -171,6 +171,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 mainSequence = new ActionHelpers.ActionsSequence();
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
                 mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison));
                 mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
                 mainSequence.AddAction(InitializeBuildingsCoroutines());

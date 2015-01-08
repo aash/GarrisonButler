@@ -19,6 +19,64 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
+        private static bool checkedMailbox = false;
+        private static Tuple<bool, int> HasMails()
+        {
+            if (API.ApiLua.HasNewMail())
+                return new Tuple<bool, int>(true,0);
+
+            if (!checkedMailbox) return new Tuple<bool, int>(true, 0);
+
+            var mailFrame = MailFrame.Instance;
+            if (mailFrame != null)
+            {
+                if (mailFrame.HasNewMail)
+                    return new Tuple<bool, int>(true, 0);
+            }
+
+            return new Tuple<bool, int>(false, 0);
+        }
+
+        private async static Task<bool> MoveAndInteractWithMailbox()
+        {
+            List<WoWGameObject> MailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
+                    .Where(o => o.SubType == WoWGameObjectType.Mailbox).ToList();
+
+            WoWGameObject mailbox = MailboxList.FirstOrDefault();
+            if (mailbox == default(WoWGameObject))
+            {
+                WoWPoint mailboxLocation = Me.IsAlliance ? allyMailbox : hordeMailbox;
+                return await MoveTo(mailboxLocation, "[Mailing] Moving to mailbox at " + mailboxLocation);
+            }
+
+            if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
+                if (await MoveToInteract(mailbox))
+                    return true;
+
+            mailbox.Interact();
+            await CommonCoroutines.SleepForLagDuration();
+            return true;
+        }
+        public static async Task<bool> GetMails(int osef)
+        {
+            if (!MailFrame.Instance.IsVisible)
+            {
+                return await MoveAndInteractWithMailbox();
+            }
+
+            MailFrame mailFrame = MailFrame.Instance;
+
+            await mailFrame.OpenAllMailCoroutine();
+
+            if (!mailFrame.GetAllMails().Any())
+            {
+                mailFrame.Close();
+                checkedMailbox = true;
+                return false;
+            }
+            return true;
+        }
+
         private static Tuple<bool, List<MailItem>> CanMailItem()
         {
             List<MailItem> toMail =

@@ -11,7 +11,7 @@ namespace GarrisonButler.API
 {
     class ApiLua
     {
-
+        
         internal static int GetMaxStackItem(uint itemId)
         {
             var lua = 
@@ -25,5 +25,18 @@ namespace GarrisonButler.API
             var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToInt32();
         }
+
+        internal static bool HasNewMail()
+        {
+            var lua = 
+               @"local has = HasNewMail();
+                if not has then
+                    return tostring(false);
+                end;
+                return tostring(has);";
+            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            return t.ToBoolean();
+        }
+
     }
 }
