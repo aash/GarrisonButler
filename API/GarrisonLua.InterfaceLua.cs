@@ -44,6 +44,11 @@ namespace GarrisonLua
             Lua.DoString("SendMailFrame_SendMail();");
         }
 
+        public static void ClickCloseMailButton()
+        {
+            Lua.DoString("/click MailFrameCloseButton()");
+        }
+
         public static bool IsGarrisonMissionTabVisible()
         {
             const string lua =

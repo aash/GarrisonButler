@@ -24,6 +24,22 @@ namespace GarrisonButler.Coroutines
             protected bool _lastResult;
             protected WaitTimer _waitTimer;
 
+            public override string ToString()
+            {
+                string action = "";
+                string condition = "";
+
+                if (_action != default(Func<Task<bool>>))
+                    if (_action.Method != default(System.Reflection.MethodInfo))
+                        action = _action.Method.Name;
+
+                if (_condition != default(Func<bool>))
+                    if (_condition.Method != default(System.Reflection.MethodInfo))
+                        condition = _condition.Method.Name;
+
+                return "ActionBasic: _action=" + action + "; _condition=" + condition;
+            }
+
             public ActionBasic(Func<Task<bool>> action, int waitTimeMs = 3000, bool instantStart = false)
             {
                 _action = action;
@@ -63,6 +79,22 @@ namespace GarrisonButler.Coroutines
             protected bool _lastResult;
             protected bool _needToCache = false;
             protected Tuple<bool, T> _tempStorage;
+
+            public override string ToString()
+            {
+                string action = "";
+                string condition = "";
+
+                if (_action != default(Func<T, Task<bool>>))
+                    if (_action.Method != default(System.Reflection.MethodInfo))
+                        action = _action.Method.Name;
+
+                if (_condition != default(Func<Tuple<bool, T>>))
+                    if (_condition.Method != default(System.Reflection.MethodInfo))
+                        condition = _condition.Method.Name;
+
+                return "ActionOnTimer: _action=" + action + "; _condition=" + condition;
+            }
 
             public ActionOnTimer(Func<T, Task<bool>> action, Func<Tuple<bool, T>> condition, int waitTimeActionMs = 3000,
                 int waitTimeConditionMs = 3500,
@@ -182,10 +214,12 @@ namespace GarrisonButler.Coroutines
 
             public override async Task<bool> ExecuteAction()
             {
-                //GarrisonButler.Diagnostic("Starting main sequence.");
+                //GarrisonButler.Diagnostic("ActionSequence.ExecuteAction(): count=" + Actions.Count);
+                //int count = 0;
                 foreach (Action actionBasic in Actions)
                 {
-                    //GarrisonButler.Diagnostic("Starting main sequence: executing action");
+                    //count++;
+                    //GarrisonButler.Diagnostic("ActionSequence.ExecuteAction():   #" + count + " - " + actionBasic.ToString());
                     if (await actionBasic.ExecuteAction())
                         return true;
                 }

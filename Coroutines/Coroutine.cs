@@ -292,9 +292,19 @@ namespace GarrisonButler
                 return false;
             }
 
+            // Bot will sleep after one full run waiting for new things to do
+            // similar to behavior in MixedMode
+            if (ReadyToSwitch)
+                if (!GarrisonButler.Instance.RequirementsMet)
+                    return false;
+
             // Heavier coroutines on timer
+            //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
             if (await mainSequence.ExecuteAction())
+            {
+                //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
+            }
 
             ReadyToSwitch = true;
             return false;

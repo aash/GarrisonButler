@@ -28,10 +28,20 @@ namespace GarrisonButler
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
         private static String LogBak = "";
         private static readonly WaitTimer logTimer = new WaitTimer(TimeSpan.FromSeconds(5));
+        public static StyxLog CurrentHonorbuddyLog = default(StyxLog);
 
         public GarrisonButler()
         {
             Instance = this;
+
+            CurrentHonorbuddyLog = StyxLog.GetLogs().GetEmptyIfNull().FirstOrDefault();
+
+            //IEnumerable<StyxLog> logs = StyxLog.GetLogs();
+
+            //foreach (StyxLog curLog in logs)
+            //{
+            //    System.Windows.MessageBox.Show(curLog.LogFilePath);
+            //}
         }
 
         public static string NameStatic
@@ -116,8 +126,24 @@ namespace GarrisonButler
             Logging.Write(Colors.Red, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
+        // SortedList
+        //  key = function name
+        //  value = List of messages
+        //private static string[,] DiagnosticSlots = new string[100, 100];
+
         internal static void Diagnostic(string message, params object[] args)
         {
+            //string callingFunction = new System.Diagnostics.StackFrame(1, true).GetMethod().Name;
+            //string toLog = String.Format(String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
+
+            //for (int i = 0; i < DiagnosticSlots.GetLength(0); i++)
+            //{
+            //    for(int j = 0; j < DiagnosticSlots.GetLength(1); j++)
+            //    {
+
+            //    }
+            //}
+
             Logging.WriteDiagnostic(Colors.Orange, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
