@@ -64,7 +64,7 @@ namespace GarrisonButler
                 var listItems = new List<WoWItem>();
                 foreach (MailItem mail in mailsRecipient)
                 {
-                    listItems.AddRange(mail.GetItemsToSend());
+                    listItems.AddRange(await mail.GetItemsToSend());
                 }
                 // send if any to send
                 if (listItems.Any())

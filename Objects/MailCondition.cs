@@ -6,8 +6,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms.VisualStyles;
+using GarrisonButler.API;
 using JetBrains.Annotations;
 using Styx;
+using Styx.CommonBot.Coroutines;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonButler.Objects
@@ -195,7 +199,7 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public IEnumerable<WoWItem> GetItemsOrNull(uint itemId)
+        public async Task<IEnumerable<WoWItem>> GetItemsOrNull(uint itemId)
         {
             switch (_condition)
             {
@@ -206,7 +210,7 @@ namespace GarrisonButler.Objects
                     return GetNumberInBagsSuperiorOrEqualTo(itemId, _checkValue);
 
                 case Conditions.KeepNumberInBags:
-                    return GetNumberKeepNumberInBags(itemId, _checkValue);
+                    return await GetNumberKeepNumberInBags(itemId, _checkValue);
 
                 case Conditions.None:
                     return null;
@@ -284,11 +288,23 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberKeepNumberInBags(uint itemId, int x)
+        private async static Task<IEnumerable<WoWItem>> GetNumberKeepNumberInBags(uint itemId, int x)
         {
-            // This is the pain...
-            throw new NotImplementedException("To do");
-            return null;
+            for (int i = 0; i < 15; i++)
+            {
+                StackItems();
+                await CommonCoroutines.SleepForLagDuration();
+            }
+            await Buddy.Coroutines.Coroutine.Yield();
+            SplitItemStack(x, itemId);
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+
+            // This is the pain... Not sure it will work
+            var items = GetAllItems(itemId);
+            var toKeep = items.FirstOrDefault(i => i.StackCount == x);
+            if (toKeep == default(WoWItem))
+                return new List<WoWItem>();
+            return items.Where(i => i != toKeep);
         }
 
         #endregion
@@ -316,6 +332,89 @@ namespace GarrisonButler.Objects
                 StyxWoW.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == itemId ? i.StackCount : 0);
         }
 
+        /// <summary>
+        /// Stacks all items in bags.
+        /// </summary>
+        private static void StackItems()
+        {
+            Lua.DoString(@"
+            local items={}  
+            local done = 1  
+            for bag = 0,4 do  
+                for slot=1,GetContainerNumSlots(bag) do  
+                    local id = GetContainerItemID(bag,slot)  
+                    local _,c,l = GetContainerItemInfo(bag, slot)  
+                    if id ~= nil then  
+                        local n,_,_,_,_,_,_, maxStack = GetItemInfo(id)  
+                        if c < maxStack then  
+                            if items[id] == nil then  
+                                items[id] = {left=maxStack-c,bag=bag,slot=slot,locked = l or 0}  
+                            else  
+                                if items[id].locked == 0 then  
+                                    PickupContainerItem(bag, slot)  
+                                    PickupContainerItem(items[id].bag, items[id].slot)  
+                                    items[id] = nil  
+                                else  
+                                    items[id] = {left=maxStack-c,bag=bag,slot=slot,locked = l or 0}  
+                                end  
+                                done = 0  
+                            end  
+                        end  
+                    end  
+                end  
+            end  
+            return done 
+        ");
+        }
+
+        private static void StackItems(WoWItem stays, WoWItem move)
+        {
+            
+        }
+        /// <summary>
+        /// Split a stack of itemId in a stack of amount and the rest.
+        /// </summary>
+        /// <param name="amount"></param>
+        /// <param name="itemdId"></param>
+        private static void SplitItemStack(int amount, uint itemdId)
+        {
+            var possibleStacks = StyxWoW.Me.BagItems.Where(i => i.Entry == itemdId && i.StackCount >= amount);
+            if (!possibleStacks.Any())
+                return;
+
+            Lua.DoString(
+                string.Format(
+                    "local amount = {0}; ", amount) +
+                string.Format(
+                    "local item = {0}; ", itemdId) +
+                    "local ItemBagNr = 0; " +
+                    "local ItemSlotNr = 1; " +
+                    "local EmptyBagNr = 0; " +
+                    "local EmptySlotNr = 1; " +
+                    "for b=0,4 do " +
+                        "for s=1,GetContainerNumSlots(b) do " +
+                            "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */ "then " +
+                                "ItemBagNr = b; " +
+                                "ItemSlotNr = s; " +
+                            "end; " +
+                        "end; " +
+                    "end; " +
+                    "for b=0,4 do " +
+                        "for s=1,GetContainerNumSlots(b) do " +
+                            "if GetContainerItemID(b,s) == nil then " +
+                                "EmptyBagNr = b; " +
+                                "EmptySlotNr = s; " +
+                            "end; " +
+                        "end; " +
+                    "end; " +
+                    "ClearCursor(); " +
+                    "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
+                    "if CursorHasItem() then " +
+                        "PickupContainerItem(EmptyBagNr,EmptySlotNr); " +
+                        "ClearCursor(); " +
+                    "end;"
+            );
+        }
         #endregion
 
 

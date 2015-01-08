@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using Styx.Helpers;
+using Styx.WoWInternals;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
 #endregion

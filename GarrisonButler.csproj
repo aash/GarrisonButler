@@ -42,6 +42,7 @@
     <Compile Include="API\GarrisonLua.Follower.cs" />
     <Compile Include="API\GarrisonLua.InterfaceLua.cs" />
     <Compile Include="API\GarrisonLua.Mission.cs" />
+    <Compile Include="API\Others.cs" />
     <Compile Include="Config\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>

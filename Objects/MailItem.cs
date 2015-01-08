@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Bots.Professionbuddy.Components;
 using JetBrains.Annotations;
 using Styx;
@@ -32,6 +33,7 @@ namespace GarrisonButler.Objects
 
         public MailItem()
         {
+            Condition = new MailCondition();
         }
 
         public uint ItemId
@@ -92,9 +94,9 @@ namespace GarrisonButler.Objects
             return _condition.GetCondition(ItemId);
         }
 
-        public IEnumerable<WoWItem> GetItemsToSend()
+        public async Task<IEnumerable<WoWItem>> GetItemsToSend()
         {
-            return _condition.GetItemsOrNull(ItemId);
+            return await _condition.GetItemsOrNull(ItemId);
         }
         public string Comment
         {
