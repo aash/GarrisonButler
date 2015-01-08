@@ -51,6 +51,11 @@
     </Compile>
     <Compile Include="Config\GaBSettings.Building.cs" />
     <Compile Include="Config\GaBSettings.cs" />
+    <Compile Include="Config\GarrisonButlerImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GarrisonButlerImages.resx</DependentUpon>
+    </Compile>
     <Compile Include="Config\MailingTab.cs" />
     <Compile Include="Coroutines\ActionHelpers.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Shipments.cs" />
@@ -130,8 +135,11 @@
     <EmbeddedResource Include="Config\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Config\GarrisonButlerImages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>GarrisonButlerImages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

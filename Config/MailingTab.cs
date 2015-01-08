@@ -294,7 +294,9 @@ namespace GarrisonButler.Config
                     _addRuleValueTextBox.SetBinding(TextBox.TextProperty, bindingCheckValue);
 
                     var toSelect =
-                        MailCondition.GetAllPossibleConditions().FirstOrDefault(c => c.Name == item.Condition.Name);
+                        MailCondition.GetAllPossibleConditions()
+                            .GetEmptyIfNull()
+                            .FirstOrDefault(c => c.Name == item.Condition.Name);
                     //var bindingCondition = new Binding("Condition") { Source = item };
                     //_addRuleListBox.SetBinding(TextBox.TextProperty, bindingCondition);
                     //if (toSelect != null)

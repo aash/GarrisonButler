@@ -24,13 +24,8 @@ using Orientation = System.Windows.Controls.Orientation;
 using TabControl = System.Windows.Controls.TabControl;
 using TextBox = System.Windows.Controls.TextBox;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 #endregion
 
@@ -60,12 +55,15 @@ namespace GarrisonButler.Config
                 Width = 600;
                 Height = 400;
                 MinHeight = 300;
-                MinHeight = 300;
-                Title = "GarrisonButler Beta v" + GarrisonButler.Version;
-
+                MinWidth = 300;
+                Title = GarrisonButler.NameStatic + " v" + GarrisonButler.Version;
                 var tabControl = new TabControl();
                 tabControl.Height = double.NaN;
                 tabControl.Width = double.NaN;
+
+                //Splash screen
+                var splashTabItem = new TabItem { Header = "Welcome", Content = ContentTabSplash() };
+                tabControl.Items.Add(splashTabItem);
 
                 var generalTabItem = new TabItem {Header = "General", Content = ContentTabGeneral()};
                 tabControl.Items.Add(generalTabItem);
@@ -410,6 +408,40 @@ namespace GarrisonButler.Config
                 Submit.Click += SendBugReport;
                 mainWrapPanel.Children.Add(Submit);
                 
+                mainFrame.Content = mainWrapPanel;
+                return mainFrame;
+            }
+            object ContentTabSplash()
+            {
+                var grid = new Grid();
+
+                grid.Height = double.NaN;
+                grid.Width = double.NaN;
+
+                var mainFrame = new ScrollViewer();
+                mainFrame.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+
+                var mainWrapPanel = new WrapPanel();
+                mainWrapPanel.Orientation = System.Windows.Controls.Orientation.Vertical;
+                mainWrapPanel.Width = double.NaN;
+
+                ImageBrush splashBrush = new ImageBrush();
+                BitmapImage myImage = new BitmapImage();
+                System.IO.MemoryStream myMemStream = new System.IO.MemoryStream();
+                System.Drawing.Bitmap garrisonButlerSplashImage =
+                    GarrisonButler.NameStatic == "GarrisonButler ICE"
+                    ? GarrisonButlerImages.GarrisonButlerICESplashImage
+                    : GarrisonButlerImages.GarrisonButlerLiteSplashImage;
+                garrisonButlerSplashImage.Save(myMemStream, garrisonButlerSplashImage.RawFormat);
+                myMemStream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                myImage.BeginInit();
+                myImage.StreamSource = myMemStream;
+                myImage.EndInit();
+
+                splashBrush.ImageSource = myImage;
+                mainWrapPanel.Background = splashBrush;
+
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
