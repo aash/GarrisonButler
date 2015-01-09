@@ -168,13 +168,13 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 mainSequence = new ActionHelpers.ActionsSequence();
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
+                if(GarrisonButler.NameStatic.Contains("ICE")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
                 mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison));
                 mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem));
+                if (GarrisonButler.NameStatic.Contains("ICE")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 

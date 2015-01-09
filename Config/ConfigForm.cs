@@ -73,10 +73,13 @@ namespace GarrisonButler.Config
 
                 var ProfessionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
                 tabControl.Items.Add(ProfessionTabItem);
-                
-                mailingTab = new MailingTab();
-                var Mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
-                tabControl.Items.Add(Mailing);
+
+                if (GarrisonButler.NameStatic.Contains("ICE"))
+                {
+                    mailingTab = new MailingTab();
+                    var Mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
+                    tabControl.Items.Add(Mailing);
+                }
 
                 var aboutTabItem = new TabItem { Header = "About", Content = ContentTabAbout() };
                 tabControl.Items.Add(aboutTabItem);
