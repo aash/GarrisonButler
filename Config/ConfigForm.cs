@@ -74,7 +74,7 @@ namespace GarrisonButler.Config
                 var ProfessionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
                 tabControl.Items.Add(ProfessionTabItem);
 
-                if (GarrisonButler.NameStatic.Contains("ICE"))
+                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
                 {
                     mailingTab = new MailingTab();
                     var Mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
@@ -432,7 +432,7 @@ namespace GarrisonButler.Config
                 BitmapImage myImage = new BitmapImage();
                 System.IO.MemoryStream myMemStream = new System.IO.MemoryStream();
                 System.Drawing.Bitmap garrisonButlerSplashImage =
-                    GarrisonButler.NameStatic == "GarrisonButler ICE"
+                    GarrisonButler.NameStatic.ToLower().Contains("ice")
                     ? GarrisonButlerImages.GarrisonButlerICESplashImage
                     : GarrisonButlerImages.GarrisonButlerLiteSplashImage;
                 garrisonButlerSplashImage.Save(myMemStream, garrisonButlerSplashImage.RawFormat);
