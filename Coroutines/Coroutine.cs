@@ -1,4 +1,5 @@
 ﻿using GarrisonButler.API;
+using Styx.CommonBot.Profiles;
 
 #region
 
@@ -183,7 +184,35 @@ namespace GarrisonButler
                 GarrisonButler.Warning(e.ToString());
             }
         }
+        private static WaitTimer vendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
+        private static Profile _currentProfile;
+        private static void CheckForVendors()
+        {
+            if (vendorCheckTimer.IsFinished)
+            {
+                GarrisonButler.Diagnostic("Checking for vendors...");
+                // load empty profile if none loaded
+                if (_currentProfile == null)
+                {
+                    ProfileManager.LoadEmpty();
+                    _currentProfile = ProfileManager.CurrentProfile;
+                }
 
+                var profile = ProfileManager.CurrentProfile;
+
+                // get all visible vendors
+                var vendors = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().Where(u => u.IsVendor).GetEmptyIfNull();
+
+                // add the new ones to the list of vendors as unknown, it should check itself.
+                foreach (var woWUnit in vendors.Where(woWUnit => profile.VendorManager.AllVendors.All(v => v.Entry != woWUnit.Entry)))
+                {
+                    profile.VendorManager.AllVendors.Add(new Vendor(woWUnit,Vendor.VendorType.Unknown));
+                    GarrisonButler.Diagnostic("Adding vendor: " + woWUnit);
+                }
+                GarrisonButler.Diagnostic("Checking for vendors... Done.");
+                vendorCheckTimer.Reset();
+            }
+        }
 
         internal static void OnStop()
         {
@@ -258,6 +287,8 @@ namespace GarrisonButler
             CheckResetAfk();
 
             CheckNavigationSystem();
+
+            CheckForVendors();
 
             if (await RestoreUiIfNeeded())
                 return true;
