@@ -1,4 +1,5 @@
-﻿using GarrisonButler.API;
+﻿using Bots.DungeonBuddy.Helpers;
+using GarrisonButler.API;
 using Styx.CommonBot.Profiles;
 
 #region
@@ -186,6 +187,23 @@ namespace GarrisonButler
         }
         private static WaitTimer vendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
         private static Profile _currentProfile;
+        private static WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(5));
+        private static async Task<bool> CheckBagsFull()
+        {
+            if (!CheckBagsFullTimer.IsFinished)
+                return false;
+
+            if (Me.BagsFull)
+            {
+                if (await HbApi.StackAllItemsIfPossible())
+                    return true;
+
+                Alert.Show("Bags full", "This toons bags are full, please make room before GarrisonButler can continue.", 60, true, false);
+                return true;
+            }
+            CheckBagsFullTimer.Reset();
+            return false;
+        }
         private static void CheckForVendors()
         {
             if (vendorCheckTimer.IsFinished)
@@ -314,6 +332,9 @@ namespace GarrisonButler
             if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
 
+            if (await CheckBagsFull())
+                return true;
+            
             if (mainSequence == null)
             {
                 GarrisonButler.Warning("ERROR: mainSequence NULL");
