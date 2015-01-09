@@ -16,6 +16,7 @@ using Styx.WoWInternals.WoWObjects;
 using Styx.Common;
 using Styx.Common.Helpers;
 using System.Diagnostics;
+using System.Timers;
 
 #endregion
 
@@ -24,14 +25,25 @@ namespace GarrisonButler
     partial class Coroutine
     {
         private static bool checkedMailbox = false;
-        private static int checkCycles = 0;
+        private static int numMailsOnLastCheck = 0;
         private static Stopwatch mailboxCheckTimer = new Stopwatch();   // Only check mail every 60s if no items exist in mail frame
+        private static int mailCheckInterval = checkIntervalWhileStillWaiting; // in seconds
+        private static int checkIntervalWhileStillWaiting = 65;
+        private static bool allowMailTimerStart = true;
         private static Tuple<bool, int> HasMails()
         {
-            // Only check mail every 60s
-            if (mailboxCheckTimer.IsRunning)
+            if (!GaBSettings.Get().RetrieveMail)
             {
-                if (mailboxCheckTimer.ElapsedMilliseconds < 60000)
+                GarrisonButler.Diagnostic("[Mail] Checking mail deactivated in user settings.");
+                return new Tuple<bool, int>(false, 0);
+            }
+
+            // Only check mail every 5 minutes by default
+            // If check interval is 65s, it will return true for HasMails()
+            if ((mailboxCheckTimer.IsRunning) && (mailCheckInterval != checkIntervalWhileStillWaiting))
+            {
+                // Timer has not finished yet, indicate "no mail"
+                if (mailboxCheckTimer.Elapsed.TotalSeconds < (mailCheckInterval))
                 {
                     return new Tuple<bool, int>(false, 0);
                 }
@@ -78,67 +90,127 @@ namespace GarrisonButler
             await CommonCoroutines.SleepForLagDuration();
             return true;
         }
+
+        static LogLevel HBMailLoggingBugOriginalLogLevel;
+        static LogLevel HBMailLoggingBugOriginalFileLogLevel;
+        static bool HBMailLoggingBugOriginalFileLoggingFlag;
+        private static void WorkAroundHBMailLoggingBugStart()
+        {
+            HBMailLoggingBugOriginalLogLevel = GarrisonButler.CurrentHonorbuddyLog.LoggingLevel;
+            HBMailLoggingBugOriginalFileLogLevel = GarrisonButler.CurrentHonorbuddyLog.LogFileLevel;
+            HBMailLoggingBugOriginalFileLoggingFlag = GarrisonButler.CurrentHonorbuddyLog.FileLogging;
+
+            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = LogLevel.None;
+            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = LogLevel.None;
+            GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
+        }
+
+        private static void WorkAroundHBMailLoggingBugEnd()
+        {
+            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = HBMailLoggingBugOriginalLogLevel;
+            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = HBMailLoggingBugOriginalFileLogLevel;
+            GarrisonButler.CurrentHonorbuddyLog.FileLogging = HBMailLoggingBugOriginalFileLoggingFlag;
+        }
+
         public static async Task<bool> GetMails(int osef)
         {
+            // If check interval is 65s, we must wait for the wow server to allow another refresh
+            if ((mailboxCheckTimer.IsRunning) && (mailCheckInterval == checkIntervalWhileStillWaiting))
+            {
+                // Need to keep waiting for timer
+                if (mailboxCheckTimer.Elapsed.TotalSeconds < (mailCheckInterval))
+                {
+                    return true;
+                }
+                else
+                {
+                    mailboxCheckTimer.Reset();
+                    mailboxCheckTimer.Stop();
+                }
+            }
+
+            // Get to the mailbox
             if (!MailFrame.Instance.IsVisible)
             {
                 return await MoveAndInteractWithMailbox();
             }
 
-            // Wait for server to load mails
+            // Wait for server to load mails after opening mailbox
             await Buddy.Coroutines.Coroutine.Sleep(5000);
 
             MailFrame mailFrame = MailFrame.Instance;
 
-            LogLevel oldLogLevel = GarrisonButler.CurrentHonorbuddyLog.LoggingLevel;
-            LogLevel oldFileLogLevel = GarrisonButler.CurrentHonorbuddyLog.LogFileLevel;
-            bool oldFileLoggingFlag = GarrisonButler.CurrentHonorbuddyLog.FileLogging;
+            int numMail = InterfaceLua.GetInboxMailCountInPlayerInbox();
+            int totalMail = InterfaceLua.GetInboxMailCountOnServer();
 
-            // Attempt to fix writing out character names
-            // OpenAllMailCoroutine() will print out debug info
-            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = LogLevel.None;
-            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = LogLevel.None;
-            GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
-
-            IEnumerable<MailFrame.InboxMailItem> allMails = mailFrame.GetAllMails();
-
-            bool openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();            
-
-            // Reset setings before OpenAllMailCoroutine()
-            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = oldLogLevel;
-            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = oldFileLogLevel;
-            GarrisonButler.CurrentHonorbuddyLog.FileLogging = true;
+            WorkAroundHBMailLoggingBugStart();
+            bool openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
+            WorkAroundHBMailLoggingBugEnd();
 
             // Wait for logging changes to take effect / mail icon
             await Buddy.Coroutines.Coroutine.Sleep(1000);
 
-            //GarrisonButler.Diagnostic("OpenAllMailCoroutine Result = " + openAllMailCoroutineResult.ToString());
-            //GarrisonButler.Diagnostic("GetAllMails() returned count=" + mailFrame.GetAllMails().GetEmptyIfNull().Count());
+            // "Read" all mails, even ones with only text in them
+            // This turns the mail "grey" to get rid of the mail icon
+            // OpenAllMailCoroutine() from the Honorbuddy base does NOT turn the mail
+            // to "grey" when checking mail with ONLY text in it.
+            mailFrame.GetAllMails().GetEmptyIfNull().ForEach(m => InterfaceLua.MarkMailAsRead(m.Index));
 
-            if (!mailFrame.GetAllMails().GetEmptyIfNull().Any())
+            // Allow for a 2nd check if the server returned more mails than were shown in the inbox
+            // AND
+            // We reduced the number of total mail (on the server) from the last check
+            // If total mail didn't change between checks, that means the user's inbox is
+            // stuck possibly due to "read" messages that contain only text or their inventory
+            // is full
+            bool condition1 = (numMail >= 50) && (numMailsOnLastCheck != totalMail);
+
+            // Allow for a 2nd check when fresh bot run or after a 5min timer refresh
+            bool condition2 = (numMail >= 50) && (allowMailTimerStart);
+
+            if(condition1 || condition2)
             {
+                GarrisonButler.Log("[Mail] More mail to check, waiting 65 seconds");
+                allowMailTimerStart = false;
+                numMailsOnLastCheck = totalMail;
                 if (mailFrame.IsVisible)
                 {
-                    InterfaceLua.ClickCloseMailButton();
                     mailFrame.Close();
+
+                    // Wait for mail icon to update after closing mail frame
+                    await Buddy.Coroutines.Coroutine.Sleep(1000);
                 }
-
-                checkedMailbox = true;
-
-                // Wait 60s before checking mail again
-                if (!mailboxCheckTimer.IsRunning)
+                mailCheckInterval = 65;
+                mailboxCheckTimer.Reset();
+                mailboxCheckTimer.Start();
+                return true;
+            }
+            else
+            {
+                GarrisonButler.Log("[Mail] Waiting 5 minutes to check mail again.");
+                numMailsOnLastCheck = 0;
+                allowMailTimerStart = true;
+                if (mailFrame.IsVisible)
                 {
-                    mailboxCheckTimer.Reset();
-                    mailboxCheckTimer.Start();
+                    mailFrame.Close();
+
+                    // Wait for mail icon to update after closing mail frame
+                    await Buddy.Coroutines.Coroutine.Sleep(1000);
                 }
+                mailCheckInterval = 60 * 5; // 5 minutes
+                mailboxCheckTimer.Reset();
+                mailboxCheckTimer.Start();
                 return false;
             }
-            
-            return true;
         }
 
         private static Tuple<bool, List<MailItem>> CanMailItem()
         {
+            if (!GaBSettings.Get().SendMail)
+            {
+                GarrisonButler.Diagnostic("[Mailing] Sending mail deactivated in user settings.");
+                return new Tuple<bool, List<MailItem>>(false, null);
+            }
+
             List<MailItem> toMail =
                 GaBSettings.Get().MailItems.GetEmptyIfNull().Where(m => m.CanMail()).ToList();
 

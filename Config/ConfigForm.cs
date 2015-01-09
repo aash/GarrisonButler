@@ -55,7 +55,7 @@ namespace GarrisonButler.Config
                 Width = 600;
                 Height = 400;
                 MinHeight = 300;
-                MinWidth = 300;
+                MinWidth = 600;
                 Title = GarrisonButler.NameStatic + " v" + GarrisonButler.Version;
                 var tabControl = new TabControl();
                 tabControl.Height = double.NaN;

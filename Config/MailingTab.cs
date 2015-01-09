@@ -29,6 +29,7 @@ namespace GarrisonButler.Config
         private TextBox _addCommentTextBox = new TextBox();
         private TextBox _addItemIdTextBox = new TextBox();
         private TextBox _addRecipientTextBox = new TextBox();
+        private CheckBox _retrieveMailCheckBox = new CheckBox();
         private ComboBox _addRuleListBox = new ComboBox();
         private TextBox _addRuleValueTextBox = new TextBox();
         private SortAdorner _listViewSortAdorner;
@@ -40,10 +41,15 @@ namespace GarrisonButler.Config
             _mainGrid.Height = double.NaN;
             _mainGrid.Width = double.NaN;
             _mainGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            _mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
             _mainGrid.RowDefinitions.Add(new RowDefinition());
             _mainGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(30)});
             _mainGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(60)});
 
+            UIElement mailOptionPanel = MailOptions();
+            Grid.SetRow(mailOptionPanel, 0);
+            Grid.SetColumn(mailOptionPanel, 0);
+            _mainGrid.Children.Add(mailOptionPanel);
 
             var gridView = new GridView();
 
@@ -120,18 +126,18 @@ namespace GarrisonButler.Config
 
             //mainFrame.Content = myListView;
             Grid.SetColumn(_myListView, 0);
-            Grid.SetRow(_myListView, 0);
+            Grid.SetRow(_myListView, 1);
             _mainGrid.Children.Add(_myListView);
 
             // Buttons
             Grid barPanel = Buttons();
-            Grid.SetRow(barPanel, 1);
+            Grid.SetRow(barPanel, 2);
             Grid.SetColumn(barPanel, 0);
             _mainGrid.Children.Add(barPanel);
 
             // Input data
             Grid Inputs = InputBoxes();
-            Grid.SetRow(Inputs, 2);
+            Grid.SetRow(Inputs, 3);
             Grid.SetColumn(Inputs, 0);
             _mainGrid.Children.Add(Inputs);
         }
@@ -141,6 +147,35 @@ namespace GarrisonButler.Config
         public object ContentTabMailing()
         {
             return _mainGrid;
+        }
+        protected CheckBox CreateCheckBoxWithBinding(string Label, string AttributeName, object source)
+        {
+            var checkBox = new CheckBox();
+            checkBox.Content = Label;
+            checkBox.Height = 25;
+            // binding
+            var binding = new Binding(AttributeName);
+            binding.Source = source;
+            checkBox.SetBinding(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, binding);
+            return checkBox;
+        }
+
+        private UIElement MailOptions()
+        {
+            var mainWrapPanel = new WrapPanel();
+            mainWrapPanel.Orientation = Orientation.Horizontal;
+            mainWrapPanel.Width = double.NaN;
+
+            CheckBox RetrieveMail = CreateCheckBoxWithBinding("Retrieve Mail",
+                "RetrieveMail", GaBSettings.Get());
+            RetrieveMail.Margin = new Thickness(0, 0, 5, 0);
+            mainWrapPanel.Children.Add(RetrieveMail);
+
+            CheckBox SendMail = CreateCheckBoxWithBinding("Send Mail",
+                "SendMail", GaBSettings.Get());
+            mainWrapPanel.Children.Add(SendMail);
+
+            return mainWrapPanel;
         }
 
         private Grid InputBoxes()

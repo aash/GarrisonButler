@@ -71,17 +71,26 @@ namespace GarrisonButler
             if (unit == null)
             {
                 await MoveTo(building.Pnj, "[Salvage] Moving to building at " + building.Pnj);
+
                 return true;
             }
 
-            if (await MoveToInteract(unit))
-                return true;
+            // If we don't dismount earlier, the bot will determine that it has reached the
+            // unit when it is within 2 yards of the location.  Need to stop and dismount earlier,
+            // then call "MoveTo" again after the dismount logic to finish the movement by foot
+            if(Me.Location.Distance(unit.Location) > 10)
+                if (await MoveTo(unit.Location))
+                    return true;
 
             if (Me.Mounted)
             {
                 await CommonCoroutines.Dismount("Salvaging");
                 await CommonCoroutines.SleepForLagDuration();
             }
+
+            if (await MoveTo(unit.Location))
+                return true;
+
             foreach (WoWItem salvageCrate in salvageCrates)
             {
                 salvageCrate.UseContainerItem();

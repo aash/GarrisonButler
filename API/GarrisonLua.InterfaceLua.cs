@@ -39,6 +39,29 @@ namespace GarrisonLua
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
         }
 
+        public static void MarkMailAsRead(int index)
+        {
+            Lua.DoString("GetInboxText(" + index + ")");
+        }
+
+        /// <summary>
+        /// Must be called with Mail Frame open
+        /// </summary>
+        /// <returns>Number of mails shown in the player's mail inbox.  Max of 50 allowed at 1 time.</returns>
+        public static int GetInboxMailCountInPlayerInbox()
+        {
+            return Lua.GetReturnValues("local numItems, totalItems = GetInboxNumItems(); if (not numItems) then return tostring(0); else return tostring(numItems); end;").GetEmptyIfNull().FirstOrDefault().ToInt32();
+        }
+
+        /// <summary>
+        /// Must be called with Mail Frame open
+        /// </summary>
+        /// <returns>Number of mails currently on blizzard server</returns>
+        public static int GetInboxMailCountOnServer()
+        {
+            return Lua.GetReturnValues("local numItems, totalItems = GetInboxNumItems(); if (not totalItems) then return tostring(0); else return tostring(totalItems); end;").GetEmptyIfNull().FirstOrDefault().ToInt32();
+        }
+
         public static void ClickSendMail()
         {
             Lua.DoString("SendMailFrame_SendMail();");
