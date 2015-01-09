@@ -6,9 +6,9 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
+using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
-using GarrisonLua;
 using Styx.Common;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
@@ -21,7 +21,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 3, 21, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 3, 22, 1);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;

@@ -1,11 +1,12 @@
-﻿#region
+﻿using GarrisonButler.API;
+
+#region
 
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.Config;
-using GarrisonLua;
 using NewMixedMode;
 using Styx;
 using Styx.Common.Helpers;
@@ -46,7 +47,7 @@ namespace GarrisonButler
             {
                 if (_hbRelogSkipped == false)
                 {
-                    GarrisonButler.Diagnostic("[HBRelogMode] Skipping current task.");
+                    GarrisonButler.Log("[HBRelogMode] Skipping current task.");
                     hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);
                     _hbRelogSkipped = true;
                 }

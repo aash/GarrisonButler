@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonButler;
 using GarrisonButler.Libraries;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
@@ -12,7 +11,7 @@ using Styx.WoWInternals;
 
 #endregion
 
-namespace GarrisonLua
+namespace GarrisonButler.API
 {
     public static class InterfaceLua
     {
@@ -110,7 +109,7 @@ namespace GarrisonLua
 
         public static void OpenMission(Mission mission)
         {
-            GarrisonButler.GarrisonButler.Diagnostic("OpenMission - id: " + mission.MissionId);
+            global::GarrisonButler.GarrisonButler.Diagnostic("OpenMission - id: " + mission.MissionId);
             //Scroll until we see mission first
             String lua =
                 "local mission; local am = {}; C_Garrison.GetAvailableMissions(am);" +
@@ -146,7 +145,7 @@ namespace GarrisonLua
 
         public static void AddFollowersToMissionOld(string missionId, List<string> followersId)
         {
-            GarrisonButler.GarrisonButler.Diagnostic("Cleaning mission Followers");
+            global::GarrisonButler.GarrisonButler.Diagnostic("Cleaning mission Followers");
 
             String luaClear = String.Format(
                 "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
@@ -156,11 +155,11 @@ namespace GarrisonLua
 
             Lua.DoString(luaClear);
 
-            GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers: " + followersId.Count);
+            global::GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers: " + followersId.Count);
 
             foreach (string t in followersId)
             {
-                GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
+                global::GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
             }
             string
                 luaAdd =
@@ -230,8 +229,8 @@ namespace GarrisonLua
 
         public static void StartMission(Mission mission)
         {
-            GarrisonButler.GarrisonButler.Diagnostic("StartMission: ");
-            GarrisonButler.GarrisonButler.Diagnostic(mission.ToString());
+            global::GarrisonButler.GarrisonButler.Diagnostic("StartMission: ");
+            global::GarrisonButler.GarrisonButler.Diagnostic(mission.ToString());
 
             String lua = String.Format("C_Garrison.StartMission(\"{0}\");", mission.MissionId);
 

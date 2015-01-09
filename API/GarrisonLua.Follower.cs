@@ -3,14 +3,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonButler;
 using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
 
 #endregion
 
-namespace GarrisonLua
+namespace GarrisonButler.API
 {
     public static class FollowersLua
     {

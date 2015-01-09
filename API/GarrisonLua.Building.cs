@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonButler;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Helpers;
@@ -11,7 +10,7 @@ using Styx.WoWInternals;
 
 #endregion
 
-namespace GarrisonLua
+namespace GarrisonButler.API
 {
     public static class BuildingsLua
     {
@@ -198,7 +197,7 @@ namespace GarrisonLua
                 "return tostring(amount);";
 
             float res = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToFloat();
-            GarrisonButler.GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
+            global::GarrisonButler.GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
             return (int) res;
         }
     }

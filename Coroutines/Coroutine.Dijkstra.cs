@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using GarrisonButler.API;
 using Priority_Queue;
 using Styx;
 using Styx.Pathing;
@@ -20,9 +21,9 @@ namespace GarrisonButler
         private static Graph _movementGraph;
         private static List<WoWPoint> _zonePoints;
 
-        private static NavigationGaB navigation;
-
-        internal static NavigationProvider oldNavigation;
+        private static NavigationGaB customNavigation;
+        private static bool CustomNavigationLoaded = false;
+        internal static NavigationProvider nativeNavigation;
 
         public static void InitializationMove()
         {
@@ -32,12 +33,6 @@ namespace GarrisonButler
                 _zonePoints = GetGarrisonPoints();
 
                 //navigation.UpdateMaps();
-            }
-            if (navigation == null)
-            {
-                navigation = new NavigationGaB();
-                oldNavigation = Navigator.NavigationProvider;
-                Navigator.NavigationProvider = navigation;
             }
 
             // Generating graph from list of points

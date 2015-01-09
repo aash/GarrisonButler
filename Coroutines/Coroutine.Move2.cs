@@ -23,14 +23,17 @@ namespace GarrisonButler
     public class NavigationGaB : MeshNavigator
     {
         internal static WoWPoint CurrentDestination;
-        private static readonly Stopwatch StuckWatch = new Stopwatch();
-        private readonly WaitTimer waitTimer1 = new WaitTimer(TimeSpan.FromSeconds(1.0));
-        private readonly WaitTimer waitTimer2 = WaitTimer.FiveSeconds;
-        private MeshMovePath CurrentMovePath2;
-        private StuckHandlerGaB stuckHandlerGaB;
-
-
+        private readonly WaitTimer _waitTimer1 = new WaitTimer(TimeSpan.FromSeconds(1.0));
+        private readonly WaitTimer _waitTimer2 = WaitTimer.FiveSeconds;
+        private MeshMovePath _currentMovePath2;
+        private StuckHandlerGaB _stuckHandlerGaB;
+        
         public override float PathPrecision { get; set; }
+
+        public WaitTimer WaitTimer2
+        {
+            get { return _waitTimer2; }
+        }
 
         public override void OnRemoveAsCurrent()
         {
@@ -72,11 +75,11 @@ namespace GarrisonButler
         public override void OnSetAsCurrent()
         {
             base.OnSetAsCurrent();
-            stuckHandlerGaB = new StuckHandlerGaB(Coroutine.oldNavigation.StuckHandler);
+            _stuckHandlerGaB = new StuckHandlerGaB(Coroutine.nativeNavigation.StuckHandler);
             GarrisonButler.Log("Custom navigation System activated!");
         }
 
-        public override bool CanNavigateWithin(WoWPoint @from, WoWPoint to, float distanceTolerancy)
+        public override bool CanNavigateWithin(WoWPoint @from, WoWPoint to, float distanceTolerance)
         {
             return true;
         }
@@ -101,22 +104,22 @@ namespace GarrisonButler
             if (activeMover == null)
                 return MoveResult.Failed;
 
-            WoWPoint MoverLocation = activeMover.Location;
+            WoWPoint moverLocation = activeMover.Location;
 
-            if (stuckHandlerGaB.IsStuck())
+            if (_stuckHandlerGaB.IsStuck())
             {
                 GarrisonButler.Diagnostic("Is stuck :O ! ");
-                stuckHandlerGaB.Unstick();
-                stuckHandlerGaB.Reset();
+                _stuckHandlerGaB.Unstick();
+                _stuckHandlerGaB.Reset();
                 return MoveResult.UnstuckAttempt;
             }
-            if (MoverLocation.Distance(location) < 2.4f)
+            if (moverLocation.Distance(location) < 2.4f)
             {
                 Clear();
-                stuckHandlerGaB.Reset();
+                _stuckHandlerGaB.Reset();
                 return MoveResult.ReachedDestination;
             }
-            if (MoverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
+            if (moverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
                 return MoveResult.Moved;
@@ -125,7 +128,7 @@ namespace GarrisonButler
             {
                 Mount.StateMount(getDestination);
             }
-            if (waitTimer1.IsFinished)
+            if (_waitTimer1.IsFinished)
             {
                 WoWGameObject wowgameObject =
                     ObjectManager.GetObjectsOfType<WoWGameObject>(false, false)
@@ -140,9 +143,9 @@ namespace GarrisonButler
                 {
                     wowgameObject.Interact();
                 }
-                waitTimer1.Reset();
+                _waitTimer1.Reset();
             }
-            bool flag = CurrentMovePath2 == null || CurrentMovePath2.Path.End.DistanceSqr(location) > 9.0f;
+            bool flag = _currentMovePath2 == null || _currentMovePath2.Path.End.DistanceSqr(location) > 9.0f;
 
             //else if (waitTimer2.IsFinished && Unnamed2(CurrentMovePath2, MoverLocation))
             //{
@@ -152,22 +155,22 @@ namespace GarrisonButler
             //}
             if (!flag)
             {
-                return MovePath(CurrentMovePath2);
+                return MovePath(_currentMovePath2);
             }
 
             WoWPoint startFp;
             WoWPoint endFp;
-            stuckHandlerGaB.Reset();
-            if (MoverLocation.DistanceSqr(location) > 100000 &&
-                FlightPaths.ShouldTakeFlightpath(MoverLocation, location, activeMover.MovementInfo.RunSpeed) &&
-                FlightPaths.SetFlightPathUsage(MoverLocation, location, out startFp, out endFp))
+            _stuckHandlerGaB.Reset();
+            if (moverLocation.DistanceSqr(location) > 100000 &&
+                FlightPaths.ShouldTakeFlightpath(moverLocation, location, activeMover.MovementInfo.RunSpeed) &&
+                FlightPaths.SetFlightPathUsage(moverLocation, location, out startFp, out endFp))
                 return MoveResult.PathGenerated;
-            PathFindResult path2 = FindPath(MoverLocation, location);
+            PathFindResult path2 = FindPath(moverLocation, location);
             if (!path2.Succeeded)
             {
                 return MoveResult.PathGenerationFailed;
             }
-            CurrentMovePath2 = new MeshMovePath(path2);
+            _currentMovePath2 = new MeshMovePath(path2);
             return MoveResult.PathGenerated;
         }
 
@@ -288,54 +291,54 @@ namespace GarrisonButler
 
         public class StuckHandlerGaB : StuckHandler
         {
-            private readonly StuckHandler Native;
-            private readonly Stopwatch stopwatch = new Stopwatch();
-            private WoWPoint cacheDestination = WoWPoint.Empty;
-            private int cpt;
-            private WoWPoint lastCheckedLocation = new WoWPoint(0, 0, 0);
+            private readonly StuckHandler _native;
+            private readonly Stopwatch _stopwatch = new Stopwatch();
+            private WoWPoint _cacheDestination = WoWPoint.Empty;
+            private int _cpt;
+            private WoWPoint _lastCheckedLocation = new WoWPoint(0, 0, 0);
 
             public StuckHandlerGaB(StuckHandler native)
             {
-                Native = native;
-                lastCheckedLocation = StyxWoW.Me.Location;
-                stopwatch.Start();
+                _native = native;
+                _lastCheckedLocation = StyxWoW.Me.Location;
+                _stopwatch.Start();
             }
 
             public override bool IsStuck()
             {
-                if (stopwatch.ElapsedMilliseconds > 2000)
+                if (_stopwatch.ElapsedMilliseconds > 2000)
                 {
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    if (CurrentDestination != cacheDestination)
+                    _stopwatch.Reset();
+                    _stopwatch.Start();
+                    if (CurrentDestination != _cacheDestination)
                     {
-                        lastCheckedLocation = StyxWoW.Me.Location;
-                        cacheDestination = CurrentDestination;
+                        _lastCheckedLocation = StyxWoW.Me.Location;
+                        _cacheDestination = CurrentDestination;
                         return false;
                     }
-                    if (StyxWoW.Me.Location.Distance(lastCheckedLocation) < 3)
+                    if (StyxWoW.Me.Location.Distance(_lastCheckedLocation) < 3)
                     {
-                        cpt++;
+                        _cpt++;
                         return true;
                     }
-                    lastCheckedLocation = StyxWoW.Me.Location;
+                    _lastCheckedLocation = StyxWoW.Me.Location;
                 }
                 return false;
             }
 
             public override void Reset()
             {
-                stopwatch.Reset();
-                stopwatch.Start();
-                cpt = 0;
-                cacheDestination = CurrentDestination;
+                _stopwatch.Reset();
+                _stopwatch.Start();
+                _cpt = 0;
+                _cacheDestination = CurrentDestination;
             }
 
             public override void Unstick()
             {
-                for (int i = 0; i < cpt; i++)
+                for (int i = 0; i < _cpt; i++)
                 {
-                    Native.Unstick();
+                    _native.Unstick();
                 }
             }
         }

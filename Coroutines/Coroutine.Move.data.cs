@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonLua;
+using GarrisonButler.API;
 using Styx;
 
 #endregion

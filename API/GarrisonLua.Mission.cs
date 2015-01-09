@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GarrisonButler;
 using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
@@ -11,7 +10,7 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonLua
+namespace GarrisonButler.API
 {
     public static class MissionLua
     {
@@ -49,7 +48,7 @@ namespace GarrisonLua
 
         public static List<string> GetListMissionsId()
         {
-            GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
+            global::GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
 
             String lua =
                 "local available_missions = {}; local RetInfo = {}; C_Garrison.GetAvailableMissions(available_missions);" +
@@ -58,7 +57,7 @@ namespace GarrisonLua
 
             List<string> missionsId = Lua.GetReturnValues(lua);
 
-            GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
+            global::GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
             return missionsId;
         }
 

@@ -1,4 +1,6 @@
-﻿#region
+﻿using GarrisonButler.API;
+
+#region
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,6 @@ using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
-using GarrisonLua;
 using NewMixedMode;
 using Styx;
 using Styx.Common.Helpers;
@@ -64,12 +65,6 @@ namespace GarrisonButler
         private static long cpt;
 
         public static DateTime NextCheck = DateTime.Now;
-
-        internal static readonly List<uint> GarrisonsZonesId = new List<uint>
-        {
-            7078, // Lunarfall - Ally
-            7004, // Frostwall - Horde
-        };
 
         internal static readonly uint GarrisonHearthstone = 110560;
         private static readonly WoWPoint FishingSpotAlly = new WoWPoint(2021.108, 187.5952, 84.55713);
@@ -194,8 +189,8 @@ namespace GarrisonButler
         {
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
             mainSequence = null;
-            Navigator.NavigationProvider = oldNavigation;
-            navigation = null;
+            Navigator.NavigationProvider = nativeNavigation;
+            customNavigation = null;
         }
 
         internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
@@ -262,6 +257,8 @@ namespace GarrisonButler
             // Fast checks
             CheckResetAfk();
 
+            CheckNavigationSystem();
+
             if (await RestoreUiIfNeeded())
                 return true;
 
@@ -310,9 +307,26 @@ namespace GarrisonButler
             return false;
         }
 
+        private static void CheckNavigationSystem()
+        {
+            if (customNavigation == null)
+            {
+                nativeNavigation = Navigator.NavigationProvider;
+                customNavigation = new NavigationGaB();
+            }
+            if (HbApi.IsInGarrison() && !CustomNavigationLoaded)
+            {
+                Navigator.NavigationProvider = customNavigation;
+            }
+            else if (CustomNavigationLoaded)
+            {
+                Navigator.NavigationProvider = nativeNavigation;
+            }
+        }
+
         internal static Tuple<bool, WoWItem> ShouldTPToGarrison()
         {
-            if (!GarrisonsZonesId.Contains(Me.ZoneId))
+            if (!HbApi.IsInGarrison())
             {
                 if (!GaBSettings.Get().UseGarrisonHearthstone)
                 {
@@ -356,7 +370,7 @@ namespace GarrisonButler
                         GarrisonButler.Log("Casting Garrison Hearthstone.");
 
                         GarrisonButler.Log("Waiting after casting Garrison Hearthstone...");
-                        if (!await Buddy.Coroutines.Coroutine.Wait(60000, () => GarrisonsZonesId.Contains(Me.ZoneId)))
+                        if (!await Buddy.Coroutines.Coroutine.Wait(60000, HbApi.IsInGarrison))
                         {
                             return false;
                         }
