@@ -40,7 +40,12 @@ namespace GarrisonButler
                 throw new NotImplementedException(
                     "This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
+            GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
+            return false;
+        }
 
+        private async static Task<bool> JobDoneSwitch()
+        {
             var hbRelogApi = new HBRelogApi();
 
             if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
@@ -66,7 +71,7 @@ namespace GarrisonButler
             }
             else if (BotManager.Current.Name == "Mixed Mode")
             {
-                var botBase = (MixedModeEx) BotManager.Current;
+                var botBase = (MixedModeEx)BotManager.Current;
                 if (botBase.PrimaryBot.Name.ToLower().Contains("angler"))
                 {
                     WoWPoint fishingSpot = Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde;
@@ -79,13 +84,8 @@ namespace GarrisonButler
                     }
                 }
             }
-            else
-            {
-                GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
-            }
-            return false;
+            return true;
         }
-
         private static bool AnythingLeftToDoBeforeEnd()
         {
             if (ReadyToSwitch)

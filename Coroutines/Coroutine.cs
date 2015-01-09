@@ -1,4 +1,5 @@
 ﻿using Bots.DungeonBuddy.Helpers;
+using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.API;
 using Styx.CommonBot.Profiles;
 
@@ -345,7 +346,10 @@ namespace GarrisonButler
             // similar to behavior in MixedMode
             if (ReadyToSwitch)
                 if (!GarrisonButler.Instance.RequirementsMet)
+                {
+                    await JobDoneSwitch();
                     return false;
+                }
 
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
@@ -358,6 +362,7 @@ namespace GarrisonButler
             ReadyToSwitch = true;
             return false;
         }
+
 
         private static void CheckNavigationSystem()
         {
