@@ -37,6 +37,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />
     <Compile Include="API\GarrisonLua.Building.cs" />
     <Compile Include="API\GarrisonLua.Follower.cs" />

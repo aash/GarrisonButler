@@ -285,7 +285,7 @@ namespace GarrisonButler
                     await mailFrame.SendMailWithManyAttachmentsCoroutine(mailsRecipient
                         .GetEmptyIfNull()
                         .FirstOrDefault()
-                        .Recipient, listItems.GetEmptyIfNull().ToArray());
+                        .Recipient.ToString(), listItems.GetEmptyIfNull().ToArray());
                     await CommonCoroutines.SleepForRandomUiInteractionTime();
                     InterfaceLua.ClickSendMail();
                 }

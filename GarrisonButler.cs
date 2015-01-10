@@ -21,7 +21,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 3, 30, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 3, 35, 0);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;

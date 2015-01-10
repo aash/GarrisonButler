@@ -1,4 +1,7 @@
-﻿#region
+﻿using GarrisonButler.Config;
+using GarrisonButler.Objects;
+
+#region
 
 using System;
 using System.Collections;
@@ -108,62 +111,76 @@ public class ObjectDumper
             }
             else
             {
-                MemberInfo[] members = element.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
-                WriteIndent();
-                Write(prefix);
-                bool propWritten = false;
-                foreach (MemberInfo m in members)
+                var safeStringElement = element as SafeString;
+                if (safeStringElement != null)
                 {
-                    var f = m as FieldInfo;
-                    var p = m as PropertyInfo;
-                    if (f != null || p != null)
-                    {
-                        if (propWritten)
-                        {
-                            WriteTab();
-                        }
-                        else
-                        {
-                            propWritten = true;
-                        }
-                        Write(m.Name);
-                        Write("=");
-                        Type t = f != null ? f.FieldType : p.PropertyType;
-                        if (t.IsValueType || t == typeof (string))
-                        {
-                            WriteValue(f != null ? f.GetValue(element) : p.GetValue(element, null));
-                        }
-                        else
-                        {
-                            if (typeof (IEnumerable).IsAssignableFrom(t))
-                            {
-                                Write("...");
-                            }
-                            else
-                            {
-                                Write("{ }");
-                            }
-                        }
-                    }
+                    WriteIndent();
+                    Write(prefix);
+                    Write(SafeString.ToStringSafe());
                 }
-                if (propWritten) WriteLine();
-                if (level < depth)
+                else
                 {
+                    MemberInfo[] members = element.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
+                    WriteIndent();
+                    Write(prefix);
+                    bool propWritten = false;
                     foreach (MemberInfo m in members)
                     {
                         var f = m as FieldInfo;
                         var p = m as PropertyInfo;
                         if (f != null || p != null)
                         {
-                            Type t = f != null ? f.FieldType : p.PropertyType;
-                            if (!(t.IsValueType || t == typeof (string)))
+                            if (propWritten)
                             {
-                                object value = f != null ? f.GetValue(element) : p.GetValue(element, null);
-                                if (value != null)
+                                WriteTab();
+                            }
+                            else
+                            {
+                                propWritten = true;
+                            }
+                            Write(m.Name);
+                            Write("=");
+                            Type t = f != null ? f.FieldType : p.PropertyType;
+                            if (t == typeof (SafeString))
+                            {
+                                WriteValue(SafeString.ToStringSafe());
+                            }
+                            else if (t.IsValueType || t == typeof (string))
+                            {
+                                WriteValue(f != null ? f.GetValue(element) : p.GetValue(element, null));
+                            }
+                            else
+                            {
+                                if (typeof (IEnumerable).IsAssignableFrom(t))
                                 {
-                                    level++;
-                                    WriteObject(m.Name + ": ", value);
-                                    level--;
+                                    Write("...");
+                                }
+                                else
+                                {
+                                    Write("{ }");
+                                }
+                            }
+                        }
+                    }
+                    if (propWritten) WriteLine();
+                    if (level < depth)
+                    {
+                        foreach (MemberInfo m in members)
+                        {
+                            var f = m as FieldInfo;
+                            var p = m as PropertyInfo;
+                            if (f != null || p != null)
+                            {
+                                Type t = f != null ? f.FieldType : p.PropertyType;
+                                if (!(t.IsValueType || t == typeof (string)))
+                                {
+                                    object value = f != null ? f.GetValue(element) : p.GetValue(element, null);
+                                    if (value != null)
+                                    {
+                                        level++;
+                                        WriteObject(m.Name + ": ", value);
+                                        level--;
+                                    }
                                 }
                             }
                         }

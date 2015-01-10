@@ -69,7 +69,7 @@ namespace GarrisonButler.Config
             {
                 Header = columnHeader1,
                 Width = double.NaN,
-                DisplayMemberBinding = new Binding("Recipient")
+                DisplayMemberBinding = new Binding("Recipient.Value")
             };
             gridView.Columns.Add(column1);
 
@@ -319,7 +319,7 @@ namespace GarrisonButler.Config
                     var bindingId = new Binding("ItemId") {Source = item};
                     _addItemIdTextBox.SetBinding(TextBox.TextProperty, bindingId);
 
-                    var bindingRecipient = new Binding("Recipient") {Source = item};
+                    var bindingRecipient = new Binding("Value") {Source = item.Recipient};
                     _addRecipientTextBox.SetBinding(TextBox.TextProperty, bindingRecipient);
 
                     var bindingComment = new Binding("Comment") { Source = item };

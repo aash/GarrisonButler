@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Xml.Serialization;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
@@ -142,13 +143,13 @@ namespace GarrisonButler.Config
             {
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
-                // TO DELETE
-                GarrisonButler.Diagnostic(e.ToString());
-                // TO DELETE end
                 currentSettings = DefaultConfig();
             }
-            //ObjectDumper.Write(currentSettings);
-            ObjectDumper.WriteToHB(currentSettings, 3);
+        }
+
+        private static void PrintConfig()
+        {
+            ObjectDumper.WriteToHB(currentSettings, 3); //Deactivated because logs toon char in recipient for now
         }
     }
 }

@@ -20,13 +20,13 @@ namespace GarrisonButler.Objects
     {
         private string _comment;
         private uint _itemId;
-        private string _recipient;
+        private SafeString _recipient;
         private MailCondition _condition;
 
         public MailItem(uint itemId, string recipient, MailCondition mailCondition, int checkValue, string comment = "")
         {
             ItemId = itemId;
-            Recipient = recipient;
+            _recipient = new SafeString(recipient);
             _condition = new MailCondition(mailCondition.Condition,checkValue);
             Comment = comment;
         }
@@ -49,7 +49,7 @@ namespace GarrisonButler.Objects
             }
         }
 
-        public string Recipient
+        public SafeString Recipient
         {
             get { return _recipient; }
             set
