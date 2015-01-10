@@ -43,8 +43,9 @@ namespace GarrisonButler
 
         public override float? PathDistance(WoWPoint @from, WoWPoint to, float maxDistance = (float) 3.402823E+38)
         {
-            return base.PathDistance(@from, to, maxDistance);
+            return 3;
         }
+
 
         public override MoveResult MovePath(MeshMovePath path)
         {

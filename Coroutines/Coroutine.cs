@@ -222,13 +222,36 @@ namespace GarrisonButler
                 var profile = ProfileManager.CurrentProfile;
 
                 // get all visible vendors
-                var vendors = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().Where(u => u.IsVendor).GetEmptyIfNull();
-
+                var vendors = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().Where(u => u.IsVendor && Dijkstra.ClosestToNodes(u.Location).Distance(u.Location) < 5).GetEmptyIfNull();
+                //foreach (var vendor in profile.VendorManager.AllVendors)
+                //{
+                //    if (vendor.Location == null ||
+                //        Dijkstra.ClosestToNodes(vendor.Location).Distance(vendor.Location) > 5)
+                //    {
+                //        profile.VendorManager.AllVendors.Remove(vendor);
+                //    }
+                //}
                 // add the new ones to the list of vendors as unknown, it should check itself.
-                foreach (var woWUnit in vendors.Where(woWUnit => profile.VendorManager.AllVendors.All(v => v.Entry != woWUnit.Entry)))
+                foreach (var woWUnit in vendors.Where(woWUnit => profile.VendorManager.ForcedVendors.All(v => v.Entry != woWUnit.Entry)))
                 {
-                    profile.VendorManager.AllVendors.Add(new Vendor(woWUnit,Vendor.VendorType.Unknown));
+                    if (woWUnit.IsRepairMerchant)
+                        profile.VendorManager.ForcedVendors.Add(new Vendor(woWUnit, Vendor.VendorType.Repair));
+                    else
+                        profile.VendorManager.ForcedVendors.Add(new Vendor(woWUnit, Vendor.VendorType.Unknown));
                     GarrisonButler.Diagnostic("Adding vendor: " + woWUnit);
+                }
+                if (BotPoi.Current != null)
+                {
+                    var currentpoi = BotPoi.Current.AsVendor;
+                    if (currentpoi != null)
+                    {
+                        if (!vendors.Any(i => i.Entry == currentpoi.Entry))
+                        {
+                            profile.VendorManager.AllVendors.Remove(currentpoi);
+                            profile.VendorManager.ForcedVendors.Remove(currentpoi);
+                            GarrisonButler.Diagnostic(currentpoi.ToString());
+                        }
+                    }
                 }
                 GarrisonButler.Diagnostic("Checking for vendors... Done.");
                 vendorCheckTimer.Reset();
