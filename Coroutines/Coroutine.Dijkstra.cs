@@ -101,7 +101,7 @@ namespace GarrisonButler
                 {
                     res[index] = tempPath[index];
                 }
-                GarrisonButler.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                GarrisonButler.DiagnosticLogTimeTaken("Path generation", (int)PathGenerationStopwatch.ElapsedMilliseconds);
                 PathGenerationStopwatch.Stop();
                 return res;
             }

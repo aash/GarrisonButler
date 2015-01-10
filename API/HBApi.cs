@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections;
 using GarrisonButler;
 using GarrisonButler.Libraries;
 using Styx;
@@ -91,15 +92,21 @@ namespace GarrisonButler.API
         /// <returns></returns>
         internal static bool AnyItemsStackable()
         {
-            var stackable = Me.BagItems.Where(i => i.StackCount < ApiLua.GetMaxStackItem(i.Entry)).GetEmptyIfNull().ToArray();
-            for (int i = 0; i < stackable.Count(); i++)
+            List<WoWItem> stackable =
+                Me.BagItems
+                .Where(i => i.StackCount < ApiLua.GetMaxStackItem(i.Entry))
+                .GetEmptyIfNull()
+                .ToList();
+
+            while (stackable.Count > 0)
             {
-                for (int j = 0; j < stackable.Count() - i; j++)
-                {
-                    if (stackable.ElementAt(i).Entry == stackable.ElementAt(j).Entry)
-                        return true;
-                }
+                WoWItem currentItem = stackable[0];
+                stackable.RemoveAt(0);
+
+                if (stackable.Any(d => d.Entry == currentItem.Entry))
+                    return true;
             }
+
             return false;
         }
 

@@ -126,10 +126,45 @@ namespace GarrisonButler
             Logging.Write(Colors.Red, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
-        // SortedList
-        //  key = function name
-        //  value = List of messages
-        //private static string[,] DiagnosticSlots = new string[100, 100];
+        internal static void DiagnosticLogTimeTaken(string activity, DateTime startedAt)
+        {
+            DiagnosticLogTimeTaken(activity, (DateTime.Now - startedAt).TotalMilliseconds);
+        }
+
+        internal static void DiagnosticLogTimeTaken(string activity, int elapsedTimeInMs)
+        {
+            DiagnosticLogTimeTaken(activity, (double)elapsedTimeInMs);
+        }
+
+        internal static void DiagnosticLogTimeTaken(string activity, double elapsedTimeInMs)
+        {
+            DiagnosticLogTimeTaken(activity, TimeSpan.FromMilliseconds(elapsedTimeInMs));
+        }
+
+        internal static void DiagnosticLogTimeTaken(string activity, TimeSpan timeTaken)
+        {
+            string formattedTime = String.Format("{0:mm\\:ss\\:fff}", timeTaken);
+            int count = formattedTime.Count(c => c == ':');
+
+            if (count == 2)
+            {
+                int firstIndex = formattedTime.IndexOf(':');
+
+                formattedTime = formattedTime.Substring(0, firstIndex)
+                    + "m:"
+                    + formattedTime.Substring(firstIndex + 1);
+
+                int lastIndex = formattedTime.LastIndexOf(':');
+
+                formattedTime = formattedTime.Substring(0, lastIndex)
+                    + "s:"
+                    + formattedTime.Substring(lastIndex + 1, formattedTime.Length - lastIndex - 1);
+
+                formattedTime += "ms";
+            }
+
+            Diagnostic(activity + " took " + formattedTime);
+        }
 
         internal static void Diagnostic(string message, params object[] args)
         {

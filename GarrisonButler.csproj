@@ -85,6 +85,7 @@
     <Compile Include="Libraries\ModuleVersion.cs" />
     <Compile Include="Libraries\ObjectDumper.cs" />
     <Compile Include="Libraries\PriorityQueueNode.cs" />
+    <Compile Include="Libraries\ToHashSetExtension.cs" />
     <Compile Include="Objects\Building.cs" />
     <Compile Include="Coroutines\Coroutine.cs" />
     <Compile Include="Objects\DailyProfession.cs" />

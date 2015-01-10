@@ -191,17 +191,33 @@ namespace GarrisonButler
         private static WaitTimer vendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
         private static Profile _currentProfile;
         private static WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(5));
+        private static Stopwatch bagsFullAlertTimer = new Stopwatch();
         private static async Task<bool> CheckBagsFull()
         {
             if (!CheckBagsFullTimer.IsFinished)
                 return false;
+
+            if (bagsFullAlertTimer.IsRunning)
+            {
+                if (bagsFullAlertTimer.Elapsed > TimeSpan.FromSeconds(35))
+                    bagsFullAlertTimer.Stop();
+                else
+                    return true;
+            }
 
             if (Me.BagsFull)
             {
                 if (await HbApi.StackAllItemsIfPossible())
                     return true;
 
-                Alert.Show("Bags full", "This toons bags are full, please make room before GarrisonButler can continue.", 60, true, false);
+                // Without a timer it will spam Alert messages over and over
+                // Should probably have a way to hook in to the "ok" button
+                // but for now we will just wait 30s
+                bagsFullAlertTimer.Reset();
+                bagsFullAlertTimer.Start();
+                Alert.Show("Bags full", "This toons bags are full, please make room before GarrisonButler can continue.", 30, true, false);
+                GarrisonButler.Log("!!! Bags Full, please make room before GarrisonButler can continue.  Waiting 35s.");
+                
                 return true;
             }
             CheckBagsFullTimer.Reset();

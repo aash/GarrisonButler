@@ -264,7 +264,7 @@ namespace GarrisonButler
                     }
                 }
 
-                GarrisonButler.Diagnostic("Took " + (DateTime.Now - startedAt).TotalMilliseconds + "ms to fully create path.");
+                GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
                 //StyxWoW.Memory.AcquireFrame();
                 return task.Result;
             }
