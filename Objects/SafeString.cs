@@ -36,7 +36,7 @@ namespace GarrisonButler.Objects
         //public static implicit operator string(SafeString d)
         //{
         //    if (d == null)
-        //        d = new SafeString();
+        //        d = new SafeString(); 
         //    return d.Value;
         //}
 
