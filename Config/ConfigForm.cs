@@ -520,6 +520,9 @@ namespace GarrisonButler.Config
                     GaBSettings.Get());
                 mainWrapPanel.Children.Add(CompletedMissions);
 
+                CheckBox ForceJunkSell = CreateCheckBoxWithBinding("Force auto sell grey items", "ForceJunkSell",
+                    GaBSettings.Get());
+                mainWrapPanel.Children.Add(ForceJunkSell);
 
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;

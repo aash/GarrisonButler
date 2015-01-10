@@ -2,6 +2,7 @@
 using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.API;
 using Styx.CommonBot.Profiles;
+using Styx.WoWInternals.DB;
 
 #region
 
@@ -175,6 +176,7 @@ namespace GarrisonButler
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
+                mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
@@ -232,6 +234,7 @@ namespace GarrisonButler
                 vendorCheckTimer.Reset();
             }
         }
+
 
         internal static void OnStop()
         {
@@ -380,7 +383,33 @@ namespace GarrisonButler
                 Navigator.NavigationProvider = nativeNavigation;
             }
         }
+        
+        private async static Task<bool> SellJunk()
+        {
+            if (!GaBSettings.Get().ForceJunkSell)
+            {
+                GarrisonButler.Diagnostic("[Vendor] Force junk behavior deactivated in User settings.");
+                return false;
+            }
 
+            if (Me.BagItems.Any(i =>
+            {
+                var res = false;
+                try
+                {
+                    res = i.Quality == WoWItemQuality.Poor;
+                }
+                catch (Exception)
+                {}
+                return res;
+            }))
+            {
+                GarrisonButler.Log("[Vendor] Selling Junk.");
+                return await _vendorBehavior.ExecuteCoroutine();
+            }
+            GarrisonButler.Diagnostic("[Vendor] No Junk detected.");
+            return false;
+        }
         internal static Tuple<bool, WoWItem> ShouldTPToGarrison()
         {
             if (!HbApi.IsInGarrison())

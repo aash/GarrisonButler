@@ -500,11 +500,14 @@ namespace GarrisonButler
             if (GossipFrame.Instance != null)
             {
                 GossipFrame frame = GossipFrame.Instance;
-                foreach (GossipEntry gossipOptionEntry in frame.GossipOptionEntries)
+                if (frame.GossipOptionEntries.Any())
                 {
-                    Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
+                    foreach (GossipEntry gossipOptionEntry in frame.GossipOptionEntries)
+                    {
+                        Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
+                    }
+                    frame.SelectGossipOption(frame.GossipOptionEntries.Count - 1);
                 }
-                frame.SelectGossipOption(frame.GossipOptionEntries.Count - 1);
             }
         }
 
