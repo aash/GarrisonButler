@@ -190,7 +190,7 @@ namespace GarrisonButler
         }
         private static WaitTimer vendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
         private static Profile _currentProfile;
-        private static WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(5));
+        private static WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(15));
         private static Stopwatch bagsFullAlertTimer = new Stopwatch();
         private static async Task<bool> CheckBagsFull()
         {
