@@ -527,7 +527,7 @@ namespace GarrisonButler
             if (GossipFrame.Instance != null)
             {
                 GossipFrame frame = GossipFrame.Instance;
-                if (frame.GossipOptionEntries.Any())
+                if (frame.GossipOptionEntries.GetEmptyIfNull().Any())
                 {
                     foreach (GossipEntry gossipOptionEntry in frame.GossipOptionEntries)
                     {

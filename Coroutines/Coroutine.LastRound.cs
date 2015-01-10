@@ -37,6 +37,74 @@ namespace GarrisonButler
             return false;
         }
 
+        class Description : Attribute
+        {
+
+            public string Text;
+
+            public Description(string text)
+            {
+
+                Text = text;
+
+            }
+
+        }
+
+        public enum EndPosition
+        {
+            [Description("Random")]
+            Random,
+            [Description("Mission Table")]
+            MissionTable,
+            [Description("War Planning Map")]
+            WarPlanningMap,
+            [Description("Architect Table")]
+            ArchitectTable,
+            [Description("Mine")]
+            Mine,
+            [Description("Garden")]
+            Garden,
+            [Description("Fishing Shack")]
+            FishingShack,
+            [Description("Menagerie")]
+            Menagerie,
+            [Description("Town Center")]
+            TownCenter,
+            [Description("Small Plot 1")]
+            SmallPlot1,
+            [Description("Small Plot 2")]
+            SmallPlot2,
+            [Description("Small Plot 3")]
+            SmallPlot3,
+            [Description("Medium Plot 1")]
+            MediumPlot1,
+            [Description("Medium Plot 2")]
+            MediumPlot2,
+            [Description("Large Plot 1")]
+            LargePlot1,
+            [Description("Large Plot 2")]
+            LargePlot2,
+            [Description("Vendor Camp")]
+            VendorCamp,
+            [Description("General Goods Vendor")]
+            GeneralGoodsVendor,
+            [Description("Reagents Vendor")]
+            ReagentsVendor,
+            [Description("Innkeeper")]
+            Innkeeper,
+            [Description("Food & Drink Vendor")]
+            FoodAndDrinkVendor,
+            [Description("Graveyard")]
+            Graveyard,
+            [Description("Training Dummies")]
+            TrainingDummies,
+            [Description("Primal Trader")]
+            PrimalTrader,
+            [Description("Outhouse")]
+            Outhouse
+        }
+
         private static bool LastRoundInit = false;
         private static async Task<bool> LastRound()
         {
