@@ -42,6 +42,13 @@ namespace GarrisonButler
             if (toHarvest == null)
                 return false;
 
+            // STEP 0 - Check for blacklisted object. Otherwise shipments which still exists and are valid will stuck the bot. 
+            if (Blacklist.Contains(toHarvest, BlacklistFlags.All))
+            {
+                toHarvest = null;
+                return false;
+            }
+
             // STEP 1 - Attempt to harvest original node
             if (toHarvest.IsValid)
             {

@@ -204,10 +204,12 @@ namespace GarrisonButler
                 else
                     return true;
             }
-
-            if (Me.BagsFull)
+            if (Me.FreeBagSlots < 3)
             {
                 if (await HbApi.StackAllItemsIfPossible())
+                    return true;
+
+                if (await SellJunkCoroutine())
                     return true;
 
                 // Without a timer it will spam Alert messages over and over
@@ -215,8 +217,8 @@ namespace GarrisonButler
                 // but for now we will just wait 30s
                 bagsFullAlertTimer.Reset();
                 bagsFullAlertTimer.Start();
-                Alert.Show("Bags full", "This toons bags are full, please make room before GarrisonButler can continue.", 30, true, false);
-                GarrisonButler.Log("!!! Bags Full, please make room before GarrisonButler can continue.  Waiting 35s.");
+                Alert.Show("Bags space is low", "Bag space is low on this toon, please make room before GarrisonButler can continue. Min:3 Advised:10", 30, true, false);
+                GarrisonButler.Log("!!! Bag space is low, please make room before GarrisonButler can continue. Min:3 Advised:10 - Waiting 35s.");
                 
                 return true;
             }
@@ -422,7 +424,7 @@ namespace GarrisonButler
                 Navigator.NavigationProvider = nativeNavigation;
             }
         }
-        
+
         private async static Task<bool> SellJunk()
         {
             if (!GaBSettings.Get().ForceJunkSell)
@@ -430,7 +432,10 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[Vendor] Force junk behavior deactivated in User settings.");
                 return false;
             }
-
+            return await SellJunkCoroutine();
+        }
+        private async static Task<bool> SellJunkCoroutine()
+        {
             if (Me.BagItems.Any(i =>
             {
                 var res = false;
