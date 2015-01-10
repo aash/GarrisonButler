@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
+using GarrisonButler.API;
 using Styx;
 using Styx.CommonBot;
 using Styx.Patchables;
@@ -54,29 +56,30 @@ namespace GarrisonButler.Objects
         public static readonly List<DailyProfession> AllDailies =
             new List<DailyProfession>
             {
-                new DailyProfession("Alchemical Catalyst", 108996, tradeskillID.Alchemy),
-                new DailyProfession("Secret of Draenor Alchemy", 118700, tradeskillID.Alchemy),
-                new DailyProfession("Truesteel Ingot", 108257, tradeskillID.Blacksmithing),
-                new DailyProfession("Secret of Draenor Blacksmithing", 118720, tradeskillID.Blacksmithing),
-                new DailyProfession("Fractured Temporal Crystal", 115504, tradeskillID.Enchanting),
-                new DailyProfession("Secret of Draenor Enchanting", 119293, tradeskillID.Enchanting),
-                new DailyProfession("Gearspring Parts", 111366, tradeskillID.Engineering),
-                new DailyProfession("Secret of Draenor Engineering", 119299, tradeskillID.Engineering),
-                new DailyProfession("War Paints", 112377, tradeskillID.Inscription), // war paint
-                new DailyProfession("Secret of Draenor Inscription", 119297, tradeskillID.Inscription), // secrets
-                new DailyProfession("Taladite Crystal", 115524, tradeskillID.Jewelcrafting),
-                new DailyProfession("Secret of Draenor Jewelcrafting", 118723, tradeskillID.Jewelcrafting), // secret
-                new DailyProfession("Burnished Leather", 110611, tradeskillID.Leatherworking),
-                new DailyProfession("Secret of Draenor Leatherworking", 118721, tradeskillID.Leatherworking),
-                new DailyProfession("Hexweave Cloth", 111556, tradeskillID.Tailoring),
-                new DailyProfession("Secret of Draenor Tailoring", 118722, tradeskillID.Tailoring),
+                new DailyProfession("Alchemical Catalyst", 108996, 156587, tradeskillID.Alchemy),
+                new DailyProfession("Secret of Draenor Alchemy", 118700, 175880, tradeskillID.Alchemy),
+                new DailyProfession("Truesteel Ingot", 108257, 171690, tradeskillID.Blacksmithing),
+                new DailyProfession("Secret of Draenor Blacksmithing", 118720, 176090, tradeskillID.Blacksmithing),
+                new DailyProfession("Fractured Temporal Crystal", 115504, 169092, tradeskillID.Enchanting),
+                new DailyProfession("Secret of Draenor Enchanting", 119293, 177043, tradeskillID.Enchanting),
+                new DailyProfession("Gearspring Parts", 111366, 169080, tradeskillID.Engineering),
+                new DailyProfession("Secret of Draenor Engineering", 119299, 177054, tradeskillID.Engineering),
+                new DailyProfession("War Paints", 112377, 169081, tradeskillID.Inscription), // war paint
+                new DailyProfession("Secret of Draenor Inscription", 119297, 177045, tradeskillID.Inscription), // secrets
+                new DailyProfession("Taladite Crystal", 115524, 170700, tradeskillID.Jewelcrafting),
+                new DailyProfession("Secret of Draenor Jewelcrafting", 118723, 176087, tradeskillID.Jewelcrafting), // secret
+                new DailyProfession("Burnished Leather", 110611, 171391, tradeskillID.Leatherworking),
+                new DailyProfession("Secret of Draenor Leatherworking", 118721, 176089, tradeskillID.Leatherworking),
+                new DailyProfession("Hexweave Cloth", 111556, 168835, tradeskillID.Tailoring),
+                new DailyProfession("Secret of Draenor Tailoring", 118722, 176058, tradeskillID.Tailoring),
             };
 
-        private DailyProfession(string name, uint itemId, tradeskillID tradeskillId)
+        private DailyProfession(string name, uint itemId, uint spellId, tradeskillID tradeskillId)
         {
             Name = name;
             TradeskillId = tradeskillId;
             ItemId = itemId;
+            SpellId = spellId;
             Spell = null;
         }
 
@@ -87,6 +90,7 @@ namespace GarrisonButler.Objects
         public string Name { get; set; }
         public tradeskillID TradeskillId { get; set; }
         public uint ItemId { get; set; }
+        public uint SpellId { get; set; }
         public bool Activated { get; set; }
 
         [XmlIgnore]
@@ -113,33 +117,11 @@ namespace GarrisonButler.Objects
         {
             string name = Enum.GetName(typeof (tradeskillID), TradeskillId);
             var TradeSkillSpell = (tradeskillSpell) Enum.Parse(typeof (tradeskillSpell), name);
-            GarrisonButler.Diagnostic("[DailyProfession] Name:" + name);
-            GarrisonButler.Diagnostic("[DailyProfession] TradeSkillSpell:" + TradeSkillSpell);
 
-            if (!SpellManager.HasSpell((int) TradeSkillSpell))
-                return null;
+            GarrisonButler.Diagnostic("[DailyProfession] Name: " + this.Name);
+            GarrisonButler.Diagnostic("[DailyProfession] TradeSkillSpell: " + TradeSkillSpell);
 
-            var skillLineId = (int) TradeskillId;
-
-            List<SkillLine> skillLineIds = StyxWoW.Db[ClientDb.SkillLine]
-                .Select(r => r.GetStruct<SkillLineInfo.SkillLineEntry>())
-                .Where(s => s.ID == skillLineId || s.ParentSkillLineId == skillLineId)
-                .Select(s => (SkillLine) s.ID)
-                .ToList();
-
-            DateTime startTime = DateTime.Now;
-            List<WoWSpell> recipes = SkillLineAbility.GetAbilities()
-                .Where(
-                    a =>
-                        skillLineIds.Contains(a.SkillLine) && a.NextSpellId == 0 && a.GreySkillLevel > 0 &&
-                        a.TradeSkillCategoryId > 0)
-                .Select(a => WoWSpell.FromId(a.SpellId))
-                .Where(s => s != null && s.IsValid)
-                .ToList();
-            GarrisonButler.Diagnostic("Took " + (DateTime.Now - startTime).TotalMilliseconds + "ms to get recipes");
-
-            return recipes.FirstOrDefault(s => s.CreatesItemId == ItemId)
-                   ?? recipes.FirstOrDefault(s => s.Id == ItemId);
+            return WoWSpell.FromId((int)SpellId) ?? default(WoWSpell);
         }
 
         public int GetMaxRepeat()
