@@ -186,10 +186,9 @@ namespace GarrisonButler
 
         private PathFindResult FindPathInner(PathFindResult pathFindResult)
         {
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            DateTime startedAt = DateTime.Now;
             Vector3[] points = Coroutine.Dijkstra.GetPath2(pathFindResult.Start, pathFindResult.End);
-            stopWatch.Stop();
+            GarrisonButler.DiagnosticLogTimeTaken("GetPath2 inside FindPathInner", startedAt);
             var abilities = new AbilityFlags[points.Count()];
             var PolygonReferences = new PolygonReference[points.Count()];
             var straightpaths = new StraightPathFlags[points.Count()];
@@ -203,6 +202,7 @@ namespace GarrisonButler
                 AreaTypes[index] = AreaType.Ground;
             }
 
+            GarrisonButler.DiagnosticLogTimeTaken("FindPathInner", startedAt);
 
             return new PathFindResult
             {
@@ -215,7 +215,7 @@ namespace GarrisonButler
                 PolyTypes = AreaTypes,
                 Start = pathFindResult.Start,
                 End = pathFindResult.End,
-                Elapsed = stopWatch.Elapsed,
+                Elapsed = DateTime.Now - startedAt,
                 IsPartialPath = false
             };
         }
@@ -240,44 +240,51 @@ namespace GarrisonButler
                     End = obj.End
                 };
             }
+
+            DateTime startedAt = DateTime.Now;
+            PathFindResult toReturn = FindPathInner(obj);
+            GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
+
+            return toReturn;
+
             //this.\u0001 = false;
             // ISSUE: reference to a compiler-generated method
-            Task<PathFindResult> task = Task<PathFindResult>.Factory.StartNew(() => FindPathInner(obj));
-            DateTime startedAt = DateTime.Now;
-            try
-            {
-                //StyxWoW.Memory.ReleaseFrame();
-                //while it is not done with timeout 
-                while ((DateTime.Now - startedAt).TotalMilliseconds < 10000/TreeRoot.TicksPerSecond || !task.IsCompleted)
-                {
-                    try
-                    {
-                        //StyxWoW.Memory.AcquireFrame();
-                        ObjectManager.Update();
-                        WoWMovement.Pulse();
-                        StyxWoW.ResetAfk();
-                        //StyxWoW.Memory.ReleaseFrame();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.WriteException(ex);
-                    }
-                }
+            //Task<PathFindResult> task = Task<PathFindResult>.Factory.StartNew(() => FindPathInner(obj));
+            //DateTime startedAt = DateTime.Now;
+            //try
+            //{
+            //    //StyxWoW.Memory.ReleaseFrame();
+            //    //while it is not done with timeout 
+            //    while ((DateTime.Now - startedAt).TotalMilliseconds < 10000/TreeRoot.TicksPerSecond || !task.IsCompleted)
+            //    {
+            //        try
+            //        {
+            //            //StyxWoW.Memory.AcquireFrame();
+            //            ObjectManager.Update();
+            //            WoWMovement.Pulse();
+            //            StyxWoW.ResetAfk();
+            //            //StyxWoW.Memory.ReleaseFrame();
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            Logging.WriteException(ex);
+            //        }
+            //    }
 
-                GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
-                //StyxWoW.Memory.AcquireFrame();
-                return task.Result;
-            }
-            catch (AggregateException ex)
-            {
-                Logging.WriteException(ex);
-            }
-            finally
-            {
-                task.Dispose();
-            }
+            //    GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
+            //    //StyxWoW.Memory.AcquireFrame();
+            //    return task.Result;
+            //}
+            //catch (AggregateException ex)
+            //{
+            //    Logging.WriteException(ex);
+            //}
+            //finally
+            //{
+            //    task.Dispose();
+            //}
 
-            return obj;
+            //return obj;
         }
 
         public override WoWPoint[] GeneratePath(WoWPoint @from, WoWPoint to)

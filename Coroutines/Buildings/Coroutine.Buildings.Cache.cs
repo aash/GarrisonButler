@@ -53,6 +53,30 @@ namespace GarrisonButler
             return new Tuple<bool, WoWGameObject>(true, cache);
         }
 
+        private static bool IsWoWObjectGarrisonCache(WoWObject toCheck)
+        {
+            return GarrisonCaches.Contains(toCheck.Entry);
+        }
+
+        private static List<WoWGameObject> GetCacheIfCanRunCache()
+        {
+            // Settings
+            if (!GaBSettings.Get().GarrisonCache)
+            {
+                //GarrisonButler.Diagnostic("[Cache] Cache deactivated in user settings.");
+                return new List<WoWGameObject>();
+            }
+
+            // Check
+            List<WoWGameObject> returnList =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
+                    .Where(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry))
+                    .ToList();
+
+            return returnList;
+        }
+
         private static bool ShouldRunCache()
         {
             return CanRunCache().Item1;

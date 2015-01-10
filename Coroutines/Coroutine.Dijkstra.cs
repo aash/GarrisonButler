@@ -18,7 +18,7 @@ namespace GarrisonButler
     {
         #region Dijkstra
 
-        private static Graph _movementGraph;
+        private static Graph _movementGraph = null;
         private static List<WoWPoint> _zonePoints;
 
         private static NavigationGaB customNavigation;
@@ -36,7 +36,8 @@ namespace GarrisonButler
             }
 
             // Generating graph from list of points
-            _movementGraph = Dijkstra.GraphFromList(_zonePoints);
+            if(_movementGraph == null)
+                _movementGraph = Dijkstra.GraphFromList(_zonePoints);
 
             // Init variables for movement system
             _lastMoveTo = new WoWPoint();
@@ -53,7 +54,11 @@ namespace GarrisonButler
                 {
                     graph.AddNode(t);
                 }
+                
                 List<WoWPoint> graphPoints = graph.Nodes.Keys.ToList();
+                
+                DateTime forLoopFilterEndTime = DateTime.Now;
+                int count = 0;
                 for (int i = 0; i < graphPoints.Count; i++)
                 {
                     WoWPoint point1 = graphPoints[i];
@@ -64,9 +69,15 @@ namespace GarrisonButler
                         if (dist < 4)
                         {
                             graph.AddConnection(point1, point2, dist, true);
+                            count++;
                         }
                     }
                 }
+                GarrisonButler.DiagnosticLogTimeTaken("Matching all with distance less than "
+                + 4
+                + " returned "
+                + count
+                + " elements USING 2x for loops", forLoopFilterEndTime);
                 return graph;
             }
 

@@ -39,13 +39,17 @@ namespace GarrisonButler
 
         private static async Task<bool> HarvestWoWGameObjectCachedLocation(WoWGameObject toHarvest)
         {
+            // toHarvest's original value will not be modified inside an async Task
             if (toHarvest == null)
                 return false;
 
-            // STEP 0 - Check for blacklisted object. Otherwise shipments which still exists and are valid will stuck the bot. 
-            if (Blacklist.Contains(toHarvest, BlacklistFlags.All))
+            // STEP 0 - Check for blacklisted object. Otherwise shipments which still exists and are valid will stuck the bot.
+            if (Blacklist.Contains(toHarvest, BlacklistFlags.All)
+                && IsWoWObjectShipment(toHarvest))
             {
-                toHarvest = null;
+                Blacklist.BlacklistEntry entry = Blacklist.GetEntry(toHarvest);
+                GarrisonButler.Diagnostic("[Harvest] Skipping GarrisonShipment due to blacklist="
+                    + entry.Flags.ToString());
                 return false;
             }
 
@@ -63,36 +67,73 @@ namespace GarrisonButler
                     return true;
 
             // STEP 3 - See if the location of toHarvest still exists in all currently "seen" nodes
-            //List<WoWGameObject> mineNodes = GetAllMineNodesIfCanRunMine();
+            //          Only if Herb or Mine
+            List<WoWGameObject> searchList = null;
+
+            if (IsWoWObjectMine(toHarvest))
+                searchList = GetAllMineNodesIfCanRunMine();
+            else if (IsWoWObjectHerbNode(toHarvest))
+                searchList = GetAllGardenNodesIfCanRunGarden();
+            else if (IsWoWObjectGarrisonCache(toHarvest))
+                searchList = GetCacheIfCanRunCache();
+            else if (IsWoWObjectFinalizeGarrisonPlot(toHarvest))
+                searchList = GetAllBuildingsToActivateIfCanActivateAtLeastOneBuilding();
+            else if (IsWoWObjectShipment(toHarvest))
+                searchList = GetAllShipmentObjectsIfCanRunShipments();
+            else
+            {
+                // toHarvest.SubType is invalid here since toHarvest.IsValid is false
+                //switch (toHarvest.SubType)
+                //{
+                //    case WoWGameObjectType.GarrisonMonument:
+                //        break;
+
+                //    case WoWGameObjectType.GarrisonMonumentPlaque:
+                //        break;
+
+                //    case WoWGameObjectType.GarrisonShipment:
+                //        break;
+                //}
+            }
 
             WoWGameObject foundNodeStillExists =
-                GetAllMineNodesIfCanRunMine()
+                searchList
                 .GetEmptyIfNull()
                 .Where(o => o.Location == CachedToHarvestLocation)
                 .FirstOrDefault();
 
             if (foundNodeStillExists == default(WoWGameObject))
             {
+                GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node default");
                 CachedToHarvestLocation = WoWPoint.Empty;
                 return false;
             }
 
-            // STEP 4 - toHarvest still exists, try to harvest
+            
             if (foundNodeStillExists == null)
             {
+                GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node null");
                 CachedToHarvestLocation = WoWPoint.Empty;
                 return false;
             }
 
             if (!foundNodeStillExists.IsValid)
             {
+                GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node not valid");
                 CachedToHarvestLocation = WoWPoint.Empty;
                 return false;
             }
 
+            // STEP 4 - if toHarvest still exists, try to harvest
+            GarrisonButler.Diagnostic("[Harvest] STEP 4 - Attempt to HarvestWoWGameObject - name="
+                + foundNodeStillExists.Name
+                + "; Entry="
+                + foundNodeStillExists.Entry);
             CachedToHarvestLocation = foundNodeStillExists.Location;
             if (await HarvestWoWGameOject(foundNodeStillExists))
                 return true;
+
+            GarrisonButler.Diagnostic("[Harvest] STEP 5 - Finished");
 
             return false;
             // Get the new game object since the old one will be destroyed

@@ -392,6 +392,7 @@ namespace GarrisonButler
                 if (!GarrisonButler.Instance.RequirementsMet)
                 {
                     await JobDoneSwitch();
+                    GarrisonButler.Log("Taking a break for 60s");
                     return false;
                 }
 

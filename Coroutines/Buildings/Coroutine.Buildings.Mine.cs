@@ -63,7 +63,7 @@ namespace GarrisonButler
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
-            // Is there something to mine? 
+            // Is there something to mine?
             WoWGameObject node =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
@@ -78,6 +78,11 @@ namespace GarrisonButler
 
             GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
             return new Tuple<bool, WoWGameObject>(true, node);
+        }
+
+        private static bool IsWoWObjectMine(WoWObject toCheck)
+        {
+            return MineItems.Contains(toCheck.Entry);
         }
 
         private static List<WoWGameObject> GetAllMineNodesIfCanRunMine()

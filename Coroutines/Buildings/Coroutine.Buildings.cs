@@ -48,6 +48,11 @@ namespace GarrisonButler
 
         private static List<ActionHelpers.ActionBasic> BuildingsActions;
 
+        private static bool IsWoWObjectFinalizeGarrisonPlot(WoWObject toCheck)
+        {
+            return FinalizeGarrisonPlotIds.Contains(toCheck.Entry);
+        }
+
         public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
         {
             // Initializing coroutines
@@ -123,7 +128,7 @@ namespace GarrisonButler
                     new ActionHelpers.ActionOnTimer<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
                         PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine), 5000, 10000));
             }
-            if (garden != null)
+            if (garden != default(Building))
             {
                 // Harvest garden
                 buildingsActionsSequence.AddAction(
@@ -190,7 +195,6 @@ namespace GarrisonButler
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
-                    .ToList()
                     .OrderBy(o => o.Location.X);
 
             if (!allToActivate.Any())
@@ -205,6 +209,24 @@ namespace GarrisonButler
                                       toActivate.DisplayId + ": " + toActivate.Location);
 
             return new Tuple<bool, WoWGameObject>(true, toActivate);
+        }
+
+        private static List<WoWGameObject> GetAllBuildingsToActivateIfCanActivateAtLeastOneBuilding()
+        {
+            // Settings
+            if (!GaBSettings.Get().ActivateBuildings)
+            {
+                return new List<WoWGameObject>();
+            }
+
+            List<WoWGameObject> returnList =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
+                    .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
+                    .OrderBy(o => o.Location.X)
+                    .ToList();
+
+            return returnList;
         }
 
         private static async Task<bool> ActivateFinishedBuildings(WoWGameObject toActivate)

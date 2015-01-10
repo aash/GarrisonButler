@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common;
 using Styx.CommonBot.Coroutines;
@@ -259,6 +260,32 @@ namespace GarrisonButler
             RefreshBuildings();
         }
 
+        private static bool IsWoWObjectShipment(WoWObject toCheck)
+        {
+            return ShipmentsMap
+                .GetEmptyIfNull()
+                .Any(s => s.buildingIds.Contains((int)toCheck.Entry));
+        }
+
+        private static Shipment GetShipmentFromWoWObject(WoWObject toGet)
+        {
+            return ShipmentsMap
+                    .GetEmptyIfNull()
+                    .Where(s => s.buildingIds.Contains((int)toGet.Entry))
+                    .FirstOrDefault();
+        }
+
+        private static List<WoWGameObject> GetAllShipmentObjectsIfCanRunShipments()
+        {
+            List<WoWGameObject> returnList =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
+                    .Where(o => ShipmentsMap.Any(j => j.shipmentId == o.Entry))
+                    .OrderBy(o => o.DistanceSqr)
+                    .ToList();
+
+            return returnList;
+        }
 
         private static bool ShouldRunPickUpOrStartShipment()
         {

@@ -169,7 +169,7 @@ namespace GarrisonButler
             if (TablePosition == WoWPoint.Empty)
             {
                 WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
-                if (tableForLoc != null)
+                if (tableForLoc != default(WoWGameObject))
                 {
                     GarrisonButler.Diagnostic("Found Command table location, not using default anymore.");
                     TablePosition = tableForLoc.Location;
@@ -179,7 +179,7 @@ namespace GarrisonButler
             if (TablePosition != WoWPoint.Empty)
             {
                 WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
-                if (tableForLoc != null)
+                if (tableForLoc != default(WoWGameObject))
                 {
                     if (await MoveToInteract(tableForLoc))
                         return true;
@@ -200,6 +200,12 @@ namespace GarrisonButler
                 return false;
 
             WoWObject table = MissionLua.GetCommandTableOrDefault();
+            if (table == default(WoWObject))
+            {
+                GarrisonButler.Diagnostic("[Missions] Trouble getting command table from LUA.");
+                return false;
+            }
+
             try
             {
                 table.Interact();

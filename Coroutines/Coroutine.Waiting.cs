@@ -84,6 +84,7 @@ namespace GarrisonButler
                     }
                 }
             }
+
             return true;
         }
         private static bool AnythingLeftToDoBeforeEnd()
