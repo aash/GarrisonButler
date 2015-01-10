@@ -405,8 +405,10 @@ namespace GarrisonButler
             }))
             {
                 GarrisonButler.Log("[Vendor] Selling Junk.");
+                Vendors.ForceSell = true;
                 return await _vendorBehavior.ExecuteCoroutine();
             }
+            Vendors.ForceSell = false;
             GarrisonButler.Diagnostic("[Vendor] No Junk detected.");
             return false;
         }
