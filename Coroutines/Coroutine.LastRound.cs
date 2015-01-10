@@ -37,15 +37,14 @@ namespace GarrisonButler
             return false;
         }
 
+        private static bool LastRoundInit = false;
         private static async Task<bool> LastRound()
         {
             if (!CanRunLastRound())
                 return false;
 
             List<WoWPoint> myLastRoundPoints = Me.IsAlliance ? LastRoundWaypointsAlly : LastRoundWaypointsHorde;
-            if (Me.IsAlliance
-                ? !myLastRoundPoints.Contains(TableAlliance)
-                : !myLastRoundPoints.Contains(TableHorde))
+            if (!LastRoundInit)
             {
                 Random r = new Random(DateTime.Now.Second);
                 float randomX = (float)(r.NextDouble()-0.5) * 5;
@@ -54,6 +53,7 @@ namespace GarrisonButler
                 toAdd.X = toAdd.X + randomX;
                 toAdd.Y = toAdd.Y + randomY;
                 myLastRoundPoints.Add(toAdd);
+                LastRoundInit = true;
             }
 
             if (_lastRoundTemp > myLastRoundPoints.Count - 1)
