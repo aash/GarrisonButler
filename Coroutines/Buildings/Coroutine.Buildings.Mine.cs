@@ -195,7 +195,8 @@ namespace GarrisonButler
                     "end;"
             );
 
-            return true;
+            // To stop the task from continually running forever
+            return false;
         }
 
 
