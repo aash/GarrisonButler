@@ -91,26 +91,26 @@ namespace GarrisonButler
             return true;
         }
 
-        static LogLevel HBMailLoggingBugOriginalLogLevel;
-        static LogLevel HBMailLoggingBugOriginalFileLogLevel;
-        static bool HBMailLoggingBugOriginalFileLoggingFlag;
-        private static void WorkAroundHBMailLoggingBugStart()
-        {
-            HBMailLoggingBugOriginalLogLevel = GarrisonButler.CurrentHonorbuddyLog.LoggingLevel;
-            HBMailLoggingBugOriginalFileLogLevel = GarrisonButler.CurrentHonorbuddyLog.LogFileLevel;
-            HBMailLoggingBugOriginalFileLoggingFlag = GarrisonButler.CurrentHonorbuddyLog.FileLogging;
+        //static LogLevel HBMailLoggingBugOriginalLogLevel;
+        //static LogLevel HBMailLoggingBugOriginalFileLogLevel;
+        //static bool HBMailLoggingBugOriginalFileLoggingFlag;
+        //private static void WorkAroundHBMailLoggingBugStart()
+        //{
+        //    HBMailLoggingBugOriginalLogLevel = GarrisonButler.CurrentHonorbuddyLog.LoggingLevel;
+        //    HBMailLoggingBugOriginalFileLogLevel = GarrisonButler.CurrentHonorbuddyLog.LogFileLevel;
+        //    HBMailLoggingBugOriginalFileLoggingFlag = GarrisonButler.CurrentHonorbuddyLog.FileLogging;
 
-            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = LogLevel.None;
-            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = LogLevel.None;
-            GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
-        }
+        //    GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = LogLevel.None;
+        //    GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = LogLevel.None;
+        //    GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
+        //}
 
-        private static void WorkAroundHBMailLoggingBugEnd()
-        {
-            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = HBMailLoggingBugOriginalLogLevel;
-            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = HBMailLoggingBugOriginalFileLogLevel;
-            GarrisonButler.CurrentHonorbuddyLog.FileLogging = HBMailLoggingBugOriginalFileLoggingFlag;
-        }
+        //private static void WorkAroundHBMailLoggingBugEnd()
+        //{
+        //    GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = HBMailLoggingBugOriginalLogLevel;
+        //    GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = HBMailLoggingBugOriginalFileLogLevel;
+        //    GarrisonButler.CurrentHonorbuddyLog.FileLogging = HBMailLoggingBugOriginalFileLoggingFlag;
+        //}
 
         public static async Task<bool> GetMails(int osef)
         {
@@ -143,9 +143,24 @@ namespace GarrisonButler
             int numMail = InterfaceLua.GetInboxMailCountInPlayerInbox();
             int totalMail = InterfaceLua.GetInboxMailCountOnServer();
 
-            WorkAroundHBMailLoggingBugStart();
+            //WorkAroundHBMailLoggingBugStart();
+            LogLevel HBMailLoggingBugOriginalLogLevel;
+            LogLevel HBMailLoggingBugOriginalFileLogLevel;
+            bool HBMailLoggingBugOriginalFileLoggingFlag;
+            HBMailLoggingBugOriginalLogLevel = GarrisonButler.CurrentHonorbuddyLog.LoggingLevel;
+            HBMailLoggingBugOriginalFileLogLevel = GarrisonButler.CurrentHonorbuddyLog.LogFileLevel;
+            HBMailLoggingBugOriginalFileLoggingFlag = GarrisonButler.CurrentHonorbuddyLog.FileLogging;
+
+            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = LogLevel.None;
+            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = LogLevel.None;
+            GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
+
             bool openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
-            WorkAroundHBMailLoggingBugEnd();
+
+            GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = HBMailLoggingBugOriginalLogLevel;
+            GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = HBMailLoggingBugOriginalFileLogLevel;
+            GarrisonButler.CurrentHonorbuddyLog.FileLogging = HBMailLoggingBugOriginalFileLoggingFlag;
+            //WorkAroundHBMailLoggingBugEnd();
 
             // Wait for logging changes to take effect / mail icon
             await Buddy.Coroutines.Coroutine.Sleep(1000);
