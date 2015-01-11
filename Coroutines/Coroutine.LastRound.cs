@@ -120,7 +120,7 @@ namespace GarrisonButler
                 var toAdd = Me.IsAlliance ? TableAlliance : TableHorde;
                 toAdd.X = toAdd.X + randomX;
                 toAdd.Y = toAdd.Y + randomY;
-                myLastRoundPoints.Add(toAdd);
+                myLastRoundPoints.Add(Dijkstra.ClosestToNodes(toAdd));
                 LastRoundInit = true;
             }
 
