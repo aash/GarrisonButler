@@ -124,6 +124,7 @@ namespace GarrisonButler
                 }
                 else
                 {
+                    GarrisonButler.Diagnostic("[Mail] " + mailCheckInterval + "s mailbox timer finished inside GetMails()");
                     mailboxCheckTimer.Reset();
                     mailboxCheckTimer.Stop();
                 }
@@ -132,16 +133,21 @@ namespace GarrisonButler
             // Get to the mailbox
             if (!MailFrame.Instance.IsVisible)
             {
-                return await MoveAndInteractWithMailbox();
+                if(await MoveAndInteractWithMailbox())
+                    return true;
             }
 
             // Wait for server to load mails after opening mailbox
+            GarrisonButler.Diagnostic("[Mail] Waiting 5s for WoW to load mail.");
             await Buddy.Coroutines.Coroutine.Sleep(5000);
 
             MailFrame mailFrame = MailFrame.Instance;
 
             int numMail = InterfaceLua.GetInboxMailCountInPlayerInbox();
             int totalMail = InterfaceLua.GetInboxMailCountOnServer();
+
+            GarrisonButler.Diagnostic("[Mail] LUA returned VisibleMail=" + numMail);
+            GarrisonButler.Diagnostic("[Mail] LUA returned server TotalMail=" + totalMail);
 
             //WorkAroundHBMailLoggingBugStart();
             LogLevel HBMailLoggingBugOriginalLogLevel;
@@ -164,6 +170,7 @@ namespace GarrisonButler
 
             // Wait for logging changes to take effect / mail icon
             await Buddy.Coroutines.Coroutine.Sleep(1000);
+            GarrisonButler.Diagnostic("[Mail] OpenAllMailCoroutine() returned " + openAllMailCoroutineResult.ToString());
 
             // "Read" all mails, even ones with only text in them
             // This turns the mail "grey" to get rid of the mail icon
@@ -177,10 +184,13 @@ namespace GarrisonButler
             // If total mail didn't change between checks, that means the user's inbox is
             // stuck possibly due to "read" messages that contain only text or their inventory
             // is full
+            GarrisonButler.Diagnostic("[Mail] numMailsOnLastCheck=" + numMailsOnLastCheck);
             bool condition1 = (numMail >= 50) && (numMailsOnLastCheck != totalMail);
+            GarrisonButler.Diagnostic("[Mail] condition1=" + condition1.ToString());
 
             // Allow for a 2nd check when fresh bot run or after a 5min timer refresh
             bool condition2 = (numMail >= 50) && (allowMailTimerStart);
+            GarrisonButler.Diagnostic("[Mail] condition2=" + condition2.ToString());
 
             if(condition1 || condition2)
             {
