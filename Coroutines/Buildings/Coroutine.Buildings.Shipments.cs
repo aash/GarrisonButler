@@ -11,6 +11,7 @@ using Styx;
 using Styx.Common;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
+using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -456,15 +457,27 @@ namespace GarrisonButler
                 return true;
 
             unit.Interact();
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
-            if (!await Buddy.Coroutines.Coroutine.Wait(500, () =>
+
+            await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
-                if (!InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+                var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
+                if (!res)
                 {
-                    //    unit.Interact(); 
+                    Navigator.PlayerMover.MoveTowards(unit.Location); 
+                }
+                return res;
+            });
+
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+            if (!await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+            {
+                var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
+                if (!res)
+                {
+                    unit.Interact(); 
                     IfGossip(unit);
                 }
-                return InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
+                return res;
             }))
             {
                 GarrisonButler.Warning(
