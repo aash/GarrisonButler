@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.VisualStyles;
+using System.Xml.Serialization;
 using GarrisonButler.API;
 using JetBrains.Annotations;
 using Styx;
@@ -38,6 +39,7 @@ namespace GarrisonButler.Objects
         /// <summary>
         /// Name of the condition as displayed in UI
         /// </summary>
+        [XmlAttribute("Name")]
         public string Name
         {
             get { return _name; }
@@ -54,7 +56,8 @@ namespace GarrisonButler.Objects
 
         /// <summary>
         /// Condition of the item
-        /// </summary>
+        /// </summary>        
+        [XmlAttribute("Rule")]
         public Conditions Condition
         {
             get { return _condition; }
@@ -71,6 +74,7 @@ namespace GarrisonButler.Objects
         /// <summary>
         /// Value to check against for condition
         /// </summary>
+        [XmlAttribute("CheckValue")]
         public int CheckValue
         {
             get { return _checkValue; }

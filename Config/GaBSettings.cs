@@ -15,6 +15,7 @@ using Styx.Helpers;
 
 namespace GarrisonButler.Config
 {
+    [XmlRoot("GarrisonButlerSettings")]
     public class GaBSettings
     {
         private GaBSettings()
@@ -24,19 +25,22 @@ namespace GarrisonButler.Config
         [XmlIgnore]
         public static GaBSettings currentSettings { get; set; }
 
-        [XmlArray]
+        [XmlArrayItem("Building", typeof(BuildingSettings))]
+        [XmlArray("BuildingsSettings")]
         public List<BuildingSettings> BuildingsSettings { get; set; }
+
+        [XmlArrayItem("Mail", typeof(MailItem))]
+        [XmlArray("MailItems")]
         public List<MailItem> MailItems { get; set; }
 
-        [XmlArray]
+        [XmlArrayItem("Daily", typeof(DailyProfession))]
+        [XmlArray("DailySettings")]
         public List<DailyProfession> DailySettings { get; set; }
 
         public bool UseGarrisonHearthstone { get; set; }
-
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
         public bool ForceJunkSell { get; set; }
-
         public bool GarrisonCache { get; set; }
         public bool HarvestGarden { get; set; }
         public bool HarvestMine { get; set; }
@@ -48,10 +52,8 @@ namespace GarrisonButler.Config
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
-
-
         public int TimeMinBetweenRun { get; set; }
-
+        [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
         public bool HBRelogMode { get; set; }
 
@@ -119,10 +121,11 @@ namespace GarrisonButler.Config
                     new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"), false);
                 writer.Serialize(file, currentSettings);
                 file.Close();
+                GarrisonButler.Log("Settings saved.");
             }
             catch(Exception e)
             {
-                GarrisonButler.Diagnostic("Failed to save configuration");
+                GarrisonButler.Diagnostic("Failed to save configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
             }
         }
@@ -144,6 +147,7 @@ namespace GarrisonButler.Config
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
                 currentSettings = DefaultConfig();
+                Save();
             }
         }
 

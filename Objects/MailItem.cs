@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Bots.Professionbuddy.Components;
 using JetBrains.Annotations;
 using Styx;
@@ -18,10 +19,10 @@ namespace GarrisonButler.Objects
 {
     public class MailItem : INotifyPropertyChanged
     {
-        private string _comment;
         private uint _itemId;
         private SafeString _recipient;
         private MailCondition _condition;
+        private string _comment;
 
         public MailItem(uint itemId, string recipient, MailCondition mailCondition, int checkValue, string comment = "")
         {
@@ -36,6 +37,7 @@ namespace GarrisonButler.Objects
             Condition = new MailCondition();
         }
 
+        [XmlAttribute("ItemID")]
         public uint ItemId
         {
             get { return _itemId; }
@@ -49,6 +51,7 @@ namespace GarrisonButler.Objects
             }
         }
 
+        //[XmlText()]
         public SafeString Recipient
         {
             get { return _recipient; }
@@ -61,6 +64,8 @@ namespace GarrisonButler.Objects
                 }
             }
         }
+
+        [XmlElement("Condition")]
         public MailCondition Condition
         {
             get { return _condition; }
@@ -73,6 +78,7 @@ namespace GarrisonButler.Objects
                 }
             }
         }
+        [XmlIgnore]
         public int CheckValue
         {
             get
@@ -98,6 +104,8 @@ namespace GarrisonButler.Objects
         {
             return await _condition.GetItemsOrNull(ItemId);
         }
+
+        //[XmlText()]
         public string Comment
         {
             get { return _comment; }

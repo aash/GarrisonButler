@@ -87,10 +87,15 @@ namespace GarrisonButler.Objects
         {
         }
 
+        [XmlText()]
         public string Name { get; set; }
+        [XmlAttribute("TradeskillId")]
         public tradeskillID TradeskillId { get; set; }
+        [XmlAttribute("ItemId")]
         public uint ItemId { get; set; }
+        [XmlAttribute("SpellId")]
         public uint SpellId { get; set; }
+        [XmlAttribute("Activated")]
         public bool Activated { get; set; }
 
         [XmlIgnore]

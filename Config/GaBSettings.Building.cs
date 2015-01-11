@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 using GarrisonButler.Libraries;
 
 #endregion
@@ -27,10 +28,19 @@ namespace GarrisonButler.Config
             BuildingIds = new List<int>();
         }
 
-        public List<int> BuildingIds { get; set; }
+        [XmlText()]
         public string Name { get; set; }
+
+        [XmlAttribute("BuildingIds")]
+        public List<int> BuildingIds { get; set; }
+
+        [XmlAttribute("CanStartOrder")]
         public bool CanStartOrder { get; set; }
+
+        [XmlAttribute("MaxCanStartOrder")]
         public int MaxCanStartOrder { get; set; }
+
+        [XmlAttribute("CanCollectOrder")]
         public bool CanCollectOrder { get; set; }
 
         public override string ToString()

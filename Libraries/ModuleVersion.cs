@@ -2,6 +2,7 @@
 
 using System;
 using System.Globalization;
+using System.Xml.Serialization;
 
 #endregion
 
@@ -237,6 +238,7 @@ namespace GarrisonButler.Libraries
         ///     Gets the major.
         /// </summary>
         /// <value></value>
+        [XmlAttribute("Major")]
         public int Major
         {
             get { return major; }
@@ -247,6 +249,7 @@ namespace GarrisonButler.Libraries
         ///     Gets the minor.
         /// </summary>
         /// <value></value>
+        [XmlAttribute("Minor")]
         public int Minor
         {
             get { return minor; }
@@ -257,6 +260,7 @@ namespace GarrisonButler.Libraries
         ///     Gets the build.
         /// </summary>
         /// <value></value>
+        [XmlAttribute("Build")]
         public int Build
         {
             get { return build; }
@@ -267,6 +271,7 @@ namespace GarrisonButler.Libraries
         ///     Gets the revision.
         /// </summary>
         /// <value></value>
+        [XmlAttribute("Revision")]
         public int Revision
         {
             get { return revision; }

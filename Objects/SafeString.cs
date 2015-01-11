@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using JetBrains.Annotations;
 
 namespace GarrisonButler.Objects
@@ -13,6 +14,8 @@ namespace GarrisonButler.Objects
     {
         // props
         private string _value;
+
+        [XmlText()]
         public string Value
         {
             get { return _value; }
