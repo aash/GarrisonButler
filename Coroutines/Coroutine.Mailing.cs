@@ -54,6 +54,8 @@ namespace GarrisonButler
                 }
             }
 
+            if (!checkedMailbox) return new Tuple<bool, int>(true, 0);
+
             if (API.ApiLua.HasNewMail())
                 return new Tuple<bool, int>(true, 0);
             else
@@ -162,6 +164,8 @@ namespace GarrisonButler
             GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
 
             bool openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
+
+            checkedMailbox = true;
 
             GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = HBMailLoggingBugOriginalLogLevel;
             GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = HBMailLoggingBugOriginalFileLogLevel;

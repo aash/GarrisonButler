@@ -55,7 +55,7 @@ namespace GarrisonButler
             // Check if had been harvested (ie standing within interact range)
             if (Me.Location.DistanceSqr(CachedToHarvestLocation) <= CachedInteractRangeSqr)
             {
-                GarrisonButler.Diagnostic("[Harvest]Finished cached harvesting sequence naturally.");
+                GarrisonButler.Diagnostic("[Harvest] STEP 1 - Finished cached harvesting sequence naturally.");
                 return false;
             }
             // If we are here, it is either that the bot did something wrong or node too far. 
@@ -132,17 +132,21 @@ namespace GarrisonButler
                 + foundNodeStillExists.Entry);
             CachedToHarvestLocation = foundNodeStillExists.Location;
             CachedInteractRangeSqr = foundNodeStillExists.InteractRangeSqr;
-            if (await HarvestWoWGameOject(foundNodeStillExists))
+
+            bool harvestReturnValue = await HarvestWoWGameOject(foundNodeStillExists);
+            if (harvestReturnValue)
                 return true;
 
+            GarrisonButler.Diagnostic("[Harvest] STEP 4 - HarvestWoWGameObject returned false!");
+
             // STEP 0-2 - Check for blacklisted object.
-            if (Blacklist.Contains(toHarvest, BlacklistFlags.Node))
-            {
-                Blacklist.BlacklistEntry entry = Blacklist.GetEntry(toHarvest);
-                GarrisonButler.Diagnostic("[Harvest3] Skipping Node {0} at {1} due to blacklist="
-                    + entry.Flags.ToString(), toHarvest.Name, toHarvest.Location);
-                return false;
-            }
+            //if (Blacklist.Contains(toHarvest, BlacklistFlags.Node))
+            //{
+            //    Blacklist.BlacklistEntry entry = Blacklist.GetEntry(toHarvest);
+            //    GarrisonButler.Diagnostic("[Harvest] Skipping Node {0} at {1} due to blacklist="
+            //        + entry.Flags.ToString(), toHarvest.Name, toHarvest.Location);
+            //    return false;
+            //}
 
             GarrisonButler.Diagnostic("[Harvest] STEP 5 - Finished");
 
