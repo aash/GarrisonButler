@@ -107,18 +107,18 @@ namespace GarrisonButler
 
             WoWPoint moverLocation = activeMover.Location;
 
+            if (moverLocation.Distance(location) < 2.4f)
+            {
+                Clear();
+                _stuckHandlerGaB.Reset();
+                return MoveResult.ReachedDestination;
+            }
             if (_stuckHandlerGaB.IsStuck())
             {
                 GarrisonButler.Diagnostic("Is stuck :O ! ");
                 _stuckHandlerGaB.Unstick();
                 _stuckHandlerGaB.Reset();
                 return MoveResult.UnstuckAttempt;
-            }
-            if (moverLocation.Distance(location) < 2.4f)
-            {
-                Clear();
-                _stuckHandlerGaB.Reset();
-                return MoveResult.ReachedDestination;
             }
             if (moverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
             {

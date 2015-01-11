@@ -63,21 +63,29 @@ namespace GarrisonButler
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
+            //// Is there something to mine?
+            //WoWGameObject node =
+            //    ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+            //        .GetEmptyIfNull()
+            //        .Where(o => MineItems.Contains(o.Entry))
+            //        .OrderBy(o => o.Distance)
+            //        .FirstOrDefault();
+
             // Is there something to mine?
-            WoWGameObject node =
+            var nodes =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
-                    .Where(o => MineItems.Contains(o.Entry))
-                    .OrderBy(o => o.Distance)
-                    .FirstOrDefault();
-            if (node == default(WoWGameObject))
+                    .Where(o => MineItems.Contains(o.Entry)).GetEmptyIfNull();
+
+            if (nodes.IsNullOrEmpty())
             {
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
+            var closest = Dijkstra.GetClosestObject(Me.Location, nodes.ToArray());
 
-            GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + node.Location);
-            return new Tuple<bool, WoWGameObject>(true, node);
+            GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + closest.Location);
+            return new Tuple<bool, WoWGameObject>(true, closest);
         }
 
         private static bool IsWoWObjectMine(WoWObject toCheck)
