@@ -14785,7 +14785,7 @@ namespace GarrisonButler
 
             // Adding Mine
             Building mine = _buildings.FirstOrDefault(b => ShipmentsMap[0].buildingIds.Contains(b.id));
-            if (mine != null)
+            if (mine != default(Building))
             {
                 GarrisonButler.Diagnostic("Generating Custom points: Mine level " + mine.rank + " detected.");
                 points.AddRange(Me.IsAlliance
@@ -14797,7 +14797,7 @@ namespace GarrisonButler
 
             // Adding Garden
             Building garden = _buildings.FirstOrDefault(b => ShipmentsMap[1].buildingIds.Contains(b.id));
-            if (garden != null)
+            if (garden != default(Building))
             {
                 GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.rank + " detected.");
                 points.AddRange(Me.IsAlliance
@@ -14811,7 +14811,7 @@ namespace GarrisonButler
             Building bunker = _buildings.FirstOrDefault(b => b.id == (int)buildings.DwarvenBunkerLvl1 || 
                 b.id == (int)buildings.DwarvenBunkerLvl2 || 
                 b.id == (int)buildings.DwarvenBunkerLvl3);
-            if (bunker != null)
+            if (bunker != default(Building))
             {
                 GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.rank + " detected.");
                 points.AddRange(DwarvenBunkerPaths(Me.IsAlliance, bunker.plotId, TownHallLvl));

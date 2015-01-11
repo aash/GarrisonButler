@@ -177,7 +177,7 @@ namespace GarrisonButler
 
         private static void RefreshBuildings(bool forced = false)
         {
-            if (!RefreshBuildingsTimer.IsFinished && _buildings != null && !forced) return;
+            if (!RefreshBuildingsTimer.IsFinished && !_buildings.IsNullOrEmpty() && !forced) return;
 
             GarrisonButler.Log("Refreshing Buildings database.");
 
