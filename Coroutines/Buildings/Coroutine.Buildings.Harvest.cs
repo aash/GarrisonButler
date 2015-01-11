@@ -18,6 +18,7 @@ namespace GarrisonButler
     partial class Coroutine
     {
         private static WoWPoint CachedToHarvestLocation = WoWPoint.Empty;
+        private static float CachedInteractRangeSqr = 0f;
 
         private static async Task<bool> HarvestWoWGameOject(WoWGameObject toHarvest)
         {
@@ -42,27 +43,24 @@ namespace GarrisonButler
             // toHarvest's original value will not be modified inside an async Task
             if (toHarvest == null)
                 return false;
-
-            // STEP 0 - Check for blacklisted object. Otherwise shipments which still exists and are valid will stuck the bot.
-            if (Blacklist.Contains(toHarvest, BlacklistFlags.All)
-                && IsWoWObjectShipment(toHarvest))
-            {
-                Blacklist.BlacklistEntry entry = Blacklist.GetEntry(toHarvest);
-                GarrisonButler.Diagnostic("[Harvest] Skipping GarrisonShipment due to blacklist="
-                    + entry.Flags.ToString());
-                return false;
-            }
-
+            
             // STEP 1 - Attempt to harvest original node
             if (toHarvest.IsValid)
             {
                 CachedToHarvestLocation = toHarvest.Location;
+                CachedInteractRangeSqr = toHarvest.InteractRangeSqr;
                 if (await HarvestWoWGameOject(toHarvest))   // returns false if toHarvest becomes null or invalid
                     return true;
             }
-
-            // STEP 2 - Make sure we are within 5 yards of the location of toHarvest
-            if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.Distance(CachedToHarvestLocation) > 5))
+            // Check if had been harvested (ie standing within interact range)
+            if (Me.Location.DistanceSqr(CachedToHarvestLocation) <= CachedInteractRangeSqr)
+            {
+                GarrisonButler.Diagnostic("[Harvest]Finished cached harvesting sequence naturally.");
+                return false;
+            }
+            // If we are here, it is either that the bot did something wrong or node too far. 
+            // STEP 2 - Make sure we are within interact range of the location of toHarvest
+            if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.DistanceSqr(CachedToHarvestLocation) > CachedInteractRangeSqr))
                 if (await MoveTo(CachedToHarvestLocation)) // returns false for Failed and ReachedDestination
                     return true;
 
@@ -106,6 +104,7 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node default");
                 CachedToHarvestLocation = WoWPoint.Empty;
+                CachedInteractRangeSqr = 0.0f;
                 return false;
             }
 
@@ -114,6 +113,7 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node null");
                 CachedToHarvestLocation = WoWPoint.Empty;
+                CachedInteractRangeSqr = 0.0f;
                 return false;
             }
 
@@ -121,6 +121,7 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node not valid");
                 CachedToHarvestLocation = WoWPoint.Empty;
+                CachedInteractRangeSqr = 0.0f;
                 return false;
             }
 
@@ -130,84 +131,22 @@ namespace GarrisonButler
                 + "; Entry="
                 + foundNodeStillExists.Entry);
             CachedToHarvestLocation = foundNodeStillExists.Location;
+            CachedInteractRangeSqr = foundNodeStillExists.InteractRangeSqr;
             if (await HarvestWoWGameOject(foundNodeStillExists))
                 return true;
+
+            // STEP 0-2 - Check for blacklisted object.
+            if (Blacklist.Contains(toHarvest, BlacklistFlags.Node))
+            {
+                Blacklist.BlacklistEntry entry = Blacklist.GetEntry(toHarvest);
+                GarrisonButler.Diagnostic("[Harvest3] Skipping Node {0} at {1} due to blacklist="
+                    + entry.Flags.ToString(), toHarvest.Name, toHarvest.Location);
+                return false;
+            }
 
             GarrisonButler.Diagnostic("[Harvest] STEP 5 - Finished");
 
             return false;
-            // Get the new game object since the old one will be destroyed
-            //Tuple<bool, WoWGameObject> mineToGetTuple = CanRunMine();
-
-            //toHarvest = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
-
-            // No object found
-            //if (toHarvest == null)
-            //    return false;
-
-            // Valid object found
-            //if (toHarvest.IsValid)
-            //{
-            //    CachedToHarvestLocation = toHarvest.Location;
-            //    if (await HarvestWoWGameOject(toHarvest))
-            //        return true;
-            //}
-
-            //CachedToHarvestLocation = WoWPoint.Empty;
-            //return false;
-
-
-            //WoWPoint startLocation = Me.Location;
-            //WoWGameObject mineToGet = mineToGetTuple.Item1 ? mineToGetTuple.Item2 : null;
-            //System.Diagnostics.Stopwatch stuckWatch = new System.Diagnostics.Stopwatch();
-            //stuckWatch.Start();
-
-            //while(true)
-            //{
-            //    if (mineToGet == null)
-            //        return false;
-
-            //    // Handle getting stuck
-            //    if(stuckWatch.ElapsedMilliseconds > 10000)
-            //    {
-            //        if(Me.Location.Distance(startLocation) < 1)
-            //        {
-            //            GarrisonButler.Diagnostic("[Mine] Appear to be stuck, trying to strafe and move backwards.");
-            //            WoWMovement.Move(WoWMovement.MovementDirection.Backwards, TimeSpan.FromSeconds(1));
-            //            WoWMovement.Move(WoWMovement.MovementDirection.StrafeLeft, TimeSpan.FromSeconds(1));
-            //            WoWMovement.Move(WoWMovement.MovementDirection.Backwards, TimeSpan.FromSeconds(1));
-            //            WoWMovement.Move(WoWMovement.MovementDirection.StrafeLeft, TimeSpan.FromSeconds(1));
-            //        }
-
-            //        startLocation = Me.Location;
-            //        stuckWatch.Reset();
-            //    }
-
-            //    // Handle being within 5 yards of mine
-            //    if(Me.Location.Distance(mineToGet.Location) < 5)
-            //    {
-            //        WoWMovement.MoveStop();
-            //        await Styx.CommonBot.Coroutines.CommonCoroutines.SleepForLagDuration();
-            //        await Buddy.Coroutines.Coroutine.Sleep(200);
-            //        break;
-            //    }
-
-            //    // Attempt to move to mine
-            //    await Coroutine.MoveTo(mineToGet.Location);
-
-            //    // Handle object going invalid during move
-            //    if(mineToGet.IsValid == false)
-            //    {
-            //        mineToGetTuple = CanRunMine();
-
-            //        if (!mineToGetTuple.Item1)
-            //            return false;
-
-            //        mineToGet = mineToGetTuple.Item2;
-            //    }
-            //}
-
-            //return await HarvestWoWGameOject(toHarvest);
         }
     }
 }
