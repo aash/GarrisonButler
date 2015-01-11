@@ -404,6 +404,21 @@ namespace GarrisonButler
                     };
                     break;
 
+                case (int)buildings.InnTavernLvl1:
+                case (int)buildings.InnTavernLvl2:
+                case (int)buildings.InnTavernLvl3:
+                    //TODO - Need display ids for tavern for alliance / horde
+                    //Displayids = new List<uint>
+                    //{
+                    //    14474, // Garrison Building Armory V1
+                    //    14516, // Garrison Building Armory V2
+                    //    14517, // Garrison Building Armory V3
+                    //    18553, // Garrison Building Horde Armory V1
+                    //    18554, // Garrison Building Horde Armory V2
+                    //    18555, // Garrison Building Horde Armory V3
+                    //};
+                    break;
+
 
                     // horde 1 <Vendor Name="Yukla Greenshadow" Entry="79821" Type="Repair" X="5642.186" Y="4511.771" Z="120.1076" />
                     // ally 2 <Vendor Name="Garm" Entry="77781" Type="Repair" X="1806.123" Y="188.0837" Z="70.84762" />
@@ -819,6 +834,17 @@ namespace GarrisonButler
                 case buildings.StorehouseLvl2:
                 case buildings.StorehouseLvl3:
                     break;
+                case buildings.InnTavernLvl1:
+                case buildings.InnTavernLvl2:
+                case buildings.InnTavernLvl3:
+                    break;
+                case buildings.FishingShackLvl1:
+                case buildings.FishingShackLvl2:
+                case buildings.FishingShackLvl3:
+                    break;
+                default:
+                    GarrisonButler.Warning("HasOrder hit default case with b=" + b);
+                    break;
             }
             return false;
         }
@@ -931,5 +957,9 @@ namespace GarrisonButler
         EngineeringWorksLvl1 = 91,
         EngineeringWorksLvl2 = 123,
         EngineeringWorksLvl3 = 124,
+
+        InnTavernLvl1 = 34,
+        InnTavernLvl2 = 35,
+        InnTavernLvl3 = 36
     }
 }

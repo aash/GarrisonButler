@@ -22,6 +22,9 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
+        private const int BiggerIsBetterAlliance = 36592;
+        private const int BiggerIsBetterHorde = 36567;
+
         private static readonly List<Shipment> ShipmentsMap = new List<Shipment>
         {
             // Mine
@@ -30,7 +33,8 @@ namespace GarrisonButler
                 61, // lvl 1
                 62, // lvl 2
                 63, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5474.07, 4451.756, 144.5106)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5474.07, 4451.756, 144.5106),
+            35154, 34192),
 
             // Garden
             new Shipment(235885, new List<int>
@@ -38,7 +42,8 @@ namespace GarrisonButler
                 29, // lvl 1
                 136, // lvl 2
                 137, // lvl 3
-            }, new WoWPoint(1862, 139, 78), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1862, 139, 78), new WoWPoint(5414.973, 4574.003, 137.4256),
+            34193, 36404),
 
             #region large
             // Barracks
@@ -47,7 +52,8 @@ namespace GarrisonButler
                 26, // lvl 1
                 27, // lvl 2
                 28, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Dwarven Bunker
             new Shipment(235885, new List<int>
@@ -55,7 +61,8 @@ namespace GarrisonButler
                 8, // lvl 1
                 9, // lvl 2
                 10, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Gnomish Gearworks
             new Shipment(235885, new List<int>
@@ -63,7 +70,8 @@ namespace GarrisonButler
                 162, // lvl 1
                 163, // lvl 2
                 164, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Mage Tower
             new Shipment(235885, new List<int>
@@ -71,7 +79,8 @@ namespace GarrisonButler
                 37, // lvl 1
                 38, // lvl 2
                 39, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Stables
             new Shipment(235885, new List<int>
@@ -79,7 +88,8 @@ namespace GarrisonButler
                 65, // lvl 1
                 66, // lvl 2
                 67, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             #endregion
             #region medium
@@ -89,7 +99,8 @@ namespace GarrisonButler
                 24, // lvl 1
                 25, // lvl 2
                 133, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            36345, 36271),  // Breaking into the Trap Game
 
             // Gladiator's Sanctum
             new Shipment(235885, new List<int>
@@ -97,7 +108,8 @@ namespace GarrisonButler
                 159, // lvl 1
                 160, // lvl 2
                 161, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Lumber Mill
             new Shipment(235885, new List<int>
@@ -105,7 +117,8 @@ namespace GarrisonButler
                 40, // lvl 1
                 41, // lvl 2
                 138, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            36138, 36192),
 
             // Trading Post
             new Shipment(235885, new List<int>
@@ -113,7 +126,17 @@ namespace GarrisonButler
                 111, // lvl 1
                 144, // lvl 2
                 145, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+
+            // Inn / Tavern
+            new Shipment(235885, new List<int>
+            {
+                111, // lvl 1
+                144, // lvl 2
+                145, // lvl 3
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             #endregion
             #region small
@@ -123,7 +146,8 @@ namespace GarrisonButler
                 76, // lvl 1
                 119, // lvl 2
                 120, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37568, 36641),
 
             // Enchanter's Study
             new Shipment(235885, new List<int>
@@ -131,7 +155,8 @@ namespace GarrisonButler
                 93, // lvl 1
                 125, // lvl 2
                 126, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37570, 36645),
 
             // Gem Boutique
             new Shipment(235885, new List<int>
@@ -139,7 +164,8 @@ namespace GarrisonButler
                 96, // lvl 1
                 131, // lvl 2
                 132, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37573, 36644),
 
             // Salvage Yard
             new Shipment(235885, new List<int>
@@ -147,7 +173,8 @@ namespace GarrisonButler
                 52, // lvl 1
                 140, // lvl 2
                 141, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Scribe's Quarters
             new Shipment(235885, new List<int>
@@ -155,7 +182,8 @@ namespace GarrisonButler
                 95, // lvl 1
                 129, // lvl 2
                 130, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37572, 36647),
 
             // Storehouse
             new Shipment(235885, new List<int>
@@ -163,7 +191,8 @@ namespace GarrisonButler
                 51, // lvl 1
                 142, // lvl 2
                 143, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),   // 37060 - Lost in Transition - One time quest (extra??)
 
             // Tailoring Emporium
             new Shipment(235885, new List<int>
@@ -171,7 +200,8 @@ namespace GarrisonButler
                 94, // lvl 1
                 127, // lvl 2
                 128, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37575, 36643),
 
             // The Forge
             new Shipment(235885, new List<int>
@@ -179,7 +209,8 @@ namespace GarrisonButler
                 60, // lvl 1
                 117, // lvl 2
                 118, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37569, 35168),
 
             // The Tannery
             new Shipment(235885, new List<int>
@@ -187,7 +218,8 @@ namespace GarrisonButler
                 90, // lvl 1
                 121, // lvl 2
                 122, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37574, 36642),
 
             // Engineering Works
             new Shipment(235885, new List<int>
@@ -195,7 +227,8 @@ namespace GarrisonButler
                 91, // lvl 1
                 123, // lvl 2
                 124, // lvl 3
-            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256)),
+            }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
+            37571, 36646),
 
             // Others? 
         };
@@ -350,6 +383,13 @@ namespace GarrisonButler
 
             building.Refresh();
 
+            // Activated by user ?
+            if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
+            {
+                GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
+                return new Tuple<bool, Building>(false, null);
+            }
+
             // No Shipment left to start
             if (building.NumberShipmentLeftToStart() <= 0)
             {
@@ -357,12 +397,17 @@ namespace GarrisonButler
                 return new Tuple<bool, Building>(false, null);
             }
 
-            // Activated by user ?
-            if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
+            // Structs cannot be null
+            Shipment shipmentObjectFound = ShipmentsMap.FirstOrDefault(s => s.buildingIds.Contains(building.id));
+
+            if(!shipmentObjectFound.completedPreQuest)
             {
-                GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
+                GarrisonButler.Warning("[ShipmentStart] Cannot collect shipments until pre-quest is done: {0}", building.name);
+                GarrisonButler.Diagnostic("[ShipmentStart] preQuest not completed A={1} H={2}: {0}",
+                    building.name, shipmentObjectFound.shipmentPreQuestIdAlliance, shipmentObjectFound.shipmentPreQuestIdHorde);
                 return new Tuple<bool, Building>(false, null);
             }
+
 
             // Under construction
             if (building.isBuilding || building.canActivate)
@@ -502,7 +547,8 @@ namespace GarrisonButler
             }
             if (!await Buddy.Coroutines.Coroutine.Wait(10000, () =>
             {
-                GarrisonButler.Diagnostic("[ShipmentStart] Waiting for WoW shipment data to refresh newly started.");
+                //This diag message was causing a lot of spam
+                //GarrisonButler.Diagnostic("[ShipmentStart] Waiting for WoW shipment data to refresh newly started.");
                 var buildingShipment = _buildings.FirstOrDefault(b => b.id == building.id);
                 if (buildingShipment != null)
                 {
@@ -602,7 +648,8 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
                 await Buddy.Coroutines.Coroutine.Wait(10000, () =>
                 {
-                    GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for WoW shipment data to refresh newly collected.");
+                    //This diag was causing a lot of spam
+                    //GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for WoW shipment data to refresh newly collected.");
                     var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
                     if (buildingShipment != null)
                     {
@@ -623,15 +670,47 @@ namespace GarrisonButler
             public readonly WoWPoint defaultAllyLocation;
             public readonly WoWPoint defaultHordeLocation;
             public readonly int shipmentId;
+            public readonly int shipmentPreQuestIdHorde;
+            public readonly int shipmentPreQuestIdAlliance;
+            public bool completedPreQuest
+            {
+                get
+                {
+                    if(Me == null)
+                    {
+                        GarrisonButler.Diagnostic("Error in class Shipment getting completedPreQuest - Me == null");
+                        return false;
+                    }
+
+                    if(!Me.IsValid)
+                    {
+                        GarrisonButler.Diagnostic("Error in class Shipment getting completedPreQuest - Me.IsValid = false");
+                        return false;
+                    }
+
+                    if (shipmentPreQuestIdHorde == 0 || shipmentPreQuestIdAlliance == 0)
+                        return false;
+
+                    Styx.CommonBot.Profiles.Quest.Order.ProfileHelperFunctionsBase helper = new Styx.CommonBot.Profiles.Quest.Order.ProfileHelperFunctionsBase();
+
+                    uint questToUse = Me.IsAlliance ? (uint)shipmentPreQuestIdAlliance : (uint)shipmentPreQuestIdHorde;
+
+                    bool returnValue = helper.IsQuestCompleted(questToUse);
+
+                    return returnValue;
+                }
+            }
 
             public Shipment(int shipmentId, List<int> buildingIds, WoWPoint defaultAllyLocation,
-                WoWPoint defaultHordeLocation)
+                WoWPoint defaultHordeLocation, int shipmentPreQuestIdHorde, int shipmentPreQuestIdAlliance)
                 : this()
             {
                 this.shipmentId = shipmentId;
                 this.buildingIds = buildingIds;
                 this.defaultAllyLocation = defaultAllyLocation;
                 this.defaultHordeLocation = defaultHordeLocation;
+                this.shipmentPreQuestIdHorde = shipmentPreQuestIdHorde;
+                this.shipmentPreQuestIdAlliance = shipmentPreQuestIdAlliance;
             }
         }
     }

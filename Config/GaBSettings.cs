@@ -100,12 +100,48 @@ namespace GarrisonButler.Config
         public BuildingSettings GetBuildingSettings(int id)
         {
             BuildingSettings settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
-            if (settings == default(BuildingSettings))
+            if (settings == null)
             {
                 GarrisonButler.Warning("Building with id: {0} not found in config.", id);
-                throw new Exception();
+                //throw new Exception();
             }
             return settings;
+        }
+
+        /// <summary>
+        /// This function will update the user's settings when we add new features to structures and what not
+        /// //TODO Still needs to check all settings, only doing buildings right now
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        private static bool UpdateSettings(GaBSettings settings)
+        {
+            if (settings == null)
+                return false;
+
+            if (settings.BuildingsSettings == null)
+                return false;
+
+            // Make sure no new buildings were added
+            foreach (buildings building in (buildings[])Enum.GetValues((typeof(buildings))))
+            {
+                string nameCurrent = BuildingSettings.nameFromBuildingID((int)building);
+
+                // If the current building settings doesn't contain any records with the
+                // building name from the Enum, we need to add it
+                if(!settings.BuildingsSettings.Any(b => b.Name == nameCurrent))
+                {
+                    // Find the list of IDs from this building to add
+                    List<int> IDs =
+                        ((buildings[])Enum.GetValues((typeof(buildings)))).Where(
+                            b => BuildingSettings.nameFromBuildingID((int)b) == nameCurrent)
+                            .Select(x => (int)x)
+                            .ToList();
+                    settings.BuildingsSettings.Add(new BuildingSettings(IDs.ToList()));
+                }
+            }
+
+            return true;
         }
 
 
@@ -141,6 +177,7 @@ namespace GarrisonButler.Config
                     new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
                 currentSettings = (GaBSettings) reader.Deserialize(file);
                 GarrisonButler.Diagnostic("Configuration successfully loaded.");
+                UpdateSettings(currentSettings);
             }
             catch (Exception e)
             {
