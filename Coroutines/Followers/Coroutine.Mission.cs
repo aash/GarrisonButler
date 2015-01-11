@@ -178,11 +178,19 @@ namespace GarrisonButler
 
             if (TablePosition != WoWPoint.Empty)
             {
+                if (InterfaceLua.IsGarrisonMissionFrameOpen())
+                    return false; 
+                
                 WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != default(WoWGameObject))
                 {
                     if (await MoveToInteract(tableForLoc))
                         return true;
+                    if (tableForLoc.WithinInteractRange)
+                    {
+                        tableForLoc.Interact();
+                        return true;
+                    }
                 }
                 else
                 {
