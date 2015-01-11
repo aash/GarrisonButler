@@ -27,7 +27,7 @@ namespace GarrisonButler
         private readonly WaitTimer _waitTimer2 = WaitTimer.FiveSeconds;
         private MeshMovePath _currentMovePath2;
         private StuckHandlerGaB _stuckHandlerGaB;
-        
+        private MoveResult _lastMoveResult;
         public override float PathPrecision { get; set; }
 
         public WaitTimer WaitTimer2
@@ -97,22 +97,31 @@ namespace GarrisonButler
 
         public override MoveResult MoveTo(WoWPoint location)
         {
+            // If the location to move to hasn't changed and we already
+            // Reached the destination, then no need to keep going.
+            if (CurrentDestination == location
+                && _lastMoveResult != null
+                && _lastMoveResult == MoveResult.ReachedDestination)
+                return MoveResult.ReachedDestination;
+            
             CurrentDestination = location;
             if (location == WoWPoint.Zero)
                 return MoveResult.Failed;
-
+            
             WoWUnit activeMover = WoWMovement.ActiveMover;
             if (activeMover == null)
                 return MoveResult.Failed;
 
             WoWPoint moverLocation = activeMover.Location;
 
-            if (moverLocation.Distance(location) < 2.4f)
+            if (moverLocation.Distance(location) < 4.0f)
             {
                 Clear();
                 _stuckHandlerGaB.Reset();
+                _lastMoveResult = MoveResult.ReachedDestination;
                 return MoveResult.ReachedDestination;
             }
+            _lastMoveResult = MoveResult.Failed;
             if (_stuckHandlerGaB.IsStuck())
             {
                 GarrisonButler.Diagnostic("Is stuck :O ! ");

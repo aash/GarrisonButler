@@ -1,4 +1,5 @@
 ﻿using GarrisonButler.API;
+using GarrisonButler.Coroutines;
 
 #region
 
@@ -23,11 +24,11 @@ namespace GarrisonButler
         private static bool _hbRelogSkipped;
         private static int _hbRelogSkippedCounter;
 
-        private static async Task<bool> Waiting()
+        private static async Task<ActionResult> Waiting()
         {
             int townHallLevel = BuildingsLua.GetTownHallLevel();
             if (townHallLevel < 1)
-                return false;
+                return ActionResult.Failed;
 
             List<WoWPoint> myFactionWaitingPoints;
             if (Me.IsAlliance)
@@ -41,7 +42,7 @@ namespace GarrisonButler
                     "This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
             GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
-            return false;
+            return ActionResult.Done;
         }
 
         private async static Task<bool> JobDoneSwitch()
@@ -79,7 +80,7 @@ namespace GarrisonButler
                         "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
                     if (Me.Location.Distance(fishingSpot) > 2)
                     {
-                        if (await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot."))
+                        if (await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.") == ActionResult.Running)
                             return true;
                     }
                 }

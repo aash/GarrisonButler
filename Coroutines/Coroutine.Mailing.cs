@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Objects;
 using GarrisonButler.Libraries;
 using Styx;
@@ -71,7 +72,7 @@ namespace GarrisonButler
             //return new Tuple<bool, int>(false, 0);
         }
 
-        private async static Task<bool> MoveAndInteractWithMailbox()
+        private async static Task<ActionResult> MoveAndInteractWithMailbox()
         {
             List<WoWGameObject> MailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .GetEmptyIfNull()
@@ -85,12 +86,12 @@ namespace GarrisonButler
             }
 
             if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
-                if (await MoveToInteract(mailbox))
-                    return true;
+                if (await MoveToInteract(mailbox) == ActionResult.Running)
+                    return ActionResult.Running;
 
             mailbox.Interact();
             await CommonCoroutines.SleepForLagDuration();
-            return true;
+            return ActionResult.Running;
         }
 
         //static LogLevel HBMailLoggingBugOriginalLogLevel;
@@ -114,7 +115,7 @@ namespace GarrisonButler
         //    GarrisonButler.CurrentHonorbuddyLog.FileLogging = HBMailLoggingBugOriginalFileLoggingFlag;
         //}
 
-        public static async Task<bool> GetMails(int osef)
+        public static async Task<ActionResult> GetMails(int osef)
         {
             // If check interval is 65s, we must wait for the wow server to allow another refresh
             if ((mailboxCheckTimer.IsRunning) && (mailCheckInterval == checkIntervalWhileStillWaiting))
@@ -122,7 +123,7 @@ namespace GarrisonButler
                 // Need to keep waiting for timer
                 if (mailboxCheckTimer.Elapsed.TotalSeconds < (mailCheckInterval))
                 {
-                    return true;
+                    return ActionResult.Running;
                 }
                 else
                 {
@@ -135,8 +136,8 @@ namespace GarrisonButler
             // Get to the mailbox
             if (!MailFrame.Instance.IsVisible)
             {
-                if(await MoveAndInteractWithMailbox())
-                    return true;
+                if (await MoveAndInteractWithMailbox() == ActionResult.Running)
+                    return ActionResult.Running;
             }
 
             // Wait for server to load mails after opening mailbox
@@ -211,7 +212,7 @@ namespace GarrisonButler
                 mailCheckInterval = 65;
                 mailboxCheckTimer.Reset();
                 mailboxCheckTimer.Start();
-                return true;
+                return ActionResult.Running;
             }
             else
             {
@@ -228,7 +229,7 @@ namespace GarrisonButler
                 mailCheckInterval = 60 * 5; // 5 minutes
                 mailboxCheckTimer.Reset();
                 mailboxCheckTimer.Start();
-                return false;
+                return ActionResult.Done;
             }
         }
 
@@ -251,7 +252,7 @@ namespace GarrisonButler
             return new Tuple<bool, List<MailItem>>(true, toMail);
         }
 
-        public static async Task<bool> MailItem(List<MailItem> mailItems)
+        public static async Task<ActionResult> MailItem(List<MailItem> mailItems)
         {
             if (!MailFrame.Instance.IsVisible)
             {
@@ -267,8 +268,8 @@ namespace GarrisonButler
                 }
 
                 if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
-                    if (await MoveToInteract(mailbox))
-                        return true;
+                    if (await MoveToInteract(mailbox) == ActionResult.Running)
+                        return ActionResult.Running;
 
                 mailbox.Interact();
                 await CommonCoroutines.SleepForLagDuration();
@@ -294,7 +295,7 @@ namespace GarrisonButler
                 if (listItems.GetEmptyIfNull().Any())
                 {
                     if(mailsRecipient.GetEmptyIfNull().FirstOrDefault() == default(MailItem))
-                        return false;
+                        return ActionResult.Done;
 
                     await mailFrame.SendMailWithManyAttachmentsCoroutine(mailsRecipient
                         .GetEmptyIfNull()
@@ -305,7 +306,7 @@ namespace GarrisonButler
                 }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            return false;
+            return ActionResult.Done;
         }
     }
 }

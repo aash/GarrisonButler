@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonButler.Coroutines;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
@@ -21,7 +22,7 @@ namespace GarrisonButler
         private static string oldDestMessage;
         private static MoveResult _lastMoveResult;
 
-        public static async Task<bool> MoveTo(WoWPoint destination, string destinationMessage = null)
+        public static async Task<ActionResult> MoveTo(WoWPoint destination, string destinationMessage = null)
         {
             if (destinationMessage != null && destinationMessage != oldDestMessage)
             {
@@ -41,22 +42,22 @@ namespace GarrisonButler
 
                 case MoveResult.Failed:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: Failed.");
-                    return false;
+                    return ActionResult.Failed;
 
                 case MoveResult.ReachedDestination:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
-                    return false;
+                    return ActionResult.Done;
             }
-            return true;
+            return ActionResult.Running;
         }
 
-        public static async Task<bool> MoveToInteract(WoWObject woWObject)
+        public static async Task<ActionResult> MoveToInteract(WoWObject woWObject)
         {
             if (woWObject.WithinInteractRange)
             {
                 GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact with " +
                                           woWObject.SafeName);
-                return false;
+                return ActionResult.Done;
             }
             return await MoveTo(woWObject.Location, "[Navigation] Moving to interact with " + woWObject.SafeName);
         }

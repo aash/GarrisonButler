@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Objects;
 using Styx;
 using Styx.CommonBot.Coroutines;
@@ -92,20 +93,20 @@ namespace GarrisonButler
             return new Tuple<bool, DailyProfession>(false, null);
         }
 
-        public static async Task<bool> DoDailyCd(DailyProfession daily)
+        public static async Task<ActionResult> DoDailyCd(DailyProfession daily)
         {
             if (daily.needAnvil())
             {
                 return await FindAnvilAndDoCd(daily);
             }
             if (await DoCd(daily))
-                return true;
+                return ActionResult.Running;
 
             DailiesTriggered = false;
-            return false;
+            return ActionResult.Refresh;
         }
 
-        private static async Task<bool> FindAnvilAndDoCd(DailyProfession daily)
+        private static async Task<ActionResult> FindAnvilAndDoCd(DailyProfession daily)
         {
             WoWGameObject anvil =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
@@ -119,15 +120,16 @@ namespace GarrisonButler
                 return await MoveToMine();
             }
             GarrisonButler.Log("[Profession] Current CD requires an anvil, moving to the safest one.");
-            if (await MoveToInteract(anvil))
-                return true;
+            if (await MoveToInteract(anvil) == ActionResult.Running)
+                return ActionResult.Running;
 
             if (await DoCd(daily))
-                return true;
-            return false;
+                return ActionResult.Running;
+
+            return ActionResult.Done;
         }
 
-        public static async Task<bool> MoveToMine()
+        public static async Task<ActionResult> MoveToMine()
         {
             WoWPoint locationToLookAt = Me.IsAlliance ? new WoWPoint(1907, 93, 83) : new WoWPoint(5473, 4444, 144);
             return await MoveTo(locationToLookAt, "[Profession] Moving to mine to search for an Anvil.");

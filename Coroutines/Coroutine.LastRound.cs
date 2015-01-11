@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using Styx;
 
 #endregion
@@ -106,10 +107,10 @@ namespace GarrisonButler
         }
 
         private static bool LastRoundInit = false;
-        private static async Task<bool> LastRound()
+        private static async Task<ActionResult> LastRound()
         {
             if (!CanRunLastRound())
-                return false;
+                return ActionResult.Done;
 
             List<WoWPoint> myLastRoundPoints = Me.IsAlliance ? LastRoundWaypointsAlly : LastRoundWaypointsHorde;
             if (!LastRoundInit)
@@ -122,24 +123,25 @@ namespace GarrisonButler
                 toAdd.Y = toAdd.Y + randomY;
                 myLastRoundPoints.Add(Dijkstra.ClosestToNodes(toAdd));
                 LastRoundInit = true;
+                _lastRoundTemp = 0;
             }
 
             if (_lastRoundTemp > myLastRoundPoints.Count - 1)
             {
                 _lastRoundTemp = 0;
                 lastRoundCheckTime = DateTime.Now;
-                return false;
+                return ActionResult.Done;
             }
             if (
                 await
                     MoveTo(myLastRoundPoints[_lastRoundTemp],
-                        "Doing a last round to check if something was not too far to see before."))
+                        "Doing a last round to check if something was not too far to see before.") == ActionResult.Running)
             {
-                return true;
+                return ActionResult.Running;
             }
 
             _lastRoundTemp++;
-            return true;
+            return ActionResult.Running;
         }
     }
 }

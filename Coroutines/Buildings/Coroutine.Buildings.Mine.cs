@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
@@ -162,23 +163,23 @@ namespace GarrisonButler
             };
         }
 
-        public static async Task<bool> UseItemInbags(WoWItem item)
+        public static async Task<ActionResult> UseItemInbags(WoWItem item)
         {
             if (item == null)
-                return false;
+                return ActionResult.Failed;
 
             if (!item.IsValid)
-                return false;
+                return ActionResult.Failed;
 
             item.Use();
             GarrisonButler.Log("[Item] Using: {0}", item.Name);
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);
 
-            return false;
+            return ActionResult.Done;
         }
 
-        public static async Task<bool> DeleteItemInbags(WoWItem item)
+        public static async Task<ActionResult> DeleteItemInbags(WoWItem item)
         {
             GarrisonButler.Log("[Item] Deleting one of: {0}", item.Name);
             Lua.DoString(
@@ -204,7 +205,7 @@ namespace GarrisonButler
             );
 
             // To stop the task from continually running forever
-            return false;
+            return ActionResult.Done;
         }
 
 

@@ -112,10 +112,10 @@ namespace GarrisonButler
             return new Tuple<bool, Tuple<Mission, Follower[]>>(true, ToStart.First());
         }
 
-        public static async Task<bool> StartMission(Tuple<Mission, Follower[]> missionToStart)
+        public static async Task<ActionResult> StartMission(Tuple<Mission, Follower[]> missionToStart)
         {
             if (await MoveToTable())
-                return true;
+                return ActionResult.Running;
 
             if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
@@ -124,7 +124,7 @@ namespace GarrisonButler
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
                 {
                     GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
-                    return true;
+                    return ActionResult.Running;
                 }
             }
             if (!InterfaceLua.IsGarrisonMissionVisible())
@@ -136,7 +136,7 @@ namespace GarrisonButler
                 if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
                 {
                     GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
-                    return true;
+                    return ActionResult.Running;
                 }
             }
             else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
@@ -151,7 +151,7 @@ namespace GarrisonButler
                             () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
                 {
                     GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
-                    return true;
+                    return ActionResult.Running;
                 }
             }
             await missionToStart.Item1.AddFollowersToMission(missionToStart.Item2.ToList());
@@ -160,7 +160,7 @@ namespace GarrisonButler
             InterfaceLua.ClickCloseMission();
             RefreshFollowers(true);
             RefreshMissions(true);
-            return false;
+            return ActionResult.Refresh;
         }
 
 
@@ -184,7 +184,7 @@ namespace GarrisonButler
                 WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != default(WoWGameObject))
                 {
-                    if (await MoveToInteract(tableForLoc))
+                    if (await MoveToInteract(tableForLoc) == ActionResult.Running)
                         return true;
                     if (tableForLoc.WithinInteractRange)
                     {
@@ -194,13 +194,13 @@ namespace GarrisonButler
                 }
                 else
                 {
-                    if (await MoveTo(TablePosition, "[Missions] Moving to command table"))
+                    if (await MoveTo(TablePosition, "[Missions] Moving to command table") == ActionResult.Running)
                         return true;
                 }
             }
             else
             {
-                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table"))
+                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table") == ActionResult.Running)
                     return true;
             }
 
@@ -238,12 +238,12 @@ namespace GarrisonButler
             return CanRunTurnInMissions().Item1;
         }
 
-        public static async Task<bool> DoTurnInCompletedMissions(int osef)
+        public static async Task<ActionResult> DoTurnInCompletedMissions(int osef)
         {
             GarrisonButler.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
             // are we at the action table?
             if (await MoveToTable())
-                return true;
+                return ActionResult.Running;
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
             MissionLua.TurnInAllCompletedMissions();
@@ -260,7 +260,7 @@ namespace GarrisonButler
             TurnInMissionsTriggered = false;
             RefreshFollowers(true);
             RefreshMissions(true);
-            return false;
+            return ActionResult.Refresh;
         }
 
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)

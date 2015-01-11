@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common;
@@ -322,7 +323,7 @@ namespace GarrisonButler
             return new Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(false, null);
         }
 
-        internal static async Task<bool> PickUpOrStartAtLeastOneShipment(
+        internal static async Task<ActionResult> PickUpOrStartAtLeastOneShipment(
             Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>> input)
         {
             Tuple<bool, WoWGameObject> canPickUp = input.Item2;
@@ -330,13 +331,13 @@ namespace GarrisonButler
 
             if (canPickUp.Item1)
                 if (await PickUpShipment(canPickUp.Item2))
-                    return true;
+                    return ActionResult.Running;
 
             if (canStart.Item1)
                 if (await StartShipment(canStart.Item2))
-                    return true;
+                    return ActionResult.Running;
 
-            return false; // Done
+            return ActionResult.Done; // Done
         }
 
         internal static Tuple<bool, Building> CanStartShipment(Building building)
@@ -453,7 +454,7 @@ namespace GarrisonButler
                 return true;
             }
 
-            if (await MoveToInteract(unit))
+            if (await MoveToInteract(unit) == ActionResult.Running)
                 return true;
 
             unit.Interact();
@@ -499,13 +500,22 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            if(!await Buddy.Coroutines.Coroutine.Wait(5000, () =>
+            if (!await Buddy.Coroutines.Coroutine.Wait(10000, () =>
             {
-                building.Refresh();
-                var max = GetMaxShipmentToStart(building);
-                return max == 0;
+                GarrisonButler.Diagnostic("[ShipmentStart] Waiting for WoW shipment data to refresh newly started.");
+                var buildingShipment = _buildings.FirstOrDefault(b => b.id == building.id);
+                if (buildingShipment != null)
+                {
+                    buildingShipment.Refresh();
+                    var max = GetMaxShipmentToStart(buildingShipment);
+                    return max == 0;
+                }
+                GarrisonButler.Diagnostic("[ShipmentStart] buildingShipment null.");
+                return false;
             }))
-                GarrisonButler.Diagnostic("Mismatch starting work orders.");
+            {
+                GarrisonButler.Diagnostic("[ShipmentStart] Mismatch starting work orders.");
+            }
             building.Refresh();
             StartOrderTriggered = false;
             return false; // done here
@@ -581,13 +591,27 @@ namespace GarrisonButler
                 if (
                     await
                         MoveTo(building.Location,
-                            "[ShipmentCollect] Moving to Building to search for shipment to pick up."))
+                            "[ShipmentCollect] Moving to Building to search for shipment to pick up.") == ActionResult.Running)
                     return true;
             }
             else
             {
-                await HarvestWoWGameOject(shipmentToCollect);
-                RefreshBuildings(true);
+                if (await HarvestWoWGameObjectCachedLocation(shipmentToCollect) == ActionResult.Running)
+                    return true;
+
+                await CommonCoroutines.SleepForLagDuration();
+                await Buddy.Coroutines.Coroutine.Wait(10000, () =>
+                {
+                    GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for WoW shipment data to refresh newly collected.");
+                    var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
+                    if (buildingShipment != null)
+                    {
+                        buildingShipment.Refresh();
+                        return buildingShipment.shipmentsReady > 0;
+                    }
+                    GarrisonButler.Diagnostic("[ShipmentCollect] buildingShipment null.");
+                    return false;
+                });
                 return false; // Done here
             }
             return false; // should never reach that point!

@@ -170,14 +170,14 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 mainSequence = new ActionHelpers.ActionsSequence();
-                if(GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison));
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000));
+                if(GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails, 15000, 1000));
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison, 10000, 1000));
+                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000, 1000));
                 mainSequence.AddAction(InitializeBuildingsCoroutines());
                 mainSequence.AddAction(InitializeMissionsCoroutines());
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem));
+                if (GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem, 15000, 1000));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
                 mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 
@@ -209,7 +209,7 @@ namespace GarrisonButler
                 if (await HbApi.StackAllItemsIfPossible())
                     return true;
 
-                if (await SellJunkCoroutine())
+                if (await SellJunkCoroutine() == ActionResult.Running)
                     return true;
 
                 // Without a timer it will spam Alert messages over and over
@@ -398,7 +398,7 @@ namespace GarrisonButler
 
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
-            if (await mainSequence.ExecuteAction())
+            if (await mainSequence.ExecuteAction() == ActionResult.Running)
             {
                 //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
@@ -426,16 +426,16 @@ namespace GarrisonButler
             }
         }
 
-        private async static Task<bool> SellJunk()
+        private async static Task<ActionResult> SellJunk()
         {
             if (!GaBSettings.Get().ForceJunkSell)
             {
                 GarrisonButler.Diagnostic("[Vendor] Force junk behavior deactivated in User settings.");
-                return false;
+                return ActionResult.Done;
             }
             return await SellJunkCoroutine();
         }
-        private async static Task<bool> SellJunkCoroutine()
+        private async static Task<ActionResult> SellJunkCoroutine()
         {
             if (Me.BagItems.Any(i =>
             {
@@ -451,11 +451,11 @@ namespace GarrisonButler
             {
                 GarrisonButler.Log("[Vendor] Selling Junk.");
                 Vendors.ForceSell = true;
-                return await _vendorBehavior.ExecuteCoroutine();
+                return await _vendorBehavior.ExecuteCoroutine() ? ActionResult.Running : ActionResult.Done;
             }
             Vendors.ForceSell = false;
             GarrisonButler.Diagnostic("[Vendor] No Junk detected.");
-            return false;
+            return ActionResult.Done;
         }
         internal static Tuple<bool, WoWItem> ShouldTPToGarrison()
         {

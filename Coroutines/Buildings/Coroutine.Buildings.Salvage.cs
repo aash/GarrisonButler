@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -58,29 +59,28 @@ namespace GarrisonButler
             return true;
         }
 
-        private static async Task<bool> DoSalvages()
+        private static async Task<ActionResult> DoSalvages()
         {
             IEnumerable<WoWItem> salvageCrates;
             Building building;
 
             if (!CanRunSalvage(out salvageCrates, out building))
-                return false;
+                return ActionResult.Done;
 
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             // can't find it? Let's try to get closer to the default location.
             if (unit == null)
             {
                 await MoveTo(building.Pnj, "[Salvage] Moving to building at " + building.Pnj);
-
-                return true;
+                return ActionResult.Running;
             }
 
             // If we don't dismount earlier, the bot will determine that it has reached the
             // unit when it is within 2 yards of the location.  Need to stop and dismount earlier,
             // then call "MoveTo" again after the dismount logic to finish the movement by foot
             if(Me.Location.Distance(unit.Location) > 10)
-                if (await MoveTo(unit.Location))
-                    return true;
+                if (await MoveTo(unit.Location) == ActionResult.Running)
+                    return ActionResult.Running;
 
             if (Me.Mounted)
             {
@@ -88,8 +88,8 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
             }
 
-            if (await MoveTo(unit.Location))
-                return true;
+            if (await MoveTo(unit.Location) == ActionResult.Running)
+                return ActionResult.Running;
 
             foreach (WoWItem salvageCrate in salvageCrates)
             {
@@ -98,7 +98,7 @@ namespace GarrisonButler
                 await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            return true;
+            return ActionResult.Running;
         }
     }
 }
