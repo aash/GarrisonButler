@@ -38,7 +38,7 @@ namespace GarrisonButler
             {
                 case MoveResult.UnstuckAttempt:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: UnstuckAttempt.");
-                    await Buddy.Coroutines.Coroutine.Sleep(1000);
+                    //await Buddy.Coroutines.Coroutine.Sleep(1000);
                     break;
 
                 case MoveResult.Failed:

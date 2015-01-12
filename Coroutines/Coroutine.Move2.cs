@@ -59,9 +59,11 @@ namespace GarrisonButler
             //        return MoveResult.Failed;
                 double pathPrecision = StyxWoW.Me.Mounted ? 5 : 3;
                 int max = 0;
-                while (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && max < 5)
+                //GarrisonButler.Diagnostic("Moved time: {0}", WoWMovement.ActiveMover.MovementInfo.TimeMoved);
+                //GarrisonButler.Diagnostic("path.Index: {0}", path.Index);
+                while(StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && path.Index > 3 && max < 5)
                 {
-                    ++path.Index;
+                    path.Index++;
                     max++;
                     //return MoveResult.Moved;
                 }
@@ -108,7 +110,8 @@ namespace GarrisonButler
                 && _lastMoveResult == MoveResult.ReachedDestination)
                 return MoveResult.ReachedDestination;
 
-            if (_lastMoveResult == MoveResult.PathGenerated)
+            if (_lastMoveResult == MoveResult.PathGenerated
+                || _lastMoveResult == MoveResult.ReachedDestination)
             {
                 _stuckHandlerGaB.Reset();
             }
@@ -131,7 +134,6 @@ namespace GarrisonButler
             if (moverLocation.Distance(location) < 4.0f)
             {
                 Clear();
-                _stuckHandlerGaB.Reset();
                 _lastMoveResult = MoveResult.ReachedDestination;
                 return MoveResult.ReachedDestination;
             }
@@ -140,7 +142,6 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("Is stuck :O ! ");
                 _stuckHandlerGaB.Unstick();
-                _stuckHandlerGaB.Reset();
                 _lastMoveResult = MoveResult.UnstuckAttempt;
                 return MoveResult.UnstuckAttempt;
             }
@@ -191,7 +192,6 @@ namespace GarrisonButler
                 FlightPaths.ShouldTakeFlightpath(moverLocation, location, activeMover.MovementInfo.RunSpeed) &&
                 FlightPaths.SetFlightPathUsage(moverLocation, location, out startFp, out endFp))
             {
-                _stuckHandlerGaB.Reset();
                 _lastMoveResult = MoveResult.PathGenerated;
                 return _lastMoveResult;
             }
@@ -202,7 +202,6 @@ namespace GarrisonButler
                 return _lastMoveResult;
             }
             _currentMovePath2 = new MeshMovePath(path2);
-            _stuckHandlerGaB.Reset();
 
             _lastMoveResult = MoveResult.PathGenerated;
             return _lastMoveResult;
@@ -394,7 +393,7 @@ namespace GarrisonButler
 
             public override void Unstick()
             {
-                GarrisonButler.Diagnostic("Calling native unstick.");
+                GarrisonButler.Diagnostic("Calling native unstick : {0}", _cpt);
                 for (int i = 0; i < _cpt; i++)
                 {
                     UnstickCopy();
