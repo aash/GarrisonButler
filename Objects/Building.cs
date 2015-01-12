@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using GarrisonButler.API;
 using Styx;
 using Styx.Common.Helpers;
@@ -72,6 +73,9 @@ namespace GarrisonButler
 
         public int shipmentsTotal;
         private String timeStart;
+
+        public int workFrameWorkAroundTries = 0;
+        public const int WorkFrameWorkAroundMaxTriesUntilBlacklist = 10;
         // Settings
 
 

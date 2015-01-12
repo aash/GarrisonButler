@@ -114,11 +114,17 @@ namespace GarrisonButler
             }
             CurrentDestination = location;
             if (location == WoWPoint.Zero)
+            {
+                GarrisonButler.Diagnostic("MoveTo Failed - location == WoWPoint.Zero");
                 return MoveResult.Failed;
+            }
 
             WoWUnit activeMover = WoWMovement.ActiveMover;
             if (activeMover == null)
+            {
+                GarrisonButler.Diagnostic("MoveTo Failed - activeMover == null");
                 return MoveResult.Failed;
+            }
 
             WoWPoint moverLocation = activeMover.Location;
 
