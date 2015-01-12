@@ -194,13 +194,20 @@ namespace GarrisonButler
                     count += itemInReagentBank.StackCount;
                 }
 
-                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
+                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", reagentId, count,
                     NumberReagent);
-                if (maxCanStart == 0)
-                    maxCanStart = (int) count/NumberReagent;
+                if (count < NumberReagent)
+                {
+                    maxCanStart = 0;
+                    break;
+                }
+                else if (maxCanStart == 0)
+                    maxCanStart = (int)count / NumberReagent;
                 else if (count >= NumberReagent)
                     maxCanStart = Math.Min((int)count / NumberReagent, maxCanStart);
             }
+
+            GarrisonButler.Diagnostic("[ShipmentStart] The max that can be started is {0}: {1}", maxCanStart, this.name);
             return maxCanStart;
         }
 
