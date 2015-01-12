@@ -132,9 +132,9 @@ namespace GarrisonButler
             // Inn / Tavern
             new Shipment(235885, new List<int>
             {
-                111, // lvl 1
-                144, // lvl 2
-                145, // lvl 3
+                34, // lvl 1
+                35, // lvl 2
+                36, // lvl 3
             }, new WoWPoint(1901.799, 103.2309, 83.52671), new WoWPoint(5414.973, 4574.003, 137.4256),
             BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
