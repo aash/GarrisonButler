@@ -15,7 +15,7 @@ namespace GarrisonButler
 {
     public class Building
     {
-        public delegate bool CanCompleteOrderD();
+        public delegate int CanCompleteOrderD();
 
         public delegate Task<bool> PrepOrderD();
 
@@ -51,7 +51,7 @@ namespace GarrisonButler
         private String _buildTime;
         private String buildingLevel;
         internal bool canActivate;
-        public CanCompleteOrderD canCompleteOrder = () => false;
+        public CanCompleteOrderD canCompleteOrder = () => 0;
         private String canUpgrade;
         public String creationTime;
         private int currencyId;
@@ -148,7 +148,7 @@ namespace GarrisonButler
         }
 
 
-        private bool canCompleteOrderItem()
+        private int canCompleteOrderItem()
         {
             long count = 0;
             WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
@@ -168,11 +168,13 @@ namespace GarrisonButler
 
             GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
                 NumberReagent, count >= NumberReagent);
-            return count >= NumberReagent;
+            return (int)count/NumberReagent;
         }
 
-        private bool canCompleteOrderItems()
+        private int canCompleteOrderItems()
         {
+            var maxCanStart = 0;
+
             foreach (int reagentId in ReagentIds)
             {
                 long count = 0;
@@ -194,14 +196,17 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
                     NumberReagent);
-                if (count < NumberReagent)
-                    return false;
+                if (maxCanStart == 0)
+                    maxCanStart = (int) count/NumberReagent;
+                else if (count >= NumberReagent)
+                    maxCanStart = Math.Min((int)count / NumberReagent, maxCanStart);
             }
-            return true;
+            return maxCanStart;
         }
 
-        private bool canCompleteOrderOneOfItems()
+        private int canCompleteOrderOneOfItems()
         {
+            var maxCanStart = 0; 
             foreach (int reagentId in ReagentIds)
             {
                 long count = 0;
@@ -224,46 +229,47 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
                     NumberReagent);
                 if (count >= NumberReagent)
-                    return true;
+                    maxCanStart = Math.Max((int)count / NumberReagent, maxCanStart);
             }
-            return false;
+            return maxCanStart;
         }
 
-        private bool CanCompleteOrderCurrency()
+        private int CanCompleteOrderCurrency()
         {
-            return BuildingsLua.GetGarrisonRessources() > NumberReagent;
+            return (int)BuildingsLua.GetGarrisonRessources() / NumberReagent;
         }
 
-        private bool CanCompleteOrderMillable()
+        private int CanCompleteOrderMillable()
         {
-            long count = 0;
-            WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
-            if (itemInBags != null)
-                count += itemInBags.StackCount;
+            return canCompleteOrderItem();
+            //long count = 0;
+            //WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
+            //if (itemInBags != null)
+            //    count += itemInBags.StackCount;
 
-            WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
-            if (itemInReagentBank != null)
-                count += itemInReagentBank.StackCount;
+            //WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
+            //if (itemInReagentBank != null)
+            //    count += itemInReagentBank.StackCount;
 
-            if (count >= NumberReagent)
-                return true;
-            return false;
+            //if (count >= NumberReagent)
+            //    return true;
+            //return false;
 
-            IEnumerable<WoWItem> millableInBags =
-                StyxWoW.Me.BagItems.Where(i => MillableFrom.Contains(i.Entry) && i.StackCount > 5);
-            if (millableInBags.Any())
-            {
-                if (MillOne(millableInBags.ToList()))
-                    return false;
-                count = 0;
-                itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
-                if (itemInBags != null)
-                    count += itemInBags.StackCount;
+            //IEnumerable<WoWItem> millableInBags =
+            //    StyxWoW.Me.BagItems.Where(i => MillableFrom.Contains(i.Entry) && i.StackCount > 5);
+            //if (millableInBags.Any())
+            //{
+            //    if (MillOne(millableInBags.ToList()))
+            //        return false;
+            //    count = 0;
+            //    itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
+            //    if (itemInBags != null)
+            //        count += itemInBags.StackCount;
 
-                if (itemInReagentBank != null)
-                    count += itemInReagentBank.StackCount;
-            }
-            return count >= NumberReagent;
+            //    if (itemInReagentBank != null)
+            //        count += itemInReagentBank.StackCount;
+            //}
+            //return count >= NumberReagent;
         }
 
         private bool MillOne(List<WoWItem> millable)

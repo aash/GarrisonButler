@@ -127,7 +127,7 @@ namespace GarrisonButler.Config
             BuildingSettings settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (settings == null)
             {
-                GarrisonButler.Warning("Building with id: {0} not found in config.", id);
+                GarrisonButler.Diagnostic("Building with id: {0} not found in config.", id);
                 //throw new Exception();
             }
             return settings;

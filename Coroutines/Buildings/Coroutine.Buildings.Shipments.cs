@@ -324,55 +324,14 @@ namespace GarrisonButler
 
         private static bool ShouldRunPickUpOrStartShipment()
         {
-            return CanPickUpOrStartAtLeastOneShipmentFromAll().Item1;
-        }
-
-        internal static Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>
-            CanPickUpOrStartAtLeastOneShipmentFromAll()
-        {
-            foreach (Building building in _buildings)
+            foreach (var building in _buildings)
             {
-                Tuple<bool, Building> canStart = CanStartShipment(building);
-                Tuple<bool, WoWGameObject> canPickUp = CanPickUpShipment(building);
-
-                if (canPickUp.Item1 || canStart.Item1)
-                    return new Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        true,
-                        new Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>(canStart, canPickUp));
+                if (CanPickUpShipmentGeneration(building)().Item1 || CanStartShipmentGeneration(building)().Item1)
+                    return true;
             }
-            return new Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(false, null);
+            return false;
         }
-
-        internal static Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>
-            CanPickUpOrStartAtLeastOneShipmentAt(Building building)
-        {
-            Tuple<bool, Building> canStart = CanStartShipment(building);
-            Tuple<bool, WoWGameObject> canPickUp = CanPickUpShipment(building);
-
-            if (canPickUp.Item1 || canStart.Item1)
-                return new Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                    true,
-                    new Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>(canStart, canPickUp));
-            return new Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(false, null);
-        }
-
-        //internal static async Task<ActionResult> PickUpOrStartAtLeastOneShipment(
-        //    Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>> input)
-        //{
-        //    Tuple<bool, WoWGameObject> canPickUp = input.Item2;
-        //    Tuple<bool, Building> canStart = input.Item1;
-
-        //    if (canPickUp.Item1)
-        //        if (await PickUpShipment(canPickUp.Item2))
-        //            return ActionResult.Running;
-
-        //    if (canStart.Item1)
-        //        if (await StartShipment(canStart.Item2))
-        //            return ActionResult.Running;
-
-        //    return ActionResult.Done; // Done
-        //}
-
+        
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
             var sequence = new ActionHelpers.ActionsSequence();
@@ -392,8 +351,7 @@ namespace GarrisonButler
 
             return sequence;
         }
-
-
+        
         internal static Func<Tuple<bool, Building>> CanStartShipmentGeneration(Building building)
         {
             return new Func<Tuple<bool, Building>>(() =>
@@ -406,9 +364,12 @@ namespace GarrisonButler
                 }
 
                 building.Refresh();
+                var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.id);
+                if (buildingsettings == null)
+                    return new Tuple<bool, Building>(false, null);
 
                 // Activated by user ?
-                if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
+                if (!buildingsettings.CanStartOrder)
                 {
                     GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
                     return new Tuple<bool, Building>(false, null);
@@ -449,101 +410,27 @@ namespace GarrisonButler
                 if (MaxToStart <= 0)
                 {
                     GarrisonButler.Diagnostic(
-                        "[ShipmentStart] Reached limit of work orders started: {0} - current# {1} max {2} ",
+                        "[ShipmentStart] Can't start more work orders.",
                         building.name,
                         building.shipmentsTotal,
-                        GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder);
+                        buildingsettings.MaxCanStartOrder);
                     return new Tuple<bool, Building>(false, null);
                 }
-
-                // Do I fulfill the conditions to complete the order? 
-                if (!building.canCompleteOrder())
-                {
-                    GarrisonButler.Diagnostic(
-                        "[ShipmentStart] Do not fulfill the requirements to start a new work order: {0}", building.name);
-                    return new Tuple<bool, Building>(false, null);
-                }
+                //MaxToStart = Math.Min(building.canCompleteOrder(), MaxToStart);
+                //// Do I fulfill the conditions to complete the order? 
+                //if (MaxToStart <= 0)
+                //{
+                //    GarrisonButler.Diagnostic(
+                //        "[ShipmentStart] Do not fulfill the requirements to start a new work order: {0}", building.name);
+                //    return new Tuple<bool, Building>(false, null);
+                //}
 
                 GarrisonButler.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
                     MaxToStart, building.name);
                 return new Tuple<bool, Building>(true, building);
             });
         }
-
-
-        internal static Tuple<bool, Building> CanStartShipment(Building building)
-        {
-            if (building == null)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] Building is null, either not built or not properly scanned.");
-                return new Tuple<bool, Building>(false, null);
-            }
-
-            building.Refresh();
-
-            // Activated by user ?
-            if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
-                return new Tuple<bool, Building>(false, null);
-            }
-
-            // No Shipment left to start
-            if (building.NumberShipmentLeftToStart() <= 0)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] No shipment left to start: {0}", building.name);
-                return new Tuple<bool, Building>(false, null);
-            }
-
-            // Structs cannot be null
-            Shipment shipmentObjectFound = ShipmentsMap.FirstOrDefault(s => s.buildingIds.Contains(building.id));
-
-            if(!shipmentObjectFound.completedPreQuest)
-            {
-                GarrisonButler.Warning("[ShipmentStart] Cannot collect shipments until pre-quest is done: {0}", building.name);
-                GarrisonButler.Diagnostic("[ShipmentStart] preQuest not completed A={1} H={2}: {0}",
-                    building.name, shipmentObjectFound.shipmentPreQuestIdAlliance, shipmentObjectFound.shipmentPreQuestIdHorde);
-                return new Tuple<bool, Building>(false, null);
-            }
-
-
-            // Under construction
-            if (building.isBuilding || building.canActivate)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] Building under construction, can't start work order: {0}",
-                    building.name);
-                return new Tuple<bool, Building>(false, null);
-            }
-            int MaxToStart = GetMaxShipmentToStart(building);
-
-            // max start by user ?
-            if (MaxToStart <= 0)
-            {
-                GarrisonButler.Diagnostic(
-                    "[ShipmentStart] Reached limit of work orders started: {0} - current# {1} max {2} ",
-                    building.name,
-                    building.shipmentsTotal,
-                    GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder);
-                return new Tuple<bool, Building>(false, null);
-            }
-
-            // Do I fulfill the conditions to complete the order? 
-            if (!building.canCompleteOrder())
-            {
-                GarrisonButler.Diagnostic(
-                    "[ShipmentStart] Do not fulfill the requirements to start a new work order: {0}", building.name);
-                return new Tuple<bool, Building>(false, null);
-            }
-
-            GarrisonButler.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
-                MaxToStart, building.name);
-            return new Tuple<bool, Building>(true, building);
-        }
-
-
-
-
-
+        
         internal static Func<Tuple<bool, WoWGameObject>> CanPickUpShipmentGeneration(Building building)
         {
             return new Func<Tuple<bool, WoWGameObject>>(() =>
@@ -563,9 +450,12 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.name);
                     return new Tuple<bool, WoWGameObject>(false, null);
                 }
+                var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.id);
+                if (buildingsettings == null)
+                    return new Tuple<bool, WoWGameObject>(false, null);
 
                 // Activated by user ?
-                if (!GaBSettings.Get().GetBuildingSettings(building.id).CanCollectOrder)
+                if (!buildingsettings.CanCollectOrder)
                 {
                     GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.name);
                     return new Tuple<bool, WoWGameObject>(false, null);
@@ -593,51 +483,6 @@ namespace GarrisonButler
                     building.name);
                 return new Tuple<bool, WoWGameObject>(true, buildingAsObject);
             });
-        }
-
-        internal static Tuple<bool, WoWGameObject> CanPickUpShipment(Building building)
-        {
-            if (building == null)
-            {
-                GarrisonButler.Diagnostic("[ShipmentPickUp] Building is null, either not built or not properly scanned.");
-                return new Tuple<bool, WoWGameObject>(false, null);
-            }
-
-            building.Refresh();
-
-            // No Shipment ready
-            if (building.shipmentsReady <= 0)
-            {
-                GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.name);
-                return new Tuple<bool, WoWGameObject>(false, null);
-            }
-
-            // Activated by user ?
-            if (!GaBSettings.Get().GetBuildingSettings(building.id).CanCollectOrder)
-            {
-                GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.name);
-                return new Tuple<bool, WoWGameObject>(false, null);
-            }
-
-            // Get the list of the building objects
-            WoWGameObject buildingAsObject =
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .Where(o => building.Displayids.Contains(o.DisplayId))
-                    .OrderBy(o => o.DistanceSqr)
-                    .FirstOrDefault();
-            if (buildingAsObject == default(WoWGameObject))
-            {
-                GarrisonButler.Diagnostic("[ShipmentPickUp] Building could not be found in the area: {0}", building.name);
-                foreach (uint id in building.Displayids)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentPickUp]     ID {0}", id);
-                }
-                return new Tuple<bool, WoWGameObject>(false, null);
-            }
-
-            GarrisonButler.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}", building.shipmentsReady,
-                building.name);
-            return new Tuple<bool, WoWGameObject>(true, buildingAsObject);
         }
 
         private static async Task<ActionResult> StartShipment(Building building)
@@ -736,8 +581,10 @@ namespace GarrisonButler
             else
             {
                 MaxInProgress = Math.Min(building.shipmentCapacity, MaxSettings);
-            }
-            return MaxInProgress - building.shipmentsTotal;
+            } 
+            var MaxToStart = MaxInProgress - building.shipmentsTotal;
+            MaxToStart = Math.Min(building.canCompleteOrder(), MaxToStart);
+            return MaxToStart;
         }
         private static async Task WorkAroundBugFrame()
         {
