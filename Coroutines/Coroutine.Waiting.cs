@@ -99,43 +99,43 @@ namespace GarrisonButler
         {
             RefreshBuildings();
             // dailies cd
-            if (helperTriggerWithTimer(ShouldRunDailies, ref DailiesWaitTimer, ref DailiesTriggered,
+            if (helperTriggerWithTimer(ShouldRunDailies, ref _dailiesWaitTimer, ref _dailiesTriggered,
                 DailiesWaitTimerValue))
                 return true;
             // Cache
-            if (helperTriggerWithTimer(ShouldRunCache, ref CacheWaitTimer, ref CacheTriggered, CacheWaitTimerValue))
+            if (helperTriggerWithTimer(ShouldRunCache, ref _cacheWaitTimer, ref _cacheTriggered, CacheWaitTimerValue))
                 return true;
 
             // Mine
-            if (helperTriggerWithTimer(ShouldRunMine, ref MineWaitTimer, ref MineTriggered, MineWaitTimerValue))
+            if (helperTriggerWithTimer(ShouldRunMine, ref _mineWaitTimer, ref _mineTriggered, MineWaitTimerValue))
                 return true;
 
             // gardenla
-            if (helperTriggerWithTimer(ShouldRunGarden, ref GardenWaitTimer, ref GardenTriggered, GardenWaitTimerValue))
+            if (helperTriggerWithTimer(ShouldRunGarden, ref _gardenWaitTimer, ref _gardenTriggered, GardenWaitTimerValue))
                 return true;
 
             // Start or pickup work orders
-            if (helperTriggerWithTimer(ShouldRunPickUpOrStartShipment, ref StartOrderWaitTimer, ref StartOrderTriggered,
+            if (helperTriggerWithTimer(ShouldRunPickUpOrStartShipment, ref _startOrderWaitTimer, ref _startOrderTriggered,
                 StartOrderWaitTimerValue))
                 return true;
 
             // Missions
-            if (helperTriggerWithTimer(ShouldRunTurnInMissions, ref TurnInMissionWaitTimer, ref TurnInMissionsTriggered,
+            if (helperTriggerWithTimer(ShouldRunTurnInMissions, ref _turnInMissionWaitTimer, ref _turnInMissionsTriggered,
                 TurnInMissionWaitTimerValue))
                 return true;
 
             // Missions completed 
-            if (helperTriggerWithTimer(ShouldRunStartMission, ref StartMissionWaitTimer, ref StartMissionTriggered,
+            if (helperTriggerWithTimer(ShouldRunStartMission, ref _startMissionWaitTimer, ref _startMissionTriggered,
                 StartMissionWaitTimerValue))
                 return true;
 
             // Salvage
-            if (helperTriggerWithTimer(ShouldRunSalvage, ref SalvageWaitTimer, ref SalvageTriggered,
+            if (helperTriggerWithTimer(ShouldRunSalvage, ref _salvageWaitTimer, ref _salvageTriggered,
                 SalvageWaitTimerValue))
                 return true;
 
             // Salvage
-            if (helperTriggerWithTimer(CanRunLastRound, ref LastRoundWaitTimer, ref LastRoundTriggered,
+            if (helperTriggerWithTimer(CanRunLastRound, ref _lastRoundWaitTimer, ref _lastRoundTriggered,
                 LastRoundWaitTimerValue))
                 return true;
 

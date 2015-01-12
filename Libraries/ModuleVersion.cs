@@ -352,6 +352,10 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool operator !=(ModuleVersion v1, ModuleVersion v2)
         {
+            if (v1 == null)
+                return v2 != null;
+            if (v2 == null)
+                return true;
             return (v1 != v2);
         }
 

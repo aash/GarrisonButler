@@ -81,7 +81,7 @@ namespace GarrisonButler
             WoWGameObject mailbox = MailboxList.GetEmptyIfNull().FirstOrDefault();
             if (mailbox == default(WoWGameObject))
             {
-                WoWPoint mailboxLocation = Me.IsAlliance ? allyMailbox : hordeMailbox;
+                WoWPoint mailboxLocation = Me.IsAlliance ? AllyMailbox : HordeMailbox;
                 return await MoveTo(mailboxLocation, "[Mailing] Moving to mailbox at " + mailboxLocation);
             }
 
@@ -263,7 +263,7 @@ namespace GarrisonButler
                 WoWGameObject mailbox = MailboxList.GetEmptyIfNull().FirstOrDefault();
                 if (mailbox == default(WoWGameObject))
                 {
-                    WoWPoint mailboxLocation = Me.IsAlliance ? allyMailbox : hordeMailbox;
+                    WoWPoint mailboxLocation = Me.IsAlliance ? AllyMailbox : HordeMailbox;
                     return await MoveTo(mailboxLocation, "[Mailing] Moving to mailbox at " + mailboxLocation);
                 }
 

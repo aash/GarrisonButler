@@ -563,7 +563,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[ShipmentStart] Mismatch starting work orders.");
             }
             building.Refresh();
-            StartOrderTriggered = false;
+            _startOrderTriggered = false;
             return false; // done here
         }
 

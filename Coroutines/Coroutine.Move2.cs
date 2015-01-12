@@ -100,7 +100,7 @@ namespace GarrisonButler
             // If the location to move to hasn't changed and we already
             // Reached the destination, then no need to keep going.
             if (CurrentDestination == location
-                && _lastMoveResult != null
+                && _lastMoveResult != null // always true
                 && _lastMoveResult == MoveResult.ReachedDestination)
                 return MoveResult.ReachedDestination;
             

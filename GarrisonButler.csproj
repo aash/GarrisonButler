@@ -37,6 +37,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config\OldSettings\DailyProfession.cs" />
+    <Compile Include="Config\OldSettings\GaBSettings.Building.cs" />
+    <Compile Include="Config\OldSettings\GabSettings.cs" />
+    <Compile Include="Config\OldSettings\MailCondition.cs" />
+    <Compile Include="Config\OldSettings\MailItem.cs" />
     <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />
     <Compile Include="API\GarrisonLua.Building.cs" />
@@ -143,6 +148,7 @@
       <LastGenOutput>GarrisonButlerImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

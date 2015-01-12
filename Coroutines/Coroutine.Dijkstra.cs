@@ -41,7 +41,7 @@ namespace GarrisonButler
                 _movementGraph = Dijkstra.GraphFromList(_zonePoints);
 
             // Init variables for movement system
-            _lastMoveTo = new WoWPoint();
+            new WoWPoint();
         }
 
         public class Dijkstra

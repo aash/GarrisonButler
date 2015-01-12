@@ -4,18 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
-using GarrisonButler.Config;
-using GarrisonButler.Libraries;
-using GarrisonButler.API;
 using Styx;
-using Styx.CommonBot;
 using Styx.Patchables;
 using Styx.WoWInternals;
 using Styx.WoWInternals.DBC;
 
 #endregion
 
-namespace GarrisonButler.Objects
+
+
+namespace GarrisonButler.Config.OldSettings
 {
     public class DailyProfession
     {
@@ -74,29 +72,23 @@ namespace GarrisonButler.Objects
                 new DailyProfession("Secret of Draenor Tailoring", 118722, 176058, tradeskillID.Tailoring),
             };
 
-        public DailyProfession(string name, uint itemId, uint spellId, tradeskillID tradeskillId, bool activated = false)
+        private DailyProfession(string name, uint itemId, uint spellId, tradeskillID tradeskillId)
         {
             Name = name;
             TradeskillId = tradeskillId;
             ItemId = itemId;
             SpellId = spellId;
             Spell = null;
-            Activated = activated;
         }
 
-        public DailyProfession()
+        private DailyProfession()
         {
         }
 
-        [XmlText()]
         public string Name { get; set; }
-        [XmlAttribute("TradeskillId")]
         public tradeskillID TradeskillId { get; set; }
-        [XmlAttribute("ItemId")]
         public uint ItemId { get; set; }
-        [XmlAttribute("SpellId")]
         public uint SpellId { get; set; }
-        [XmlAttribute("Activated")]
         public bool Activated { get; set; }
 
         [XmlIgnore]
@@ -121,8 +113,8 @@ namespace GarrisonButler.Objects
 
         public WoWSpell HasRecipe()
         {
-            string name = Enum.GetName(typeof (tradeskillID), TradeskillId);
-            var TradeSkillSpell = (tradeskillSpell) Enum.Parse(typeof (tradeskillSpell), name);
+            string name = Enum.GetName(typeof(tradeskillID), TradeskillId);
+            var TradeSkillSpell = (tradeskillSpell)Enum.Parse(typeof(tradeskillSpell), name);
 
             GarrisonButler.Diagnostic("[DailyProfession] Name: " + this.Name);
             GarrisonButler.Diagnostic("[DailyProfession] TradeSkillSpell: " + TradeSkillSpell);
@@ -152,7 +144,7 @@ namespace GarrisonButler.Objects
                     StyxWoW.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == reagent ? i.StackCount : 0);
                 numInBags +=
                     StyxWoW.Me.ReagentBankItems.Sum(i => i != null && i.IsValid && i.Entry == reagent ? i.StackCount : 0);
-                var repeatNum = (int) (numInBags/required);
+                var repeatNum = (int)(numInBags / required);
                 if (repeatNum < maxRepeat)
                     maxRepeat = repeatNum;
             }
@@ -162,19 +154,19 @@ namespace GarrisonButler.Objects
 
         public WoWSpell GetRecipeSpell()
         {
-            var skillLine = (SkillLine) TradeskillId;
-            if (!Enum.GetValues(typeof (SkillLine)).Cast<SkillLine>().Contains(skillLine))
+            var skillLine = (SkillLine)TradeskillId;
+            if (!Enum.GetValues(typeof(SkillLine)).Cast<SkillLine>().Contains(skillLine))
             {
                 GarrisonButler.Diagnostic("[DailyProfession] TradeSkillId {0} is not a valid tradeskill Id.",
                     TradeskillId);
             }
 
-            var skillLineId = (int) TradeskillId;
+            var skillLineId = (int)TradeskillId;
 
             List<SkillLine> skillLineIds = StyxWoW.Db[ClientDb.SkillLine]
                 .Select(r => r.GetStruct<SkillLineInfo.SkillLineEntry>())
                 .Where(s => s.ID == skillLineId || s.ParentSkillLineId == skillLineId)
-                .Select(s => (SkillLine) s.ID)
+                .Select(s => (SkillLine)s.ID)
                 .ToList();
 
             List<WoWSpell> recipes = SkillLineAbility.GetAbilities()
@@ -188,6 +180,11 @@ namespace GarrisonButler.Objects
 
             return recipes.FirstOrDefault(s => s.CreatesItemId == ItemId)
                    ?? recipes.FirstOrDefault(s => s.Id == ItemId);
+        }
+
+        public Objects.DailyProfession FromOld()
+        {
+            return new Objects.DailyProfession(Name, ItemId, SpellId, (Objects.DailyProfession.tradeskillID) TradeskillId, Activated);
         }
     }
 }

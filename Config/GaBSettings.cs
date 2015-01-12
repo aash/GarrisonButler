@@ -65,15 +65,15 @@ namespace GarrisonButler.Config
             ret.MailItems = new List<MailItem>();
             // Buildings generation, Ugly... but dynamic
             ret.BuildingsSettings = new List<BuildingSettings>();
-            foreach (buildings building in (buildings[]) Enum.GetValues((typeof (buildings))))
+            foreach (buildings building in (buildings[])Enum.GetValues((typeof(buildings))))
             {
-                string nameCurrent = BuildingSettings.nameFromBuildingID((int) building);
+                string nameCurrent = BuildingSettings.nameFromBuildingID((int)building);
                 if (ret.BuildingsSettings.All(b => b.Name != nameCurrent))
                 {
                     List<int> IDs =
-                        ((buildings[]) Enum.GetValues((typeof (buildings)))).Where(
-                            b => BuildingSettings.nameFromBuildingID((int) b) == nameCurrent)
-                            .Select(x => (int) x)
+                        ((buildings[])Enum.GetValues((typeof(buildings)))).Where(
+                            b => BuildingSettings.nameFromBuildingID((int)b) == nameCurrent)
+                            .Select(x => (int)x)
                             .ToList();
                     ret.BuildingsSettings.Add(new BuildingSettings(IDs.ToList()));
                 }
@@ -85,6 +85,31 @@ namespace GarrisonButler.Config
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
             return ret;
+        }
+        private GaBSettings(OldSettings.GaBSettings oldSettings)
+        {
+            ConfigVersion = GarrisonButler.Version;
+            ActivateBuildings = oldSettings.ActivateBuildings;
+            BuildingsSettings = oldSettings.BuildingsSettings.Select(b => b.FromOld()).ToList();
+            CompletedMissions = oldSettings.CompletedMissions;
+            ConfigVersion = oldSettings.ConfigVersion;
+            DailySettings = oldSettings.DailySettings.Select(d=> d.FromOld()).ToList();
+            DeleteCoffee = oldSettings.DeleteCoffee;
+            DeleteMiningPick = oldSettings.DeleteMiningPick;
+            ForceJunkSell = oldSettings.ForceJunkSell;
+            GarrisonCache = oldSettings.GarrisonCache;
+            HBRelogMode = oldSettings.HBRelogMode;
+            HarvestGarden = oldSettings.HarvestGarden;
+            HarvestMine = oldSettings.HarvestMine;
+            MailItems = oldSettings.MailItems.Select(m=> m.FromOld()).ToList();
+            RetrieveMail = oldSettings.RetrieveMail;
+            SalvageCrates = oldSettings.SalvageCrates;
+            SendMail = oldSettings.SendMail;
+            StartMissions = oldSettings.StartMissions;
+            TimeMinBetweenRun = oldSettings.TimeMinBetweenRun;
+            UseCoffee = oldSettings.UseCoffee;
+            UseGarrisonHearthstone = oldSettings.UseGarrisonHearthstone;
+            UseMiningPick = oldSettings.UseMiningPick;
         }
 
         public static GaBSettings Get()
@@ -166,18 +191,69 @@ namespace GarrisonButler.Config
             }
         }
 
+        private static OldSettings.GaBSettings LoadOld()
+        {
+            try
+            {
+                // try to load as old settings
+                var oldSettings = OldSettings.GaBSettings.LoadOnly();
+                if (oldSettings == null)
+                {
+                    GarrisonButler.Diagnostic("Couldn't load as old version");
+                }
+                else 
+                {
+                    if (oldSettings.ConfigVersion == null)
+                        GarrisonButler.Diagnostic("Couldn't load old version number.");
+                
+                    GarrisonButler.Diagnostic("Old version of settings detected.");
+                    return oldSettings;
+                }
+            }
+            catch (Exception)
+            {
+                GarrisonButler.Diagnostic("Couldn't see the settings as an old version.");
+            }
+            return null;
+        }
+
+        private static GaBSettings UpgradeIfPossible()
+        {
+            var oldSettings = LoadOld();
+            
+            if (oldSettings == null)
+                return null;
+
+            var newSettings = new GaBSettings(oldSettings);
+            return newSettings;
+        }
+
         public static void Load()
         {
             try
             {
                 GarrisonButler.Diagnostic("Loading configuration");
-                var reader =
-                    new XmlSerializer(typeof (GaBSettings));
-                var file =
-                    new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
-                currentSettings = (GaBSettings) reader.Deserialize(file);
+                //Trying to load and upgrade as old one first.
+                var upgraded = UpgradeIfPossible();
+                if (upgraded != null)
+                {
+                    GarrisonButler.Diagnostic("Updated settings to version {0}.", GarrisonButler.Version);
+                    currentSettings = upgraded;
+                    UpdateSettings(currentSettings);
+                    Save();
+                }
+                else
+                {
+                    GarrisonButler.Diagnostic("Loading settings from version {0}.", GarrisonButler.Version);
+                    var reader =
+                        new XmlSerializer(typeof (GaBSettings));
+                    var file =
+                        new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
+                    currentSettings = (GaBSettings)reader.Deserialize(file);
+                    file.Close();
+                    UpdateSettings(currentSettings);
+                }
                 GarrisonButler.Diagnostic("Configuration successfully loaded.");
-                UpdateSettings(currentSettings);
             }
             catch (Exception e)
             {

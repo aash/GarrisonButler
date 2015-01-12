@@ -42,7 +42,6 @@ namespace GarrisonButler
         private static Composite _combatBehavior;
         private static Composite _vendorBehavior;
         private static readonly WaitTimer ResetAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
-        private static WoWPoint _lastMoveTo;
         private static List<Building> _buildings;
         private static List<Mission> _missions;
         private static List<Follower> _followers;
@@ -61,12 +60,8 @@ namespace GarrisonButler
             new WoWPoint(5585.125, 4565.036, 135.9761), //level 3
         };
 
-        private static readonly WoWPoint allyMailbox = new WoWPoint(1927.694, 294.151, 88.96585);
-        private static readonly WoWPoint hordeMailbox = new WoWPoint(5580.682, 4570.392, 136.558);
-
-
-        private static bool test = true;
-        private static long cpt;
+        private static readonly WoWPoint AllyMailbox = new WoWPoint(1927.694, 294.151, 88.96585);
+        private static readonly WoWPoint HordeMailbox = new WoWPoint(5580.682, 4570.392, 136.558);
 
         public static DateTime NextCheck = DateTime.Now;
 
@@ -74,62 +69,53 @@ namespace GarrisonButler
         private static readonly WoWPoint FishingSpotAlly = new WoWPoint(2021.108, 187.5952, 84.55713);
         private static readonly WoWPoint FishingSpotHorde = new WoWPoint(5482.597, 4637.465, 136.1296);
 
-        private static bool init;
-
         public static bool ReadyToSwitch = false;
 
-        private static bool RestoreCompletedMission;
-        private static ActionHelpers.ActionsSequence mainSequence;
-        private static Stopwatch testStopwatch = new Stopwatch();
+        private static bool _restoreCompletedMission;
+        private static ActionHelpers.ActionsSequence _mainSequence;
+        private static Stopwatch _testStopwatch = new Stopwatch();
 
         #region MixedModeTimers
 
-        private static bool DailiesTriggered;
-        private static WaitTimer DailiesWaitTimer;
-        private static int DailiesWaitTimerValue = 30;
+        private static bool _dailiesTriggered;
+        private static WaitTimer _dailiesWaitTimer;
+        private const int DailiesWaitTimerValue = 30;
 
-        private static WaitTimer CacheWaitTimer;
-        private static bool CacheTriggered;
-        private static int CacheWaitTimerValue = 30;
-
-
-        private static WaitTimer StartOrderWaitTimer;
-        private static bool StartOrderTriggered;
-        private static int StartOrderWaitTimerValue = 30;
-
-        private static WaitTimer PickUpOrderWaitTimer;
-        private static bool PickUpOrderTriggered;
-        private static int PickUpOrderWaitTimerValue = 30;
+        private static WaitTimer _cacheWaitTimer;
+        private static bool _cacheTriggered;
+        private const int CacheWaitTimerValue = 30;
 
 
-        private static WaitTimer GardenWaitTimer;
-        private static int GardenWaitTimerValue = 30;
-        private static bool GardenTriggered;
+        private static WaitTimer _startOrderWaitTimer;
+        private static bool _startOrderTriggered;
+        private const int StartOrderWaitTimerValue = 30;
 
 
-        private static WaitTimer MineWaitTimer;
-        private static int MineWaitTimerValue = 30;
-        private static bool MineTriggered;
+        private static WaitTimer _gardenWaitTimer;
+        private const int GardenWaitTimerValue = 30;
+        private static bool _gardenTriggered;
 
-        private static WaitTimer MissionWaitTimer;
-        private static bool MissionTriggered;
-        private static int MissionWaitTimerValue = 30;
 
-        private static WaitTimer TurnInMissionWaitTimer;
-        private static bool TurnInMissionsTriggered;
-        private static int TurnInMissionWaitTimerValue = 30;
+        private static WaitTimer _mineWaitTimer;
+        private const int MineWaitTimerValue = 30;
+        private static bool _mineTriggered;
 
-        private static WaitTimer StartMissionWaitTimer;
-        private static bool StartMissionTriggered;
-        private static int StartMissionWaitTimerValue = 30;
 
-        private static WaitTimer SalvageWaitTimer;
-        private static bool SalvageTriggered;
-        private static int SalvageWaitTimerValue = 30;
+        private static WaitTimer _turnInMissionWaitTimer;
+        private static bool _turnInMissionsTriggered;
+        private const int TurnInMissionWaitTimerValue = 30;
 
-        private static int LastRoundWaitTimerValue = 30;
-        private static bool LastRoundTriggered;
-        private static WaitTimer LastRoundWaitTimer;
+        private static WaitTimer _startMissionWaitTimer;
+        private static bool _startMissionTriggered;
+        private const int StartMissionWaitTimerValue = 30;
+
+        private static WaitTimer _salvageWaitTimer;
+        private static bool _salvageTriggered;
+        private const int SalvageWaitTimerValue = 30;
+
+        private const int LastRoundWaitTimerValue = 30;
+        private static bool _lastRoundTriggered;
+        private static WaitTimer _lastRoundWaitTimer;
 
         #endregion
 
@@ -169,17 +155,17 @@ namespace GarrisonButler
                 InitializationMove();
                 GarrisonButler.Diagnostic("InitializationMove");
 
-                mainSequence = new ActionHelpers.ActionsSequence();
-                if(GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails, 15000, 1000));
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison, 10000, 1000));
-                mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000, 1000));
-                mainSequence.AddAction(InitializeBuildingsCoroutines());
-                mainSequence.AddAction(InitializeMissionsCoroutines());
-                mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
-                mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice")) mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem, 15000, 1000));
-                mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
-                mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
+                _mainSequence = new ActionHelpers.ActionsSequence();
+                if(GarrisonButler.NameStatic.ToLower().Contains("ice")) _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails, 15000, 1000));
+                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison, 10000, 1000));
+                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000, 1000));
+                _mainSequence.AddAction(InitializeBuildingsCoroutines());
+                _mainSequence.AddAction(InitializeMissionsCoroutines());
+                _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
+                _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
+                if (GarrisonButler.NameStatic.ToLower().Contains("ice")) _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem, 15000, 1000));
+                _mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
+                _mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
             }
@@ -188,19 +174,19 @@ namespace GarrisonButler
                 GarrisonButler.Warning(e.ToString());
             }
         }
-        private static WaitTimer vendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
+        private static readonly WaitTimer VendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
         private static Profile _currentProfile;
-        private static WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(15));
-        private static Stopwatch bagsFullAlertTimer = new Stopwatch();
+        private static readonly WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(15));
+        private static readonly Stopwatch BagsFullAlertTimer = new Stopwatch();
         private static async Task<bool> CheckBagsFull()
         {
             if (!CheckBagsFullTimer.IsFinished)
                 return false;
 
-            if (bagsFullAlertTimer.IsRunning)
+            if (BagsFullAlertTimer.IsRunning)
             {
-                if (bagsFullAlertTimer.Elapsed > TimeSpan.FromSeconds(35))
-                    bagsFullAlertTimer.Stop();
+                if (BagsFullAlertTimer.Elapsed > TimeSpan.FromSeconds(35))
+                    BagsFullAlertTimer.Stop();
                 else
                     return true;
             }
@@ -215,8 +201,8 @@ namespace GarrisonButler
                 // Without a timer it will spam Alert messages over and over
                 // Should probably have a way to hook in to the "ok" button
                 // but for now we will just wait 30s
-                bagsFullAlertTimer.Reset();
-                bagsFullAlertTimer.Start();
+                BagsFullAlertTimer.Reset();
+                BagsFullAlertTimer.Start();
                 Alert.Show("Bags space is low", "Bag space is low on this toon, please make room before GarrisonButler can continue. Min:3 Advised:10", 30, true, false);
                 GarrisonButler.Log("!!! Bag space is low, please make room before GarrisonButler can continue. Min:3 Advised:10 - Waiting 35s.");
                 
@@ -227,7 +213,7 @@ namespace GarrisonButler
         }
         private static void CheckForVendors()
         {
-            if (vendorCheckTimer.IsFinished)
+            if (VendorCheckTimer.IsFinished)
             {
                 GarrisonButler.Diagnostic("Checking for vendors...");
                 // load empty profile if none loaded
@@ -272,7 +258,7 @@ namespace GarrisonButler
                     }
                 }
                 GarrisonButler.Diagnostic("Checking for vendors... Done.");
-                vendorCheckTimer.Reset();
+                VendorCheckTimer.Reset();
             }
         }
 
@@ -280,7 +266,7 @@ namespace GarrisonButler
         internal static void OnStop()
         {
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
-            mainSequence = null;
+            _mainSequence = null;
             Navigator.NavigationProvider = nativeNavigation;
             customNavigation = null;
         }
@@ -380,7 +366,7 @@ namespace GarrisonButler
             if (await CheckBagsFull())
                 return true;
             
-            if (mainSequence == null)
+            if (_mainSequence == null)
             {
                 GarrisonButler.Warning("ERROR: mainSequence NULL");
                 return false;
@@ -398,7 +384,7 @@ namespace GarrisonButler
 
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
-            if (await mainSequence.ExecuteAction() == ActionResult.Running)
+            if (await _mainSequence.ExecuteAction() == ActionResult.Running)
             {
                 //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
@@ -535,7 +521,7 @@ namespace GarrisonButler
 
         private static async Task<bool> RestoreUiIfNeeded()
         {
-            if (RestoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
+            if (_restoreCompletedMission && MissionLua.GetNumberCompletedMissions() == 0)
             {
                 GarrisonButler.Diagnostic("RestoreUiIfNeeded RestoreCompletedMission called");
                 // Restore UI
@@ -545,9 +531,10 @@ namespace GarrisonButler
                              "GarrisonMissionFrame.MissionComplete.currentIndex = nil;" +
                              "GarrisonMissionFrame.MissionTab:Show();" +
                              "GarrisonMissionList_UpdateMissions();");
-                RestoreCompletedMission = false;
+                _restoreCompletedMission = false;
                 return true;
             }
+            await CommonCoroutines.SleepForLagDuration();
             return false;
         }
 
@@ -556,10 +543,10 @@ namespace GarrisonButler
             // loot everything.
             if (!GarrisonButler.LootIsOpen) return false;
 
-            var lootSlotInfos = new List<LootSlotInfo>();
+            var lootSlotInfo = new List<LootSlotInfo>();
             for (int i = 0; i < LootFrame.Instance.LootItems; i++)
             {
-                lootSlotInfos.Add(LootFrame.Instance.LootInfo(i));
+                lootSlotInfo.Add(LootFrame.Instance.LootInfo(i));
             }
 
             if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
@@ -568,8 +555,8 @@ namespace GarrisonButler
                 return !GarrisonButler.LootIsOpen;
             }))
             {
-                GarrisonButler.Log("Succesfully looted: ");
-                foreach (LootSlotInfo lootinfo in lootSlotInfos)
+                GarrisonButler.Log("Successfully looted: ");
+                foreach (LootSlotInfo lootinfo in lootSlotInfo)
                 {
                     GarrisonButler.Log(lootinfo.LootQuantity + "x " + lootinfo.LootName);
                 }

@@ -203,7 +203,7 @@ namespace GarrisonButler
                         "DeleteCursorItem(); " +
                     "end;"
             );
-
+            
             // To stop the task from continually running forever
             return ActionResult.Done;
         }

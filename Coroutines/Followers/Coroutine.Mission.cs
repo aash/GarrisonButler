@@ -257,7 +257,7 @@ namespace GarrisonButler
                          "GarrisonMissionList_UpdateMissions();");
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
-            TurnInMissionsTriggered = false;
+            _turnInMissionsTriggered = false;
             RefreshFollowers(true);
             RefreshMissions(true);
             return ActionResult.Refresh;

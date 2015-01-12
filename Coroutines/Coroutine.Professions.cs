@@ -102,7 +102,7 @@ namespace GarrisonButler
             if (await DoCd(daily))
                 return ActionResult.Running;
 
-            DailiesTriggered = false;
+            _dailiesTriggered = false;
             return ActionResult.Refresh;
         }
 
