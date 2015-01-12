@@ -254,7 +254,9 @@ namespace GarrisonButler
 
         public static async Task<ActionResult> MailItem(List<MailItem> mailItems)
         {
-            if (!MailFrame.Instance.IsVisible)
+            MailFrame mailFrame = MailFrame.Instance;
+
+            if (!mailFrame.IsVisible)
             {
                 List<WoWGameObject> MailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
                     .GetEmptyIfNull()
@@ -275,15 +277,15 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
             }
 
-            MailFrame mailFrame = MailFrame.Instance;
+            
 
             //Splitting list based on recipients
-            var MailsPerRecipient = mailItems
+            var mailsPerRecipient = mailItems
                 .GetEmptyIfNull()
-                .GroupBy(i => i.Recipient)
+                .GroupBy(i => i.Recipient.Value)
                 .Select(x=> x.Select(i=> i))
                 .ToList();
-            foreach (var mailsRecipient in MailsPerRecipient)
+            foreach (var mailsRecipient in mailsPerRecipient)
             {
                 // list all items to send to this recipient
                 var listItems = new List<WoWItem>();
