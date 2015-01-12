@@ -526,7 +526,7 @@ namespace GarrisonButler
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
 
-            if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+            if (!await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
                 var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
                 if (!res)
