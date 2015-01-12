@@ -323,7 +323,7 @@ namespace GarrisonButler.Objects
         /// <returns></returns>
         private static IEnumerable<WoWItem> GetAllItems(uint itemId)
         {
-            return StyxWoW.Me.BagItems.Where(i => i.IsMailable() && i.Entry == itemId);
+            return StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.IsMailable() && i.Entry == itemId);
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace GarrisonButler.Objects
         private static long GetNumberItemInBags(uint itemId)
         {
             return
-                StyxWoW.Me.BagItems.Sum(i => i.IsMailable() && i.Entry == itemId ? i.StackCount : 0);
+                StyxWoW.Me.BagItems.GetEmptyIfNull().Sum(i => i.IsMailable() && i.Entry == itemId ? i.StackCount : 0);
         }
 
         /// <summary>
@@ -344,7 +344,7 @@ namespace GarrisonButler.Objects
         /// <param name="itemdId"></param>
         private static void SplitItemStack(int amount, uint itemdId)
         {
-            var possibleStacks = StyxWoW.Me.BagItems.Where(i => i.Entry == itemdId && i.StackCount >= amount);
+            var possibleStacks = StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemdId && i.StackCount >= amount);
             if (!possibleStacks.Any())
                 return;
 

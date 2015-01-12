@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,19 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool IsProtected(this WoWItem item)
         {
-            return ProtectedItemsManager.Contains(item.Entry);
+            var isProtected = false;
+            try
+            {
+                if(item != null)
+                    isProtected = ProtectedItemsManager.Contains(item.Entry);
+            }
+            catch (Exception e)
+            {
+                GarrisonButler.Warning("[ItemsExtensions] Error while checking ProtectedItemsManager. Will consider item as protected to be safe.");
+                GarrisonButler.Diagnostic("[ItemsExtensions] Error of type: ", e.GetType());
+                isProtected = true;
+            }
+            return isProtected;
         }
     }
 }
