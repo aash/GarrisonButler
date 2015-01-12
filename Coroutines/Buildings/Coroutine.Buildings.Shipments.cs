@@ -371,14 +371,21 @@ namespace GarrisonButler
                 // Activated by user ?
                 if (!buildingsettings.CanStartOrder)
                 {
-                    GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Deactivated in user settings: {1}", building.id, building.name);
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+                if (building.workFrameWorkAroundTries >= Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
+                {
+                    GarrisonButler.Warning("[ShipmentStart,{0}] Building has been blacklisted due to reaching maximum Blizzard Workframe Bug workaround tries ({1})",
+                        building.id, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                     return new Tuple<bool, Building>(false, null);
                 }
 
                 // No Shipment left to start
                 if (building.NumberShipmentLeftToStart() <= 0)
                 {
-                    GarrisonButler.Diagnostic("[ShipmentStart] No shipment left to start: {0}", building.name);
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] No shipment left to start: {1}", building.id, building.name);
                     return new Tuple<bool, Building>(false, null);
                 }
 
@@ -387,10 +394,10 @@ namespace GarrisonButler
 
                 if (!shipmentObjectFound.completedPreQuest)
                 {
-                    GarrisonButler.Warning("[ShipmentStart] Cannot collect shipments until pre-quest is done: {0}",
-                        building.name);
-                    GarrisonButler.Diagnostic("[ShipmentStart] preQuest not completed A={1} H={2}: {0}",
-                        building.name, shipmentObjectFound.shipmentPreQuestIdAlliance,
+                    GarrisonButler.Warning("[ShipmentStart,{0}] Cannot collect shipments until pre-quest is done: {1}",
+                        building.id, building.name);
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] preQuest not completed A={2} H={3}: {1}",
+                        building.id, building.name, shipmentObjectFound.shipmentPreQuestIdAlliance,
                         shipmentObjectFound.shipmentPreQuestIdHorde);
                     return new Tuple<bool, Building>(false, null);
                 }
@@ -400,8 +407,8 @@ namespace GarrisonButler
                 if (building.isBuilding || building.canActivate)
                 {
                     GarrisonButler.Diagnostic(
-                        "[ShipmentStart] Building under construction, can't start work order: {0}",
-                        building.name);
+                        "[ShipmentStart,{0}] Building under construction, can't start work order: {1}",
+                        building.id, building.name);
                     return new Tuple<bool, Building>(false, null);
                 }
                 int MaxToStart = GetMaxShipmentToStart(building);
@@ -410,7 +417,7 @@ namespace GarrisonButler
                 if (MaxToStart <= 0)
                 {
                     GarrisonButler.Diagnostic(
-                        "[ShipmentStart] Can't start more work orders.",
+                        String.Format("[ShipmentStart,{0}] Can't start more work orders.", building.id),
                         building.name,
                         building.shipmentsTotal,
                         buildingsettings.MaxCanStartOrder);
@@ -425,8 +432,8 @@ namespace GarrisonButler
                 //    return new Tuple<bool, Building>(false, null);
                 //}
 
-                GarrisonButler.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
-                    MaxToStart, building.name);
+                GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found {1} new work orders to start: {2}",
+                    building.id, MaxToStart, building.name);
                 return new Tuple<bool, Building>(true, building);
             });
         }
@@ -487,12 +494,18 @@ namespace GarrisonButler
 
         private static async Task<ActionResult> StartShipment(Building building)
         {
+            if (building == null)
+            {
+                GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
+                return ActionResult.Done;
+            }
+
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
                 await
                     MoveTo(building.Pnj,
-                        "[ShipmentStart] Could not find unit (" + building.PnjId + "), moving to default location.");
+                        String.Format("[ShipmentStart,{0}] Could not find unit ({1}), moving to default location.", building.id, building.PnjId));
                 return ActionResult.Running;
             }
 
@@ -512,22 +525,33 @@ namespace GarrisonButler
             });
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
+
             if (!await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
                 var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
                 if (!res)
                 {
-                    unit.Interact(); 
+                    unit.Interact();
                     IfGossip(unit);
                 }
                 return res;
             }))
             {
+                if (building.workFrameWorkAroundTries < Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
+                    building.workFrameWorkAroundTries++;
+                else
+                {
+                    GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
+                        building.id, building.name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                    return ActionResult.Done;
+                }
                 GarrisonButler.Warning(
-                    "[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
+                    "[ShipmentStart,{0}] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
+                    building.id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                 await WorkAroundBugFrame();
                 return ActionResult.Running;
             }
+            building.workFrameWorkAroundTries = 0;
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
@@ -588,11 +612,20 @@ namespace GarrisonButler
         }
         private static async Task WorkAroundBugFrame()
         {
-            Buddy.Coroutines.Coroutine.Wait(6000, () =>
+            bool keepGoing = true;
+            System.Diagnostics.Stopwatch workaroundTimer = new System.Diagnostics.Stopwatch();
+            workaroundTimer.Start();
+            
+            // Total time to try workaround is 5s
+            // Need to do it this way because MoveToTable is a Task which returns true
+            // when it needs to do more work (such as between MoveTo pulses)
+            while(keepGoing && (workaroundTimer.ElapsedMilliseconds < 5000))
             {
-                MoveToTable();
-                return false;
-            });
+                Task<bool> task = MoveToTable();
+                Buddy.Coroutines.ExternalTaskWaitResult<bool> result = await Buddy.Coroutines.Coroutine.ExternalTask<bool>(task, 5000);
+                keepGoing = result.Completed ? result.Result : false;
+                await Buddy.Coroutines.Coroutine.Yield();
+            }
         }
 
         private static void IfGossip(WoWUnit pnj)
