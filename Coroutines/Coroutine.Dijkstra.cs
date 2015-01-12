@@ -135,7 +135,7 @@ namespace GarrisonButler
                     throw new ArgumentException("Ending node must be in graph.");
 
                 ProcessGraph(_movementGraph, starting);
-                WoWPoint[] tempPath = ExtractPathWoW(_movementGraph, ending);
+                WoWPoint[] tempPath = ExtractPathWoW(_movementGraph, ending, to);
 
                 PathGenerationStopwatch.Stop();
                 GarrisonButler.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
@@ -154,20 +154,17 @@ namespace GarrisonButler
                 WoWPoint starting = ClosestToNodes(from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
+                
+                ProcessGraph(_movementGraph, starting);
 
                 var EndingPoints = new List<WoWPoint>();
+                List<WoWPoint[]> pathsList = new List<WoWPoint[]>();
                 for (int i = 0; i < to.Length; i++)
                 {
-                    EndingPoints.Add(ClosestToNodes(to[i]));
-                    if (_movementGraph.Nodes.All(n => n.Key != EndingPoints[i]))
+                    var endingPoint = ClosestToNodes(to[i]);
+                    if (_movementGraph.Nodes.All(n => n.Key != endingPoint))
                         throw new ArgumentException("Ending node must be in graph.");
-                }
-
-                ProcessGraph(_movementGraph, starting);
-                List<WoWPoint[]> pathsList = new List<WoWPoint[]>();
-                foreach (var endingPoint in EndingPoints)
-                {
-                    pathsList.Add(ExtractPathWoW(_movementGraph, endingPoint));
+                    pathsList.Add(ExtractPathWoW(_movementGraph, endingPoint,to[i]));
                 }
 
                 PathGenerationStopwatch.Stop();
@@ -264,9 +261,11 @@ namespace GarrisonButler
                 return path.ToArray();
             }
 
-            private static WoWPoint[] ExtractPathWoW(Graph graph, WoWPoint target)
+            private static WoWPoint[] ExtractPathWoW(Graph graph, WoWPoint target, WoWPoint endReal)
             {
                 var path = new List<WoWPoint>();
+
+                    path.Add(endReal);
                 Node u = graph.Nodes.First(n => n.Key == target).Value;
 
                 while (u.Previous != null)
@@ -275,10 +274,6 @@ namespace GarrisonButler
                     u = u.Previous;
                 }
                 path.Reverse();
-                for (int index = 0; index < path.Count; index++)
-                {
-                    WoWPoint vector3 = path[index];
-                }
                 return path.ToArray();
             }
 
