@@ -356,22 +356,120 @@ namespace GarrisonButler
             return new Tuple<bool, Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(false, null);
         }
 
-        internal static async Task<ActionResult> PickUpOrStartAtLeastOneShipment(
-            Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>> input)
+        //internal static async Task<ActionResult> PickUpOrStartAtLeastOneShipment(
+        //    Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>> input)
+        //{
+        //    Tuple<bool, WoWGameObject> canPickUp = input.Item2;
+        //    Tuple<bool, Building> canStart = input.Item1;
+
+        //    if (canPickUp.Item1)
+        //        if (await PickUpShipment(canPickUp.Item2))
+        //            return ActionResult.Running;
+
+        //    if (canStart.Item1)
+        //        if (await StartShipment(canStart.Item2))
+        //            return ActionResult.Running;
+
+        //    return ActionResult.Done; // Done
+        //}
+
+        internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
-            Tuple<bool, WoWGameObject> canPickUp = input.Item2;
-            Tuple<bool, Building> canStart = input.Item1;
-
-            if (canPickUp.Item1)
-                if (await PickUpShipment(canPickUp.Item2))
-                    return ActionResult.Running;
-
-            if (canStart.Item1)
-                if (await StartShipment(canStart.Item2))
-                    return ActionResult.Running;
-
-            return ActionResult.Done; // Done
+            var sequence = new ActionHelpers.ActionsSequence();
+            foreach (var building in _buildings)
+            {
+                sequence.AddAction(new ActionHelpers.ActionOnTimerCached<WoWGameObject>(PickUpShipment, CanPickUpShipmentGeneration(building)));
+                sequence.AddAction(new ActionHelpers.ActionOnTimerCached<Building>(StartShipment, CanStartShipmentGeneration(building)));
+            }
+            return sequence;
         }
+        internal static ActionHelpers.ActionsSequence PickUpOrStartSequence(Building building)
+        {
+            var sequence = new ActionHelpers.ActionsSequence();
+
+            sequence.AddAction(new ActionHelpers.ActionOnTimerCached<WoWGameObject>(PickUpShipment, CanPickUpShipmentGeneration(building)));
+            sequence.AddAction(new ActionHelpers.ActionOnTimerCached<Building>(StartShipment, CanStartShipmentGeneration(building)));
+
+            return sequence;
+        }
+
+
+        internal static Func<Tuple<bool, Building>> CanStartShipmentGeneration(Building building)
+        {
+            return new Func<Tuple<bool, Building>>(() =>
+            {
+                if (building == null)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart] Building is null, either not built or not properly scanned.");
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+                building.Refresh();
+
+                // Activated by user ?
+                if (!GaBSettings.Get().GetBuildingSettings(building.id).CanStartOrder)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart] Deactivated in user settings: {0}", building.name);
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+                // No Shipment left to start
+                if (building.NumberShipmentLeftToStart() <= 0)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart] No shipment left to start: {0}", building.name);
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+                // Structs cannot be null
+                Shipment shipmentObjectFound = ShipmentsMap.FirstOrDefault(s => s.buildingIds.Contains(building.id));
+
+                if (!shipmentObjectFound.completedPreQuest)
+                {
+                    GarrisonButler.Warning("[ShipmentStart] Cannot collect shipments until pre-quest is done: {0}",
+                        building.name);
+                    GarrisonButler.Diagnostic("[ShipmentStart] preQuest not completed A={1} H={2}: {0}",
+                        building.name, shipmentObjectFound.shipmentPreQuestIdAlliance,
+                        shipmentObjectFound.shipmentPreQuestIdHorde);
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+
+                // Under construction
+                if (building.isBuilding || building.canActivate)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart] Building under construction, can't start work order: {0}",
+                        building.name);
+                    return new Tuple<bool, Building>(false, null);
+                }
+                int MaxToStart = GetMaxShipmentToStart(building);
+
+                // max start by user ?
+                if (MaxToStart <= 0)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart] Reached limit of work orders started: {0} - current# {1} max {2} ",
+                        building.name,
+                        building.shipmentsTotal,
+                        GaBSettings.Get().GetBuildingSettings(building.id).MaxCanStartOrder);
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+                // Do I fulfill the conditions to complete the order? 
+                if (!building.canCompleteOrder())
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart] Do not fulfill the requirements to start a new work order: {0}", building.name);
+                    return new Tuple<bool, Building>(false, null);
+                }
+
+                GarrisonButler.Diagnostic("[ShipmentStart] Found {0} new work orders to start: {1}",
+                    MaxToStart, building.name);
+                return new Tuple<bool, Building>(true, building);
+            });
+        }
+
 
         internal static Tuple<bool, Building> CanStartShipment(Building building)
         {
@@ -443,6 +541,60 @@ namespace GarrisonButler
         }
 
 
+
+
+
+        internal static Func<Tuple<bool, WoWGameObject>> CanPickUpShipmentGeneration(Building building)
+        {
+            return new Func<Tuple<bool, WoWGameObject>>(() =>
+            {
+                if (building == null)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentPickUp] Building is null, either not built or not properly scanned.");
+                    return new Tuple<bool, WoWGameObject>(false, null);
+                }
+
+                building.Refresh();
+
+                // No Shipment ready
+                if (building.shipmentsReady <= 0)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.name);
+                    return new Tuple<bool, WoWGameObject>(false, null);
+                }
+
+                // Activated by user ?
+                if (!GaBSettings.Get().GetBuildingSettings(building.id).CanCollectOrder)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.name);
+                    return new Tuple<bool, WoWGameObject>(false, null);
+                }
+
+                // Get the list of the building objects
+                WoWGameObject buildingAsObject =
+                    ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                        .Where(o => building.Displayids.Contains(o.DisplayId))
+                        .OrderBy(o => o.DistanceSqr)
+                        .FirstOrDefault();
+                if (buildingAsObject == default(WoWGameObject))
+                {
+                    GarrisonButler.Diagnostic("[ShipmentPickUp] Building could not be found in the area: {0}",
+                        building.name);
+                    foreach (uint id in building.Displayids)
+                    {
+                        GarrisonButler.Diagnostic("[ShipmentPickUp]     ID {0}", id);
+                    }
+                    return new Tuple<bool, WoWGameObject>(false, null);
+                }
+
+                GarrisonButler.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}",
+                    building.shipmentsReady,
+                    building.name);
+                return new Tuple<bool, WoWGameObject>(true, buildingAsObject);
+            });
+        }
+
         internal static Tuple<bool, WoWGameObject> CanPickUpShipment(Building building)
         {
             if (building == null)
@@ -488,7 +640,7 @@ namespace GarrisonButler
             return new Tuple<bool, WoWGameObject>(true, buildingAsObject);
         }
 
-        private static async Task<bool> StartShipment(Building building)
+        private static async Task<ActionResult> StartShipment(Building building)
         {
             WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
@@ -496,11 +648,11 @@ namespace GarrisonButler
                 await
                     MoveTo(building.Pnj,
                         "[ShipmentStart] Could not find unit (" + building.PnjId + "), moving to default location.");
-                return true;
+                return ActionResult.Running;
             }
 
             if (await MoveToInteract(unit) == ActionResult.Running)
-                return true;
+                return ActionResult.Running;
 
             unit.Interact();
 
@@ -529,7 +681,7 @@ namespace GarrisonButler
                 GarrisonButler.Warning(
                     "[ShipmentStart] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.");
                 await WorkAroundBugFrame();
-                return true;
+                return ActionResult.Running;
             }
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
 
@@ -545,26 +697,31 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            if (!await Buddy.Coroutines.Coroutine.Wait(10000, () =>
+
+            for (int i = 0; i < 10; i++)
             {
-                //This diag message was causing a lot of spam
-                //GarrisonButler.Diagnostic("[ShipmentStart] Waiting for WoW shipment data to refresh newly started.");
                 var buildingShipment = _buildings.FirstOrDefault(b => b.id == building.id);
                 if (buildingShipment != null)
                 {
+                    InterfaceLua.ToggleLandingPage();
+                    await CommonCoroutines.SleepForLagDuration();
+                    await CommonCoroutines.SleepForRandomUiInteractionTime();
                     buildingShipment.Refresh();
+                    InterfaceLua.ToggleLandingPage();
                     var max = GetMaxShipmentToStart(buildingShipment);
-                    return max == 0;
+                    if (max == 0)
+                    {
+                        GarrisonButler.Log("[ShipmentStart] Finished starting work orders at {0}.", buildingShipment.name);
+                        return ActionResult.Done;
+                    }
+                    else
+                    {
+                        GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
+                    }
                 }
-                GarrisonButler.Diagnostic("[ShipmentStart] buildingShipment null.");
-                return false;
-            }))
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] Mismatch starting work orders.");
+                await Buddy.Coroutines.Coroutine.Yield();
             }
-            building.Refresh();
-            _startOrderTriggered = false;
-            return false; // done here
+            return ActionResult.Refresh;
         }
 
         private static int GetMaxShipmentToStart(Building building)
@@ -608,7 +765,7 @@ namespace GarrisonButler
         }
 
 
-        private static async Task<bool> PickUpShipment(WoWGameObject building)
+        private static async Task<ActionResult> PickUpShipment(WoWGameObject building)
         {
             WoWPoint locationToLookAt = WoWPoint.Empty;
 
@@ -638,30 +795,47 @@ namespace GarrisonButler
                     await
                         MoveTo(building.Location,
                             "[ShipmentCollect] Moving to Building to search for shipment to pick up.") == ActionResult.Running)
-                    return true;
+                    return ActionResult.Running;
             }
             else
             {
-                if (await HarvestWoWGameObjectCachedLocation(shipmentToCollect) == ActionResult.Running)
-                    return true;
+                var actionResult = await HarvestWoWGameObjectCachedLocation(shipmentToCollect);
+                if (actionResult == ActionResult.Running)
+                    return ActionResult.Running;
 
-                await CommonCoroutines.SleepForLagDuration();
-                await Buddy.Coroutines.Coroutine.Wait(10000, () =>
+                InterfaceLua.ToggleLandingPage();
+                await CommonCoroutines.SleepForRandomUiInteractionTime();
+
+                if (actionResult == ActionResult.Refresh)
+                    return ActionResult.Refresh;
+
+
+
+                for (int i = 0; i < 10; i++)
                 {
-                    //This diag was causing a lot of spam
-                    //GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for WoW shipment data to refresh newly collected.");
                     var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
                     if (buildingShipment != null)
                     {
+                        InterfaceLua.ToggleLandingPage();
+                        await CommonCoroutines.SleepForLagDuration();
+                        await CommonCoroutines.SleepForRandomUiInteractionTime();
                         buildingShipment.Refresh();
-                        return buildingShipment.shipmentsReady > 0;
+                        InterfaceLua.ToggleLandingPage();
+                        if (buildingShipment.shipmentsReady == 0)
+                        {
+                            GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
+                            return ActionResult.Done;
+                        }
+                        else
+                        {
+                            GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
+                        }
                     }
-                    GarrisonButler.Diagnostic("[ShipmentCollect] buildingShipment null.");
-                    return false;
-                });
-                return false; // Done here
+                    await Buddy.Coroutines.Coroutine.Yield();
+                }
+                return ActionResult.Refresh;
             }
-            return false; // should never reach that point!
+            return ActionResult.Done; // should never reach that point!
         }
 
         private struct Shipment

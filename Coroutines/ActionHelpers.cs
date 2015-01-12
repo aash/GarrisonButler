@@ -104,9 +104,9 @@ namespace GarrisonButler.Coroutines
                 _action = action;
                 _condition = condition;
                 _resCondition = default(Tuple<bool, T>);
-                _waitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(1000));
-                _waitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(2000));
-                _waitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(10));
+                _waitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(3000));
+                _waitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(10000));
+                _waitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(100));
                 _lastResult = ActionResult.Init;
                 _preActions = preAction;
             }
@@ -240,8 +240,11 @@ namespace GarrisonButler.Coroutines
                 {
                     //count++;
                     //GarrisonButler.Diagnostic("ActionSequence.ExecuteAction():   #" + count + " - " + actionBasic.ToString());
-                    if (await actionBasic.ExecuteAction() == ActionResult.Running)
+                    var result = await actionBasic.ExecuteAction();
+                    if (result == ActionResult.Running)
                         return ActionResult.Running;
+                    if (result == ActionResult.Refresh)
+                        return ActionResult.Refresh;
                 }
                 return ActionResult.Done;
             }

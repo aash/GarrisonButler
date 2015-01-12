@@ -124,9 +124,7 @@ namespace GarrisonButler
                             }, 10000, 30000)));
 
                 // Take care of mine shipments
-                buildingsActionsSequence.AddAction(
-                    new ActionHelpers.ActionOnTimerCached<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(mine), 10000));
+                buildingsActionsSequence.AddAction(PickUpOrStartSequence(mine));
             }
             if (garden != default(Building))
             {
@@ -136,14 +134,10 @@ namespace GarrisonButler
                         CanRunGarden, 5000));
 
                 // Take care of garden shipments
-                buildingsActionsSequence.AddAction(
-                    new ActionHelpers.ActionOnTimerCached<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                        PickUpOrStartAtLeastOneShipment, () => CanPickUpOrStartAtLeastOneShipmentAt(garden), 10000));
+                buildingsActionsSequence.AddAction(PickUpOrStartSequence(garden)); 
             }
             // Take care of all shipments
-            buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimerCached<Tuple<Tuple<bool, Building>, Tuple<bool, WoWGameObject>>>(
-                    PickUpOrStartAtLeastOneShipment, CanPickUpOrStartAtLeastOneShipmentFromAll, 10000));
+            buildingsActionsSequence.AddAction(PickUpOrStartSequenceAll());
 
             // Garrison cache
             buildingsActionsSequence.AddAction(

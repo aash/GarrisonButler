@@ -80,7 +80,7 @@ namespace GarrisonButler
         {
             base.OnSetAsCurrent();
             _stuckHandlerGaB = new StuckHandlerGaB(Coroutine.nativeNavigation.StuckHandler);
-            this.StuckHandler = _stuckHandlerGaB;
+            this.StuckHandler = new StuckHandlerDummy();
             GarrisonButler.Log("Custom navigation System activated!");
         }
 
@@ -322,6 +322,19 @@ namespace GarrisonButler
         public override bool AtLocation(WoWPoint point1, WoWPoint point2)
         {
             return Coroutine.Dijkstra.ClosestToNodes(point1).Distance(Coroutine.Dijkstra.ClosestToNodes(point2)) < 3;
+        }
+
+        public class StuckHandlerDummy : StuckHandler
+        {
+            public override bool IsStuck()
+            {
+                return false;
+            }
+
+            public override void Unstick()
+            {
+                return;
+            }
         }
 
         public class StuckHandlerGaB : StuckHandler

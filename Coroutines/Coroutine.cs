@@ -386,7 +386,8 @@ namespace GarrisonButler
 
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
-            if (await _mainSequence.ExecuteAction() == ActionResult.Running)
+            var resultActions = await _mainSequence.ExecuteAction();
+            if (resultActions == ActionResult.Running || resultActions == ActionResult.Refresh)
             {
                 //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
