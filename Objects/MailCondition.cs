@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Forms.VisualStyles;
 using System.Xml.Serialization;
 using GarrisonButler.API;
+using GarrisonButler.Libraries;
 using JetBrains.Annotations;
 using Styx;
 using Styx.CommonBot.Coroutines;
@@ -316,24 +317,24 @@ namespace GarrisonButler.Objects
         #region Helpers
 
         /// <summary>
-        /// Returns all the stacks of the specified itemId in bags.
+        /// Returns all the stacks of the specified itemId in bags which can be mailed (isMailable extension).
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
         private static IEnumerable<WoWItem> GetAllItems(uint itemId)
         {
-            return StyxWoW.Me.BagItems.Where(i => i != null && i.IsValid && i.Entry == itemId);
+            return StyxWoW.Me.BagItems.Where(i => i.IsMailable() && i.Entry == itemId);
         }
 
         /// <summary>
-        /// Returns number of specified itemId in bags.
+        /// Returns number of specified itemId in bags which can be mailed (isMailable extension).
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
         private static long GetNumberItemInBags(uint itemId)
         {
             return
-                StyxWoW.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == itemId ? i.StackCount : 0);
+                StyxWoW.Me.BagItems.Sum(i => i.IsMailable() && i.Entry == itemId ? i.StackCount : 0);
         }
 
         /// <summary>
