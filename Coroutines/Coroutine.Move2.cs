@@ -51,23 +51,26 @@ namespace GarrisonButler
         {
             if (StyxWoW.Me.Mounted)
             {
-                if (path == null || path.Path == null || (path.Index < 0 || path.Index >= path.Path.Points.Length))
-                    return MoveResult.Failed;
+            //    if (path == null || path.Path == null || (path.Index < 0 || path.Index >= path.Path.Points.Length))
+            //        return MoveResult.Failed;
 
-                WoWUnit activeMover = WoWMovement.ActiveMover;
-                if (activeMover == null)
-                    return MoveResult.Failed;
+            //    WoWUnit activeMover = WoWMovement.ActiveMover;
+            //    if (activeMover == null)
+            //        return MoveResult.Failed;
                 double pathPrecision = StyxWoW.Me.Mounted ? 5 : 3;
-                if (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision)
+                int max = 0;
+                while (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && max < 5)
                 {
                     ++path.Index;
-                    return MoveResult.Moved;
+                    max++;
+                    //return MoveResult.Moved;
                 }
 
-                Vector3 vector3 = path.Path.Points[path.Index];
-                Navigator.PlayerMover.MoveTowards(vector3);
-                return MoveResult.Moved;
+            //    Vector3 vector3 = path.Path.Points[path.Index];
+            //    Navigator.PlayerMover.MoveTowards(vector3);
+            //    return MoveResult.Moved;
             }
+            //GarrisonButler.Log("Native MovePath");
 
             MoveResult res = base.MovePath(path);
             return res;
@@ -77,6 +80,7 @@ namespace GarrisonButler
         {
             base.OnSetAsCurrent();
             _stuckHandlerGaB = new StuckHandlerGaB(Coroutine.nativeNavigation.StuckHandler);
+            this.StuckHandler = _stuckHandlerGaB;
             GarrisonButler.Log("Custom navigation System activated!");
         }
 
@@ -103,11 +107,15 @@ namespace GarrisonButler
                 && _lastMoveResult != null // always true
                 && _lastMoveResult == MoveResult.ReachedDestination)
                 return MoveResult.ReachedDestination;
-            
+
+            if (_lastMoveResult == MoveResult.PathGenerated)
+            {
+                _stuckHandlerGaB.Reset();
+            }
             CurrentDestination = location;
             if (location == WoWPoint.Zero)
                 return MoveResult.Failed;
-            
+
             WoWUnit activeMover = WoWMovement.ActiveMover;
             if (activeMover == null)
                 return MoveResult.Failed;
@@ -127,34 +135,36 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("Is stuck :O ! ");
                 _stuckHandlerGaB.Unstick();
                 _stuckHandlerGaB.Reset();
+                _lastMoveResult = MoveResult.UnstuckAttempt;
                 return MoveResult.UnstuckAttempt;
             }
             if (moverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
+                _lastMoveResult = MoveResult.Moved;
                 return MoveResult.Moved;
             }
             if (Mount.ShouldMount(location))
             {
                 Mount.StateMount(getDestination);
             }
-            if (_waitTimer1.IsFinished)
-            {
-                WoWGameObject wowgameObject =
-                    ObjectManager.GetObjectsOfType<WoWGameObject>(false, false)
-                        .FirstOrDefault(param0 =>
-                        {
-                            if (param0.SubType == WoWGameObjectType.Door && ((WoWDoor) param0.SubObj).IsClosed &&
-                                (!param0.Locked && param0.WithinInteractRange) && param0.CanUse())
-                                return param0.CanUseNow();
-                            return false;
-                        });
-                if (wowgameObject != null)
-                {
-                    wowgameObject.Interact();
-                }
-                _waitTimer1.Reset();
-            }
+            //if (_waitTimer1.IsFinished)
+            //{
+            //    WoWGameObject wowgameObject =
+            //        ObjectManager.GetObjectsOfType<WoWGameObject>(false, false)
+            //            .FirstOrDefault(param0 =>
+            //            {
+            //                if (param0.SubType == WoWGameObjectType.Door && ((WoWDoor) param0.SubObj).IsClosed &&
+            //                    (!param0.Locked && param0.WithinInteractRange) && param0.CanUse())
+            //                    return param0.CanUseNow();
+            //                return false;
+            //            });
+            //    if (wowgameObject != null)
+            //    {
+            //        wowgameObject.Interact();
+            //    }
+            //    _waitTimer1.Reset();
+            //}
             bool flag = _currentMovePath2 == null || _currentMovePath2.Path.End.DistanceSqr(location) > 9.0f;
 
             //else if (waitTimer2.IsFinished && Unnamed2(CurrentMovePath2, MoverLocation))
@@ -165,23 +175,32 @@ namespace GarrisonButler
             //}
             if (!flag)
             {
-                return MovePath(_currentMovePath2);
+                _stuckHandlerGaB.Reset();
+                _lastMoveResult = MovePath(_currentMovePath2);
+                return _lastMoveResult;
             }
 
             WoWPoint startFp;
             WoWPoint endFp;
-            _stuckHandlerGaB.Reset();
             if (moverLocation.DistanceSqr(location) > 100000 &&
                 FlightPaths.ShouldTakeFlightpath(moverLocation, location, activeMover.MovementInfo.RunSpeed) &&
                 FlightPaths.SetFlightPathUsage(moverLocation, location, out startFp, out endFp))
-                return MoveResult.PathGenerated;
+            {
+                _stuckHandlerGaB.Reset();
+                _lastMoveResult = MoveResult.PathGenerated;
+                return _lastMoveResult;
+            }
             PathFindResult path2 = FindPath(moverLocation, location);
             if (!path2.Succeeded)
             {
-                return MoveResult.PathGenerationFailed;
+                _lastMoveResult = MoveResult.PathGenerationFailed;
+                return _lastMoveResult;
             }
             _currentMovePath2 = new MeshMovePath(path2);
-            return MoveResult.PathGenerated;
+            _stuckHandlerGaB.Reset();
+
+            _lastMoveResult = MoveResult.PathGenerated;
+            return _lastMoveResult;
         }
 
         private bool Unnamed2(MeshMovePath param0, Vector3 param1)
@@ -353,6 +372,7 @@ namespace GarrisonButler
 
             public override void Unstick()
             {
+                GarrisonButler.Diagnostic("Calling native unstick.");
                 for (int i = 0; i < _cpt; i++)
                 {
                     _native.Unstick();

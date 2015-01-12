@@ -156,14 +156,16 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
-                if(GarrisonButler.NameStatic.ToLower().Contains("ice")) _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails, 15000, 1000));
+                if(GarrisonButler.NameStatic.ToLower().Contains("ice")) 
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTPToGarrison, 10000, 1000));
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000, 1000));
                 _mainSequence.AddAction(InitializeBuildingsCoroutines());
                 _mainSequence.AddAction(InitializeMissionsCoroutines());
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice")) _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem, 15000, 1000));
+                if (GarrisonButler.NameStatic.ToLower().Contains("ice")) 
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem, 15000, 1000));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 
@@ -314,7 +316,7 @@ namespace GarrisonButler
 
         public static async Task<bool> RootLogic()
         {
-            ModuleVersion configVersion = GaBSettings.Get().ConfigVersion;
+           //ModuleVersion configVersion = GaBSettings.Get().ConfigVersion;
             /*if (configVersion.Build != GarrisonButler.Version.Build ||
                 configVersion.Major != GarrisonButler.Version.Major ||
                 configVersion.Minor != GarrisonButler.Version.Minor ||

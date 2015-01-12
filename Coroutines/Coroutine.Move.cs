@@ -37,7 +37,7 @@ namespace GarrisonButler
             {
                 case MoveResult.UnstuckAttempt:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: UnstuckAttempt.");
-                    await Buddy.Coroutines.Coroutine.Sleep(500);
+                    await Buddy.Coroutines.Coroutine.Sleep(1000);
                     break;
 
                 case MoveResult.Failed:
@@ -47,6 +47,9 @@ namespace GarrisonButler
                 case MoveResult.ReachedDestination:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
                     return ActionResult.Done;
+
+                case MoveResult.Moved:
+                    return ActionResult.Running;
             }
             return ActionResult.Running;
         }

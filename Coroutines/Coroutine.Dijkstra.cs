@@ -67,7 +67,7 @@ namespace GarrisonButler
                     {
                         WoWPoint point2 = graphPoints[j];
                         float dist = point1.Distance(point2);
-                        if (dist < 4)
+                        if (dist < 3)
                         {
                             graph.AddConnection(point1, point2, dist, true);
                             count++;
@@ -75,7 +75,7 @@ namespace GarrisonButler
                     }
                 }
                 GarrisonButler.DiagnosticLogTimeTaken("Matching all with distance less than "
-                + 4
+                + 3
                 + " returned "
                 + count
                 + " elements USING 2x for loops", forLoopFilterEndTime);

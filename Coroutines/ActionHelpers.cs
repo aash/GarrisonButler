@@ -104,18 +104,11 @@ namespace GarrisonButler.Coroutines
                 _action = action;
                 _condition = condition;
                 _resCondition = default(Tuple<bool, T>);
-                _waitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeActionMs));
-                _waitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeConditionMs));
-                _waitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(200));
+                _waitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(1000));
+                _waitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(2000));
+                _waitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(10));
                 _lastResult = ActionResult.Init;
                 _preActions = preAction;
-
-                _waitTimerCondition =
-                    new WaitTimer(TimeSpan.FromMilliseconds(Convert.ToInt32(1 / TreeRoot.TicksPerSecond)));
-                _waitTimerCondition.Reset();
-                _waitTimerAntiSpamRunning =
-                    new WaitTimer(TimeSpan.FromMilliseconds(Convert.ToInt32(1 / TreeRoot.TicksPerSecond)));
-                _waitTimerAntiSpamRunning.Reset();
             }
 
             public override async Task<ActionResult> ExecuteAction()
@@ -155,9 +148,9 @@ namespace GarrisonButler.Coroutines
                     _lastResult = ActionResult.Done;
 
                 _waitTimerAction.Reset();
-                return 
-                    (_lastResult == ActionResult.Refresh || _lastResult == ActionResult.Running) 
-                    ? ActionResult.Running 
+                return
+                    (_lastResult == ActionResult.Refresh || _lastResult == ActionResult.Running)
+                    ? ActionResult.Running
                     : ActionResult.Done;
             }
         }
@@ -169,12 +162,6 @@ namespace GarrisonButler.Coroutines
                 bool instantStart = false, params Action[] preAction)
                 : base(action, condition, waitTimeActionMs, waitTimeConditionMs, preAction)
             {
-                _waitTimerCondition =
-                    new WaitTimer(TimeSpan.FromMilliseconds(Convert.ToInt32(1 / TreeRoot.TicksPerSecond)));
-                _waitTimerCondition.Reset();
-                _waitTimerAntiSpamRunning =
-                    new WaitTimer(TimeSpan.FromMilliseconds(Convert.ToInt32(1 / TreeRoot.TicksPerSecond)));
-                _waitTimerAntiSpamRunning.Reset();
             }
 
             public override async Task<ActionResult> ExecuteAction()
