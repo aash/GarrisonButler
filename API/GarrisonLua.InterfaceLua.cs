@@ -32,10 +32,14 @@ namespace GarrisonButler.API
             string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
-
+        
         public static void ClickStartOrderButton()
         {
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
+        }
+        public static void ToggleLandingPage()
+        {
+            Lua.DoString("GarrisonLandingPage_Toggle()");
         }
 
         public static void MarkMailAsRead(int index)

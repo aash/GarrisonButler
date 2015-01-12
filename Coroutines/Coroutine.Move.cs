@@ -8,6 +8,7 @@ using GarrisonButler.Coroutines;
 using JetBrains.Annotations;
 using Styx;
 using Styx.Common;
+using Styx.CommonBot.Coroutines;
 using Styx.Pathing;
 using Styx.WoWInternals.World;
 using Styx.WoWInternals.WoWObjects;
@@ -60,6 +61,11 @@ namespace GarrisonButler
             {
                 GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact with " +
                                           woWObject.SafeName);
+                if(Me.IsMoving)
+                   Navigator.PlayerMover.MoveStop();
+
+                await CommonCoroutines.SleepForLagDuration();
+
                 return ActionResult.Done;
             }
             return await MoveTo(woWObject.Location, "[Navigation] Moving to interact with " + woWObject.SafeName);

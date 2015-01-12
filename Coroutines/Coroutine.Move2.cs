@@ -175,7 +175,6 @@ namespace GarrisonButler
             //}
             if (!flag)
             {
-                _stuckHandlerGaB.Reset();
                 _lastMoveResult = MovePath(_currentMovePath2);
                 return _lastMoveResult;
             }
@@ -332,10 +331,13 @@ namespace GarrisonButler
             private WoWPoint _cacheDestination = WoWPoint.Empty;
             private int _cpt;
             private WoWPoint _lastCheckedLocation = new WoWPoint(0, 0, 0);
-
+            private delegate void CopiedFunction();
+            private CopiedFunction UnstickCopy;
             public StuckHandlerGaB(StuckHandler native)
             {
                 _native = native;
+                UnstickCopy = native.Unstick;
+
                 _lastCheckedLocation = StyxWoW.Me.Location;
                 _stopwatch.Start();
             }
@@ -368,6 +370,7 @@ namespace GarrisonButler
                 _stopwatch.Start();
                 _cpt = 0;
                 _cacheDestination = CurrentDestination;
+                _native.Reset();
             }
 
             public override void Unstick()
@@ -375,7 +378,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("Calling native unstick.");
                 for (int i = 0; i < _cpt; i++)
                 {
-                    _native.Unstick();
+                    UnstickCopy();
                 }
             }
         }
