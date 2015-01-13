@@ -20,22 +20,24 @@ namespace GarrisonButler.API
             const string lua =
                 "if not GarrisonMissionFrame then return false; else return tostring(GarrisonMissionFrame:IsVisible());end;";
 
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static bool IsGarrisonCapacitiveDisplayFrame()
         {
             const string lua =
-                @"  if not GarrisonCapacitiveDisplayFrame then 
-                        return tostring(false);
-                    else 
-                        if GarrisonCapacitiveDisplayFrame:IsVisible() == true then
-                            return tostring(true);
-                        end;
-                    end;
-                    return tostring(false);";
-            return  Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToBoolean();
+                @"if not GarrisonCapacitiveDisplayFrame then 
+                      return tostring(false);
+                  else 
+                      if GarrisonCapacitiveDisplayFrame:IsVisible() == true then
+                          return tostring(true);
+                      end;
+                  end;
+                  return tostring(false);";
+            var results = Lua.GetReturnValues(lua);
+
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static void ClickStartOrderButton()
@@ -59,12 +61,17 @@ namespace GarrisonButler.API
         /// <returns>Number of mails shown in the player's mail inbox.  Max of 50 allowed at 1 time.</returns>
         public static int GetInboxMailCountInPlayerInbox()
         {
-            return
-                Lua.GetReturnValues(
-                    "local numItems, totalItems = GetInboxNumItems(); if (not numItems) then return tostring(0); else return tostring(numItems); end;")
-                    .GetEmptyIfNull()
-                    .FirstOrDefault()
-                    .ToInt32();
+            const string lua =
+                @"local numItems, totalItems = GetInboxNumItems();
+                  if (not numItems) then
+                     return tostring(0);
+                  else
+                     return tostring(numItems);
+                  end;";
+
+            var results = Lua.GetReturnValues(lua);
+
+            return results.GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         /// <summary>
@@ -73,12 +80,17 @@ namespace GarrisonButler.API
         /// <returns>Number of mails currently on blizzard server</returns>
         public static int GetInboxMailCountOnServer()
         {
-            return
-                Lua.GetReturnValues(
-                    "local numItems, totalItems = GetInboxNumItems(); if (not totalItems) then return tostring(0); else return tostring(totalItems); end;")
-                    .GetEmptyIfNull()
-                    .FirstOrDefault()
-                    .ToInt32();
+            const string lua =
+                @"local numItems, totalItems = GetInboxNumItems();
+                  if (not totalItems) then
+                     return tostring(0);
+                  else
+                     return tostring(totalItems);
+                  end;";
+
+            var results = Lua.GetReturnValues(lua);
+
+            return results.GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static void ClickSendMail()
@@ -96,8 +108,9 @@ namespace GarrisonButler.API
             const string lua =
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab then return false; else return tostring(GarrisonMissionFrame.MissionTab:IsVisible()); end;";
 
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            var results = Lua.GetReturnValues(lua);
+
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static bool IsGarrisonMissionVisible()
@@ -106,8 +119,8 @@ namespace GarrisonButler.API
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab or not GarrisonMissionFrame.MissionTab.MissionPage then return false;end;" +
                 "return tostring(GarrisonMissionFrame.MissionTab.MissionPage:IsShown())";
 
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static bool IsGarrisonMissionVisibleAndValid(string missionId)
@@ -118,8 +131,8 @@ namespace GarrisonButler.API
                     "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )",
                     missionId);
 
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static void ClickTabMission()
