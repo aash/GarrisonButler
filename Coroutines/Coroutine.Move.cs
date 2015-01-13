@@ -46,8 +46,16 @@ namespace GarrisonButler
 
                 case MoveResult.Moved:
                     return ActionResult.Running;
+
+                case MoveResult.PathGenerationFailed:
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: PathGenerationFailed.");
+                    break;
+
+                case MoveResult.PathGenerated:
+                    break;
             }
             return ActionResult.Running;
+            //MoveResult.UnstuckAttempt, MoveResult.Moved, MoveResult.PathGenerated
         }
 
         public static async Task<ActionResult> MoveToInteract(WoWObject woWObject)

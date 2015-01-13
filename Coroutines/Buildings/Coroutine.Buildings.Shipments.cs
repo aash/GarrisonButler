@@ -37,7 +37,7 @@ namespace GarrisonButler
                 62, // lvl 2
                 63 // lvl 3
             },
-                35154, 34192),
+            35154, 34192),
 
             // Garden
             new Shipment(new List<int>
@@ -46,7 +46,7 @@ namespace GarrisonButler
                 136, // lvl 2
                 137 // lvl 3
             },
-                34193, 36404),
+            34193, 36404),
 
             #region large
 
@@ -57,7 +57,7 @@ namespace GarrisonButler
                 27, // lvl 2
                 28 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Dwarven Bunker
             new Shipment(new List<int>
@@ -66,7 +66,7 @@ namespace GarrisonButler
                 9, // lvl 2
                 10 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Gnomish Gearworks
             new Shipment(new List<int>
@@ -75,7 +75,7 @@ namespace GarrisonButler
                 163, // lvl 2
                 164 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Mage Tower
             new Shipment(new List<int>
@@ -84,7 +84,7 @@ namespace GarrisonButler
                 38, // lvl 2
                 39 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Stables
             new Shipment(new List<int>
@@ -93,7 +93,7 @@ namespace GarrisonButler
                 66, // lvl 2
                 67 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             #endregion
             #region medium
@@ -114,7 +114,7 @@ namespace GarrisonButler
                 160, // lvl 2
                 161 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Lumber Mill
             new Shipment(new List<int>
@@ -123,7 +123,7 @@ namespace GarrisonButler
                 41, // lvl 2
                 138 // lvl 3
             },
-                36138, 36192),
+            36138, 36192),
 
             // Trading Post
             new Shipment(new List<int>
@@ -132,7 +132,7 @@ namespace GarrisonButler
                 144, // lvl 2
                 145 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Inn / Tavern
             new Shipment(new List<int>
@@ -141,7 +141,7 @@ namespace GarrisonButler
                 35, // lvl 2
                 36 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             #endregion
             #region small
@@ -153,7 +153,7 @@ namespace GarrisonButler
                 119, // lvl 2
                 120 // lvl 3
             },
-                37568, 36641),
+            37568, 36641),
 
             // Enchanter's Study
             new Shipment(new List<int>
@@ -162,7 +162,7 @@ namespace GarrisonButler
                 125, // lvl 2
                 126 // lvl 3
             },
-                37570, 36645),
+            37570, 36645),
 
             // Gem Boutique
             new Shipment(new List<int>
@@ -171,7 +171,7 @@ namespace GarrisonButler
                 131, // lvl 2
                 132 // lvl 3
             },
-                37573, 36644),
+            37573, 36644),
 
             // Salvage Yard
             new Shipment(new List<int>
@@ -180,7 +180,7 @@ namespace GarrisonButler
                 140, // lvl 2
                 141 // lvl 3
             },
-                BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Scribe's Quarters
             new Shipment(new List<int>
@@ -189,7 +189,7 @@ namespace GarrisonButler
                 129, // lvl 2
                 130 // lvl 3
             },
-                37572, 36647),
+            37572, 36647),
 
             // Storehouse
             new Shipment(new List<int>
@@ -207,7 +207,7 @@ namespace GarrisonButler
                 127, // lvl 2
                 128 // lvl 3
             },
-                37575, 36643),
+            37575, 36643),
 
             // The Forge
             new Shipment(new List<int>
@@ -216,7 +216,7 @@ namespace GarrisonButler
                 117, // lvl 2
                 118 // lvl 3
             },
-                37569, 35168),
+            37569, 35168),
 
             // The Tannery
             new Shipment(new List<int>
@@ -225,7 +225,7 @@ namespace GarrisonButler
                 121, // lvl 2
                 122 // lvl 3
             },
-                37574, 36642),
+            37574, 36642),
 
             // Engineering Works
             new Shipment(new List<int>
@@ -295,8 +295,8 @@ namespace GarrisonButler
                 _buildings.Any(
                     building =>
                         CanPickUpShipmentGeneration(building)().Item1 || CanStartShipmentGeneration(building)().Item1);
-        }
-
+            }
+        
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
             var sequence = new ActionHelpers.ActionsSequence();
@@ -321,7 +321,7 @@ namespace GarrisonButler
 
             return sequence;
         }
-
+        
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Tuple<bool, Building>> CanStartShipmentGeneration(Building building)
         {
@@ -411,7 +411,7 @@ namespace GarrisonButler
                 return new Tuple<bool, Building>(true, building);
             };
         }
-
+        
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Tuple<bool, WoWGameObject>> CanPickUpShipmentGeneration(Building building)
         {
@@ -495,7 +495,7 @@ namespace GarrisonButler
                 var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
                 if (!res)
                 {
-                    Navigator.PlayerMover.MoveTowards(unit.Location);
+                    Navigator.PlayerMover.MoveTowards(unit.Location); 
                 }
                 return res;
             });
@@ -506,7 +506,7 @@ namespace GarrisonButler
             {
                 var gossipFrame = GossipFrame.Instance;
                 var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame()
-                          || gossipFrame != null;
+                    || gossipFrame != null;
                 if (!res)
                 {
                     unit.Interact();
@@ -532,10 +532,31 @@ namespace GarrisonButler
             building.WorkFrameWorkAroundTries = 0;
 
 
+            // Only returns ActionResult.Done or ActionResult.Failed
+            // Returning ActionResult.Done means it is the GarrisonCapacitiveFrame
             if (await IfGossip(unit) == ActionResult.Failed)
             {
                 return ActionResult.Running;
             }
+
+            // One more check to make sure this is the right frame!!!
+            if (!InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+            {
+                if (building.workFrameWorkAroundTries < Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
+                    building.workFrameWorkAroundTries++;
+                else
+                {
+                    GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
+                        building.id, building.name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                    return ActionResult.Done;
+                }
+                GarrisonButler.Warning(
+                    "[ShipmentStart,{0}] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
+                    building.id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                await WorkAroundBugFrame();
+                return ActionResult.Running;
+            }
+            building.workFrameWorkAroundTries = 0;
 
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
 
@@ -569,8 +590,8 @@ namespace GarrisonButler
                             buildingShipment.Name);
                         return ActionResult.Done;
                     }
-                    GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
-                }
+                        GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
+                    }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             return ActionResult.Refresh;
@@ -592,7 +613,7 @@ namespace GarrisonButler
             var keepGoing = true;
             var workaroundTimer = new Stopwatch();
             workaroundTimer.Start();
-
+            
             // Total time to try workaround is 5s
             // Need to do it this way because MoveToTable is a Task which returns true
             // when it needs to do more work (such as between MoveTo pulses)
@@ -606,39 +627,65 @@ namespace GarrisonButler
         }
 
 
-        private static async Task<ActionResult> IfGossip(WoWObject pnj)
+        /// <summary>
+        /// Will return immediately if the frame detected is GarrisonCapacitiveDisplayFrame.
+        /// </summary>
+        /// <param name="pnj"></param>
+        /// <returns>Only returns ActionResult.Done or ActionResult.Failed.  ActionResult.Done is returned when GarrisonFrame found.</returns>
+        private async static Task<ActionResult> IfGossip(WoWUnit pnj)
         {
-            var frame = GossipFrame.Instance;
-
-            if (frame == null)
-                return ActionResult.Done;
-
+            // STEP 0 - Return if GarrisonFrame detected
             if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
                 return ActionResult.Done;
 
-            var cachedEntryIndexes = new int[frame.GossipOptionEntries.Count];
-            for (var i = 0; i < cachedEntryIndexes.Length; i++)
+            // STEP 1 - Return if unit isn't valid or null
+            if (pnj == null)
+                return ActionResult.Failed;
+
+            if (pnj.IsValid == false)
+                return ActionResult.Failed;
+
+            GossipFrame frame = GossipFrame.Instance;
+
+            // STEP 2 - Return if garrison frame not valid
+            if (frame == null)
+                return ActionResult.Failed;
+
+            // STEP 3 - Enumerate the possible entries to a cached data structure
+            var cachedEntryIndexes = new int[frame.GossipOptionEntries.GetEmptyIfNull().Count()];
+            for (int i = 0; i < cachedEntryIndexes.Length; i++)
             {
                 cachedEntryIndexes[i] = frame.GossipOptionEntries[i].Index;
             }
-            GarrisonButler.Diagnostic("[Gossip] Found {0} possible options.", cachedEntryIndexes.Length);
-
-            // Let's go through all of them and find the right one. 
+            GarrisonButler.Diagnostic("[Gossip,{0}] Found {1} possible options.", pnj.Entry, cachedEntryIndexes.Length);
+            
+            // STEP 4 - Go through all of the CACHED gossip entries and find the right one.
+            //          Each entry has a 10s timeout to complete a loop in the foreach
             foreach (var cachedIndex in cachedEntryIndexes)
             {
                 var timeoutTimer = new WaitTimer(TimeSpan.FromSeconds(10));
                 var atLeastOne = true;
                 frame = GossipFrame.Instance;
-                GarrisonButler.Diagnostic("[Gossip] Trying options: {0}", cachedIndex);
+                GarrisonButler.Diagnostic("[Gossip,{0}] Trying option: {1}", pnj.Entry, cachedIndex);
 
-                // Check if frame not open
+                // STEP 4a - Attempt to open the frame if it is not open
+                //           a) Tries to move to the unit
+                //           b) Tries to interact with unit
                 timeoutTimer.Reset();
                 while (((frame.GossipOptionEntries == null ||
-                         frame.GossipOptionEntries.Count <= 0)
-                        && !timeoutTimer.IsFinished) || atLeastOne)
+                    frame.GossipOptionEntries.Count <= 0) 
+                    && !timeoutTimer.IsFinished) || atLeastOne)
                 {
                     if (await MoveToInteract(pnj) == ActionResult.Running)
+                    {
                         await Buddy.Coroutines.Coroutine.Yield(); // return ActionResult.Running;
+                        //ActionResult.Runing can happen in these cases:
+                        // MoveResult.Moved
+                        // MoveResult.PathGenerated
+                        // MoveResult.PathGenerationFailed
+                        // MoveResult.UnstuckAttempt
+                        continue;
+                    }
 
                     pnj.Interact();
                     await CommonCoroutines.SleepForLagDuration();
@@ -647,17 +694,21 @@ namespace GarrisonButler
                     await Buddy.Coroutines.Coroutine.Yield();
                     atLeastOne = false;
                 }
-                // Check that this index is still valid
-                if (frame.GossipOptionEntries.GetEmptyIfNull().All(o => o.Index != cachedIndex))
+
+                // STEP 4b - Check that this index is still valid
+                if(frame == null || frame.GossipOptionEntries.GetEmptyIfNull().All(o => o.Index != cachedIndex))
                     continue;
 
+                // STEP 4c - Attempt to select the gossip option
                 frame.SelectGossipOption(cachedIndex);
                 await CommonCoroutines.SleepForLagDuration();
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
 
+                // STEP 4d - Return if the GarrisonCapacitiveDisplayFrame was found
                 if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
                     return ActionResult.Done;
 
+                // STEP 4e - Close this gossip frame because it didn't end up being the correct gossip chosen
                 await Buddy.Coroutines.Coroutine.Yield();
                 var newFrame = GossipFrame.Instance;
                 if (newFrame != null)
@@ -667,7 +718,7 @@ namespace GarrisonButler
                         newFrame.Close();
                         newFrame = GossipFrame.Instance;
                         return (newFrame.GossipOptionEntries == null ||
-                                newFrame.GossipOptionEntries.Count <= 0);
+                    newFrame.GossipOptionEntries.Count <= 0);
                     });
                     await CommonCoroutines.SleepForLagDuration();
                     await CommonCoroutines.SleepForRandomUiInteractionTime();
@@ -740,8 +791,8 @@ namespace GarrisonButler
                             GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
                             return ActionResult.Done;
                         }
-                        GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
-                    }
+                            GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
+                        }
                     await Buddy.Coroutines.Coroutine.Yield();
                 }
                 return ActionResult.Refresh;
