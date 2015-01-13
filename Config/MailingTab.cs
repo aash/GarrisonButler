@@ -47,7 +47,7 @@ namespace GarrisonButler.Config
 
             var gridView = new GridView();
 
-            var columnHeader0 = new GridViewColumnHeader {Tag = "ItemID", Content = "Item ID", Width = double.NaN};
+            var columnHeader0 = new GridViewColumnHeader {Tag = "ItemId", Content = "Item ID", Width = double.NaN};
             columnHeader0.Click += MailColumnHeader_Click;
             var column0 = new GridViewColumn
             {
@@ -101,7 +101,7 @@ namespace GarrisonButler.Config
 
             var columnHeader4 = new GridViewColumnHeader
             {
-                Tag = "Value",
+                Tag = "CheckValue",
                 Content = "Value",
                 Width = double.NaN,
                 HorizontalAlignment = HorizontalAlignment.Stretch

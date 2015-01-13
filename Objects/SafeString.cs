@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
 
 namespace GarrisonButler.Objects
 {
-    public class SafeString : INotifyPropertyChanged
+    public class SafeString : INotifyPropertyChanged, IComparable
     {
         // props
         private string _value;
@@ -51,6 +52,14 @@ namespace GarrisonButler.Objects
         public override string ToString()
         {
             return Value;
+        }
+
+        public int CompareTo(Object to)
+        {
+            var safeString = to as SafeString;
+            return safeString != null 
+                ? String.Compare(Value, safeString.Value, StringComparison.Ordinal) 
+                : Value.CompareTo(to);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

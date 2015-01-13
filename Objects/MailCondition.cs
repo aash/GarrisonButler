@@ -18,7 +18,7 @@ namespace GarrisonButler.Objects
     /// <summary>
     /// Represents a condition for a mail item
     /// </summary>
-    public class MailCondition : INotifyPropertyChanged
+    public class MailCondition : INotifyPropertyChanged, IComparable
     {
         public enum Conditions
         {
@@ -150,6 +150,14 @@ namespace GarrisonButler.Objects
         public override string ToString()
         {
             return Name;
+        }
+
+        public int CompareTo(object obj)
+        {
+            var mailCondition = obj as MailCondition;
+            return mailCondition != null
+                ? String.Compare(Name, mailCondition.Name, StringComparison.Ordinal)
+                : Name.CompareTo(obj);
         }
 
         /// <summary>
