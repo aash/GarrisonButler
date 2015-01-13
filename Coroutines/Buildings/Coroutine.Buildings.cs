@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
@@ -43,15 +42,8 @@ namespace GarrisonButler
             236190,
             236191,
             236192,
-            236193,
+            236193
         };
-
-        private static List<ActionHelpers.ActionBasic> BuildingsActions;
-
-        private static bool IsWoWObjectFinalizeGarrisonPlot(WoWObject toCheck)
-        {
-            return FinalizeGarrisonPlotIds.Contains(toCheck.Entry);
-        }
 
         public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
         {
@@ -59,15 +51,17 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
             var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
 
-            Building mine = _buildings.GetEmptyIfNull().FirstOrDefault(
+            var mine = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.id == (int) buildings.MineLvl1) || (b.id == (int) buildings.MineLvl2) ||
-                    (b.id == (int) buildings.MineLvl3));
+                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl1) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl2) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl3));
 
-            Building garden = _buildings.GetEmptyIfNull().FirstOrDefault(
+            var garden = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.id == (int) buildings.GardenLvl1) || (b.id == (int) buildings.GardenLvl2) ||
-                    (b.id == (int) buildings.GardenLvl3));
+                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl1) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl2) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl3));
 
             if (mine != default(Building))
             {
@@ -78,13 +72,12 @@ namespace GarrisonButler
                         CanRunMine,
                         5000,
                         100,
-                        false,
                         // Drink coffee
                         new ActionHelpers.ActionOnTimer<WoWItem>(
                             UseItemInbags,
                             () =>
                             {
-                                Tuple<bool, WoWItem> canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 1)();
+                                var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 1)();
                                 return
                                     new Tuple<bool, WoWItem>(
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
@@ -94,7 +87,7 @@ namespace GarrisonButler
                             UseItemInbags,
                             () =>
                             {
-                                Tuple<bool, WoWItem> canUse =
+                                var canUse =
                                     CanUseItemInBags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1)();
                                 return
                                     new Tuple<bool, WoWItem>(
@@ -105,7 +98,7 @@ namespace GarrisonButler
                             DeleteItemInbags,
                             () =>
                             {
-                                Tuple<bool, WoWItem> tooMany =
+                                var tooMany =
                                     TooManyItemInBags(MinersCofeeItemId, 5)();
                                 return
                                     new Tuple<bool, WoWItem>(
@@ -116,7 +109,7 @@ namespace GarrisonButler
                             DeleteItemInbags,
                             () =>
                             {
-                                Tuple<bool, WoWItem> tooMany =
+                                var tooMany =
                                     TooManyItemInBags(PreserverdMiningPickItemId, 5)();
                                 return
                                     new Tuple<bool, WoWItem>(
@@ -134,14 +127,15 @@ namespace GarrisonButler
                         CanRunGarden, 5000));
 
                 // Take care of garden shipments
-                buildingsActionsSequence.AddAction(PickUpOrStartSequence(garden)); 
+                buildingsActionsSequence.AddAction(PickUpOrStartSequence(garden));
             }
             // Take care of all shipments
             buildingsActionsSequence.AddAction(PickUpOrStartSequenceAll());
 
             // Garrison cache
             buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation, CanRunCache, 10000));
+                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation, CanRunCache,
+                    10000));
 
             // Buildings activation
             buildingsActionsSequence.AddAction(
@@ -150,23 +144,6 @@ namespace GarrisonButler
 
             GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;
-        }
-
-        private static async Task<bool> DoBuildingRelated()
-        {
-            if (BuildingsActions == null)
-            {
-                GarrisonButler.Warning("[Buildings] Buildings actions not initialized!");
-                return false;
-            }
-
-            foreach (ActionHelpers.ActionBasic action in BuildingsActions)
-            {
-                if (await action.ExecuteAction() == ActionResult.Running)
-                    return true;
-            }
-
-            return false;
         }
 
         private static void RefreshBuildings(bool forced = false)
@@ -185,7 +162,7 @@ namespace GarrisonButler
             if (!GaBSettings.Get().ActivateBuildings)
                 return new Tuple<bool, WoWGameObject>(false, null);
 
-            IOrderedEnumerable<WoWGameObject> allToActivate =
+            var allToActivate =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
@@ -196,55 +173,13 @@ namespace GarrisonButler
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
 
-            WoWGameObject toActivate = allToActivate.First();
+            var toActivate = allToActivate.First();
 
             GarrisonButler.Log("Found building to activate(" + toActivate.Name + "), moving to building.");
             GarrisonButler.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
                                       toActivate.DisplayId + ": " + toActivate.Location);
 
             return new Tuple<bool, WoWGameObject>(true, toActivate);
-        }
-
-        private static List<WoWGameObject> GetAllBuildingsToActivateIfCanActivateAtLeastOneBuilding()
-        {
-            // Settings
-            if (!GaBSettings.Get().ActivateBuildings)
-            {
-                return new List<WoWGameObject>();
-            }
-
-            List<WoWGameObject> returnList =
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .GetEmptyIfNull()
-                    .Where(o => FinalizeGarrisonPlotIds.Contains(o.Entry))
-                    .OrderBy(o => o.Location.X)
-                    .ToList();
-
-            return returnList;
-        }
-
-        private static async Task<bool> ActivateFinishedBuildings(WoWGameObject toActivate)
-        {
-            if (await MoveToInteract(toActivate) == ActionResult.Running)
-                return true;
-
-            await Buddy.Coroutines.Coroutine.Sleep(300);
-            toActivate.Interact();
-
-            GarrisonButler.Log("Activating " + toActivate.SafeName + ", waiting...");
-
-            if (await Buddy.Coroutines.Coroutine.Wait(5000, () =>
-            {
-                toActivate.Interact();
-                return
-                    !ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                        .GetEmptyIfNull()
-                        .Any(o => FinalizeGarrisonPlotIds.Contains(o.Entry) && o.Guid == toActivate.Guid);
-            }))
-            {
-                GarrisonButler.Warning("Failed to activate building: " + toActivate.Name);
-            }
-            return true;
         }
     }
 }

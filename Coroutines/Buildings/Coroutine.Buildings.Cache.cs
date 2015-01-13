@@ -3,11 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
-using Styx;
-using Styx.Common.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -27,54 +24,21 @@ namespace GarrisonButler
             237720
         };
 
-        private static int _attemptCache;
-        private static bool Found;
-        private static WoWPoint cacheCachedLocation;
-        private static WaitTimer cacheWaitTimer;
-
         private static Tuple<bool, WoWGameObject> CanRunCache()
         {
             if (!GaBSettings.Get().GarrisonCache)
             {
-                GarrisonButler.Diagnostic("[Cache] Cache deactivated in user settings"); 
+                GarrisonButler.Diagnostic("[Cache] Cache deactivated in user settings");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
             // Check
-            WoWGameObject cache =
+            var cache =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .FirstOrDefault(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry));
-            if (cache == default(WoWGameObject))
-            {
-                GarrisonButler.Diagnostic("[Cache] Cache not found, skipping...");
-                return new Tuple<bool, WoWGameObject>(false, null);
-            }
-
-            return new Tuple<bool, WoWGameObject>(true, cache);
-        }
-
-        private static bool IsWoWObjectGarrisonCache(WoWObject toCheck)
-        {
-            return GarrisonCaches.Contains(toCheck.Entry);
-        }
-
-        private static List<WoWGameObject> GetCacheIfCanRunCache()
-        {
-            // Settings
-            if (!GaBSettings.Get().GarrisonCache)
-            {
-                //GarrisonButler.Diagnostic("[Cache] Cache deactivated in user settings.");
-                return new List<WoWGameObject>();
-            }
-
-            // Check
-            List<WoWGameObject> returnList =
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .GetEmptyIfNull()
-                    .Where(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry))
-                    .ToList();
-
-            return returnList;
+            if (cache != default(WoWGameObject)) return new Tuple<bool, WoWGameObject>(true, cache);
+            GarrisonButler.Diagnostic("[Cache] Cache not found, skipping...");
+            return new Tuple<bool, WoWGameObject>(false, null);
         }
 
         private static bool ShouldRunCache()

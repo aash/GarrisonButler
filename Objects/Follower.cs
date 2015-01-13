@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 #endregion
 
@@ -12,7 +13,7 @@ namespace GarrisonButler
         public String Class;
         public List<String> Counters;
         public String FollowerId;
-        public int ILevel;
+        public int ItemLevel;
         public bool IsCollected;
         public int Level;
         public int LevelXp;
@@ -23,7 +24,7 @@ namespace GarrisonButler
 
         public Follower(string followerId, string name, string status,
             string Class_, String quality, int level, bool isCollected,
-            int iLevel, int xp, int levelXp, List<String> counters)
+            int iItemLevel, int xp, int levelXp, List<String> counters)
         {
             FollowerId = followerId;
             Name = name;
@@ -32,7 +33,7 @@ namespace GarrisonButler
             Quality = quality;
             Level = level;
             IsCollected = isCollected;
-            ILevel = iLevel;
+            ItemLevel = iItemLevel;
             Xp = xp;
             LevelXp = levelXp;
             Counters = counters;
@@ -41,7 +42,7 @@ namespace GarrisonButler
 
         public override string ToString()
         {
-            String follower = "";
+            var follower = "";
             follower += "  FollowerId: " + FollowerId + "\n";
             follower += "  Name: " + Name + "\n";
             follower += "  Status: " + Status + "\n";
@@ -49,14 +50,10 @@ namespace GarrisonButler
             follower += "  Quality: " + Quality + "\n";
             follower += "  Level: " + Level + "\n";
             follower += "  IsCollected: " + IsCollected + "\n";
-            follower += "  ILevel: " + ILevel + "\n";
+            follower += "  ItemLevel: " + ItemLevel + "\n";
             follower += "  Xp: " + Xp + "\n";
             follower += "  LevelXp: " + LevelXp + "\n";
-            foreach (string counter in Counters)
-            {
-                follower += "   Counter: " + counter + "\n";
-            }
-            return follower;
+            return Counters.Aggregate(follower, (current, counter) => current + ("   Counter: " + counter + "\n"));
         }
     }
 }

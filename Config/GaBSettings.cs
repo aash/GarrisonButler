@@ -2,10 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Xml.Serialization;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
@@ -23,17 +21,17 @@ namespace GarrisonButler.Config
         }
 
         [XmlIgnore]
-        public static GaBSettings currentSettings { get; set; }
+        public static GaBSettings CurrentSettings { get; set; }
 
-        [XmlArrayItem("Building", typeof(BuildingSettings))]
+        [XmlArrayItem("Building", typeof (BuildingSettings))]
         [XmlArray("BuildingsSettings")]
         public List<BuildingSettings> BuildingsSettings { get; set; }
 
-        [XmlArrayItem("Mail", typeof(MailItem))]
+        [XmlArrayItem("Mail", typeof (MailItem))]
         [XmlArray("MailItems")]
         public List<MailItem> MailItems { get; set; }
 
-        [XmlArrayItem("Daily", typeof(DailyProfession))]
+        [XmlArrayItem("Daily", typeof (DailyProfession))]
         [XmlArray("DailySettings")]
         public List<DailyProfession> DailySettings { get; set; }
 
@@ -53,30 +51,33 @@ namespace GarrisonButler.Config
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
         public int TimeMinBetweenRun { get; set; }
+
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
-        public bool HBRelogMode { get; set; }
+
+        public bool HbRelogMode { get; set; }
 
         private static GaBSettings DefaultConfig()
         {
-            var ret = new GaBSettings();
-            ret.ConfigVersion = new ModuleVersion();
-            ret.TimeMinBetweenRun = 60;
-            ret.MailItems = new List<MailItem>();
-            // Buildings generation, Ugly... but dynamic
-            ret.BuildingsSettings = new List<BuildingSettings>();
-            foreach (buildings building in (buildings[])Enum.GetValues((typeof(buildings))))
+            var ret = new GaBSettings
             {
-                string nameCurrent = BuildingSettings.nameFromBuildingID((int)building);
-                if (ret.BuildingsSettings.All(b => b.Name != nameCurrent))
-                {
-                    List<int> IDs =
-                        ((buildings[])Enum.GetValues((typeof(buildings)))).Where(
-                            b => BuildingSettings.nameFromBuildingID((int)b) == nameCurrent)
-                            .Select(x => (int)x)
-                            .ToList();
-                    ret.BuildingsSettings.Add(new BuildingSettings(IDs.ToList()));
-                }
+                ConfigVersion = new ModuleVersion(),
+                TimeMinBetweenRun = 60,
+                MailItems = new List<MailItem>(),
+                BuildingsSettings = new List<BuildingSettings>()
+            };
+            // Buildings generation, Ugly... but dynamic
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var building in (Buildings[]) Enum.GetValues((typeof (Buildings))))
+            {
+                var nameCurrent = BuildingSettings.NameFromBuildingId((int) building);
+                if (ret.BuildingsSettings.Any(b => b.Name == nameCurrent)) continue;
+                var ids =
+                    ((Buildings[]) Enum.GetValues((typeof (Buildings)))).Where(
+                        b => BuildingSettings.NameFromBuildingId((int) b) == nameCurrent)
+                        .Select(x => (int) x)
+                        .ToList();
+                ret.BuildingsSettings.Add(new BuildingSettings(ids.ToList()));
             }
 
             // General settings
@@ -86,6 +87,7 @@ namespace GarrisonButler.Config
             ret.DailySettings = DailyProfession.AllDailies;
             return ret;
         }
+
         private GaBSettings(OldSettings.GaBSettings oldSettings)
         {
             ConfigVersion = GarrisonButler.Version;
@@ -93,15 +95,15 @@ namespace GarrisonButler.Config
             BuildingsSettings = oldSettings.BuildingsSettings.Select(b => b.FromOld()).ToList();
             CompletedMissions = oldSettings.CompletedMissions;
             ConfigVersion = oldSettings.ConfigVersion;
-            DailySettings = oldSettings.DailySettings.Select(d=> d.FromOld()).ToList();
+            DailySettings = oldSettings.DailySettings.Select(d => d.FromOld()).ToList();
             DeleteCoffee = oldSettings.DeleteCoffee;
             DeleteMiningPick = oldSettings.DeleteMiningPick;
             ForceJunkSell = oldSettings.ForceJunkSell;
             GarrisonCache = oldSettings.GarrisonCache;
-            HBRelogMode = oldSettings.HBRelogMode;
+            HbRelogMode = oldSettings.HbRelogMode;
             HarvestGarden = oldSettings.HarvestGarden;
             HarvestMine = oldSettings.HarvestMine;
-            MailItems = oldSettings.MailItems.Select(m=> m.FromOld()).ToList();
+            MailItems = oldSettings.MailItems.Select(m => m.FromOld()).ToList();
             RetrieveMail = oldSettings.RetrieveMail;
             SalvageCrates = oldSettings.SalvageCrates;
             SendMail = oldSettings.SendMail;
@@ -114,17 +116,15 @@ namespace GarrisonButler.Config
 
         public static GaBSettings Get()
         {
-            if (currentSettings == null)
-            {
-                GarrisonButler.Diagnostic("No settings loaded, creating default configuration file.");
-                Load();
-            }
-            return currentSettings;
+            if (CurrentSettings != null) return CurrentSettings;
+            GarrisonButler.Diagnostic("No settings loaded, creating default configuration file.");
+            Load();
+            return CurrentSettings;
         }
 
         public BuildingSettings GetBuildingSettings(int id)
         {
-            BuildingSettings settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            var settings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (settings == null)
             {
                 GarrisonButler.Diagnostic("Building with id: {0} not found in config.", id);
@@ -148,22 +148,21 @@ namespace GarrisonButler.Config
                 return false;
 
             // Make sure no new buildings were added
-            foreach (buildings building in (buildings[])Enum.GetValues((typeof(buildings))))
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var building in (Buildings[]) Enum.GetValues((typeof (Buildings))))
             {
-                string nameCurrent = BuildingSettings.nameFromBuildingID((int)building);
+                var nameCurrent = BuildingSettings.NameFromBuildingId((int) building);
 
                 // If the current building settings doesn't contain any records with the
                 // building name from the Enum, we need to add it
-                if(!settings.BuildingsSettings.Any(b => b.Name == nameCurrent))
-                {
-                    // Find the list of IDs from this building to add
-                    List<int> IDs =
-                        ((buildings[])Enum.GetValues((typeof(buildings)))).Where(
-                            b => BuildingSettings.nameFromBuildingID((int)b) == nameCurrent)
-                            .Select(x => (int)x)
-                            .ToList();
-                    settings.BuildingsSettings.Add(new BuildingSettings(IDs.ToList()));
-                }
+                if (settings.BuildingsSettings.Any(b => b.Name == nameCurrent)) continue;
+                // Find the list of IDs from this building to add
+                var ds =
+                    ((Buildings[]) Enum.GetValues((typeof (Buildings)))).Where(
+                        b => BuildingSettings.NameFromBuildingId((int) b) == nameCurrent)
+                        .Select(x => (int) x)
+                        .ToList();
+                settings.BuildingsSettings.Add(new BuildingSettings(ds.ToList()));
             }
 
             return true;
@@ -177,14 +176,15 @@ namespace GarrisonButler.Config
             try
             {
                 var writer =
-                    new XmlSerializer(typeof(GaBSettings));
+                    new XmlSerializer(typeof (GaBSettings));
                 var file =
-                    new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"), false);
-                writer.Serialize(file, currentSettings);
+                    new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"),
+                        false);
+                writer.Serialize(file, CurrentSettings);
                 file.Close();
                 GarrisonButler.Log("Settings saved.");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 GarrisonButler.Diagnostic("Failed to save configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
@@ -201,11 +201,11 @@ namespace GarrisonButler.Config
                 {
                     GarrisonButler.Diagnostic("Couldn't load as old version");
                 }
-                else 
+                else
                 {
                     if (oldSettings.ConfigVersion == null)
                         GarrisonButler.Diagnostic("Couldn't load old version number.");
-                
+
                     GarrisonButler.Diagnostic("Old version of settings detected.");
                     return oldSettings;
                 }
@@ -220,7 +220,7 @@ namespace GarrisonButler.Config
         private static GaBSettings UpgradeIfPossible()
         {
             var oldSettings = LoadOld();
-            
+
             if (oldSettings == null)
                 return null;
 
@@ -238,8 +238,8 @@ namespace GarrisonButler.Config
                 if (upgraded != null)
                 {
                     GarrisonButler.Diagnostic("Updated settings to version {0}.", GarrisonButler.Version);
-                    currentSettings = upgraded;
-                    UpdateSettings(currentSettings);
+                    CurrentSettings = upgraded;
+                    UpdateSettings(CurrentSettings);
                     Save();
                 }
                 else
@@ -249,9 +249,9 @@ namespace GarrisonButler.Config
                         new XmlSerializer(typeof (GaBSettings));
                     var file =
                         new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
-                    currentSettings = (GaBSettings)reader.Deserialize(file);
+                    CurrentSettings = (GaBSettings) reader.Deserialize(file);
                     file.Close();
-                    UpdateSettings(currentSettings);
+                    UpdateSettings(CurrentSettings);
                 }
                 GarrisonButler.Diagnostic("Configuration successfully loaded.");
             }
@@ -259,14 +259,14 @@ namespace GarrisonButler.Config
             {
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
-                currentSettings = DefaultConfig();
+                CurrentSettings = DefaultConfig();
                 Save();
             }
         }
 
         private static void PrintConfig()
         {
-            ObjectDumper.WriteToHB(currentSettings, 3); //Deactivated because logs toon char in recipient for now
+            ObjectDumper.WriteToHb(CurrentSettings, 3); //Deactivated because logs toon char in recipient for now
         }
     }
 }

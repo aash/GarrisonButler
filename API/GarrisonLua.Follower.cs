@@ -22,37 +22,32 @@ namespace GarrisonButler.API
 
         public static string GetFollowerName(string follower)
         {
-            String lua = String.Format("return C_Garrison.GetFollowerName(\"{0}\");", follower);
+            var lua = String.Format("return C_Garrison.GetFollowerName(\"{0}\");", follower);
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerNameById(string followerId)
         {
-            String lua = String.Format("return C_Garrison.GetFollowerNameByID(\"{0}\");", followerId);
+            var lua = String.Format("return C_Garrison.GetFollowerNameByID(\"{0}\");", followerId);
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerClassSpecName(string follower)
         {
-            String lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", follower);
+            var lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", follower);
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
-        public static string GetFollowerClassSpecById(string followerId)
-        {
-            String lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-        }
 
         public static string GetFollowerDisplayIdbyId(string followerId)
         {
-            String lua = String.Format("return C_Garrison.GetFollowerDisplayIDByID(\"{0}\");", followerId);
+            var lua = String.Format("return C_Garrison.GetFollowerDisplayIDByID(\"{0}\");", followerId);
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerStatus(string followerId)
         {
-            String lua =
+            var lua =
                 "local RetInfo = {}; local followers = C_Garrison.GetFollowers();" +
                 String.Format("for i,v in ipairs(followers) do " +
                               "local followerID = (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID;" +
@@ -69,7 +64,7 @@ namespace GarrisonButler.API
 
         public static string GetFollowerInfo(string followerId)
         {
-            String lua = String.Format("return {0} and C_Garrison.GetFollowerInfo(\"{0}\");", followerId);
+            var lua = String.Format("return {0} and C_Garrison.GetFollowerInfo(\"{0}\");", followerId);
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
         }
 
@@ -77,7 +72,7 @@ namespace GarrisonButler.API
 
         public static Follower GetFollowerById(String followerId)
         {
-            String lua =
+            var lua =
                 "local RetInfo = {}; local Temp = {}; local followers = C_Garrison.GetFollowers();" +
                 String.Format(
                     "for i,f in ipairs(followers) do " +
@@ -97,20 +92,20 @@ namespace GarrisonButler.API
                     "end;" +
                     "for j_=0,9 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", followerId);
-            List<String> follower = Lua.GetReturnValues(lua);
+            var follower = Lua.GetReturnValues(lua);
 
             if (follower.IsNullOrEmpty())
                 return null;
 
-            String Name = follower[1];
-            String Status = follower[2];
-            String ClassSpecName = follower[3];
-            String quality = follower[4];
-            int level = follower[5].ToInt32();
-            bool isCollected = follower[6].ToBoolean();
-            int iLevel = follower[7].ToInt32();
-            int xp = follower[8].ToInt32();
-            int levelXp = follower[9].ToInt32();
+            var name = follower[1];
+            var status = follower[2];
+            var classSpecName = follower[3];
+            var quality = follower[4];
+            var level = follower[5].ToInt32();
+            var isCollected = follower[6].ToBoolean();
+            var iLevel = follower[7].ToInt32();
+            var xp = follower[8].ToInt32();
+            var levelXp = follower[9].ToInt32();
 
             lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", followerId) +
                   "local RetInfo = {};" +
@@ -122,9 +117,9 @@ namespace GarrisonButler.API
                   "end;" +
                   "return unpack(RetInfo)";
 
-            List<String> abilities = Lua.GetReturnValues(lua);
+            var abilities = Lua.GetReturnValues(lua);
 
-            return new Follower(followerId, Name, Status, ClassSpecName, quality, level, isCollected, iLevel, xp,
+            return new Follower(followerId, name, status, classSpecName, quality, level, isCollected, iLevel, xp,
                 levelXp, abilities);
         }
 
@@ -132,33 +127,32 @@ namespace GarrisonButler.API
 
         public static List<string> GetListFollowersId()
         {
-            String lua =
-                "local RetInfo = {}; local followers = C_Garrison.GetFollowers();" +
-                "for i,v in ipairs(followers) do " +
-                "table.insert(RetInfo,tostring( (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID));" +
-                "end;" +
-                "return unpack(RetInfo)";
+            const string lua = "local RetInfo = {}; local followers = C_Garrison.GetFollowers();" +
+                               "for i,v in ipairs(followers) do " +
+                               "table.insert(RetInfo,tostring( (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID));" +
+                               "end;" +
+                               "return unpack(RetInfo)";
 
-            List<string> followerId = Lua.GetReturnValues(lua);
+            var followerId = Lua.GetReturnValues(lua);
             return followerId;
         }
 
         public static int GetNumFollowersOnMission(int missionId)
         {
-            String lua = String.Format("return C_Garrison.GetNumFollowersOnMission(\"{0}\");", missionId);
-            List<string> luaRet = Lua.GetReturnValues(lua);
+            var lua = String.Format("return C_Garrison.GetNumFollowersOnMission(\"{0}\");", missionId);
+            var luaRet = Lua.GetReturnValues(lua);
             return Convert.ToInt32(luaRet.GetEmptyIfNull().FirstOrDefault());
         }
 
         public static void AddFollowerToMission(int missionId, int followerId)
         {
-            String lua = String.Format("C_Garrison.AddFollowerToMission(\"{0}\",\"{1}\");", missionId, followerId);
+            var lua = String.Format("C_Garrison.AddFollowerToMission(\"{0}\",\"{1}\");", missionId, followerId);
             Lua.DoString(lua);
         }
 
         public static void RemoveFollowerFromMission(int missionId, int followerId)
         {
-            String lua = String.Format("C_Garrison.RemoveFollowerFromMission(\"{0}\",\"{1}\");", missionId, followerId);
+            var lua = String.Format("C_Garrison.RemoveFollowerFromMission(\"{0}\",\"{1}\");", missionId, followerId);
             Lua.DoString(lua);
         }
     }

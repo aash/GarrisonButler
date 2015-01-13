@@ -20,7 +20,7 @@ namespace GarrisonButler.Config.OldSettings
             NumberInBagsSuperiorTo = 0,
             NumberInBagsSuperiorOrEqualTo = 1,
             KeepNumberInBags = 2,
-            None = 99,
+            None = 99
         }
 
         private string _name;
@@ -29,6 +29,7 @@ namespace GarrisonButler.Config.OldSettings
         private static List<MailCondition> _allPossibleConditions;
 
         #region GetSet
+
         /// <summary>
         /// Name of the condition as displayed in UI
         /// </summary>
@@ -37,12 +38,10 @@ namespace GarrisonButler.Config.OldSettings
             get { return _name; }
             set
             {
-                if (value != _name)
-                {
-                    _name = value;
-                    _condition = GetCondition(_name);
-                    OnPropertyChanged1();
-                }
+                if (value == _name) return;
+                _name = value;
+                _condition = GetCondition(_name);
+                OnPropertyChanged1();
             }
         }
 
@@ -54,11 +53,9 @@ namespace GarrisonButler.Config.OldSettings
             get { return _condition; }
             set
             {
-                if (value != _condition)
-                {
-                    _condition = value;
-                    OnPropertyChanged1();
-                }
+                if (value == _condition) return;
+                _condition = value;
+                OnPropertyChanged1();
             }
         }
 
@@ -70,27 +67,26 @@ namespace GarrisonButler.Config.OldSettings
             get { return _checkValue; }
             set
             {
-                if (value != _checkValue)
-                {
-                    _checkValue = value;
-                    OnPropertyChanged1();
-                }
+                if (value == _checkValue) return;
+                _checkValue = value;
+                OnPropertyChanged1();
             }
         }
+
         #endregion
 
         public MailCondition(Conditions condition, int checkValue)
         {
             _condition = condition;
             _checkValue = checkValue;
-            _name = getName(_condition);
+            _name = GetName(_condition);
         }
 
         public MailCondition()
         {
             _condition = Conditions.None;
             _checkValue = 0;
-            _name = getName(_condition);
+            _name = GetName(_condition);
         }
 
         /// <summary>
@@ -98,7 +94,7 @@ namespace GarrisonButler.Config.OldSettings
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        private string getName(Conditions condition)
+        private static string GetName(Conditions condition)
         {
             switch (condition)
             {
@@ -119,7 +115,8 @@ namespace GarrisonButler.Config.OldSettings
             }
             return "Not Implemented";
         }
-        private Conditions GetCondition(String name)
+
+        private static Conditions GetCondition(String name)
         {
             switch (name)
             {
@@ -184,7 +181,9 @@ namespace GarrisonButler.Config.OldSettings
             if (_allPossibleConditions != null)
                 return _allPossibleConditions;
 
-            _allPossibleConditions = (from object condition in Enum.GetValues(typeof(Conditions)) select new MailCondition((Conditions)condition, 0)).ToList();
+            _allPossibleConditions =
+                (from object condition in Enum.GetValues(typeof (Conditions))
+                    select new MailCondition((Conditions) condition, 0)).ToList();
             return _allPossibleConditions;
         }
 
@@ -198,10 +197,10 @@ namespace GarrisonButler.Config.OldSettings
             switch (_condition)
             {
                 case Conditions.NumberInBagsSuperiorTo:
-                    return GetNumberInBagsSuperiorTo(itemId, _checkValue);
+                    return GetNumberInBagsSuperiorTo(itemId);
 
                 case Conditions.NumberInBagsSuperiorOrEqualTo:
-                    return GetNumberInBagsSuperiorOrEqualTo(itemId, _checkValue);
+                    return GetNumberInBagsSuperiorOrEqualTo(itemId);
 
                 case Conditions.KeepNumberInBags:
                     return await GetNumberKeepNumberInBags(itemId, _checkValue);
@@ -216,8 +215,8 @@ namespace GarrisonButler.Config.OldSettings
             return null;
         }
 
-
         #region Rules
+
         // A rule must have a method returning a bool and a method returning the list of items
 
         /// <summary>
@@ -228,7 +227,7 @@ namespace GarrisonButler.Config.OldSettings
         /// <returns></returns>
         private static bool IsNumberInBagsSuperiorTo(uint itemId, int x)
         {
-            long numInBags = GetNumberItemInBags(itemId);
+            var numInBags = GetNumberItemInBags(itemId);
             return numInBags > x;
         }
 
@@ -236,9 +235,8 @@ namespace GarrisonButler.Config.OldSettings
         /// Return array of items to send to respect the following rule: if the specified character have more than x count of ItemId in bags send everything.
         /// </summary>
         /// <param name="itemId"></param>
-        /// <param name="x"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberInBagsSuperiorTo(uint itemId, int x)
+        private static IEnumerable<WoWItem> GetNumberInBagsSuperiorTo(uint itemId)
         {
             return GetAllItems(itemId);
         }
@@ -251,16 +249,16 @@ namespace GarrisonButler.Config.OldSettings
         /// <returns></returns>
         private static bool IsNumberInBagsSuperiorOrEqualTo(uint itemId, int x)
         {
-            long numInBags = GetNumberItemInBags(itemId);
+            var numInBags = GetNumberItemInBags(itemId);
             return numInBags >= x;
         }
+
         /// <summary>
         /// Return array of items to send to respect the following rule: if the specified character have x or more than x count of itemId in bags send everything.
         /// </summary>
         /// <param name="itemId"></param>
-        /// <param name="x"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberInBagsSuperiorOrEqualTo(uint itemId, int x)
+        private static IEnumerable<WoWItem> GetNumberInBagsSuperiorOrEqualTo(uint itemId)
         {
             return GetAllItems(itemId);
         }
@@ -282,9 +280,9 @@ namespace GarrisonButler.Config.OldSettings
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private async static Task<IEnumerable<WoWItem>> GetNumberKeepNumberInBags(uint itemId, int x)
+        private static async Task<IEnumerable<WoWItem>> GetNumberKeepNumberInBags(uint itemId, int x)
         {
-            for (int i = 0; i < 15; i++)
+            for (var i = 0; i < 15; i++)
             {
                 HbApi.StackItems();
                 await CommonCoroutines.SleepForLagDuration();
@@ -295,10 +293,9 @@ namespace GarrisonButler.Config.OldSettings
 
             // This is the pain... Not sure it will work
             var items = GetAllItems(itemId);
-            var toKeep = items.FirstOrDefault(i => i.StackCount == x);
-            if (toKeep == default(WoWItem))
-                return new List<WoWItem>();
-            return items.Where(i => i != toKeep);
+            var woWItems = items as WoWItem[] ?? items.ToArray();
+            var toKeep = woWItems.FirstOrDefault(i => i.StackCount == x);
+            return toKeep == default(WoWItem) ? new List<WoWItem>() : woWItems.Where(i => i != toKeep);
         }
 
         #endregion
@@ -342,50 +339,50 @@ namespace GarrisonButler.Config.OldSettings
                     "local amount = {0}; ", amount) +
                 string.Format(
                     "local item = {0}; ", itemdId) +
-                    "local ItemBagNr = 0; " +
-                    "local ItemSlotNr = 1; " +
-                    "local EmptyBagNr = 0; " +
-                    "local EmptySlotNr = 1; " +
-                    "for b=0,4 do " +
-                        "for s=1,GetContainerNumSlots(b) do " +
-                            "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */ "then " +
-                                "ItemBagNr = b; " +
-                                "ItemSlotNr = s; " +
-                            "end; " +
-                        "end; " +
-                    "end; " +
-                    "for b=0,4 do " +
-                        "for s=1,GetContainerNumSlots(b) do " +
-                            "if GetContainerItemID(b,s) == nil then " +
-                                "EmptyBagNr = b; " +
-                                "EmptySlotNr = s; " +
-                            "end; " +
-                        "end; " +
-                    "end; " +
-                    "ClearCursor(); " +
-                    "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
-                    "if CursorHasItem() then " +
-                        "PickupContainerItem(EmptyBagNr,EmptySlotNr); " +
-                        "ClearCursor(); " +
-                    "end;"
-            );
+                "local ItemBagNr = 0; " +
+                "local ItemSlotNr = 1; " +
+                "local EmptyBagNr = 0; " +
+                "local EmptySlotNr = 1; " +
+                "for b=0,4 do " +
+                "for s=1,GetContainerNumSlots(b) do " +
+                "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */
+                "then " +
+                "ItemBagNr = b; " +
+                "ItemSlotNr = s; " +
+                "end; " +
+                "end; " +
+                "end; " +
+                "for b=0,4 do " +
+                "for s=1,GetContainerNumSlots(b) do " +
+                "if GetContainerItemID(b,s) == nil then " +
+                "EmptyBagNr = b; " +
+                "EmptySlotNr = s; " +
+                "end; " +
+                "end; " +
+                "end; " +
+                "ClearCursor(); " +
+                "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
+                "if CursorHasItem() then " +
+                "PickupContainerItem(EmptyBagNr,EmptySlotNr); " +
+                "ClearCursor(); " +
+                "end;"
+                );
         }
-        #endregion
 
+        #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged1([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
+            var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-
         }
 
         public Objects.MailCondition FromOld()
         {
-            var condition = new Objects.MailCondition((Objects.MailCondition.Conditions) this.Condition, this.CheckValue);
+            var condition = new Objects.MailCondition((Objects.MailCondition.Conditions) Condition, CheckValue);
             return condition;
         }
     }

@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using GarrisonButler.Libraries;
-using GarrisonButler.Objects;
 using Styx.Helpers;
 using Styx.WoWInternals;
 
 namespace GarrisonButler.API
 {
-    class ApiLua
+    internal class ApiLua
     {
-        
         internal static int GetMaxStackItem(uint itemId)
         {
-            var lua = 
-               string.Format(
-               "local item = {0}; ", itemId) +
+            var lua =
+                string.Format(
+                    "local item = {0}; ", itemId) +
                 @"local name, link, quality, iLevel, reqLevel, class, subclass, maxStack, equipSlot, texture, vendorPrice = GetItemInfo(item);
                 if not maxStack then
                     return tostring(0);
@@ -29,8 +23,7 @@ namespace GarrisonButler.API
 
         internal static bool HasNewMail()
         {
-            var lua = 
-               @"local has = HasNewMail();
+            const string lua = @"local has = HasNewMail();
                 if not has then
                     return tostring(false);
                 end;
@@ -41,8 +34,7 @@ namespace GarrisonButler.API
 
         internal static bool IsUsableSpell(int id)
         {
-            var lua =
-                @"local usable, nomana = IsUsableSpell({0});
+            const string lua = @"local usable, nomana = IsUsableSpell({0});
                  return tostring(usable);";
             var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
@@ -50,8 +42,7 @@ namespace GarrisonButler.API
 
         internal static bool IsPlayerSpell(int id)
         {
-            var lua =
-                @"local isKnown = IsPlayerSpell({0});
+            const string lua = @"local isKnown = IsPlayerSpell({0});
                  return tostring(isKnown);";
             var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();

@@ -3,6 +3,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// ReSharper disable All
+
 #endregion
 
 namespace Priority_Queue
@@ -15,7 +17,6 @@ namespace Priority_Queue
     public sealed class HeapPriorityQueue<T> : IPriorityQueue<T>
         where T : PriorityQueueNode
     {
-        private int _numNodes;
         private readonly T[] _nodes;
         private long _numNodesEverEnqueued;
 
@@ -25,7 +26,7 @@ namespace Priority_Queue
         /// <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause an exception)</param>
         public HeapPriorityQueue(int maxNodes)
         {
-            _numNodes = 0;
+            Count = 0;
             _nodes = new T[maxNodes + 1];
             _numNodesEverEnqueued = 0;
         }
@@ -33,10 +34,7 @@ namespace Priority_Queue
         /// <summary>
         ///     Returns the number of nodes in the queue.  O(1)
         /// </summary>
-        public int Count
-        {
-            get { return _numNodes; }
-        }
+        public int Count { get; private set; }
 
         /// <summary>
         ///     Returns the maximum number of items that can be enqueued at once in this queue.  Once you hit this number (ie. once
@@ -56,9 +54,9 @@ namespace Priority_Queue
         #endif
         public void Clear()
         {
-            for (int i = 1; i < _nodes.Length; i++)
+            for (var i = 1; i < _nodes.Length; i++)
                 _nodes[i] = null;
-            _numNodes = 0;
+            Count = 0;
         }
 
         /// <summary>
@@ -81,11 +79,11 @@ namespace Priority_Queue
         public void Enqueue(T node, double priority)
         {
             node.Priority = priority;
-            _numNodes++;
-            _nodes[_numNodes] = node;
-            node.QueueIndex = _numNodes;
+            Count++;
+            _nodes[Count] = node;
+            node.QueueIndex = Count;
             node.InsertionIndex = _numNodesEverEnqueued++;
-            CascadeUp(_nodes[_numNodes]);
+            CascadeUp(_nodes[Count]);
         }
 
 #if NET_VERSION_4_5
@@ -99,7 +97,7 @@ namespace Priority_Queue
             _nodes[node2.QueueIndex] = node1;
 
             //Swap their indicies
-            int temp = node1.QueueIndex;
+            var temp = node1.QueueIndex;
             node1.QueueIndex = node2.QueueIndex;
             node2.QueueIndex = temp;
         }
@@ -108,16 +106,16 @@ namespace Priority_Queue
         private void CascadeUp(T node)
         {
             //aka Heapify-up
-            int parent = node.QueueIndex/2;
+            var parent = node.QueueIndex/2;
             while (parent >= 1)
             {
-                T parentNode = _nodes[parent];
+                var parentNode = _nodes[parent];
                 if (HasHigherPriority(parentNode, node))
                     break;
 
                 //Node has lower priority value, so move it up the heap
                 Swap(node, parentNode);
-                    //For some reason, this is faster with Swap() rather than (less..?) individual operations, like in CascadeDown()
+                //For some reason, this is faster with Swap() rather than (less..?) individual operations, like in CascadeDown()
 
                 parent = node.QueueIndex/2;
             }
@@ -131,14 +129,14 @@ namespace Priority_Queue
         {
             //aka Heapify-down
             T newParent;
-            int finalQueueIndex = node.QueueIndex;
+            var finalQueueIndex = node.QueueIndex;
             while (true)
             {
                 newParent = node;
-                int childLeftIndex = 2*finalQueueIndex;
+                var childLeftIndex = 2*finalQueueIndex;
 
                 //Check if the left-child is higher-priority than the current node
-                if (childLeftIndex > _numNodes)
+                if (childLeftIndex > Count)
                 {
                     //This could be placed outside the loop, but then we'd have to check newParent != node twice
                     node.QueueIndex = finalQueueIndex;
@@ -146,17 +144,17 @@ namespace Priority_Queue
                     break;
                 }
 
-                T childLeft = _nodes[childLeftIndex];
+                var childLeft = _nodes[childLeftIndex];
                 if (HasHigherPriority(childLeft, newParent))
                 {
                     newParent = childLeft;
                 }
 
                 //Check if the right-child is higher-priority than either the current node or the left child
-                int childRightIndex = childLeftIndex + 1;
-                if (childRightIndex <= _numNodes)
+                var childRightIndex = childLeftIndex + 1;
+                if (childRightIndex <= Count)
                 {
-                    T childRight = _nodes[childRightIndex];
+                    var childRight = _nodes[childRightIndex];
                     if (HasHigherPriority(childRight, newParent))
                     {
                         newParent = childRight;
@@ -170,7 +168,7 @@ namespace Priority_Queue
                     //Doing it this way is one less assignment operation than calling Swap()
                     _nodes[finalQueueIndex] = newParent;
 
-                    int temp = newParent.QueueIndex;
+                    var temp = newParent.QueueIndex;
                     newParent.QueueIndex = finalQueueIndex;
                     finalQueueIndex = temp;
                 }
@@ -194,6 +192,7 @@ namespace Priority_Queue
         private bool HasHigherPriority(T higher, T lower)
         {
             return (higher.Priority < lower.Priority ||
+                    // ReSharper disable once CompareOfFloatsByEqualityOperator
                     (higher.Priority == lower.Priority && higher.InsertionIndex < lower.InsertionIndex));
         }
 
@@ -203,7 +202,7 @@ namespace Priority_Queue
         /// </summary>
         public T Dequeue()
         {
-            T returnMe = _nodes[1];
+            var returnMe = _nodes[1];
             Remove(returnMe);
             return returnMe;
         }
@@ -233,8 +232,8 @@ namespace Priority_Queue
         private void OnNodeUpdated(T node)
         {
             //Bubble the updated node up or down as appropriate
-            int parentIndex = node.QueueIndex/2;
-            T parentNode = _nodes[parentIndex];
+            var parentIndex = node.QueueIndex/2;
+            var parentNode = _nodes[parentIndex];
 
             if (parentIndex > 0 && HasHigherPriority(node, parentNode))
             {
@@ -257,24 +256,24 @@ namespace Priority_Queue
                 return;
             }
 
-            if (_numNodes <= 1)
+            if (Count <= 1)
             {
                 _nodes[1] = null;
-                _numNodes = 0;
+                Count = 0;
                 return;
             }
 
             //Make sure the node is the last node in the queue
-            bool wasSwapped = false;
-            T formerLastNode = _nodes[_numNodes];
-            if (node.QueueIndex != _numNodes)
+            var wasSwapped = false;
+            var formerLastNode = _nodes[Count];
+            if (node.QueueIndex != Count)
             {
                 //Swap the node with the last node
                 Swap(node, formerLastNode);
                 wasSwapped = true;
             }
 
-            _numNodes--;
+            Count--;
             _nodes[node.QueueIndex] = null;
 
             if (wasSwapped)
@@ -286,7 +285,7 @@ namespace Priority_Queue
 
         public IEnumerator<T> GetEnumerator()
         {
-            for (int i = 1; i <= _numNodes; i++)
+            for (var i = 1; i <= Count; i++)
                 yield return _nodes[i];
         }
 
@@ -301,20 +300,18 @@ namespace Priority_Queue
         /// </summary>
         public bool IsValidQueue()
         {
-            for (int i = 1; i < _nodes.Length; i++)
+            for (var i = 1; i < _nodes.Length; i++)
             {
-                if (_nodes[i] != null)
-                {
-                    int childLeftIndex = 2*i;
-                    if (childLeftIndex < _nodes.Length && _nodes[childLeftIndex] != null &&
-                        HasHigherPriority(_nodes[childLeftIndex], _nodes[i]))
-                        return false;
+                if (_nodes[i] == null) continue;
+                var childLeftIndex = 2*i;
+                if (childLeftIndex < _nodes.Length && _nodes[childLeftIndex] != null &&
+                    HasHigherPriority(_nodes[childLeftIndex], _nodes[i]))
+                    return false;
 
-                    int childRightIndex = childLeftIndex + 1;
-                    if (childRightIndex < _nodes.Length && _nodes[childRightIndex] != null &&
-                        HasHigherPriority(_nodes[childRightIndex], _nodes[i]))
-                        return false;
-                }
+                var childRightIndex = childLeftIndex + 1;
+                if (childRightIndex < _nodes.Length && _nodes[childRightIndex] != null &&
+                    HasHigherPriority(_nodes[childRightIndex], _nodes[i]))
+                    return false;
             }
             return true;
         }

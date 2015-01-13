@@ -1,27 +1,27 @@
-﻿using GarrisonButler.Config;
-using GarrisonButler.Objects;
-
-#region
-
-using System;
+﻿using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
+using GarrisonButler.Objects;
 using Styx.Common;
+
+#region
+
+// ReSharper disable All
 
 #endregion
 
 // See the ReadMe.html for additional information
 public class ObjectDumper
 {
-    private readonly int depth;
-    private int level;
-    private int pos;
-    private TextWriter writer;
+    private readonly int _depth;
+    private int _level;
+    private int _pos;
+    private TextWriter _writer;
 
     private ObjectDumper(int depth)
     {
-        this.depth = depth;
+        _depth = depth;
     }
 
     public static void Write(object element)
@@ -36,12 +36,11 @@ public class ObjectDumper
 
     public static void Write(object element, int depth, TextWriter log)
     {
-        var dumper = new ObjectDumper(depth);
-        dumper.writer = log;
+        var dumper = new ObjectDumper(depth) {_writer = log};
         dumper.WriteObject(null, element);
     }
 
-    public static void WriteToHB(object element, int depth)
+    public static void WriteToHb(object element, int depth)
     {
         TextWriter textWriter = new StringWriter();
         Write(element, depth, textWriter);
@@ -50,28 +49,26 @@ public class ObjectDumper
 
     private void Write(string s)
     {
-        if (s != null)
-        {
-            writer.Write(s);
-            pos += s.Length;
-        }
+        if (s == null) return;
+        _writer.Write(s);
+        _pos += s.Length;
     }
 
     private void WriteIndent()
     {
-        for (int i = 0; i < level; i++) writer.Write("  ");
+        for (var i = 0; i < _level; i++) _writer.Write("  ");
     }
 
     private void WriteLine()
     {
-        writer.WriteLine();
-        pos = 0;
+        _writer.WriteLine();
+        _pos = 0;
     }
 
     private void WriteTab()
     {
         Write("  ");
-        while (pos%8 != 0) Write(" ");
+        while (_pos%8 != 0) Write(" ");
     }
 
     private void WriteObject(string prefix, object element)
@@ -88,7 +85,7 @@ public class ObjectDumper
             var enumerableElement = element as IEnumerable;
             if (enumerableElement != null)
             {
-                foreach (object item in enumerableElement)
+                foreach (var item in enumerableElement)
                 {
                     if (item is IEnumerable && !(item is string))
                     {
@@ -96,12 +93,10 @@ public class ObjectDumper
                         Write(prefix);
                         Write("...");
                         WriteLine();
-                        if (level < depth)
-                        {
-                            level++;
-                            WriteObject(prefix, item);
-                            level--;
-                        }
+                        if (_level >= _depth) continue;
+                        _level++;
+                        WriteObject(prefix, item);
+                        _level--;
                     }
                     else
                     {
@@ -120,11 +115,11 @@ public class ObjectDumper
                 }
                 else
                 {
-                    MemberInfo[] members = element.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
+                    var members = element.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
                     WriteIndent();
                     Write(prefix);
-                    bool propWritten = false;
-                    foreach (MemberInfo m in members)
+                    var propWritten = false;
+                    foreach (var m in members)
                     {
                         var f = m as FieldInfo;
                         var p = m as PropertyInfo;
@@ -140,7 +135,7 @@ public class ObjectDumper
                             }
                             Write(m.Name);
                             Write("=");
-                            Type t = f != null ? f.FieldType : p.PropertyType;
+                            var t = f != null ? f.FieldType : p.PropertyType;
                             if (t == typeof (SafeString))
                             {
                                 WriteValue(SafeString.ToStringSafe());
@@ -151,35 +146,28 @@ public class ObjectDumper
                             }
                             else
                             {
-                                if (typeof (IEnumerable).IsAssignableFrom(t))
-                                {
-                                    Write("...");
-                                }
-                                else
-                                {
-                                    Write("{ }");
-                                }
+                                Write(typeof (IEnumerable).IsAssignableFrom(t) ? "..." : "{ }");
                             }
                         }
                     }
                     if (propWritten) WriteLine();
-                    if (level < depth)
+                    if (_level < _depth)
                     {
-                        foreach (MemberInfo m in members)
+                        foreach (var m in members)
                         {
                             var f = m as FieldInfo;
                             var p = m as PropertyInfo;
                             if (f != null || p != null)
                             {
-                                Type t = f != null ? f.FieldType : p.PropertyType;
+                                var t = f != null ? f.FieldType : p.PropertyType;
                                 if (!(t.IsValueType || t == typeof (string)))
                                 {
-                                    object value = f != null ? f.GetValue(element) : p.GetValue(element, null);
+                                    var value = f != null ? f.GetValue(element) : p.GetValue(element, null);
                                     if (value != null)
                                     {
-                                        level++;
+                                        _level++;
                                         WriteObject(m.Name + ": ", value);
-                                        level--;
+                                        _level--;
                                     }
                                 }
                             }

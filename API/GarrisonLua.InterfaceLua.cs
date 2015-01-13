@@ -20,7 +20,7 @@ namespace GarrisonButler.API
             const string lua =
                 "if not GarrisonMissionFrame then return false; else return tostring(GarrisonMissionFrame:IsVisible());end;";
 
-            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -29,14 +29,15 @@ namespace GarrisonButler.API
             const string lua =
                 "if not GarrisonCapacitiveDisplayFrame then return false; else return tostring(GarrisonCapacitiveDisplayFrame:IsVisible());end;";
 
-            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
-        
+
         public static void ClickStartOrderButton()
         {
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
         }
+
         public static void ToggleLandingPage()
         {
             Lua.DoString("GarrisonLandingPage_Toggle()");
@@ -53,7 +54,12 @@ namespace GarrisonButler.API
         /// <returns>Number of mails shown in the player's mail inbox.  Max of 50 allowed at 1 time.</returns>
         public static int GetInboxMailCountInPlayerInbox()
         {
-            return Lua.GetReturnValues("local numItems, totalItems = GetInboxNumItems(); if (not numItems) then return tostring(0); else return tostring(numItems); end;").GetEmptyIfNull().FirstOrDefault().ToInt32();
+            return
+                Lua.GetReturnValues(
+                    "local numItems, totalItems = GetInboxNumItems(); if (not numItems) then return tostring(0); else return tostring(numItems); end;")
+                    .GetEmptyIfNull()
+                    .FirstOrDefault()
+                    .ToInt32();
         }
 
         /// <summary>
@@ -62,7 +68,12 @@ namespace GarrisonButler.API
         /// <returns>Number of mails currently on blizzard server</returns>
         public static int GetInboxMailCountOnServer()
         {
-            return Lua.GetReturnValues("local numItems, totalItems = GetInboxNumItems(); if (not totalItems) then return tostring(0); else return tostring(totalItems); end;").GetEmptyIfNull().FirstOrDefault().ToInt32();
+            return
+                Lua.GetReturnValues(
+                    "local numItems, totalItems = GetInboxNumItems(); if (not totalItems) then return tostring(0); else return tostring(totalItems); end;")
+                    .GetEmptyIfNull()
+                    .FirstOrDefault()
+                    .ToInt32();
         }
 
         public static void ClickSendMail()
@@ -80,7 +91,7 @@ namespace GarrisonButler.API
             const string lua =
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab then return false; else return tostring(GarrisonMissionFrame.MissionTab:IsVisible()); end;";
 
-            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -90,19 +101,19 @@ namespace GarrisonButler.API
                 "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab or not GarrisonMissionFrame.MissionTab.MissionPage then return false;end;" +
                 "return tostring(GarrisonMissionFrame.MissionTab.MissionPage:IsShown())";
 
-            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
         public static bool IsGarrisonMissionVisibleAndValid(string missionId)
         {
-            string lua =
+            var lua =
                 String.Format(
                     "if not GarrisonMissionFrame.MissionTab.MissionPage or not GarrisonMissionFrame.MissionTab.MissionPage.missionInfo or not GarrisonMissionFrame.MissionTab.MissionPage:IsShown() then return false;end;" +
                     "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )",
                     missionId);
 
-            string t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
             return t.ToBoolean();
         }
 
@@ -113,9 +124,9 @@ namespace GarrisonButler.API
 
         public static void OpenMission(Mission mission)
         {
-            global::GarrisonButler.GarrisonButler.Diagnostic("OpenMission - id: " + mission.MissionId);
+            GarrisonButler.Diagnostic("OpenMission - id: " + mission.MissionId);
             //Scroll until we see mission first
-            String lua =
+            var lua =
                 "local mission; local am = {}; C_Garrison.GetAvailableMissions(am);" +
                 String.Format(
                     "for idx = 1, #am do " +
@@ -137,21 +148,20 @@ namespace GarrisonButler.API
 
         public static void ClickCloseMission()
         {
-            String lua =
-                "GarrisonMissionFrame.MissionTab.MissionPage:Hide();" +
-                "GarrisonMissionFrame.MissionTab.MissionList:Show();" +
-                "GarrisonMissionPage_ClearParty();" +
-                "GarrisonMissionFrame.followerCounters = nil;" +
-                "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo = nil;";
+            const string lua = "GarrisonMissionFrame.MissionTab.MissionPage:Hide();" +
+                               "GarrisonMissionFrame.MissionTab.MissionList:Show();" +
+                               "GarrisonMissionPage_ClearParty();" +
+                               "GarrisonMissionFrame.followerCounters = nil;" +
+                               "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo = nil;";
 
             Lua.DoString(lua);
         }
 
         public static void AddFollowersToMissionOld(string missionId, List<string> followersId)
         {
-            global::GarrisonButler.GarrisonButler.Diagnostic("Cleaning mission Followers");
+            GarrisonButler.Diagnostic("Cleaning mission Followers");
 
-            String luaClear = String.Format(
+            var luaClear = String.Format(
                 "local MissionPageFollowers = GarrisonMissionFrame.MissionTab.MissionPage.Followers;" +
                 "for idx = 1, #MissionPageFollowers do " +
                 "GarrisonMissionPage_ClearFollower(MissionPageFollowers[idx]);" +
@@ -159,13 +169,13 @@ namespace GarrisonButler.API
 
             Lua.DoString(luaClear);
 
-            global::GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers: " + followersId.Count);
+            GarrisonButler.Diagnostic("Adding mission Followers: " + followersId.Count);
 
-            foreach (string t in followersId)
+            foreach (var t in followersId)
             {
-                global::GarrisonButler.GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
+                GarrisonButler.Diagnostic("Adding mission Followers ID: " + t);
             }
-            string
+            var
                 luaAdd =
                     "local fols = {};" +
                     String.Format("fols[1]=\"{0}\";fols[2]=\"{1}\";fols[3]=\"{2}\";",
@@ -191,9 +201,10 @@ namespace GarrisonButler.API
 
         public static async Task AddFollowersToMission(string missionId, List<string> followersId)
         {
-            foreach (string followerId in followersId)
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var followerId in followersId)
             {
-                String luaAdd = String.Format(
+                var luaAdd = String.Format(
                     //Check if in current list
                     "local button;" +
                     "local buttons = GarrisonMissionFrameFollowersListScrollFrame.buttons;" +
@@ -226,17 +237,17 @@ namespace GarrisonButler.API
 
         public static void ClickStartMission()
         {
-            String lua = "GarrisonMissionFrame.MissionTab.MissionPage.StartMissionButton:Click();";
+            const string lua = "GarrisonMissionFrame.MissionTab.MissionPage.StartMissionButton:Click();";
 
             Lua.DoString(lua);
         }
 
         public static void StartMission(Mission mission)
         {
-            global::GarrisonButler.GarrisonButler.Diagnostic("StartMission: ");
-            global::GarrisonButler.GarrisonButler.Diagnostic(mission.ToString());
+            GarrisonButler.Diagnostic("StartMission: ");
+            GarrisonButler.Diagnostic(mission.ToString());
 
-            String lua = String.Format("C_Garrison.StartMission(\"{0}\");", mission.MissionId);
+            var lua = String.Format("C_Garrison.StartMission(\"{0}\");", mission.MissionId);
 
             Lua.DoString(lua);
         }

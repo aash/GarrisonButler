@@ -1,15 +1,10 @@
-﻿
-#region
+﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections;
-using GarrisonButler;
 using GarrisonButler.Libraries;
 using Styx;
-using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -17,12 +12,12 @@ using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonButler.API
 {
-    class HbApi
+    internal class HbApi
     {
         internal static readonly List<uint> GarrisonsZonesId = new List<uint>
         {
             7078, // Lunarfall - Ally
-            7004, // Frostwall - Horde
+            7004 // Frostwall - Horde
         };
 
         internal static LocalPlayer Me = StyxWoW.Me;
@@ -66,22 +61,20 @@ namespace GarrisonButler.API
             return done 
         ");
         }
+
         /// <summary>
         /// Stacks all items in bags.
         /// </summary>
-        internal async static Task<bool> StackAllItemsIfPossible()
+        internal static async Task<bool> StackAllItemsIfPossible()
         {
             if (!AnyItemsStackable())
                 return false;
 
             await Buddy.Coroutines.Coroutine.Wait(5000, () =>
             {
-                if (AnyItemsStackable())
-                {
-                    StackItems();
-                    return false;
-                }
-                return true;
+                if (!AnyItemsStackable()) return true;
+                StackItems();
+                return false;
             });
             return true;
         }
@@ -92,15 +85,15 @@ namespace GarrisonButler.API
         /// <returns></returns>
         internal static bool AnyItemsStackable()
         {
-            List<WoWItem> stackable =
+            var stackable =
                 Me.BagItems
-                .Where(i => i.StackCount < ApiLua.GetMaxStackItem(i.Entry))
-                .GetEmptyIfNull()
-                .ToList();
+                    .Where(i => i.StackCount < ApiLua.GetMaxStackItem(i.Entry))
+                    .GetEmptyIfNull()
+                    .ToList();
 
             while (stackable.Count > 0)
             {
-                WoWItem currentItem = stackable[0];
+                var currentItem = stackable[0];
                 stackable.RemoveAt(0);
 
                 if (stackable.Any(d => d.Entry == currentItem.Entry))
@@ -109,6 +102,5 @@ namespace GarrisonButler.API
 
             return false;
         }
-
     }
 }

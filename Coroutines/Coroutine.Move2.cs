@@ -3,18 +3,15 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Styx;
-using Styx.Common;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.Pathing;
 using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
 using Tripper.MeshMisc;
 using Tripper.Navigation;
 using Tripper.RecastManaged.Detour;
-using Vector3 = Tripper.Tools.Math.Vector3;
+using Tripper.Tools.Math;
 
 #endregion
 
@@ -23,7 +20,6 @@ namespace GarrisonButler
     public class NavigationGaB : MeshNavigator
     {
         internal static WoWPoint CurrentDestination;
-        private readonly WaitTimer _waitTimer1 = new WaitTimer(TimeSpan.FromSeconds(1.0));
         private readonly WaitTimer _waitTimer2 = WaitTimer.FiveSeconds;
         private MeshMovePath _currentMovePath2;
         private StuckHandlerGaB _stuckHandlerGaB;
@@ -38,51 +34,40 @@ namespace GarrisonButler
         public override void OnRemoveAsCurrent()
         {
             GarrisonButler.Log("Custom navigation System removed!");
+            Coroutine.CustomNavigationLoaded = false;
             base.OnRemoveAsCurrent();
         }
-
-        public override float? PathDistance(WoWPoint @from, WoWPoint to, float maxDistance = (float) 3.402823E+38)
-        {
-            return base.PathDistance(from, to, maxDistance);
-        }
-
 
         public override MoveResult MovePath(MeshMovePath path)
         {
             if (StyxWoW.Me.Mounted)
             {
-            //    if (path == null || path.Path == null || (path.Index < 0 || path.Index >= path.Path.Points.Length))
-            //        return MoveResult.Failed;
-
-            //    WoWUnit activeMover = WoWMovement.ActiveMover;
-            //    if (activeMover == null)
-            //        return MoveResult.Failed;
-                double pathPrecision = StyxWoW.Me.Mounted ? 5 : 3;
-                int max = 0;
+                const double pathPrecision = 5;
+                var max = 0;
                 //GarrisonButler.Diagnostic("Moved time: {0}", WoWMovement.ActiveMover.MovementInfo.TimeMoved);
                 //GarrisonButler.Diagnostic("path.Index: {0}", path.Index);
-                while(StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && path.Index > 3 && max < 5)
+                while (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && path.Index > 3 &&
+                       max < 5)
                 {
                     path.Index++;
                     max++;
-                    //return MoveResult.Moved;
                 }
-
-            //    Vector3 vector3 = path.Path.Points[path.Index];
-            //    Navigator.PlayerMover.MoveTowards(vector3);
-            //    return MoveResult.Moved;
             }
-            //GarrisonButler.Log("Native MovePath");
-
-            MoveResult res = base.MovePath(path);
+            ////GarrisonButler.Log("Native MovePath");
+            //if (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < 1)
+            //{
+            //    path.Index++;
+            //}
+            var res = base.MovePath(path);
             return res;
         }
 
         public override void OnSetAsCurrent()
         {
             base.OnSetAsCurrent();
-            _stuckHandlerGaB = new StuckHandlerGaB(Coroutine.nativeNavigation.StuckHandler);
-            this.StuckHandler = new StuckHandlerDummy();
+            _stuckHandlerGaB = new StuckHandlerGaB(Coroutine.NativeNavigation.StuckHandler);
+            StuckHandler = new StuckHandlerDummy();
+            Coroutine.CustomNavigationLoaded = true;
             GarrisonButler.Log("Custom navigation System activated!");
         }
 
@@ -96,7 +81,7 @@ namespace GarrisonButler
             return true;
         }
 
-        private WoWPoint getDestination()
+        private static WoWPoint GetDestination()
         {
             return CurrentDestination;
         }
@@ -106,7 +91,6 @@ namespace GarrisonButler
             // If the location to move to hasn't changed and we already
             // Reached the destination, then no need to keep going.
             if (CurrentDestination == location
-                && _lastMoveResult != null // always true
                 && _lastMoveResult == MoveResult.ReachedDestination)
                 return MoveResult.ReachedDestination;
 
@@ -122,14 +106,14 @@ namespace GarrisonButler
                 return MoveResult.Failed;
             }
 
-            WoWUnit activeMover = WoWMovement.ActiveMover;
+            var activeMover = WoWMovement.ActiveMover;
             if (activeMover == null)
             {
                 GarrisonButler.Diagnostic("MoveTo Failed - activeMover == null");
                 return MoveResult.Failed;
             }
 
-            WoWPoint moverLocation = activeMover.Location;
+            var moverLocation = activeMover.Location;
 
             if (moverLocation.Distance(location) < 4.0f)
             {
@@ -153,7 +137,7 @@ namespace GarrisonButler
             }
             if (Mount.ShouldMount(location))
             {
-                Mount.StateMount(getDestination);
+                Mount.StateMount(GetDestination);
             }
             //if (_waitTimer1.IsFinished)
             //{
@@ -172,7 +156,7 @@ namespace GarrisonButler
             //    }
             //    _waitTimer1.Reset();
             //}
-            bool flag = _currentMovePath2 == null || _currentMovePath2.Path.End.DistanceSqr(location) > 9.0f;
+            var flag = _currentMovePath2 == null || _currentMovePath2.Path.End.DistanceSqr(location) > 9.0f;
 
             //else if (waitTimer2.IsFinished && Unnamed2(CurrentMovePath2, MoverLocation))
             //{
@@ -195,7 +179,7 @@ namespace GarrisonButler
                 _lastMoveResult = MoveResult.PathGenerated;
                 return _lastMoveResult;
             }
-            PathFindResult path2 = FindPath(moverLocation, location);
+            var path2 = FindPath(moverLocation, location);
             if (!path2.Succeeded)
             {
                 _lastMoveResult = MoveResult.PathGenerationFailed;
@@ -207,31 +191,23 @@ namespace GarrisonButler
             return _lastMoveResult;
         }
 
-        private bool Unnamed2(MeshMovePath param0, Vector3 param1)
-        {
-            if ((WoWMovement.ActiveMover ?? StyxWoW.Me).IsFalling || param0.Index <= 0 ||
-                (param0.Index >= param0.Path.Points.Length))
-                return true;
-            return false;
-        }
 
-
-        private PathFindResult FindPathInner(PathFindResult pathFindResult)
+        private static PathFindResult FindPathInner(PathFindResult pathFindResult)
         {
-            DateTime startedAt = DateTime.Now;
-            Vector3[] points = Coroutine.Dijkstra.GetPath2(pathFindResult.Start, pathFindResult.End);
+            var startedAt = DateTime.Now;
+            var points = Coroutine.Dijkstra.GetPath2(pathFindResult.Start, pathFindResult.End);
             GarrisonButler.DiagnosticLogTimeTaken("GetPath2 inside FindPathInner", startedAt);
             var abilities = new AbilityFlags[points.Count()];
-            var PolygonReferences = new PolygonReference[points.Count()];
+            var polygonReferences = new PolygonReference[points.Count()];
             var straightpaths = new StraightPathFlags[points.Count()];
-            var AreaTypes = new AreaType[points.Count()];
+            var areaTypes = new AreaType[points.Count()];
 
-            for (int index = 0; index < points.Length; index++)
+            for (var index = 0; index < points.Length; index++)
             {
                 straightpaths[index] = StraightPathFlags.None;
-                PolygonReferences[index] = new PolygonReference();
+                polygonReferences[index] = new PolygonReference();
                 abilities[index] = AbilityFlags.Run;
-                AreaTypes[index] = AreaType.Ground;
+                areaTypes[index] = AreaType.Ground;
             }
 
             GarrisonButler.DiagnosticLogTimeTaken("FindPathInner", startedAt);
@@ -243,8 +219,8 @@ namespace GarrisonButler
                 Status = Status.Success,
                 Flags = straightpaths,
                 Points = points,
-                Polygons = PolygonReferences,
-                PolyTypes = AreaTypes,
+                Polygons = polygonReferences,
+                PolyTypes = areaTypes,
                 Start = pathFindResult.Start,
                 End = pathFindResult.End,
                 Elapsed = DateTime.Now - startedAt,
@@ -252,11 +228,9 @@ namespace GarrisonButler
             };
         }
 
-        private PathFindResult FindPath(WoWPoint start, WoWPoint end)
+        private new static PathFindResult FindPath(WoWPoint start, WoWPoint end)
         {
-            var obj = new PathFindResult();
-            obj.Start = start;
-            obj.End = end;
+            var obj = new PathFindResult {Start = start, End = end};
             if (TreeRoot.State == TreeRootState.Stopping)
             {
                 return new PathFindResult
@@ -273,50 +247,11 @@ namespace GarrisonButler
                 };
             }
 
-            DateTime startedAt = DateTime.Now;
-            PathFindResult toReturn = FindPathInner(obj);
+            var startedAt = DateTime.Now;
+            var toReturn = FindPathInner(obj);
             GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
 
             return toReturn;
-
-            //this.\u0001 = false;
-            // ISSUE: reference to a compiler-generated method
-            //Task<PathFindResult> task = Task<PathFindResult>.Factory.StartNew(() => FindPathInner(obj));
-            //DateTime startedAt = DateTime.Now;
-            //try
-            //{
-            //    //StyxWoW.Memory.ReleaseFrame();
-            //    //while it is not done with timeout 
-            //    while ((DateTime.Now - startedAt).TotalMilliseconds < 10000/TreeRoot.TicksPerSecond || !task.IsCompleted)
-            //    {
-            //        try
-            //        {
-            //            //StyxWoW.Memory.AcquireFrame();
-            //            ObjectManager.Update();
-            //            WoWMovement.Pulse();
-            //            StyxWoW.ResetAfk();
-            //            //StyxWoW.Memory.ReleaseFrame();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            Logging.WriteException(ex);
-            //        }
-            //    }
-
-            //    GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
-            //    //StyxWoW.Memory.AcquireFrame();
-            //    return task.Result;
-            //}
-            //catch (AggregateException ex)
-            //{
-            //    Logging.WriteException(ex);
-            //}
-            //finally
-            //{
-            //    task.Dispose();
-            //}
-
-            //return obj;
         }
 
         public override WoWPoint[] GeneratePath(WoWPoint @from, WoWPoint to)
@@ -338,7 +273,6 @@ namespace GarrisonButler
 
             public override void Unstick()
             {
-                return;
             }
         }
 
@@ -348,13 +282,16 @@ namespace GarrisonButler
             private readonly Stopwatch _stopwatch = new Stopwatch();
             private WoWPoint _cacheDestination = WoWPoint.Empty;
             private int _cpt;
-            private WoWPoint _lastCheckedLocation = new WoWPoint(0, 0, 0);
+            private WoWPoint _lastCheckedLocation;
+
             private delegate void CopiedFunction();
-            private CopiedFunction UnstickCopy;
+
+            private readonly CopiedFunction _unstickCopy;
+
             public StuckHandlerGaB(StuckHandler native)
             {
                 _native = native;
-                UnstickCopy = native.Unstick;
+                _unstickCopy = native.Unstick;
 
                 _lastCheckedLocation = StyxWoW.Me.Location;
                 _stopwatch.Start();
@@ -362,23 +299,21 @@ namespace GarrisonButler
 
             public override bool IsStuck()
             {
-                if (_stopwatch.ElapsedMilliseconds > 2000)
+                if (_stopwatch.ElapsedMilliseconds <= 2000) return false;
+                _stopwatch.Reset();
+                _stopwatch.Start();
+                if (CurrentDestination != _cacheDestination)
                 {
-                    _stopwatch.Reset();
-                    _stopwatch.Start();
-                    if (CurrentDestination != _cacheDestination)
-                    {
-                        _lastCheckedLocation = StyxWoW.Me.Location;
-                        _cacheDestination = CurrentDestination;
-                        return false;
-                    }
-                    if (StyxWoW.Me.Location.Distance(_lastCheckedLocation) < 3)
-                    {
-                        _cpt++;
-                        return true;
-                    }
                     _lastCheckedLocation = StyxWoW.Me.Location;
+                    _cacheDestination = CurrentDestination;
+                    return false;
                 }
+                if (StyxWoW.Me.Location.Distance(_lastCheckedLocation) < 3)
+                {
+                    _cpt++;
+                    return true;
+                }
+                _lastCheckedLocation = StyxWoW.Me.Location;
                 return false;
             }
 
@@ -394,9 +329,9 @@ namespace GarrisonButler
             public override void Unstick()
             {
                 GarrisonButler.Diagnostic("Calling native unstick : {0}", _cpt);
-                for (int i = 0; i < _cpt; i++)
+                for (var i = 0; i < _cpt; i++)
                 {
-                    UnstickCopy();
+                    _unstickCopy();
                 }
             }
         }

@@ -1,15 +1,10 @@
 ﻿#region
 
-using System;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonButler.Coroutines;
-using GarrisonButler.Libraries;
 using Styx;
 using Styx.CommonBot;
-using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.POI;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -20,10 +15,10 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static WoWPoint CachedToHarvestLocation = WoWPoint.Empty;
-        private static float CachedInteractRangeSqr = 0f;
+        private static WoWPoint _cachedToHarvestLocation = WoWPoint.Empty;
+        private static float _cachedInteractRangeSqr;
 
-        private static async Task<bool> HarvestWoWGameOject(WoWGameObject toHarvest)
+        private static async Task<bool> HarvestWoWGameOject(WoWObject toHarvest)
         {
             var node = BotPoi.Current.AsObject as WoWGameObject;
             if (node == null || !node.IsValid)
@@ -38,10 +33,7 @@ namespace GarrisonButler
                 BotPoi.Current = new BotPoi(toHarvest, PoiType.Harvest);
 
             node = BotPoi.Current.AsObject as WoWGameObject;
-            if (node == null || !node.IsValid)
-                return false;
-
-            return true;
+            return node != null && node.IsValid;
         }
 
         private static async Task<ActionResult> HarvestWoWGameObjectCachedLocation(WoWGameObject toHarvest)
@@ -55,18 +47,16 @@ namespace GarrisonButler
             {
                 if (Blacklist.Contains(toHarvest, BlacklistFlags.Node))
                 {
+                    var harvest = toHarvest;
                     Blacklist.Clear(e =>
                     {
-                        if (e.Guid == toHarvest.Guid)
-                        {
-                            GarrisonButler.Diagnostic("Found a match for blacklist clear.");
-                            return true;
-                        }
-                        return false;
+                        if (e.Guid != harvest.Guid) return false;
+                        GarrisonButler.Diagnostic("Found a match for blacklist clear.");
+                        return true;
                     });
                 }
                 var toHarvestTemp = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .FirstOrDefault(o => o.Location == CachedToHarvestLocation);
+                    .FirstOrDefault(o => o.Location == _cachedToHarvestLocation);
                 if (toHarvestTemp != default(WoWGameObject))
                     toHarvest = toHarvestTemp;
             }
@@ -74,21 +64,20 @@ namespace GarrisonButler
             // STEP 1 - Attempt to harvest original node
             if (toHarvest.IsValid)
             {
-                CachedToHarvestLocation = toHarvest.Location;
-                CachedInteractRangeSqr = toHarvest.InteractRangeSqr;
+                _cachedToHarvestLocation = toHarvest.Location;
+                _cachedInteractRangeSqr = toHarvest.InteractRangeSqr;
                 if (await HarvestWoWGameOject(toHarvest)) // returns false if toHarvest becomes null or invalid
                 {
-                    if( (toHarvest != null && toHarvest.WithinInteractRange) || (Me.Location.DistanceSqr(CachedToHarvestLocation) <= CachedInteractRangeSqr))
-                    {
-                        GarrisonButler.Diagnostic("[Harvest] STEP 0: Done with harvesting.");
-                        return ActionResult.Refresh;
-                    }
-                    return ActionResult.Running;
+                    if ((!toHarvest.WithinInteractRange) &&
+                        (!(Me.Location.DistanceSqr(_cachedToHarvestLocation) <= _cachedInteractRangeSqr)))
+                        return ActionResult.Running;
+                    GarrisonButler.Diagnostic("[Harvest] STEP 0: Done with harvesting.");
+                    return ActionResult.Refresh;
                 }
             }
 
             // Check if had been harvested (ie standing within interact range)
-            if (Me.Location.DistanceSqr(CachedToHarvestLocation) <= CachedInteractRangeSqr)
+            if (Me.Location.DistanceSqr(_cachedToHarvestLocation) <= _cachedInteractRangeSqr)
             {
                 GarrisonButler.Diagnostic("[Harvest] STEP 1 - Finished cached harvesting sequence naturally.");
                 return ActionResult.Refresh;
@@ -97,14 +86,15 @@ namespace GarrisonButler
 
             // If we are here, it is either that the bot did something wrong or node too far. 
             // STEP 2 - Make sure we are within interact range of the location of toHarvest
-            if (CachedToHarvestLocation != WoWPoint.Empty && (Me.Location.DistanceSqr(CachedToHarvestLocation) > CachedInteractRangeSqr))
-                if (await MoveTo(CachedToHarvestLocation) == ActionResult.Running) // returns false for Failed and ReachedDestination
+            if (_cachedToHarvestLocation != WoWPoint.Empty &&
+                (Me.Location.DistanceSqr(_cachedToHarvestLocation) > _cachedInteractRangeSqr))
+                if (await MoveTo(_cachedToHarvestLocation) == ActionResult.Running)
+                    // returns false for Failed and ReachedDestination
                     return ActionResult.Running;
-            
-            
+
+
             // If we are here it means we moved to the cache location but at no points
             // on the way the node was discovered again.
-
 
 
             //GarrisonButler.Diagnostic("YYYYYYYYYYYYYY.");
@@ -159,7 +149,7 @@ namespace GarrisonButler
             //    return false;
             //}
 
-            
+
             //if (foundNodeStillExists == null)
             //{
             //    GarrisonButler.Diagnostic("[Harvest] STEP 3 - Found node null");

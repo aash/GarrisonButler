@@ -14,8 +14,6 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static WoWGameObject CurrentHerbToCollect;
-
         internal static readonly List<uint> GardenItems = new List<uint>
         {
             235390, // Nagrand Arrowbloom
@@ -39,14 +37,12 @@ namespace GarrisonButler
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
             // Do i have a garden?
-            if (!_buildings.Any(b => ShipmentsMap.GetEmptyIfNull().Count() < 2
-                ? false
-                : ShipmentsMap
-                    .GetEmptyIfNull()
-                    .ElementAt(1) // struct so no need to check for null
-                    .buildingIds
-                    .GetEmptyIfNull()
-                    .Contains(b.id)
+            if (!_buildings.Any(b => ShipmentsMap.GetEmptyIfNull().Count() >= 2 && ShipmentsMap
+                .GetEmptyIfNull()
+                .ElementAt(1) // struct so no need to check for null
+                .BuildingIds
+                .GetEmptyIfNull()
+                .Contains(b.Id)
                 ))
             {
                 GarrisonButler.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
@@ -54,7 +50,7 @@ namespace GarrisonButler
             }
 
             // Is there something to gather? 
-            WoWGameObject herbToGather =
+            var herbToGather =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .Where(o => GardenItems.Contains(o.Entry))
@@ -69,55 +65,5 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
             return new Tuple<bool, WoWGameObject>(true, herbToGather);
         }
-
-        private static bool IsWoWObjectHerbNode(WoWObject toCheck)
-        {
-            return GardenItems.Contains(toCheck.Entry);
-        }
-
-        private static List<WoWGameObject> GetAllGardenNodesIfCanRunGarden()
-        {
-            // Settings
-            if (!GaBSettings.Get().HarvestGarden)
-            {
-                //GarrisonButler.Diagnostic("[Garden] Deactivated in user settings.");
-                return new List<WoWGameObject>();
-            }
-
-            // Do i have a garden?
-            if (!_buildings.Any(b => ShipmentsMap.GetEmptyIfNull().Count() < 2
-                ? false
-                : ShipmentsMap
-                    .GetEmptyIfNull()
-                    .ElementAt(1) // struct so no need to check for null
-                    .buildingIds
-                    .GetEmptyIfNull()
-                    .Contains(b.id)
-                ))
-            {
-                //GarrisonButler.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
-                return new List<WoWGameObject>();
-            }
-
-            // Is there something to gather? 
-            List<WoWGameObject> returnList =
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .GetEmptyIfNull()
-                    .Where(o => GardenItems.Contains(o.Entry))
-                    .OrderBy(o => o.DistanceSqr)
-                    .ToList();
-
-            return returnList;
-        }
-
-        //public static async Task<bool> CleanGarden()
-        //{
-        //    WoWGameObject toGather = null;
-        //    if (!CanRunGarden(out toGather))
-        //        return false;
-
-        //    GarrisonButler.Log("[Garden] Moving to harvest herb at: " + toGather.Location);
-        //    return await HarvestWoWGameOject(toGather);
-        //}
     }
 }

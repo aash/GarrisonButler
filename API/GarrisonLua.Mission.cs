@@ -48,39 +48,38 @@ namespace GarrisonButler.API
 
         public static List<string> GetListMissionsId()
         {
-            global::GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
+            GarrisonButler.Diagnostic("GetListMissionsId LUA");
 
-            String lua =
+            const string lua =
                 "local available_missions = {}; local RetInfo = {}; C_Garrison.GetAvailableMissions(available_missions);" +
                 "for idx = 1, #available_missions do table.insert(RetInfo,tostring(available_missions[idx].missionID));end;" +
                 "return unpack(RetInfo)";
 
-            List<string> missionsId = Lua.GetReturnValues(lua);
+            var missionsId = Lua.GetReturnValues(lua);
 
-            global::GarrisonButler.GarrisonButler.Diagnostic("GetListMissionsId LUA");
+            GarrisonButler.Diagnostic("GetListMissionsId LUA");
             return missionsId;
         }
 
         public static List<string> GetListCompletedMissionsId()
         {
-            String lua =
-                "local complete_missions = C_Garrison.GetCompleteMissions(); local RetInfo = {};" +
-                "for idx = 1, #complete_missions do table.insert(RetInfo,tostring(complete_missions[idx].missionID));end;" +
-                "return unpack(RetInfo)";
+            const string lua = "local complete_missions = C_Garrison.GetCompleteMissions(); local RetInfo = {};" +
+                               "for idx = 1, #complete_missions do table.insert(RetInfo,tostring(complete_missions[idx].missionID));end;" +
+                               "return unpack(RetInfo)";
 
-            List<string> missionsId = Lua.GetReturnValues(lua);
+            var missionsId = Lua.GetReturnValues(lua);
             return missionsId;
         }
 
         public static int GetNumberCompletedMissions()
         {
-            String lua = "return tostring(#(C_Garrison.GetCompleteMissions()))";
+            const string lua = "return tostring(#(C_Garrison.GetCompleteMissions()))";
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         public static int GetNumberAvailableMissions()
         {
-            String lua = "local am = {}; C_Garrison.GetAvailableMissions(am); return tostring(#am);";
+            const string lua = "local am = {}; C_Garrison.GetAvailableMissions(am); return tostring(#am);";
             return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
@@ -100,14 +99,9 @@ namespace GarrisonButler.API
             return GetListMissionsId().GetEmptyIfNull().Select(GetMissionById).SkipWhile(m => m == null).ToList();
         }
 
-        public static List<Mission> GetAllAvailableMissionsReport()
-        {
-            return GetListMissionsId().GetEmptyIfNull().Select(GetMissionById).SkipWhile(m => m == null).ToList();
-        }
-
         private static List<string> GetEnemies(String missionId)
         {
-            String lua =
+            var lua =
                 String.Format(
                     "local location, xp, environment, environmentDesc, environmentTexture, locPrefix, isExhausting, enemies = C_Garrison.GetMissionInfo(\"{0}\");",
                     missionId) +
@@ -120,14 +114,14 @@ namespace GarrisonButler.API
                 "end;" +
                 "return unpack(RetInfo)";
 
-            List<string> enemies = Lua.GetReturnValues(lua);
+            var enemies = Lua.GetReturnValues(lua);
             return enemies ?? new List<string>();
         }
 
 
-        public static Mission GetMissionReportById(String missionId)
+        public static Mission GetMissionReportById(String missionIdArg)
         {
-            String lua =
+            var lua =
                 "local b = {}; local am = GarrisonLandingPageReport.List.AvailableItems; local RetInfo = {}; local cpt = 0;" +
                 String.Format(
                     "local location, xp, environment, environmentDesc, environmentTexture, locPrefix, isExhausting, enemies = C_Garrison.GetMissionInfo(\"{0}\");" +
@@ -154,44 +148,44 @@ namespace GarrisonButler.API
                     "cpt = 17;" +
                     "end;" +
                     "end;"
-                    , missionId) +
+                    , missionIdArg) +
                 "for j_=0,cpt do table.insert(RetInfo,tostring(b[j_]));end; " +
                 "return unpack(RetInfo)";
-            List<string> mission = Lua.GetReturnValues(lua);
+            var mission = Lua.GetReturnValues(lua);
 
             if (mission.IsNullOrEmpty())
                 return null;
 
-            List<string> enemies = GetEnemies(missionId);
-            string description = mission[0];
-            int cost = mission[1].ToInt32();
+            var enemies = GetEnemies(missionIdArg);
+            var description = mission[0];
+            var cost = mission[1].ToInt32();
             //mission[2] = this.duration;
-            int durationSeconds = mission[3].ToInt32();
-            int level = mission[4].ToInt32();
-            string type = mission[5];
+            var durationSeconds = mission[3].ToInt32();
+            var level = mission[4].ToInt32();
+            var type = mission[5];
             //mission[6] = this.locPrefix; 
-            int state = mission[7].ToInt32();
-            int ilevel = mission[8].ToInt32();
-            string name = mission[9];
-            string location = mission[10];
-            bool isRare = mission[11].ToBoolean();
+            var state = mission[7].ToInt32();
+            var ilevel = mission[8].ToInt32();
+            var name = mission[9];
+            var location = mission[10];
+            var isRare = mission[11].ToBoolean();
             //mission[12] = this.typeAtlas; 
-            string missionID = mission[13];
-            int numFollowers = mission[14].ToInt32();
-            string xp = mission[15];
-            int numRewards = mission[16].ToInt32();
-            string environment = mission[17];
+            var missionId = mission[13];
+            var numFollowers = mission[14].ToInt32();
+            var xp = mission[15];
+            var numRewards = mission[16].ToInt32();
+            var environment = mission[17];
 
             return new Mission(cost, description,
                 durationSeconds, enemies, level, ilevel,
-                isRare, location, missionID,
+                isRare, location, missionId,
                 name, numFollowers, numRewards,
                 state, type, xp, environment);
         }
 
-        public static Mission GetMissionById(String missionId)
+        public static Mission GetMissionById(String missionIdArg)
         {
-            String lua =
+            var lua =
                 "local b = {}; local am = {}; local RetInfo = {}; local cpt = 0; C_Garrison.GetAvailableMissions(am);" +
                 String.Format(
                     "local location, xp, environment, environmentDesc, environmentTexture, locPrefix, isExhausting, enemies = C_Garrison.GetMissionInfo(\"{0}\");" +
@@ -218,44 +212,44 @@ namespace GarrisonButler.API
                     "cpt = 17;" +
                     "end;" +
                     "end;"
-                    , missionId) +
+                    , missionIdArg) +
                 "for j_=0,cpt do table.insert(RetInfo,tostring(b[j_]));end; " +
                 "return unpack(RetInfo)";
-            List<string> mission = Lua.GetReturnValues(lua);
+            var mission = Lua.GetReturnValues(lua);
 
             if (mission.IsNullOrEmpty())
                 return null;
 
-            List<string> enemies = GetEnemies(missionId);
-            string description = mission[0];
-            int cost = mission[1].ToInt32();
+            var enemies = GetEnemies(missionIdArg);
+            var description = mission[0];
+            var cost = mission[1].ToInt32();
             //mission[2] = this.duration;
-            int durationSeconds = mission[3].ToInt32();
-            int level = mission[4].ToInt32();
-            string type = mission[5];
+            var durationSeconds = mission[3].ToInt32();
+            var level = mission[4].ToInt32();
+            var type = mission[5];
             //mission[6] = this.locPrefix; 
-            int state = mission[7].ToInt32();
-            int ilevel = mission[8].ToInt32();
-            string name = mission[9];
-            string location = mission[10];
-            bool isRare = mission[11].ToBoolean();
+            var state = mission[7].ToInt32();
+            var ilevel = mission[8].ToInt32();
+            var name = mission[9];
+            var location = mission[10];
+            var isRare = mission[11].ToBoolean();
             //mission[12] = this.typeAtlas; 
-            string missionID = mission[13];
-            int numFollowers = mission[14].ToInt32();
-            string xp = mission[15];
-            int numRewards = mission[16].ToInt32();
-            string environment = mission[17];
+            var missionId = mission[13];
+            var numFollowers = mission[14].ToInt32();
+            var xp = mission[15];
+            var numRewards = mission[16].ToInt32();
+            var environment = mission[17];
 
             return new Mission(cost, description,
                 durationSeconds, enemies, level, ilevel,
-                isRare, location, missionID,
+                isRare, location, missionId,
                 name, numFollowers, numRewards,
                 state, type, xp, environment);
         }
 
-        public static Mission GetCompletedMissionById(String missionId)
+        public static Mission GetCompletedMissionById(String missionIdArg)
         {
-            String lua =
+            var lua =
                 "local b = {}; local am = C_Garrison.GetCompleteMissions(); local RetInfo = {}; local cpt = 0;" +
                 String.Format("for idx = 1, #am do " +
                               "local location, xp, environment, environmentDesc, environmentTexture, locPrefix, isExhausting, enemies = C_Garrison.GetMissionInfo(\"{0}\");" +
@@ -282,40 +276,40 @@ namespace GarrisonButler.API
                               "b[19] = am[idx].xpBonus;" +
                               "b[20] = am[idx].success;" +
                               "end;" +
-                              "end;", missionId) +
+                              "end;", missionIdArg) +
                 "for j_=0,20 do table.insert(RetInfo,tostring(b[j_]));end; " +
                 "return unpack(RetInfo)";
-            List<string> mission = Lua.GetReturnValues(lua);
+            var mission = Lua.GetReturnValues(lua);
 
             if (mission.IsNullOrEmpty())
                 return null;
 
-            List<string> enemies = GetEnemies(missionId);
-            string description = mission[0];
-            int cost = mission[1].ToInt32();
+            var enemies = GetEnemies(missionIdArg);
+            var description = mission[0];
+            var cost = mission[1].ToInt32();
             //mission[2] = this.duration;
-            int durationSeconds = mission[3].ToInt32();
-            int level = mission[4].ToInt32();
-            string type = mission[5];
+            var durationSeconds = mission[3].ToInt32();
+            var level = mission[4].ToInt32();
+            var type = mission[5];
             //mission[6] = this.locPrefix; 
-            int state = mission[7].ToInt32();
-            int ilevel = mission[8].ToInt32();
-            string name = mission[9];
-            string location = mission[10];
-            bool isRare = mission[11].ToBoolean();
+            var state = mission[7].ToInt32();
+            var ilevel = mission[8].ToInt32();
+            var name = mission[9];
+            var location = mission[10];
+            var isRare = mission[11].ToBoolean();
             //mission[12] = this.typeAtlas; 
-            string missionID = mission[13];
-            int numFollowers = mission[14].ToInt32();
-            int numRewards = mission[15].ToInt32();
-            int xp = mission[16].ToInt32();
-            int material = mission[17].ToInt32();
-            string successChance = mission[18];
-            int xpBonus = mission[19].ToInt32();
-            bool success = mission[20].ToBoolean();
+            var missionId = mission[13];
+            var numFollowers = mission[14].ToInt32();
+            var numRewards = mission[15].ToInt32();
+            var xp = mission[16].ToInt32();
+            var material = mission[17].ToInt32();
+            var successChance = mission[18];
+            var xpBonus = mission[19].ToInt32();
+            var success = mission[20].ToBoolean();
 
             return new Mission(cost, description,
                 durationSeconds, enemies, level, ilevel,
-                isRare, location, missionID,
+                isRare, location, missionId,
                 name, numFollowers, numRewards,
                 state, type, xp, material, successChance, xpBonus, success);
         }
@@ -323,7 +317,8 @@ namespace GarrisonButler.API
 
         public static void TurnInAllCompletedMissions()
         {
-            foreach (Mission completedMission in GetAllCompletedMissions())
+            // ReSharper disable once UnusedVariable
+            foreach (var completedMission in GetAllCompletedMissions())
             {
                 //Mark as complete and call for bonus rolls
                 Lua.DoString(
@@ -340,7 +335,7 @@ namespace GarrisonButler.API
 
         public static void TurnInCompletedMissions(List<Mission> missions)
         {
-            foreach (Mission completedMission in missions)
+            foreach (var completedMission in missions)
             {
                 //Mark as complete and call for bonus rolls
                 Lua.DoString(

@@ -39,7 +39,7 @@ namespace GarrisonButler
             7326, // ally 3
             7327, // horde 1
             7328, // horde 2
-            7329, // horde 3
+            7329 // horde 3
         };
 
 
@@ -58,7 +58,7 @@ namespace GarrisonButler
             }
 
             // Do i have a mine?
-            if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
+            if (!_buildings.Any(b => ShipmentsMap[0].BuildingIds.Contains(b.Id)))
             {
                 GarrisonButler.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
                 return new Tuple<bool, WoWGameObject>(false, null);
@@ -78,47 +78,16 @@ namespace GarrisonButler
                     .GetEmptyIfNull()
                     .Where(o => MineItems.Contains(o.Entry)).GetEmptyIfNull();
 
-            if (nodes.IsNullOrEmpty())
+            var gameObjects = nodes as WoWGameObject[] ?? nodes.ToArray();
+            if (gameObjects.IsNullOrEmpty())
             {
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Tuple<bool, WoWGameObject>(false, null);
             }
-            var closest = Dijkstra.GetClosestObject(Me.Location, nodes.ToArray());
+            var closest = Dijkstra.GetClosestObject(Me.Location, gameObjects.ToArray());
 
             GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + closest.Location);
             return new Tuple<bool, WoWGameObject>(true, closest);
-        }
-
-        private static bool IsWoWObjectMine(WoWObject toCheck)
-        {
-            return MineItems.Contains(toCheck.Entry);
-        }
-
-        private static List<WoWGameObject> GetAllMineNodesIfCanRunMine()
-        {
-            // Settings
-            if (!GaBSettings.Get().HarvestMine)
-            {
-                //GarrisonButler.Diagnostic("[Mine] Deactivated in user settings.");
-                return new List<WoWGameObject>();
-            }
-
-            // Do i have a mine?
-            if (!_buildings.Any(b => ShipmentsMap[0].buildingIds.Contains(b.id)))
-            {
-                //GarrisonButler.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
-                return new List<WoWGameObject>();
-            }
-
-            // Is there something to mine? 
-            List<WoWGameObject> returnList = 
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .GetEmptyIfNull()
-                    .Where(o => MineItems.Contains(o.Entry))
-                    .OrderBy(o => o.Distance)
-                    .ToList();
-
-            return returnList;
         }
 
         private static bool MeIsInMine()
@@ -130,36 +99,39 @@ namespace GarrisonButler
         {
             return () =>
             {
-                WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
+                var item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
                 if (item == null || !item.IsValid || !item.Usable)
                     return new Tuple<bool,
                         WoWItem>(false,
                             null);
-                IEnumerable<KeyValuePair<string, WoWAura>> auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
-                if (auraId != 0 && maxStack != 0 && auras.Any())
+                var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
+                var pairs = auras as KeyValuePair<string, WoWAura>[] ?? auras.ToArray();
+                if (auraId != 0 && maxStack != 0 && pairs.Any())
                 {
-                    WoWAura Aura = auras.First().Value;
-                    if (Aura == null)
+                    var aura = pairs.First().Value;
+                    // ReSharper disable once InvertIf
+                    if (aura == null)
                     {
                         GarrisonButler.Diagnostic("[Item] Aura null skipping.");
                         return new Tuple<bool,
                             WoWItem>(false,
                                 null);
                     }
-                    if (Aura.StackCount >= maxStack || maxStack == 1)
+                    // ReSharper disable once InvertIf
+                    if (aura.StackCount >= maxStack || maxStack == 1)
                     {
                         GarrisonButler.Diagnostic("[Item] Number of stacks/Max: {0}/{1} - too high to use item {2}",
-                            Aura.StackCount,
+                            aura.StackCount,
                             maxStack,
-                            Aura.Name);
+                            aura.Name);
                         return new Tuple<bool, WoWItem>(false, null);
                     }
-                    GarrisonButler.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", Aura.Name, Aura.StackCount);
+                    GarrisonButler.Diagnostic("[Item] AuraCheck: {0} - current stack {1}", aura.Name, aura.StackCount);
                 }
 
-                if (item.CooldownTimeLeft.TotalSeconds > 0)
-                    return new Tuple<bool, WoWItem>(false, null);
-                return new Tuple<bool, WoWItem>(true, item);
+                return item.CooldownTimeLeft.TotalSeconds > 0
+                    ? new Tuple<bool, WoWItem>(false, null)
+                    : new Tuple<bool, WoWItem>(true, item);
             };
         }
 
@@ -187,23 +159,24 @@ namespace GarrisonButler
                     "local amount = {0}; ", 1) +
                 string.Format(
                     "local item = {0}; ", item.Entry) +
-                    "local ItemBagNr = 0; " +
-                    "local ItemSlotNr = 1; " +
-                    "for b=0,4 do " +
-                        "for s=1,GetContainerNumSlots(b) do " +
-                            "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */ "then " +
-                                "ItemBagNr = b; " +
-                                "ItemSlotNr = s; " +
-                            "end; " +
-                        "end; " +
-                    "end; " +
-                    "ClearCursor(); " +
-                    "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
-                    "if CursorHasItem() then " +
-                        "DeleteCursorItem(); " +
-                    "end;"
-            );
-            
+                "local ItemBagNr = 0; " +
+                "local ItemSlotNr = 1; " +
+                "for b=0,4 do " +
+                "for s=1,GetContainerNumSlots(b) do " +
+                "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */
+                "then " +
+                "ItemBagNr = b; " +
+                "ItemSlotNr = s; " +
+                "end; " +
+                "end; " +
+                "end; " +
+                "ClearCursor(); " +
+                "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
+                "if CursorHasItem() then " +
+                "DeleteCursorItem(); " +
+                "end;"
+                );
+            await CommonCoroutines.SleepForLagDuration();
             // To stop the task from continually running forever
             return ActionResult.Done;
         }
@@ -213,16 +186,15 @@ namespace GarrisonButler
         {
             return () =>
             {
-                WoWItem item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
+                var item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
                 if (item == null || !item.IsValid || !item.Usable)
                     return new Tuple<bool,
                         WoWItem>(false,
                             null);
 
-                if (item.StackCount >= max)
-                    return new Tuple<bool, WoWItem>(true, item);
-
-                return new Tuple<bool, WoWItem>(false, item);
+                return item.StackCount >= max
+                    ? new Tuple<bool, WoWItem>(true, item)
+                    : new Tuple<bool, WoWItem>(false, item);
             };
         }
     }

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
 using Styx.CommonBot.Profiles;
 using Styx.WoWInternals.WoWObjects;
 
@@ -10,7 +6,6 @@ namespace GarrisonButler.Libraries
 {
     public static class ItemsExtensions
     {
-
         /// <summary>
         /// Returns if an item can be mailed. Check for Null included
         /// </summary>
@@ -34,12 +29,13 @@ namespace GarrisonButler.Libraries
             var isProtected = false;
             try
             {
-                if(item != null)
+                if (item != null)
                     isProtected = ProtectedItemsManager.Contains(item.Entry);
             }
             catch (Exception e)
             {
-                GarrisonButler.Warning("[ItemsExtensions] Error while checking ProtectedItemsManager. Will consider item as protected to be safe.");
+                GarrisonButler.Warning(
+                    "[ItemsExtensions] Error while checking ProtectedItemsManager. Will consider item as protected to be safe.");
                 GarrisonButler.Diagnostic("[ItemsExtensions] Error of type: ", e.GetType());
                 isProtected = true;
             }

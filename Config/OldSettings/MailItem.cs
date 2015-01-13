@@ -9,13 +9,10 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-
-
 namespace GarrisonButler.Config.OldSettings
 {
     public class MailItem : INotifyPropertyChanged
     {
-
         private
             string _comment;
 
@@ -34,8 +31,6 @@ namespace GarrisonButler.Config.OldSettings
                 string recipient, MailCondition
                     mailCondition,
                 int checkValue,
-
-
                 string comment = "")
         {
             ItemId = itemId;
@@ -56,11 +51,9 @@ namespace GarrisonButler.Config.OldSettings
             get { return _itemId; }
             set
             {
-                if (value != _itemId)
-                {
-                    _itemId = value;
-                    OnPropertyChanged();
-                }
+                if (value == _itemId) return;
+                _itemId = value;
+                OnPropertyChanged();
             }
         }
 
@@ -70,11 +63,9 @@ namespace GarrisonButler.Config.OldSettings
             get { return _recipient; }
             set
             {
-                if (value != _recipient)
-                {
-                    _recipient = value;
-                    OnPropertyChanged();
-                }
+                if (value == _recipient) return;
+                _recipient = value;
+                OnPropertyChanged();
             }
         }
 
@@ -85,11 +76,9 @@ namespace GarrisonButler.Config.OldSettings
             get { return _condition; }
             set
             {
-                if (value != _condition)
-                {
-                    _condition = value;
-                    OnPropertyChanged();
-                }
+                if (value == _condition) return;
+                _condition = value;
+                OnPropertyChanged();
             }
         }
 
@@ -99,11 +88,9 @@ namespace GarrisonButler.Config.OldSettings
             get { return _condition != null ? _condition.CheckValue : 0; }
             set
             {
-                if (value != _condition.CheckValue)
-                {
-                    _condition.CheckValue = value;
-                    OnPropertyChanged();
-                }
+                if (value == _condition.CheckValue) return;
+                _condition.CheckValue = value;
+                OnPropertyChanged();
             }
         }
 
@@ -128,11 +115,9 @@ namespace GarrisonButler.Config.OldSettings
             get { return _comment; }
             set
             {
-                if (value != _comment)
-                {
-                    _comment = value;
-                    OnPropertyChanged();
-                }
+                if (value == _comment) return;
+                _comment = value;
+                OnPropertyChanged();
             }
         }
 
@@ -146,7 +131,7 @@ namespace GarrisonButler.Config.OldSettings
             ([
                 CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
+            var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -164,9 +149,9 @@ namespace GarrisonButler.Config.OldSettings
             Objects.MailItem FromOld
             ()
         {
-            var mailItem = new Objects.MailItem(this.ItemId, this.Recipient, this.Condition.FromOld(),
-                this.CheckValue,
-                this.Comment);
+            var mailItem = new Objects.MailItem(ItemId, Recipient, Condition.FromOld(),
+                CheckValue,
+                Comment);
             return mailItem;
         }
     }

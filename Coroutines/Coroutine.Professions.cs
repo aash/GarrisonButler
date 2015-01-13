@@ -29,7 +29,12 @@ namespace GarrisonButler
 
             IEnumerable<DailyProfession> dailyActivated =
                 DailyProfession.AllDailies.Where(
-                    d => GaBSettings.Get().DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId).Activated);
+                    d =>
+                    {
+                        var dailyProfession = GaBSettings.Get()
+                            .DailySettings.FirstOrDefault(d2 => d2.ItemId == d.ItemId);
+                        return dailyProfession != null && dailyProfession.Activated;
+                    }).ToList();
 
             //GarrisonButler.Diagnostic("[Profession] AllDailies:");
             //ObjectDumper.WriteToHB(DailyProfession.AllDailies, 1); 
@@ -42,17 +47,17 @@ namespace GarrisonButler
                 return;
             }
 
-            foreach (DailyProfession daily in dailyActivated)
+            foreach (
+                var daily in
+                    dailyActivated.Where(
+                        daily => !_detectedDailyProfessions.Any(d => d.ItemId == daily.ItemId && d.Spell == null)))
             {
-                if (!_detectedDailyProfessions.Any(d => d.ItemId == daily.ItemId && d.Spell == null))
-                {
-                    daily.Initialize();
-                    if (daily.Spell == null)
-                        continue;
+                daily.Initialize();
+                if (daily.Spell == null)
+                    continue;
 
-                    GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Name);
-                    _detectedDailyProfessions.Add(daily);
-                }
+                GarrisonButler.Log("Adding daily CD: {0} - {1}", daily.TradeskillId, daily.Name);
+                _detectedDailyProfessions.Add(daily);
             }
         }
 
@@ -79,12 +84,13 @@ namespace GarrisonButler
             //}
 
             IEnumerable<DailyProfession> possibleDailies =
-                _detectedDailyProfessions.Where(d => d.Spell.CanCast && Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
+                _detectedDailyProfessions.Where(
+                    d => d.Spell.CanCast && Math.Abs(d.Spell.CooldownTimeLeft.TotalSeconds) < 0.1)
                     .Where(d => d.GetMaxRepeat() > 0).OrderBy(d => d.TradeskillId);
 
             if (possibleDailies.Any())
             {
-                DailyProfession daily = possibleDailies.First();
+                var daily = possibleDailies.First();
                 GarrisonButler.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1} - #{2}",
                     daily.TradeskillId, daily.Spell.Name, daily.GetMaxRepeat());
                 return new Tuple<bool, DailyProfession>(true, daily);
@@ -95,7 +101,7 @@ namespace GarrisonButler
 
         public static async Task<ActionResult> DoDailyCd(DailyProfession daily)
         {
-            if (daily.needAnvil())
+            if (daily.NeedAnvil())
             {
                 return await FindAnvilAndDoCd(daily);
             }
@@ -108,7 +114,7 @@ namespace GarrisonButler
 
         private static async Task<ActionResult> FindAnvilAndDoCd(DailyProfession daily)
         {
-            WoWGameObject anvil =
+            var anvil =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .Where(o => o.SpellFocus == WoWSpellFocus.Anvil)
                     .OrderBy(o => o.Location.DistanceSqr(Dijkstra.ClosestToNodes(o.Location)))
@@ -131,7 +137,7 @@ namespace GarrisonButler
 
         public static async Task<ActionResult> MoveToMine()
         {
-            WoWPoint locationToLookAt = Me.IsAlliance ? new WoWPoint(1907, 93, 83) : new WoWPoint(5473, 4444, 144);
+            var locationToLookAt = Me.IsAlliance ? new WoWPoint(1907, 93, 83) : new WoWPoint(5473, 4444, 144);
             return await MoveTo(locationToLookAt, "[Profession] Moving to mine to search for an Anvil.");
         }
 

@@ -5,10 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using GarrisonButler.Config;
-using GarrisonButler.Libraries;
-using GarrisonButler.API;
 using Styx;
-using Styx.CommonBot;
 using Styx.Patchables;
 using Styx.WoWInternals;
 using Styx.WoWInternals.DBC;
@@ -36,7 +33,7 @@ namespace GarrisonButler.Objects
             Skinning = 393
         }
 
-        public enum tradeskillSpell
+        public enum TradeskillSpell
         {
             Alchemy = 156606,
             Blacksmithing = 158737,
@@ -49,7 +46,7 @@ namespace GarrisonButler.Objects
             Jewelcrafting = 158750,
             Leatherworking = 158752,
             //Mining = 186,
-            Tailoring = 158758,
+            Tailoring = 158758
             //Skinning = 393
         }
 
@@ -65,13 +62,15 @@ namespace GarrisonButler.Objects
                 new DailyProfession("Gearspring Parts", 111366, 169080, tradeskillID.Engineering),
                 new DailyProfession("Secret of Draenor Engineering", 119299, 177054, tradeskillID.Engineering),
                 new DailyProfession("War Paints", 112377, 169081, tradeskillID.Inscription), // war paint
-                new DailyProfession("Secret of Draenor Inscription", 119297, 177045, tradeskillID.Inscription), // secrets
+                new DailyProfession("Secret of Draenor Inscription", 119297, 177045, tradeskillID.Inscription),
+                // secrets
                 new DailyProfession("Taladite Crystal", 115524, 170700, tradeskillID.Jewelcrafting),
-                new DailyProfession("Secret of Draenor Jewelcrafting", 118723, 176087, tradeskillID.Jewelcrafting), // secret
+                new DailyProfession("Secret of Draenor Jewelcrafting", 118723, 176087, tradeskillID.Jewelcrafting),
+                // secret
                 new DailyProfession("Burnished Leather", 110611, 171391, tradeskillID.Leatherworking),
                 new DailyProfession("Secret of Draenor Leatherworking", 118721, 176089, tradeskillID.Leatherworking),
                 new DailyProfession("Hexweave Cloth", 111556, 168835, tradeskillID.Tailoring),
-                new DailyProfession("Secret of Draenor Tailoring", 118722, 176058, tradeskillID.Tailoring),
+                new DailyProfession("Secret of Draenor Tailoring", 118722, 176058, tradeskillID.Tailoring)
             };
 
         public DailyProfession(string name, uint itemId, uint spellId, tradeskillID tradeskillId, bool activated = false)
@@ -88,14 +87,18 @@ namespace GarrisonButler.Objects
         {
         }
 
-        [XmlText()]
+        [XmlText]
         public string Name { get; set; }
+
         [XmlAttribute("TradeskillId")]
         public tradeskillID TradeskillId { get; set; }
+
         [XmlAttribute("ItemId")]
         public uint ItemId { get; set; }
+
         [XmlAttribute("SpellId")]
         public uint SpellId { get; set; }
+
         [XmlAttribute("Activated")]
         public bool Activated { get; set; }
 
@@ -104,7 +107,7 @@ namespace GarrisonButler.Objects
 
         public void Initialize()
         {
-            DailyProfession firstOrDefault = GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId);
+            var firstOrDefault = GaBSettings.Get().DailySettings.FirstOrDefault(d => d.ItemId == ItemId);
             if (firstOrDefault != null && firstOrDefault.Activated)
             {
                 GarrisonButler.Diagnostic("[DailyProfession] {0}: loading spell.", Name);
@@ -114,20 +117,26 @@ namespace GarrisonButler.Objects
                 GarrisonButler.Diagnostic("[DailyProfession] {0}: not activated.", Name);
         }
 
-        public bool needAnvil()
+        public bool NeedAnvil()
         {
             return TradeskillId == tradeskillID.Blacksmithing || TradeskillId == tradeskillID.Engineering;
         }
 
         public WoWSpell HasRecipe()
         {
-            string name = Enum.GetName(typeof (tradeskillID), TradeskillId);
-            var TradeSkillSpell = (tradeskillSpell) Enum.Parse(typeof (tradeskillSpell), name);
+            var name = Enum.GetName(typeof (tradeskillID), TradeskillId);
+            if (name != null)
+            {
+                var tradeSkillSpell = (TradeskillSpell) Enum.Parse(typeof (TradeskillSpell), name);
 
-            GarrisonButler.Diagnostic("[DailyProfession] Name: " + this.Name);
-            GarrisonButler.Diagnostic("[DailyProfession] TradeSkillSpell: " + TradeSkillSpell);
-
-            return WoWSpell.FromId((int)SpellId) ?? default(WoWSpell);
+                GarrisonButler.Diagnostic("[DailyProfession] Name: " + Name);
+                GarrisonButler.Diagnostic("[DailyProfession] TradeSkillSpell: " + tradeSkillSpell);
+            }
+            else
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] Name: null");
+            }
+            return WoWSpell.FromId((int) SpellId);
         }
 
         public int GetMaxRepeat()
@@ -135,20 +144,20 @@ namespace GarrisonButler.Objects
             if (Spell == null)
                 Spell = GetRecipeSpell();
 
-            int maxRepeat = Int32.MaxValue;
-            WoWSpell.SpellReagentsEntry spellReagents = Spell.InternalInfo.SpellReagents;
+            var maxRepeat = Int32.MaxValue;
+            var spellReagents = Spell.InternalInfo.SpellReagents;
             if (spellReagents.Reagent == null)
                 return maxRepeat;
 
-            for (int index = 0; index < spellReagents.Reagent.Length; index++)
+            for (var index = 0; index < spellReagents.Reagent.Length; index++)
             {
-                int reagent = spellReagents.Reagent[index];
+                var reagent = spellReagents.Reagent[index];
                 if (reagent == 0)
                     continue;
-                uint required = spellReagents.ReagentCount[index];
+                var required = spellReagents.ReagentCount[index];
                 if (required <= 0)
                     continue;
-                long numInBags =
+                var numInBags =
                     StyxWoW.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == reagent ? i.StackCount : 0);
                 numInBags +=
                     StyxWoW.Me.ReagentBankItems.Sum(i => i != null && i.IsValid && i.Entry == reagent ? i.StackCount : 0);
@@ -156,8 +165,7 @@ namespace GarrisonButler.Objects
                 if (repeatNum < maxRepeat)
                     maxRepeat = repeatNum;
             }
-            if (Spell.CooldownTimeLeft.TotalSeconds > 0) return 0;
-            return maxRepeat;
+            return Spell.CooldownTimeLeft.TotalSeconds > 0 ? 0 : maxRepeat;
         }
 
         public WoWSpell GetRecipeSpell()
@@ -171,13 +179,13 @@ namespace GarrisonButler.Objects
 
             var skillLineId = (int) TradeskillId;
 
-            List<SkillLine> skillLineIds = StyxWoW.Db[ClientDb.SkillLine]
+            var skillLineIds = StyxWoW.Db[ClientDb.SkillLine]
                 .Select(r => r.GetStruct<SkillLineInfo.SkillLineEntry>())
                 .Where(s => s.ID == skillLineId || s.ParentSkillLineId == skillLineId)
                 .Select(s => (SkillLine) s.ID)
                 .ToList();
 
-            List<WoWSpell> recipes = SkillLineAbility.GetAbilities()
+            var recipes = SkillLineAbility.GetAbilities()
                 .Where(
                     a =>
                         skillLineIds.Contains(a.SkillLine) && a.NextSpellId == 0 && a.GreySkillLevel > 0 &&

@@ -1,11 +1,13 @@
-﻿namespace GarrisonButler.Config
+﻿using System.ComponentModel;
+
+namespace GarrisonButler.Config
 {
     partial class ConfigForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.

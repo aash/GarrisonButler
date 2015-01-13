@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using GarrisonButler.API;
 using Priority_Queue;
 using Styx;
 using Styx.Pathing;
@@ -19,12 +18,12 @@ namespace GarrisonButler
     {
         #region Dijkstra
 
-        private static Graph _movementGraph = null;
+        private static Graph _movementGraph;
         private static List<WoWPoint> _zonePoints;
 
-        private static NavigationGaB customNavigation;
-        private static bool CustomNavigationLoaded = false;
-        internal static NavigationProvider nativeNavigation;
+        private static NavigationGaB _customNavigation;
+        internal static bool CustomNavigationLoaded = false;
+        internal static NavigationProvider NativeNavigation;
 
         public static void InitializationMove()
         {
@@ -37,11 +36,8 @@ namespace GarrisonButler
             }
 
             // Generating graph from list of points
-            if(_movementGraph == null)
+            if (_movementGraph == null)
                 _movementGraph = Dijkstra.GraphFromList(_zonePoints);
-
-            // Init variables for movement system
-            new WoWPoint();
         }
 
         public class Dijkstra
@@ -51,34 +47,32 @@ namespace GarrisonButler
             public static Graph GraphFromList(List<WoWPoint> points)
             {
                 var graph = new Graph();
-                foreach (WoWPoint t in points)
+                foreach (var t in points)
                 {
                     graph.AddNode(t);
                 }
-                
-                List<WoWPoint> graphPoints = graph.Nodes.Keys.ToList();
-                
-                DateTime forLoopFilterEndTime = DateTime.Now;
-                int count = 0;
-                for (int i = 0; i < graphPoints.Count; i++)
+
+                var graphPoints = graph.Nodes.Keys.ToList();
+
+                var forLoopFilterEndTime = DateTime.Now;
+                var count = 0;
+                for (var i = 0; i < graphPoints.Count; i++)
                 {
-                    WoWPoint point1 = graphPoints[i];
-                    for (int j = i + 1; j < graphPoints.Count; j++)
+                    var point1 = graphPoints[i];
+                    for (var j = i + 1; j < graphPoints.Count; j++)
                     {
-                        WoWPoint point2 = graphPoints[j];
-                        float dist = point1.Distance(point2);
-                        if (dist < 3)
-                        {
-                            graph.AddConnection(point1, point2, dist, true);
-                            count++;
-                        }
+                        var point2 = graphPoints[j];
+                        var dist = point1.Distance(point2);
+                        if (!(dist < 3)) continue;
+                        graph.AddConnection(point1, point2, dist, true);
+                        count++;
                     }
                 }
                 GarrisonButler.DiagnosticLogTimeTaken("Matching all with distance less than "
-                + 3
-                + " returned "
-                + count
-                + " elements USING 2x for loops", forLoopFilterEndTime);
+                                                      + 3
+                                                      + " returned "
+                                                      + count
+                                                      + " elements USING 2x for loops", forLoopFilterEndTime);
                 return graph;
             }
 
@@ -95,9 +89,9 @@ namespace GarrisonButler
                 PathGenerationStopwatch.Start();
 
                 GarrisonButler.Diagnostic("Starting path generation.");
-                WoWPoint starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(from);
 
-                WoWPoint ending = ClosestToNodes(to);
+                var ending = ClosestToNodes(to);
 
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
@@ -107,13 +101,14 @@ namespace GarrisonButler
 
                 ProcessGraph(_movementGraph, starting);
 
-                WoWPoint[] tempPath = ExtractPath(_movementGraph, ending);
+                var tempPath = ExtractPath(_movementGraph, ending);
                 var res = new Vector3[tempPath.Count()];
-                for (int index = 0; index < tempPath.Length; index++)
+                for (var index = 0; index < tempPath.Length; index++)
                 {
                     res[index] = tempPath[index];
                 }
-                GarrisonButler.DiagnosticLogTimeTaken("Path generation", (int)PathGenerationStopwatch.ElapsedMilliseconds);
+                GarrisonButler.DiagnosticLogTimeTaken("Path generation",
+                    (int) PathGenerationStopwatch.ElapsedMilliseconds);
                 PathGenerationStopwatch.Stop();
                 return res;
             }
@@ -126,16 +121,16 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("Starting path generation.");
 
-                WoWPoint starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
 
-                WoWPoint ending = ClosestToNodes(to);
+                var ending = ClosestToNodes(to);
                 if (_movementGraph.Nodes.All(n => n.Key != ending))
                     throw new ArgumentException("Ending node must be in graph.");
 
                 ProcessGraph(_movementGraph, starting);
-                WoWPoint[] tempPath = ExtractPathWoW(_movementGraph, ending, to);
+                var tempPath = ExtractPathWoW(_movementGraph, ending, to);
 
                 PathGenerationStopwatch.Stop();
                 GarrisonButler.Diagnostic("Path generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
@@ -151,24 +146,24 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("Starting path generation.");
 
-                WoWPoint starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
-                
+
                 ProcessGraph(_movementGraph, starting);
 
-                var EndingPoints = new List<WoWPoint>();
-                List<WoWPoint[]> pathsList = new List<WoWPoint[]>();
-                for (int i = 0; i < to.Length; i++)
+                var pathsList = new List<WoWPoint[]>();
+                foreach (var t in to)
                 {
-                    var endingPoint = ClosestToNodes(to[i]);
+                    var endingPoint = ClosestToNodes(t);
                     if (_movementGraph.Nodes.All(n => n.Key != endingPoint))
                         throw new ArgumentException("Ending node must be in graph.");
-                    pathsList.Add(ExtractPathWoW(_movementGraph, endingPoint,to[i]));
+                    pathsList.Add(ExtractPathWoW(_movementGraph, endingPoint,t));
                 }
 
                 PathGenerationStopwatch.Stop();
-                GarrisonButler.Diagnostic("Multi-Paths generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                GarrisonButler.Diagnostic("Multi-Paths generated in " + PathGenerationStopwatch.ElapsedMilliseconds +
+                                          "ms.");
                 return pathsList;
             }
 
@@ -180,30 +175,29 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("Starting path generation.");
 
-                WoWPoint starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
 
                 ProcessGraph(_movementGraph, starting);
-                double minDistance = double.MaxValue;
-                WoWGameObject temp = objectsTo.First();
+                var minDistance = double.MaxValue;
+                var temp = objectsTo.First();
 
-                for (int i = 0; i < objectsTo.Length; i++)
+                foreach (var gameObject in objectsTo)
                 {
-                    var EndPoint = ClosestToNodes(objectsTo[i].Location);
-                    if (_movementGraph.Nodes.All(n => n.Key != EndPoint))
+                    var endPoint = ClosestToNodes(gameObject.Location);
+                    if (_movementGraph.Nodes.All(n => n.Key != endPoint))
                         throw new ArgumentException("Ending node must be in graph.");
 
-                    var currentDistance = ExtractDistanceWoW(_movementGraph, EndPoint);
-                    if (currentDistance <= minDistance)
-                    {
-                        minDistance = currentDistance;
-                        temp = objectsTo[i];
-                    }
+                    var currentDistance = ExtractDistanceWoW(_movementGraph, endPoint);
+                    if (!(currentDistance <= minDistance)) continue;
+                    minDistance = currentDistance;
+                    temp = gameObject;
                 }
-                
+
                 PathGenerationStopwatch.Stop();
-                GarrisonButler.Diagnostic("Multi-Paths generated in " + PathGenerationStopwatch.ElapsedMilliseconds + "ms.");
+                GarrisonButler.Diagnostic("Multi-Paths generated in " + PathGenerationStopwatch.ElapsedMilliseconds +
+                                          "ms.");
                 return temp;
             }
 
@@ -211,34 +205,30 @@ namespace GarrisonButler
             {
                 // Initialization of the data
                 var priorityQueue = new HeapPriorityQueue<Node>(graph.Nodes.Count);
-                foreach (Node node in graph.Nodes.Values)
+                foreach (var node in graph.Nodes.Values)
                 {
                     node.DistanceFromStart = double.PositiveInfinity;
                     node.Previous = null;
                     node.Visited = false;
                 }
                 graph.Nodes[startingNode].DistanceFromStart = 0;
-                foreach (Node node in graph.Nodes.Values)
+                foreach (var node in graph.Nodes.Values)
                 {
                     priorityQueue.Enqueue(node, node.DistanceFromStart);
                 }
-                int cpt = 0;
                 // Processing graph
                 while (priorityQueue.Count != 0)
                 {
-                    Node U = priorityQueue.Dequeue();
-                    U.Visited = true;
-                    IEnumerable<NodeConnection> connections = U.Connections.Where(c => c.Target.Visited == false);
-                    foreach (NodeConnection V in connections)
+                    var u = priorityQueue.Dequeue();
+                    u.Visited = true;
+                    var connections = u.Connections.Where(c => c.Target.Visited == false);
+                    foreach (var v in connections)
                     {
-                        double distance = U.DistanceFromStart + V.Distance;
-                        if (distance < V.Target.DistanceFromStart)
-                        {
-                            V.Target.DistanceFromStart = distance;
-                            cpt++;
-                            V.Target.Previous = U;
-                            priorityQueue.UpdatePriority(V.Target, distance);
-                        }
+                        var distance = u.DistanceFromStart + v.Distance;
+                        if (!(distance < v.Target.DistanceFromStart)) continue;
+                        v.Target.DistanceFromStart = distance;
+                        v.Target.Previous = u;
+                        priorityQueue.UpdatePriority(v.Target, distance);
                     }
                 }
             }
@@ -246,7 +236,7 @@ namespace GarrisonButler
             private static WoWPoint[] ExtractPath(Graph graph, WoWPoint target)
             {
                 var path = new List<WoWPoint>();
-                Node u = graph.Nodes.First(n => n.Key == target).Value;
+                var u = graph.Nodes.First(n => n.Key == target).Value;
 
                 while (u.Previous != null)
                 {
@@ -254,19 +244,14 @@ namespace GarrisonButler
                     u = u.Previous;
                 }
                 path.Reverse();
-                for (int index = 0; index < path.Count; index++)
-                {
-                    WoWPoint vector3 = path[index];
-                }
                 return path.ToArray();
             }
 
             private static WoWPoint[] ExtractPathWoW(Graph graph, WoWPoint target, WoWPoint endReal)
             {
-                var path = new List<WoWPoint>();
+                var path = new List<WoWPoint> {endReal};
 
-                    path.Add(endReal);
-                Node u = graph.Nodes.First(n => n.Key == target).Value;
+                var u = graph.Nodes.First(n => n.Key == target).Value;
 
                 while (u.Previous != null)
                 {
@@ -279,8 +264,8 @@ namespace GarrisonButler
 
             private static double ExtractDistanceWoW(Graph graph, WoWPoint target)
             {
-                double distance = Double.MaxValue;
-                Node u = graph.Nodes.First(n => n.Key == target).Value;
+                var distance = Double.MaxValue;
+                var u = graph.Nodes.First(n => n.Key == target).Value;
 
                 while (u.Previous != null)
                 {

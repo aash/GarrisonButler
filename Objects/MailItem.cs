@@ -1,16 +1,11 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Bots.Professionbuddy.Components;
 using JetBrains.Annotations;
-using Styx;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
@@ -28,7 +23,7 @@ namespace GarrisonButler.Objects
         {
             ItemId = itemId;
             _recipient = new SafeString(recipient);
-            _condition = new MailCondition(mailCondition.Condition,checkValue);
+            _condition = new MailCondition(mailCondition.Condition, checkValue);
             Comment = comment;
         }
 
@@ -43,11 +38,9 @@ namespace GarrisonButler.Objects
             get { return _itemId; }
             set
             {
-                if (value != _itemId)
-                {
-                    _itemId = value;
-                    OnPropertyChanged();
-                }
+                if (value == _itemId) return;
+                _itemId = value;
+                OnPropertyChanged();
             }
         }
 
@@ -57,11 +50,9 @@ namespace GarrisonButler.Objects
             get { return _recipient; }
             set
             {
-                if (value != _recipient)
-                {
-                    _recipient = value;
-                    OnPropertyChanged();
-                }
+                if (value == _recipient) return;
+                _recipient = value;
+                OnPropertyChanged();
             }
         }
 
@@ -71,27 +62,21 @@ namespace GarrisonButler.Objects
             get { return _condition; }
             set
             {
-                if (value != _condition)
-                {
-                    _condition = value;
-                    OnPropertyChanged();
-                }
+                if (value == _condition) return;
+                _condition = value;
+                OnPropertyChanged();
             }
         }
+
         [XmlIgnore]
         public int CheckValue
         {
-            get
-            {
-                return _condition != null ? _condition.CheckValue : 0;
-            }
+            get { return _condition != null ? _condition.CheckValue : 0; }
             set
             {
-                if (value != _condition.CheckValue)
-                {
-                    _condition.CheckValue = value;
-                    OnPropertyChanged();
-                }
+                if (value == _condition.CheckValue) return;
+                _condition.CheckValue = value;
+                OnPropertyChanged();
             }
         }
 
@@ -111,11 +96,9 @@ namespace GarrisonButler.Objects
             get { return _comment; }
             set
             {
-                if (value != _comment)
-                {
-                    _comment = value;
-                    OnPropertyChanged();
-                }
+                if (value == _comment) return;
+                _comment = value;
+                OnPropertyChanged();
             }
         }
 
@@ -124,7 +107,7 @@ namespace GarrisonButler.Objects
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
+            var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
 

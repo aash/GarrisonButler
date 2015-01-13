@@ -3,29 +3,24 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
-using Styx.Helpers;
 using Binding = System.Windows.Data.Binding;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Label = System.Windows.Controls.Label;
-using ListView = System.Windows.Controls.ListView;
 using Orientation = System.Windows.Controls.Orientation;
 using TabControl = System.Windows.Controls.TabControl;
 using TextBox = System.Windows.Controls.TextBox;
-using System;
-using System.Windows.Documents;
-using System.Windows.Media.Imaging;
 
 #endregion
 
@@ -34,9 +29,8 @@ namespace GarrisonButler.Config
     public partial class ConfigForm : Form
     {
         private static MyWindow _myWindow;
-        private static List<CheckBox> collectCheckBoxes;
-        private static List<CheckBox> startCheckBoxes;
-        private static MailingTab mailingTab;
+        private static List<CheckBox> _collectCheckBoxes;
+        private static List<CheckBox> _startCheckBoxes;
 
         public ConfigForm()
         {
@@ -57,33 +51,31 @@ namespace GarrisonButler.Config
                 MinHeight = 300;
                 MinWidth = 600;
                 Title = GarrisonButler.NameStatic + " v" + GarrisonButler.Version;
-                var tabControl = new TabControl();
-                tabControl.Height = double.NaN;
-                tabControl.Width = double.NaN;
+                var tabControl = new TabControl {Height = double.NaN, Width = double.NaN};
 
                 //Splash screen
-                var splashTabItem = new TabItem { Header = "Welcome", Content = ContentTabSplash() };
+                var splashTabItem = new TabItem {Header = "Welcome", Content = ContentTabSplash()};
                 tabControl.Items.Add(splashTabItem);
 
                 var generalTabItem = new TabItem {Header = "General", Content = ContentTabGeneral()};
                 tabControl.Items.Add(generalTabItem);
 
-                var WorkOrderTabItem = new TabItem {Header = "Work Orders", Content = ContentTabWorkOrder()};
-                tabControl.Items.Add(WorkOrderTabItem);
+                var workOrderTabItem = new TabItem {Header = "Work Orders", Content = ContentTabWorkOrder()};
+                tabControl.Items.Add(workOrderTabItem);
 
-                var ProfessionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
-                tabControl.Items.Add(ProfessionTabItem);
+                var professionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
+                tabControl.Items.Add(professionTabItem);
 
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
                 {
-                    mailingTab = new MailingTab();
-                    var Mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
-                    tabControl.Items.Add(Mailing);
+                    var mailingTab = new MailingTab();
+                    var mailing = new TabItem {Header = "Mailing", Content = mailingTab.ContentTabMailing()};
+                    tabControl.Items.Add(mailing);
                 }
 
-                var aboutTabItem = new TabItem { Header = "About", Content = ContentTabAbout() };
+                var aboutTabItem = new TabItem {Header = "About", Content = ContentTabAbout()};
                 tabControl.Items.Add(aboutTabItem);
-                
+
                 Content = tabControl;
             }
 
@@ -91,22 +83,25 @@ namespace GarrisonButler.Config
 
             private UIElement ProfessionBox(List<DailyProfession> dailies)
             {
-                var border = new Border();
-                border.HorizontalAlignment = HorizontalAlignment.Left;
-                border.VerticalAlignment = VerticalAlignment.Top;
-                border.BorderBrush = Brushes.Black;
-                border.BorderThickness = new Thickness(2);
+                var border = new Border
+                {
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(2)
+                };
 
-                var grid = new Grid();
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
-                grid.HorizontalAlignment = HorizontalAlignment.Left;
-                grid.VerticalAlignment = VerticalAlignment.Top;
+                var grid = new Grid
+                {
+                    Height = double.NaN,
+                    Width = double.NaN,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top
+                };
 
                 var name = new Label();
-                name.Content = dailies.GetEmptyIfNull().FirstOrDefault() == default(DailyProfession)
-                    ? "Error"
-                    : dailies.GetEmptyIfNull().FirstOrDefault().TradeskillId.ToString();
+                var dailyProfession = dailies.GetEmptyIfNull().FirstOrDefault();
+                name.Content = dailyProfession != null ? dailyProfession.TradeskillId.ToString() : "Error";
                 name.FontSize = 14;
                 name.FontWeight = FontWeights.Black;
                 name.HorizontalAlignment = HorizontalAlignment.Left;
@@ -114,26 +109,22 @@ namespace GarrisonButler.Config
                 name.Width = 163;
                 name.Height = 28;
                 name.Margin = new Thickness(10, 5, 0, 0);
-
-                CheckBox daily1 = CreateCheckBoxWithBindingBuilding(dailies.GetEmptyIfNull().FirstOrDefault() == default(DailyProfession)
-                    ? "Error" : dailies.GetEmptyIfNull().FirstOrDefault().Name, "Activated",
-                    dailies.GetEmptyIfNull().FirstOrDefault());
+                var daily1 = CreateCheckBoxWithBindingBuilding(dailyProfession != null
+                    ? dailyProfession.Name
+                    : "Error: Unknown building name", "Activated", dailyProfession);
                 daily1.Margin = new Thickness(10, 33, 0, 0);
                 AlldailiesCheckbox.Add(daily1);
-
-                CheckBox daily2 = CreateCheckBoxWithBindingBuilding(dailies.GetEmptyIfNull().Count() < 2
-                    ? "Error" : dailies.GetEmptyIfNull().ElementAt(1).Name, "Activated",
-                    dailies.ElementAt(1));
+                var daily2 = CreateCheckBoxWithBindingBuilding(dailies.GetEmptyIfNull().Count() < 2
+                    ? "Error"
+                    : dailies.GetEmptyIfNull().ElementAt(1).Name, "Activated", dailies.ElementAt(1));
                 daily2.Margin = new Thickness(10, 60, 0, 0);
                 AlldailiesCheckbox.Add(daily2);
-
 
                 grid.Children.Add(name);
                 grid.Children.Add(daily1);
                 grid.Children.Add(daily2);
 
                 border.Child = grid;
-
                 return border;
             }
 
@@ -141,9 +132,7 @@ namespace GarrisonButler.Config
             {
                 AlldailiesCheckbox = new List<CheckBox>();
 
-                var grid = new Grid();
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
+                var grid = new Grid {Height = double.NaN, Width = double.NaN};
 
                 var gridmainCol1 = new ColumnDefinition();
                 grid.ColumnDefinitions.Add(gridmainCol1);
@@ -151,27 +140,22 @@ namespace GarrisonButler.Config
                 var gridmainRow1 = new RowDefinition();
                 grid.RowDefinitions.Add(gridmainRow1);
 
-                var gridmainRow2 = new RowDefinition();
-                gridmainRow2.Height = new GridLength(30);
+                var gridmainRow2 = new RowDefinition {Height = new GridLength(30)};
                 grid.RowDefinitions.Add(gridmainRow2);
 
 
-                var mainFrame = new ScrollViewer();
-                mainFrame.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                var mainWrapPanel = new WrapPanel();
-                mainWrapPanel.Orientation = Orientation.Horizontal;
-                mainWrapPanel.Width = double.NaN;
-                List<List<DailyProfession>> listOflists = GaBSettings.Get().DailySettings
+                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Horizontal, Width = double.NaN};
+                var listOflists = GaBSettings.Get().DailySettings
                     .GetEmptyIfNull()
                     .Select((x, i) => new {Index = x.TradeskillId, Value = x})
                     .GroupBy(x => x.Index)
                     .Select(x => x.Select(v => v.Value).ToList())
                     .ToList();
 
-                foreach (List<DailyProfession> dailies in listOflists)
+                foreach (var b in listOflists.Select(ProfessionBox))
                 {
-                    UIElement b = ProfessionBox(dailies);
                     mainWrapPanel.Children.Add(b);
                 }
 
@@ -183,38 +167,37 @@ namespace GarrisonButler.Config
 
 
                 //  bar
-                var barPanel = new Grid();
-                barPanel.Width = double.NaN;
-                barPanel.Height = 30;
-                barPanel.MinHeight = 30;
-                barPanel.MinWidth = 250;
-                barPanel.VerticalAlignment = VerticalAlignment.Bottom;
-                barPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+                var barPanel = new Grid
+                {
+                    Width = double.NaN,
+                    Height = 30,
+                    MinHeight = 30,
+                    MinWidth = 250,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
 
                 var gridCol1 = new ColumnDefinition();
                 var gridCol2 = new ColumnDefinition();
                 barPanel.ColumnDefinitions.Add(gridCol1);
                 barPanel.ColumnDefinitions.Add(gridCol2);
 
-                var gridRow1 = new RowDefinition();
-                gridRow1.Height = new GridLength(30);
+                var gridRow1 = new RowDefinition {Height = new GridLength(30)};
                 barPanel.RowDefinitions.Add(gridRow1);
 
-                var Select = new Button();
-                Select.Content = "Select All";
-                Select.Tag = 1;
-                Select.Click += SelectAllProfession_Click;
-                Grid.SetRow(Select, 0);
-                Grid.SetColumn(Select, 0);
-                barPanel.Children.Add(Select);
+                var select = new Button();
+                select.Content = "Select All";
+                select.Tag = 1;
+                select.Click += SelectAllProfession_Click;
+                Grid.SetRow(select, 0);
+                Grid.SetColumn(select, 0);
+                barPanel.Children.Add(select);
 
-                var StartAll = new Button();
-                StartAll.Content = "Unselect All";
-                StartAll.Tag = 3;
-                StartAll.Click += UnSelectAllProfession_Click;
-                Grid.SetRow(StartAll, 0);
-                Grid.SetColumn(StartAll, 1);
-                barPanel.Children.Add(StartAll);
+                var startAll = new Button {Content = "Unselect All", Tag = 3};
+                startAll.Click += UnSelectAllProfession_Click;
+                Grid.SetRow(startAll, 0);
+                Grid.SetColumn(startAll, 1);
+                barPanel.Children.Add(startAll);
 
                 Grid.SetRow(barPanel, 1);
                 Grid.SetColumn(barPanel, 0);
@@ -226,12 +209,10 @@ namespace GarrisonButler.Config
 
             protected object ContentTabWorkOrder()
             {
-                startCheckBoxes = new List<CheckBox>();
-                collectCheckBoxes = new List<CheckBox>();
+                _startCheckBoxes = new List<CheckBox>();
+                _collectCheckBoxes = new List<CheckBox>();
 
-                var grid = new Grid();
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
+                var grid = new Grid {Height = double.NaN, Width = double.NaN};
 
                 var gridmainCol1 = new ColumnDefinition();
                 grid.ColumnDefinitions.Add(gridmainCol1);
@@ -239,23 +220,21 @@ namespace GarrisonButler.Config
                 var gridmainRow1 = new RowDefinition();
                 grid.RowDefinitions.Add(gridmainRow1);
 
-                var gridmainRow2 = new RowDefinition();
-                gridmainRow2.Height = new GridLength(30);
+                var gridmainRow2 = new RowDefinition {Height = new GridLength(30)};
                 grid.RowDefinitions.Add(gridmainRow2);
 
 
-                var mainFrame = new ScrollViewer();
-                mainFrame.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                var mainWrapPanel = new WrapPanel();
-                mainWrapPanel.Orientation = Orientation.Horizontal;
-                mainWrapPanel.Width = double.NaN;
+                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Horizontal, Width = double.NaN};
 
-                foreach (BuildingSettings buildingsSetting in 
-                    GaBSettings.Get().BuildingsSettings.GetEmptyIfNull().Where(bs=> Building.HasOrder((buildings)bs.BuildingIds.GetEmptyIfNull().FirstOrDefault()))
-                    .OrderBy(b => b.Name))
+                foreach (
+                    var b in
+                        GaBSettings.Get()
+                            .BuildingsSettings.GetEmptyIfNull()
+                            .Where(bs => Building.HasOrder((Buildings) bs.BuildingIds.GetEmptyIfNull().FirstOrDefault()))
+                            .OrderBy(b => b.Name).Select(BuildingBox))
                 {
-                    UIElement b = BuildingBox(buildingsSetting);
                     mainWrapPanel.Children.Add(b);
                 }
                 mainFrame.Content = mainWrapPanel;
@@ -266,38 +245,35 @@ namespace GarrisonButler.Config
                 grid.Children.Add(mainFrame);
 
                 //  bar
-                var barPanel = new Grid();
-                barPanel.Width = double.NaN;
-                barPanel.Height = 30;
-                barPanel.MinHeight = 30;
-                barPanel.MinWidth = 250;
-                barPanel.VerticalAlignment = VerticalAlignment.Bottom;
-                barPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+                var barPanel = new Grid
+                {
+                    Width = double.NaN,
+                    Height = 30,
+                    MinHeight = 30,
+                    MinWidth = 250,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
 
                 var gridCol1 = new ColumnDefinition();
                 var gridCol2 = new ColumnDefinition();
                 barPanel.ColumnDefinitions.Add(gridCol1);
                 barPanel.ColumnDefinitions.Add(gridCol2);
 
-                var gridRow1 = new RowDefinition();
-                gridRow1.Height = new GridLength(30);
+                var gridRow1 = new RowDefinition {Height = new GridLength(30)};
                 barPanel.RowDefinitions.Add(gridRow1);
 
-                var collectAll = new Button();
-                collectAll.Content = "Select Collect All";
-                collectAll.Tag = 1;
+                var collectAll = new Button {Content = "Select Collect All", Tag = 1};
                 collectAll.Click += newBtn_Click;
                 Grid.SetRow(collectAll, 0);
                 Grid.SetColumn(collectAll, 0);
                 barPanel.Children.Add(collectAll);
 
-                var StartAll = new Button();
-                StartAll.Content = "Select Start All";
-                StartAll.Tag = 3;
-                StartAll.Click += newBtn_Click;
-                Grid.SetRow(StartAll, 0);
-                Grid.SetColumn(StartAll, 1);
-                barPanel.Children.Add(StartAll);
+                var startAll = new Button {Content = "Select Start All", Tag = 3};
+                startAll.Click += newBtn_Click;
+                Grid.SetRow(startAll, 0);
+                Grid.SetColumn(startAll, 1);
+                barPanel.Children.Add(startAll);
 
                 Grid.SetRow(barPanel, 1);
                 Grid.SetColumn(barPanel, 0);
@@ -305,138 +281,110 @@ namespace GarrisonButler.Config
 
                 return grid;
             }
-            
-            private void SendBugReport(object sender, RoutedEventArgs e)
+
+            private static void SendBugReport(object sender, RoutedEventArgs e)
             {
                 var btn = sender as Button;
                 GarrisonButler.Diagnostic("zzzzzzzzzz");
-                if (btn != null)
-                {
-                    GarrisonButler.Diagnostic("yyyyyyyyyyyyyy");
-                    new FreshDesk().SendBugReport("TEST title", "TEst body");
-                }
+                if (btn == null) return;
+                GarrisonButler.Diagnostic("yyyyyyyyyyyyyy");
+                new FreshDesk().SendBugReport("TEST title", "TEst body");
             }
+
             private void SelectAllProfession_Click(object sender, RoutedEventArgs e)
             {
                 var btn = sender as Button;
-                if (btn != null)
+                if (btn == null) return;
+                foreach (var checkBox in AlldailiesCheckbox)
                 {
-                    foreach (CheckBox checkBox in AlldailiesCheckbox)
-                    {
-                        checkBox.IsChecked = true;
-                    }
+                    checkBox.IsChecked = true;
                 }
             }
 
             private void UnSelectAllProfession_Click(object sender, RoutedEventArgs e)
             {
                 var btn = sender as Button;
-                if (btn != null)
+                if (btn == null) return;
+                foreach (var checkBox in AlldailiesCheckbox)
                 {
-                    foreach (CheckBox checkBox in AlldailiesCheckbox)
-                    {
-                        checkBox.IsChecked = false;
-                    }
+                    checkBox.IsChecked = false;
                 }
             }
 
-            private void newBtn_Click(object sender, RoutedEventArgs e)
+            private static void newBtn_Click(object sender, RoutedEventArgs e)
             {
                 var btn = sender as Button;
-                if (btn != null)
+                if (btn == null) return;
+                if (!(btn.Tag is int)) return;
+                switch ((int) btn.Tag)
                 {
-                    if (btn.Tag is int)
-                    {
-                        switch ((int) btn.Tag)
+                    case 1:
+                        foreach (var checkBox in _collectCheckBoxes)
                         {
-                            case 1:
-                                foreach (CheckBox checkBox in collectCheckBoxes)
-                                {
-                                    checkBox.IsChecked = true;
-                                    btn.Tag = 2;
-                                    btn.Content = "Unselect Collect All";
-                                }
-                                break;
-
-                            case 2:
-                                foreach (CheckBox checkBox in collectCheckBoxes)
-                                {
-                                    checkBox.IsChecked = false;
-                                    btn.Tag = 1;
-                                    btn.Content = "Select Collect All";
-                                }
-                                break;
-
-                            case 3:
-                                foreach (CheckBox checkBox in startCheckBoxes)
-                                {
-                                    checkBox.IsChecked = true;
-                                    btn.Tag = 4;
-                                    btn.Content = "Unselect Start All";
-                                }
-                                break;
-
-                            case 4:
-                                foreach (CheckBox checkBox in startCheckBoxes)
-                                {
-                                    checkBox.IsChecked = false;
-                                    btn.Tag = 3;
-                                    btn.Content = "Select Start All";
-                                }
-                                break;
-
-                            default:
-                                break;
+                            checkBox.IsChecked = true;
+                            btn.Tag = 2;
+                            btn.Content = "Unselect Collect All";
                         }
-                    }
+                        break;
+
+                    case 2:
+                        foreach (var checkBox in _collectCheckBoxes)
+                        {
+                            checkBox.IsChecked = false;
+                            btn.Tag = 1;
+                            btn.Content = "Select Collect All";
+                        }
+                        break;
+
+                    case 3:
+                        foreach (var checkBox in _startCheckBoxes)
+                        {
+                            checkBox.IsChecked = true;
+                            btn.Tag = 4;
+                            btn.Content = "Unselect Start All";
+                        }
+                        break;
+
+                    case 4:
+                        foreach (var checkBox in _startCheckBoxes)
+                        {
+                            checkBox.IsChecked = false;
+                            btn.Tag = 3;
+                            btn.Content = "Select Start All";
+                        }
+                        break;
                 }
             }
 
             protected object ContentTabAbout()
             {
-                var grid = new Grid();
+                var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
+                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
 
-                var mainFrame = new ScrollViewer();
-                mainFrame.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                var submit = new Button {Content = "Submit"};
+                submit.Click += SendBugReport;
+                mainWrapPanel.Children.Add(submit);
 
-                var mainWrapPanel = new WrapPanel();
-                mainWrapPanel.Orientation = Orientation.Vertical;
-                mainWrapPanel.Width = double.NaN;
-
-                var Submit = new Button();
-                Submit.Content = "Submit";
-                Submit.Click += SendBugReport;
-                mainWrapPanel.Children.Add(Submit);
-                
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
-            object ContentTabSplash()
+
+            private static object ContentTabSplash()
             {
-                var grid = new Grid();
+                var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
+                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
 
-                var mainFrame = new ScrollViewer();
-                mainFrame.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-
-                var mainWrapPanel = new WrapPanel();
-                mainWrapPanel.Orientation = System.Windows.Controls.Orientation.Vertical;
-                mainWrapPanel.Width = double.NaN;
-
-                ImageBrush splashBrush = new ImageBrush();
-                BitmapImage myImage = new BitmapImage();
-                System.IO.MemoryStream myMemStream = new System.IO.MemoryStream();
-                System.Drawing.Bitmap garrisonButlerSplashImage =
+                var splashBrush = new ImageBrush();
+                var myImage = new BitmapImage();
+                var myMemStream = new MemoryStream();
+                var garrisonButlerSplashImage =
                     GarrisonButler.NameStatic.ToLower().Contains("ice")
-                    ? GarrisonButlerImages.GarrisonButlerICESplashImage
-                    : GarrisonButlerImages.GarrisonButlerLiteSplashImage;
+                        ? GarrisonButlerImages.GarrisonButlerICESplashImage
+                        : GarrisonButlerImages.GarrisonButlerLiteSplashImage;
                 garrisonButlerSplashImage.Save(myMemStream, garrisonButlerSplashImage.RawFormat);
-                myMemStream.Seek(0, System.IO.SeekOrigin.Begin);
+                myMemStream.Seek(0, SeekOrigin.Begin);
 
                 myImage.BeginInit();
                 myImage.StreamSource = myMemStream;
@@ -448,101 +396,92 @@ namespace GarrisonButler.Config
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
+
             protected object ContentTabGeneral()
             {
-                var grid = new Grid();
+                var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
+                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
 
-                var mainFrame = new ScrollViewer();
-                mainFrame.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-
-                var mainWrapPanel = new WrapPanel();
-                mainWrapPanel.Orientation = Orientation.Vertical;
-                mainWrapPanel.Width = double.NaN;
-
-                CheckBox UseGarrisonHearthstone = CreateCheckBoxWithBinding("Use Garrison Hearthstone",
+                var useGarrisonHearthstone = CreateCheckBoxWithBinding("Use Garrison Hearthstone",
                     "UseGarrisonHearthstone", GaBSettings.Get());
-                mainWrapPanel.Children.Add(UseGarrisonHearthstone);
+                mainWrapPanel.Children.Add(useGarrisonHearthstone);
 
-                CheckBox HBRelogMode =
+                var hbRelogMode =
                     CreateCheckBoxWithBinding(
-                        "Activate HBRelog Mode: auto skip to next task when done (Cautious, not tested!)", "HBRelogMode",
+                        "Activate HBRelog Mode: auto skip to next task when done (Cautious, not tested!)", "HbRelogMode",
                         GaBSettings.Get());
-                mainWrapPanel.Children.Add(HBRelogMode);
+                mainWrapPanel.Children.Add(hbRelogMode);
 
 
-                CheckBox GarrisonCache = CreateCheckBoxWithBinding("Collect garrison cache", "GarrisonCache",
+                var garrisonCache = CreateCheckBoxWithBinding("Collect garrison cache", "GarrisonCache",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(GarrisonCache);
+                mainWrapPanel.Children.Add(garrisonCache);
 
 
-                CheckBox HarvestGarden = CreateCheckBoxWithBinding("Harvest herbs in garden", "HarvestGarden",
+                var harvestGarden = CreateCheckBoxWithBinding("Harvest herbs in garden", "HarvestGarden",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(HarvestGarden);
+                mainWrapPanel.Children.Add(harvestGarden);
 
 
-                CheckBox HarvestMine = CreateCheckBoxWithBinding("Harvest ores in mine", "HarvestMine",
+                var harvestMine = CreateCheckBoxWithBinding("Harvest ores in mine", "HarvestMine",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(HarvestMine);
+                mainWrapPanel.Children.Add(harvestMine);
 
-                CheckBox UseCoffee = CreateCheckBoxWithBinding("Use coffee in mine", "UseCoffee", GaBSettings.Get());
-                mainWrapPanel.Children.Add(UseCoffee);
+                var useCoffee = CreateCheckBoxWithBinding("Use coffee in mine", "UseCoffee", GaBSettings.Get());
+                mainWrapPanel.Children.Add(useCoffee);
 
-                CheckBox UseMiningPick = CreateCheckBoxWithBinding("Use mining pick in mine", "UseMiningPick",
+                var useMiningPick = CreateCheckBoxWithBinding("Use mining pick in mine", "UseMiningPick",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(UseMiningPick);
+                mainWrapPanel.Children.Add(useMiningPick);
 
-                CheckBox DeleteCoffee = CreateCheckBoxWithBinding("Delete coffee when at 5.", "DeleteCoffee", GaBSettings.Get());
-                mainWrapPanel.Children.Add(DeleteCoffee);
-
-                CheckBox DeleteMiningPick = CreateCheckBoxWithBinding("Delete mining when at 5.", "DeleteMiningPick",
+                var deleteCoffee = CreateCheckBoxWithBinding("Delete coffee when at 5.", "DeleteCoffee",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(DeleteMiningPick);
+                mainWrapPanel.Children.Add(deleteCoffee);
+
+                var deleteMiningPick = CreateCheckBoxWithBinding("Delete mining when at 5.", "DeleteMiningPick",
+                    GaBSettings.Get());
+                mainWrapPanel.Children.Add(deleteMiningPick);
 
 
-                CheckBox ActivateBuildings = CreateCheckBoxWithBinding("Activate finished buildings",
+                var activateBuildings = CreateCheckBoxWithBinding("Activate finished buildings",
                     "ActivateBuildings", GaBSettings.Get());
-                mainWrapPanel.Children.Add(ActivateBuildings);
+                mainWrapPanel.Children.Add(activateBuildings);
 
 
-                CheckBox SalvageCrates = CreateCheckBoxWithBinding("Open Salvage crates", "SalvageCrates",
+                var salvageCrates = CreateCheckBoxWithBinding("Open Salvage crates", "SalvageCrates",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(SalvageCrates);
+                mainWrapPanel.Children.Add(salvageCrates);
 
 
-                CheckBox StartMissions = CreateCheckBoxWithBinding("Start missions if possible", "StartMissions",
+                var startMissions = CreateCheckBoxWithBinding("Start missions if possible", "StartMissions",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(StartMissions);
+                mainWrapPanel.Children.Add(startMissions);
 
-                CheckBox CompletedMissions = CreateCheckBoxWithBinding("Turn in completed missions", "CompletedMissions",
+                var completedMissions = CreateCheckBoxWithBinding("Turn in completed missions", "CompletedMissions",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(CompletedMissions);
+                mainWrapPanel.Children.Add(completedMissions);
 
-                CheckBox ForceJunkSell = CreateCheckBoxWithBinding("Force auto sell grey items", "ForceJunkSell",
+                var forceJunkSell = CreateCheckBoxWithBinding("Force auto sell grey items", "ForceJunkSell",
                     GaBSettings.Get());
-                mainWrapPanel.Children.Add(ForceJunkSell);
+                mainWrapPanel.Children.Add(forceJunkSell);
 
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
 
-            protected CheckBox CreateCheckBoxWithBinding(string Label, string AttributeName, object source)
+            protected CheckBox CreateCheckBoxWithBinding(string label, string attributeName, object source)
             {
-                var checkBox = new CheckBox();
-                checkBox.Content = Label;
-                checkBox.Height = 25;
+                var checkBox = new CheckBox {Content = label, Height = 25};
                 // binding
-                var binding = new Binding(AttributeName);
-                binding.Source = source;
+                var binding = new Binding(attributeName) {Source = source};
                 checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
                 return checkBox;
             }
 
-            protected CheckBox CreateCheckBoxWithBindingBuilding(string Label, string AttributeName, object source)
+            protected CheckBox CreateCheckBoxWithBindingBuilding(string label, string attributeName, object source)
             {
-                CheckBox checkBox = CreateCheckBoxWithBinding(Label, AttributeName, source);
+                var checkBox = CreateCheckBoxWithBinding(label, attributeName, source);
                 checkBox.HorizontalAlignment = HorizontalAlignment.Left;
                 checkBox.VerticalAlignment = VerticalAlignment.Top;
                 checkBox.Height = 23;
@@ -560,53 +499,62 @@ namespace GarrisonButler.Config
 
             private UIElement BuildingBox(BuildingSettings building)
             {
-                var border = new Border();
-                border.HorizontalAlignment = HorizontalAlignment.Left;
-                border.VerticalAlignment = VerticalAlignment.Top;
-                border.BorderBrush = Brushes.Black;
-                border.BorderThickness = new Thickness(2);
+                var border = new Border
+                {
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(2)
+                };
 
-                var grid = new Grid();
-                grid.Height = double.NaN;
-                grid.Width = double.NaN;
-                grid.HorizontalAlignment = HorizontalAlignment.Left;
-                grid.VerticalAlignment = VerticalAlignment.Top;
+                var grid = new Grid
+                {
+                    Height = double.NaN,
+                    Width = double.NaN,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top
+                };
 
-                var name = new Label();
-                name.Content = building.Name;
-                name.FontSize = 14;
-                name.FontWeight = FontWeights.Black;
-                name.HorizontalAlignment = HorizontalAlignment.Left;
-                name.VerticalAlignment = VerticalAlignment.Top;
-                name.Width = 163;
-                name.Height = 28;
-                name.Margin = new Thickness(10, 5, 0, 0);
+                var name = new Label
+                {
+                    Content = building.Name,
+                    FontSize = 14,
+                    FontWeight = FontWeights.Black,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Width = 163,
+                    Height = 28,
+                    Margin = new Thickness(10, 5, 0, 0)
+                };
 
-                CheckBox collect = CreateCheckBoxWithBindingBuilding("Collect work orders", "CanCollectOrder", building);
+                var collect = CreateCheckBoxWithBindingBuilding("Collect work orders", "CanCollectOrder", building);
                 collect.Margin = new Thickness(10, 33, 0, 0);
-                collectCheckBoxes.Add(collect);
+                _collectCheckBoxes.Add(collect);
 
-                CheckBox start = CreateCheckBoxWithBindingBuilding("Start work orders", "CanStartOrder", building);
+                var start = CreateCheckBoxWithBindingBuilding("Start work orders", "CanStartOrder", building);
                 start.Margin = new Thickness(10, 60, 0, 0);
-                startCheckBoxes.Add(start);
+                _startCheckBoxes.Add(start);
 
-                var max = new Label();
-                max.HorizontalAlignment = HorizontalAlignment.Left;
-                max.VerticalAlignment = VerticalAlignment.Top;
-                max.Width = 150;
-                max.Height = 23;
-                max.Margin = new Thickness(9, 75, 0, 0);
-                max.Content = "Max (0 = unlimited):";
+                var max = new Label
+                {
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Width = 150,
+                    Height = 23,
+                    Margin = new Thickness(9, 75, 0, 0),
+                    Content = "Max (0 = unlimited):"
+                };
 
-                var maxTextBox = new TextBox();
-                maxTextBox.Height = 23;
-                maxTextBox.TextWrapping = TextWrapping.Wrap;
-                maxTextBox.Text = "0";
-                maxTextBox.Margin = new Thickness(127, 76, 11, 9);
-                maxTextBox.MaxLength = 3;
+                var maxTextBox = new TextBox
+                {
+                    Height = 23,
+                    TextWrapping = TextWrapping.Wrap,
+                    Text = "0",
+                    Margin = new Thickness(127, 76, 11, 9),
+                    MaxLength = 3
+                };
                 // binding
-                var maxStartBinding = new Binding("MaxCanStartOrder");
-                maxStartBinding.Source = building;
+                var maxStartBinding = new Binding("MaxCanStartOrder") {Source = building};
                 maxStartBinding.ValidationRules.Add(new IsValidNumberOrderRule());
                 maxTextBox.SetBinding(TextBox.TextProperty, maxStartBinding);
 
@@ -631,7 +579,7 @@ namespace GarrisonButler.Config
                         return new ValidationResult(false, "Please enter a number between 0 and 100.");
                     }
                     uint test;
-                    if (uint.TryParse(str, out test) && test < 0 || test > 100)
+                    if (!uint.TryParse(str, out test) || test > 100)
                     {
                         return new ValidationResult(false, "Please enter a number between 0 and 100.");
                     }

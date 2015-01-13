@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
 
 namespace GarrisonButler.Objects
 {
-    public class SafeString: INotifyPropertyChanged
+    public class SafeString : INotifyPropertyChanged
     {
         // props
         private string _value;
 
-        [XmlText()]
+        [XmlText]
         public string Value
         {
             get { return _value; }
             set
             {
-                this._value = value;
+                _value = value;
                 OnPropertyChanged();
             }
         }
@@ -63,7 +58,7 @@ namespace GarrisonButler.Objects
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
+            var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }

@@ -1,8 +1,12 @@
 ﻿#region
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Xml.Serialization;
+
+// ReSharper disable ConvertIfStatementToReturnStatement
+// ReSharper disable All
 
 #endregion
 
@@ -14,20 +18,20 @@ namespace GarrisonButler.Libraries
     [Serializable]
     public class ModuleVersion : ICloneable, IComparable
     {
-        private int build;
-        private int major;
-        private int minor;
-        private int revision;
+        private int _build;
+        private int _major;
+        private int _minor;
+        private int _revision;
 
         /// <summary>
         ///     Creates a new <see cref="ModuleVersion" /> instance.
         /// </summary>
         public ModuleVersion()
         {
-            build = -1;
-            revision = -1;
-            major = 0;
-            minor = 0;
+            _build = -1;
+            _revision = -1;
+            _major = 0;
+            _minor = 0;
         }
 
         /// <summary>
@@ -36,46 +40,42 @@ namespace GarrisonButler.Libraries
         /// <param name="version">Version.</param>
         public ModuleVersion(string version)
         {
-            build = -1;
-            revision = -1;
+            _build = -1;
+            _revision = -1;
             if (version == null)
             {
                 throw new ArgumentNullException("version");
             }
-            var chArray1 = new char[1] {'.'};
-            string[] textArray1 = version.Split(chArray1);
-            int num1 = textArray1.Length;
+            var chArray1 = new char[] {'.'};
+            var textArray1 = version.Split(chArray1);
+            var num1 = textArray1.Length;
             if ((num1 < 2) || (num1 > 4))
             {
                 throw new ArgumentException("Arg_VersionString");
             }
-            major = int.Parse(textArray1[0], CultureInfo.InvariantCulture);
-            if (major < 0)
+            _major = int.Parse(textArray1[0], CultureInfo.InvariantCulture);
+            if (_major < 0)
             {
-                throw new ArgumentOutOfRangeException("version", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("version", @"ArgumentOutOfRange_Version");
             }
-            minor = int.Parse(textArray1[1], CultureInfo.InvariantCulture);
-            if (minor < 0)
+            _minor = int.Parse(textArray1[1], CultureInfo.InvariantCulture);
+            if (_minor < 0)
             {
-                throw new ArgumentOutOfRangeException("version", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("version", @"ArgumentOutOfRange_Version");
             }
             num1 -= 2;
-            if (num1 > 0)
+            if (num1 <= 0) return;
+            _build = int.Parse(textArray1[2], CultureInfo.InvariantCulture);
+            if (_build < 0)
             {
-                build = int.Parse(textArray1[2], CultureInfo.InvariantCulture);
-                if (build < 0)
-                {
-                    throw new ArgumentOutOfRangeException("build", "ArgumentOutOfRange_Version");
-                }
-                num1--;
-                if (num1 > 0)
-                {
-                    revision = int.Parse(textArray1[3], CultureInfo.InvariantCulture);
-                    if (revision < 0)
-                    {
-                        throw new ArgumentOutOfRangeException("revision", "ArgumentOutOfRange_Version");
-                    }
-                }
+                throw new ArgumentOutOfRangeException("version", @"ArgumentOutOfRange_Version");
+            }
+            num1--;
+            if (num1 <= 0) return;
+            _revision = int.Parse(textArray1[3], CultureInfo.InvariantCulture);
+            if (_revision < 0)
+            {
+                throw new ArgumentOutOfRangeException("version", @"ArgumentOutOfRange_Version");
             }
         }
 
@@ -86,19 +86,19 @@ namespace GarrisonButler.Libraries
         /// <param name="minor">Minor.</param>
         public ModuleVersion(int major, int minor)
         {
-            build = -1;
-            revision = -1;
+            _build = -1;
+            _revision = -1;
             if (major < 0)
             {
-                throw new ArgumentOutOfRangeException("major", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("major", @"ArgumentOutOfRange_Version");
             }
             if (minor < 0)
             {
-                throw new ArgumentOutOfRangeException("minor", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("minor", @"ArgumentOutOfRange_Version");
             }
-            this.major = major;
-            this.minor = minor;
-            this.major = major;
+            _major = major;
+            _minor = minor;
+            _major = major;
         }
 
         /// <summary>
@@ -109,23 +109,23 @@ namespace GarrisonButler.Libraries
         /// <param name="build">Build.</param>
         public ModuleVersion(int major, int minor, int build)
         {
-            this.build = -1;
-            revision = -1;
+            _build = -1;
+            _revision = -1;
             if (major < 0)
             {
-                throw new ArgumentOutOfRangeException("major", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("major", @"ArgumentOutOfRange_Version");
             }
             if (minor < 0)
             {
-                throw new ArgumentOutOfRangeException("minor", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("minor", @"ArgumentOutOfRange_Version");
             }
             if (build < 0)
             {
-                throw new ArgumentOutOfRangeException("build", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("build", @"ArgumentOutOfRange_Version");
             }
-            this.major = major;
-            this.minor = minor;
-            this.build = build;
+            _major = major;
+            _minor = minor;
+            _build = build;
         }
 
         /// <summary>
@@ -137,28 +137,28 @@ namespace GarrisonButler.Libraries
         /// <param name="revision">Revision.</param>
         public ModuleVersion(int major, int minor, int build, int revision)
         {
-            this.build = -1;
-            this.revision = -1;
+            _build = -1;
+            _revision = -1;
             if (major < 0)
             {
-                throw new ArgumentOutOfRangeException("major", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("major", @"ArgumentOutOfRange_Version");
             }
             if (minor < 0)
             {
-                throw new ArgumentOutOfRangeException("minor", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("minor", @"ArgumentOutOfRange_Version");
             }
             if (build < 0)
             {
-                throw new ArgumentOutOfRangeException("build", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("build", @"ArgumentOutOfRange_Version");
             }
             if (revision < 0)
             {
-                throw new ArgumentOutOfRangeException("revision", "ArgumentOutOfRange_Version");
+                throw new ArgumentOutOfRangeException("revision", @"ArgumentOutOfRange_Version");
             }
-            this.major = major;
-            this.minor = minor;
-            this.build = build;
-            this.revision = revision;
+            _major = major;
+            _minor = minor;
+            _build = build;
+            _revision = revision;
         }
 
         #region ICloneable Members
@@ -170,10 +170,10 @@ namespace GarrisonButler.Libraries
         public object Clone()
         {
             var version1 = new ModuleVersion();
-            version1.major = major;
-            version1.minor = minor;
-            version1.build = build;
-            version1.revision = revision;
+            version1._major = _major;
+            version1._minor = _minor;
+            version1._build = _build;
+            version1._revision = _revision;
             return version1;
         }
 
@@ -184,7 +184,7 @@ namespace GarrisonButler.Libraries
         /// <summary>
         ///     Compares to.
         /// </summary>
-        /// <param name="obj">Obj.</param>
+        /// <param name="version">Obj.</param>
         /// <returns></returns>
         public int CompareTo(object version)
         {
@@ -197,35 +197,35 @@ namespace GarrisonButler.Libraries
                 throw new ArgumentException("Arg_MustBeVersion");
             }
             var version1 = (ModuleVersion) version;
-            if (major != version1.Major)
+            if (_major != version1.Major)
             {
-                if (major > version1.Major)
+                if (_major > version1.Major)
                 {
                     return 1;
                 }
                 return -1;
             }
-            if (minor != version1.Minor)
+            if (_minor != version1.Minor)
             {
-                if (minor > version1.Minor)
+                if (_minor > version1.Minor)
                 {
                     return 1;
                 }
                 return -1;
             }
-            if (build != version1.Build)
+            if (_build != version1.Build)
             {
-                if (build > version1.Build)
+                if (_build > version1.Build)
                 {
                     return 1;
                 }
                 return -1;
             }
-            if (revision == version1.Revision)
+            if (_revision == version1.Revision)
             {
                 return 0;
             }
-            if (revision > version1.Revision)
+            if (_revision > version1.Revision)
             {
                 return 1;
             }
@@ -241,8 +241,8 @@ namespace GarrisonButler.Libraries
         [XmlAttribute("Major")]
         public int Major
         {
-            get { return major; }
-            set { major = value; }
+            get { return _major; }
+            set { _major = value; }
         }
 
         /// <summary>
@@ -252,8 +252,8 @@ namespace GarrisonButler.Libraries
         [XmlAttribute("Minor")]
         public int Minor
         {
-            get { return minor; }
-            set { minor = value; }
+            get { return _minor; }
+            set { _minor = value; }
         }
 
         /// <summary>
@@ -263,8 +263,8 @@ namespace GarrisonButler.Libraries
         [XmlAttribute("Build")]
         public int Build
         {
-            get { return build; }
-            set { build = value; }
+            get { return _build; }
+            set { _build = value; }
         }
 
         /// <summary>
@@ -274,8 +274,8 @@ namespace GarrisonButler.Libraries
         [XmlAttribute("Revision")]
         public int Revision
         {
-            get { return revision; }
-            set { revision = value; }
+            get { return _revision; }
+            set { _revision = value; }
         }
 
         /// <summary>
@@ -290,8 +290,8 @@ namespace GarrisonButler.Libraries
                 return false;
             }
             var version1 = (ModuleVersion) obj;
-            if (((major == version1.Major) && (minor == version1.Minor)) && (build == version1.Build) &&
-                (revision == version1.Revision))
+            if (((_major == version1.Major) && (_minor == version1.Minor)) && (_build == version1.Build) &&
+                (_revision == version1.Revision))
             {
                 return true;
             }
@@ -302,13 +302,14 @@ namespace GarrisonButler.Libraries
         ///     Gets the hash code.
         /// </summary>
         /// <returns></returns>
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode()
         {
-            int num1 = 0;
-            num1 |= ((major & 15) << 0x1c);
-            num1 |= ((minor & 0xff) << 20);
-            num1 |= ((build & 0xff) << 12);
-            return (num1 | revision & 0xfff);
+            var num1 = 0;
+            num1 |= ((_major & 15) << 0x1c);
+            num1 |= ((_minor & 0xff) << 20);
+            num1 |= ((_build & 0xff) << 12);
+            return (num1 | _revision & 0xfff);
         }
 
         /// <summary>
@@ -319,7 +320,7 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool operator ==(ModuleVersion v1, ModuleVersion v2)
         {
-            return v1.Equals(v2);
+            return v1 != null && v1.Equals(v2);
         }
 
         /// <summary>
@@ -395,11 +396,11 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public override string ToString()
         {
-            if (build == -1)
+            if (_build == -1)
             {
                 return ToString(2);
             }
-            if (revision == -1)
+            if (_revision == -1)
             {
                 return ToString(3);
             }
@@ -422,31 +423,31 @@ namespace GarrisonButler.Libraries
                 }
                 case 1:
                 {
-                    return (major.ToString());
+                    return (_major.ToString(CultureInfo.CurrentCulture));
                 }
                 case 2:
                 {
-                    return (major + "." + minor);
+                    return (_major + "." + _minor);
                 }
             }
-            if (build == -1)
+            if (_build == -1)
             {
                 throw new ArgumentException(string.Format("ArgumentOutOfRange_Bounds_Lower_Upper {0},{1}", "0", "2"),
                     "fieldCount");
             }
             if (fieldCount == 3)
             {
-                objArray1 = new object[5] {major, ".", minor, ".", build};
+                objArray1 = new object[] {_major, ".", _minor, ".", _build};
                 return string.Concat(objArray1);
             }
-            if (revision == -1)
+            if (_revision == -1)
             {
                 throw new ArgumentException(string.Format("ArgumentOutOfRange_Bounds_Lower_Upper {0},{1}", "0", "3"),
                     "fieldCount");
             }
             if (fieldCount == 4)
             {
-                objArray1 = new object[7] {major, ".", minor, ".", build, ".", revision};
+                objArray1 = new object[] {_major, ".", _minor, ".", _build, ".", _revision};
                 return string.Concat(objArray1);
             }
             throw new ArgumentException(string.Format("ArgumentOutOfRange_Bounds_Lower_Upper {0},{1}", "0", "4"),

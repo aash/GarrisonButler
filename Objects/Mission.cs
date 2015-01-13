@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
@@ -17,7 +18,7 @@ namespace GarrisonButler
         public int DurationSeconds;
         public List<String> Enemies;
         public string Environment;
-        public int ILevel;
+        public int ItemLevel;
         public bool IsRare;
         public int Level;
         public String Location;
@@ -27,7 +28,7 @@ namespace GarrisonButler
         public int NumFollowers;
         public int NumRewards;
         public int State;
-        public bool Success = false;
+        public bool Success;
 
 
         public string SuccessChance;
@@ -35,7 +36,8 @@ namespace GarrisonButler
         public string Xp;
         public int XpBonus;
 
-        public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level, int iLevel,
+        public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level,
+            int iItemLevel,
             bool isRare, string location, string missionId, string name, int numFollowers, int numRewards, int state,
             string type, string xp, string environment)
         {
@@ -43,7 +45,7 @@ namespace GarrisonButler
             Description = description;
             DurationSeconds = durationSeconds;
             Enemies = enemies;
-            ILevel = iLevel;
+            ItemLevel = iItemLevel;
             IsRare = isRare;
             Level = level;
             Location = location;
@@ -58,7 +60,8 @@ namespace GarrisonButler
             //GarrisonButler.Diagnostic(ToString());
         }
 
-        public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level, int iLevel,
+        public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level,
+            int iItemLevel,
             bool isRare, string location, string missionId, string name, int numFollowers, int numRewards, int state,
             string type, int xp, int material, string succesChance, int xpBonus, bool success)
         {
@@ -66,7 +69,7 @@ namespace GarrisonButler
             Description = description;
             DurationSeconds = durationSeconds;
             Enemies = enemies;
-            ILevel = iLevel;
+            ItemLevel = iItemLevel;
             IsRare = isRare;
             Level = level;
             Location = location;
@@ -76,7 +79,7 @@ namespace GarrisonButler
             NumRewards = numRewards;
             State = state;
             Type = type;
-            Xp = xp.ToString();
+            Xp = xp.ToString(CultureInfo.CurrentCulture);
             MaterialMultiplier = material;
             SuccessChance = succesChance;
             XpBonus = xpBonus;
@@ -85,14 +88,14 @@ namespace GarrisonButler
 
         public override string ToString()
         {
-            String mission = "";
+            var mission = "";
             mission += "  MissionId: " + MissionId + "\n";
             mission += "  Name: " + Name + "\n";
             mission += "  Cost: " + Cost + "\n";
             mission += "  Xp: " + Xp + "\n";
             mission += "  XpBonus: " + XpBonus + "\n";
             mission += "  Level: " + Level + "\n";
-            mission += "  ILevel: " + ILevel + "\n";
+            mission += "  ItemLevel: " + ItemLevel + "\n";
             mission += "  Success: " + Success + "\n";
             mission += "  State: " + State + "\n";
             mission += "  Type: " + Type + "\n";
@@ -105,16 +108,12 @@ namespace GarrisonButler
             mission += "  successChance: " + SuccessChance + "\n";
             mission += "  materialMultiplier: " + MaterialMultiplier + "\n";
             mission += "  Enemies: " + "\n";
-            foreach (string enemy in Enemies)
-            {
-                mission += "    " + enemy + "\n";
-            }
-            return mission;
+            return Enemies.Aggregate(mission, (current, enemy) => current + ("    " + enemy + "\n"));
         }
 
         public void PrintCompletedMission()
         {
-            string report = "";
+            string report;
             if (Success)
             {
                 report = "MISSION SUCCESS\n" + ToString();
@@ -130,25 +129,25 @@ namespace GarrisonButler
         {
             var match = new Follower[NumFollowers];
             // select only follower with a matching ability and a level >= to mission level
-            List<Follower> filteredFollowers =
+            var filteredFollowers =
                 followers.Where(f => f.Level >= Level).ToList();
-            if (Level == 100) filteredFollowers = filteredFollowers.Where(f => f.ILevel >= ILevel).ToList();
-            List<Follower> possibleSlot1 = filteredFollowers;
+            if (Level == 100) filteredFollowers = filteredFollowers.Where(f => f.ItemLevel >= ItemLevel).ToList();
+            var possibleSlot1 = filteredFollowers;
 
-            foreach (Follower f1 in possibleSlot1)
+            foreach (var f1 in possibleSlot1)
             {
                 match[0] = f1;
                 if (NumFollowers > 1)
                 {
-                    foreach (Follower f2 in possibleSlot1)
+                    var f4 = f1;
+                    foreach (var f2 in possibleSlot1.Where(f2 => f2 != f4))
                     {
-                        if (f2 == f1) continue;
                         match[1] = f2;
                         if (NumFollowers > 2)
                         {
-                            foreach (Follower f3 in possibleSlot1)
+                            var f5 = f2;
+                            foreach (var f3 in possibleSlot1.Where(f3 => f3 != f5 && f3 != f4))
                             {
-                                if (f3 == f2 || f3 == f1) continue;
                                 match[2] = f3;
                                 // Check the comp
                                 if (IsMatch(match))
@@ -175,8 +174,8 @@ namespace GarrisonButler
 
         private bool IsMatch(IEnumerable<Follower> possibleMatch)
         {
-            List<String> counters = possibleMatch.Select(m => m.Counters).SelectMany(x => x).ToList();
-            foreach (string ability in Enemies)
+            var counters = possibleMatch.Select(m => m.Counters).SelectMany(x => x).ToList();
+            foreach (var ability in Enemies)
             {
                 if (counters.Contains(ability))
                     counters.Remove(ability);
@@ -215,9 +214,9 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic(ToString());
             }
 
-            public override string ToString()
+            public override sealed string ToString()
             {
-                String mission = "";
+                var mission = "";
                 mission += "  MissionId: " + MissionId + "\n";
                 mission += "  Name: " + Name + "\n";
                 mission += "  Xp: " + Xp + "\n";

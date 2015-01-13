@@ -23,10 +23,9 @@ namespace GarrisonButler
 
         private static readonly WoWPoint TableHorde = new WoWPoint(5559, 4599, 140);
         private static readonly WoWPoint TableAlliance = new WoWPoint(1943, 330, 91);
-        private static bool CheckedMissions;
         private static readonly WaitTimer RefreshMissionsTimer = new WaitTimer(TimeSpan.FromMinutes(5));
         private static readonly WaitTimer RefreshFollowerTimer = new WaitTimer(TimeSpan.FromMinutes(5));
-        private static WoWPoint TablePosition = WoWPoint.Empty;
+        private static WoWPoint _tablePosition = WoWPoint.Empty;
 
         private static void InitializeMissions()
         {
@@ -63,7 +62,7 @@ namespace GarrisonButler
                 return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
             }
 
-            int numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
+            var numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
 
             // Is there mission available to start
             if (numberMissionAvailable == 0)
@@ -76,40 +75,37 @@ namespace GarrisonButler
             RefreshFollowers();
 
 
-            int garrisonRessources = BuildingsLua.GetGarrisonRessources();
-            IEnumerable<Mission> Missions = _missions.Where(m => m.Cost < garrisonRessources);
-            if (!Missions.Any())
+            var garrisonRessources = BuildingsLua.GetGarrisonRessources();
+            IEnumerable<Mission> missions = _missions.Where(m => m.Cost < garrisonRessources).ToList();
+            if (!missions.Any())
             {
                 GarrisonButler.Diagnostic("[Missions] Not enough ressources to start a mission.");
                 return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
             }
 
-            var ToStart = new List<Tuple<Mission, Follower[]>>();
-            List<Follower> followersTemp = _followers.ToList();
-            foreach (Mission mission in Missions)
+            var toStart = new List<Tuple<Mission, Follower[]>>();
+            var followersTemp = _followers.ToList();
+            foreach (var mission in missions)
             {
-                Follower[] match =
+                var match =
                     mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status == "nil").ToList());
                 if (match == null)
                     continue;
-                ToStart.Add(new Tuple<Mission, Follower[]>(mission, match));
+                toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
                 followersTemp.RemoveAll(match.Contains);
             }
 
-            string mess = "Found " + numberMissionAvailable + " available missions to complete. " +
-                          "Can successfully complete: " + ToStart.Count + " missions.";
-            if (ToStart.Count > 0)
+            var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
+                       "Can successfully complete: " + toStart.Count + " missions.";
+            if (toStart.Count > 0)
                 GarrisonButler.Log(mess);
             else
             {
                 GarrisonButler.Diagnostic(mess);
             }
-            if (!ToStart.Any())
-            {
-                return new Tuple<bool, Tuple<Mission, Follower[]>>(false, null);
-            }
-
-            return new Tuple<bool, Tuple<Mission, Follower[]>>(true, ToStart.First());
+            return !toStart.Any()
+                ? new Tuple<bool, Tuple<Mission, Follower[]>>(false, null)
+                : new Tuple<bool, Tuple<Mission, Follower[]>>(true, toStart.First());
         }
 
         public static async Task<ActionResult> StartMission(Tuple<Mission, Follower[]> missionToStart)
@@ -166,22 +162,22 @@ namespace GarrisonButler
 
         public static async Task<bool> MoveToTable()
         {
-            if (TablePosition == WoWPoint.Empty)
+            if (_tablePosition == WoWPoint.Empty)
             {
-                WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
+                var tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != default(WoWGameObject))
                 {
                     GarrisonButler.Diagnostic("Found Command table location, not using default anymore.");
-                    TablePosition = tableForLoc.Location;
+                    _tablePosition = tableForLoc.Location;
                 }
             }
 
-            if (TablePosition != WoWPoint.Empty)
+            if (_tablePosition != WoWPoint.Empty)
             {
                 if (InterfaceLua.IsGarrisonMissionFrameOpen())
-                    return false; 
-                
-                WoWObject tableForLoc = MissionLua.GetCommandTableOrDefault();
+                    return false;
+
+                var tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != default(WoWGameObject))
                 {
                     if (await MoveToInteract(tableForLoc) == ActionResult.Running)
@@ -194,20 +190,21 @@ namespace GarrisonButler
                 }
                 else
                 {
-                    if (await MoveTo(TablePosition, "[Missions] Moving to command table") == ActionResult.Running)
+                    if (await MoveTo(_tablePosition, "[Missions] Moving to command table") == ActionResult.Running)
                         return true;
                 }
             }
             else
             {
-                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table") == ActionResult.Running)
+                if (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table") ==
+                    ActionResult.Running)
                     return true;
             }
 
             if (InterfaceLua.IsGarrisonMissionFrameOpen())
                 return false;
 
-            WoWObject table = MissionLua.GetCommandTableOrDefault();
+            var table = MissionLua.GetCommandTableOrDefault();
             if (table == default(WoWObject))
             {
                 GarrisonButler.Diagnostic("[Missions] Trouble getting command table from LUA.");
@@ -266,7 +263,6 @@ namespace GarrisonButler
         public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
         {
             GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED");
-            string missionId = args.Args[0].ToString();
             //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
             //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
         }

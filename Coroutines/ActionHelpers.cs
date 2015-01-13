@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Styx.Common.Helpers;
-using Styx.CommonBot;
 
 #endregion
 
@@ -21,236 +21,230 @@ namespace GarrisonButler.Coroutines
         internal class ActionBasic : Action
         {
             private readonly Func<Task<ActionResult>> _action;
-            private readonly Func<bool> _condition;
-            protected ActionResult _lastResult;
-            protected WaitTimer _waitTimer;
+            protected ActionResult LastResult;
+            protected WaitTimer WaitTimer;
 
             public override string ToString()
             {
-                string action = "";
-                string condition = "";
+                var action = "";
 
-                if (_action != default(Func<Task<ActionResult>>))
-                    if (_action.Method != default(System.Reflection.MethodInfo))
-                        action = _action.Method.Name;
+                if (_action == default(Func<Task<ActionResult>>)) return "ActionBasic: _action=" + action;
+                if (_action.Method != default(MethodInfo))
+                    action = _action.Method.Name;
 
-                if (_condition != default(Func<bool>))
-                    if (_condition.Method != default(System.Reflection.MethodInfo))
-                        condition = _condition.Method.Name;
-
-                return "ActionBasic: _action=" + action + "; _condition=" + condition;
+                return "ActionBasic: _action=" + action;
             }
 
             public ActionBasic(Func<Task<ActionResult>> action, int waitTimeMs = 3000)
             {
                 _action = action;
-                _waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
-                _lastResult = ActionResult.Done;
-            }
-
-            public ActionBasic()
-            {
+                WaitTimer = new WaitTimer(TimeSpan.FromMilliseconds(waitTimeMs));
+                LastResult = ActionResult.Done;
             }
 
             public override async Task<ActionResult> ExecuteAction()
             {
                 //GarrisonButler.Diagnostic("Execute ExecuteAction.");
-                if (_lastResult == ActionResult.Done && !_waitTimer.IsFinished)
+                if (LastResult == ActionResult.Done && !WaitTimer.IsFinished)
                 {
                     //GarrisonButler.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
                     return ActionResult.Done;
                 }
 
                 //GarrisonButler.Diagnostic("Execute ExecuteAction: Executing");
-                _lastResult = await _action();
+                LastResult = await _action();
                 //GarrisonButler.Diagnostic("Execute ExecuteAction: Result: " + _lastResult);
 
-                _waitTimer.Reset();
-                return _lastResult;
+                WaitTimer.Reset();
+                return LastResult;
             }
         }
 
         internal class ActionOnTimer<T> : Action
         {
-            protected readonly Func<T, Task<ActionResult>> _action;
-            protected readonly Func<Tuple<bool, T>> _condition;
-            protected readonly Action[] _preActions;
-            protected readonly WaitTimer _waitTimerAction;
-            protected WaitTimer _waitTimerAntiSpamRunning;
-            protected WaitTimer _waitTimerCondition;
-            protected ActionResult _lastResult;
-            protected bool _needToCache = false;
-            protected Tuple<bool, T> _resCondition;
+            protected readonly Func<T, Task<ActionResult>> CustomAction;
+            protected readonly Func<Tuple<bool, T>> Condition;
+            protected readonly Action[] PreActions;
+            protected readonly WaitTimer WaitTimerAction;
+            protected WaitTimer WaitTimerAntiSpamRunning;
+            protected WaitTimer WaitTimerCondition;
+            protected ActionResult LastResult;
+            protected bool NeedToCache = false;
+            protected Tuple<bool, T> ResCondition;
 
             public override string ToString()
             {
-                string action = "";
-                string condition = "";
+                var action = "";
+                var condition = "";
 
-                if (_action != default(Func<T, Task<ActionResult>>))
-                    if (_action.Method != default(System.Reflection.MethodInfo))
-                        action = _action.Method.Name;
+                if (CustomAction != default(Func<T, Task<ActionResult>>))
+                    if (CustomAction.Method != default(MethodInfo))
+                        action = CustomAction.Method.Name;
 
-                if (_condition != default(Func<Tuple<bool, T>>))
-                    if (_condition.Method != default(System.Reflection.MethodInfo))
-                        condition = _condition.Method.Name;
+                if (Condition == default(Func<Tuple<bool, T>>))
+                    return "ActionOnTimer: _action=" + action + "; _condition=" + condition;
+                if (Condition.Method != default(MethodInfo))
+                    condition = Condition.Method.Name;
 
                 return "ActionOnTimer: _action=" + action + "; _condition=" + condition;
             }
 
-            public ActionOnTimer(Func<T, Task<ActionResult>> action, Func<Tuple<bool, T>> condition, int waitTimeActionMs = 3000,
+            public ActionOnTimer(Func<T, Task<ActionResult>> customAction, Func<Tuple<bool, T>> condition,
+                int waitTimeActionMs = 3000,
                 int waitTimeConditionMs = 3500, params Action[] preAction)
             {
-                _action = action;
-                _condition = condition;
-                _resCondition = default(Tuple<bool, T>);
-                _waitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(3000));
-                _waitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(10000));
-                _waitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(100));
-                _lastResult = ActionResult.Init;
-                _preActions = preAction;
+                CustomAction = customAction;
+                Condition = condition;
+                ResCondition = default(Tuple<bool, T>);
+                WaitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(5000));
+                WaitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(10000));
+                WaitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(1.0/15.0));
+                LastResult = ActionResult.Init;
+                PreActions = preAction;
             }
 
             public override async Task<ActionResult> ExecuteAction()
             {
                 // Check time between a recheck once done
-                if (_lastResult == ActionResult.Done && !_waitTimerAction.IsFinished)
+                if (LastResult == ActionResult.Done && !WaitTimerAction.IsFinished)
                     return ActionResult.Done;
 
                 // Check time while running to not overload
-                if (_lastResult == ActionResult.Running && !_waitTimerAntiSpamRunning.IsFinished)
+                if (LastResult == ActionResult.Running && !WaitTimerAntiSpamRunning.IsFinished)
                     return ActionResult.Running;
 
-                _waitTimerAntiSpamRunning.Reset();
+                WaitTimerAntiSpamRunning.Reset();
 
                 // Check action condition, refresh if asked, if not yet ran once, if timer is finished
-                if (_lastResult == ActionResult.Refresh 
-                    || _lastResult == ActionResult.Init
-                    || _waitTimerCondition.IsFinished)
+                if (LastResult == ActionResult.Refresh
+                    || LastResult == ActionResult.Init
+                    || WaitTimerCondition.IsFinished)
                 {
-                    _resCondition = _condition();
-                    _waitTimerCondition.Reset();
+                    ResCondition = Condition();
+                    WaitTimerCondition.Reset();
                 }
 
                 // If condition of action verified
-                if (_resCondition.Item1)
+                if (ResCondition.Item1)
                 {
                     // Running preactions with a tick between some
-                    foreach (Action preAction in _preActions)
+                    foreach (var preAction in PreActions)
                     {
                         if (await preAction.ExecuteAction() == ActionResult.Running)
                             await Buddy.Coroutines.Coroutine.Yield();
                     }
                     // Running action
-                    _lastResult = await _action(_resCondition.Item2);
+                    LastResult = await CustomAction(ResCondition.Item2);
                 }
                 else
-                    _lastResult = ActionResult.Done;
+                    LastResult = ActionResult.Done;
 
-                _waitTimerAction.Reset();
+                WaitTimerAction.Reset();
                 return
-                    (_lastResult == ActionResult.Refresh || _lastResult == ActionResult.Running)
-                    ? ActionResult.Running
-                    : ActionResult.Done;
+                    (LastResult == ActionResult.Refresh || LastResult == ActionResult.Running)
+                        ? ActionResult.Running
+                        : ActionResult.Done;
             }
         }
 
         internal class ActionOnTimerCached<T> : ActionOnTimer<T>
         {
-            public ActionOnTimerCached(Func<T, Task<ActionResult>> action, Func<Tuple<bool, T>> condition,
-                int waitTimeActionMs = 1000, int waitTimeConditionMs = 150,
-                bool instantStart = false, params Action[] preAction)
-                : base(action, condition, waitTimeActionMs, waitTimeConditionMs, preAction)
+            public ActionOnTimerCached(Func<T, Task<ActionResult>> customAction, Func<Tuple<bool, T>> condition,
+                int waitTimeActionMs = 1000, int waitTimeConditionMs = 150, params Action[] preAction)
+                : base(customAction, condition, waitTimeActionMs, waitTimeConditionMs, preAction)
             {
             }
 
             public override async Task<ActionResult> ExecuteAction()
             {
                 // Check time between a recheck once done
-                if (_lastResult == ActionResult.Done && !_waitTimerAction.IsFinished)
+                if (LastResult == ActionResult.Done && !WaitTimerAction.IsFinished)
                     return ActionResult.Done;
 
                 // Check time while running to not overload
-                if (_lastResult == ActionResult.Running && !_waitTimerAntiSpamRunning.IsFinished)
+                if (LastResult == ActionResult.Running && !WaitTimerAntiSpamRunning.IsFinished)
                     return ActionResult.Running;
 
-                _waitTimerAntiSpamRunning.Reset();
+                WaitTimerAntiSpamRunning.Reset();
 
                 // Check action condition, refresh if asked, if not yet ran once, if done and timer finished.
-                if (_lastResult == ActionResult.Refresh
-                    || _lastResult == ActionResult.Init
-                    || ( _lastResult == ActionResult.Done))
+                if (LastResult == ActionResult.Refresh
+                    || LastResult == ActionResult.Init
+                    || (LastResult == ActionResult.Done))
                 {
-                    _resCondition = _condition();
-                    _waitTimerCondition.Reset();
+                    ResCondition = Condition();
+                    WaitTimerCondition.Reset();
                 }
 
                 // If condition of action verified
-                if (_resCondition.Item1)
+                if (ResCondition.Item1)
                 {
                     // Running preactions with a tick between some
-                    foreach (Action preAction in _preActions)
+                    foreach (var preAction in PreActions)
                     {
                         if (await preAction.ExecuteAction() == ActionResult.Running)
                             await Buddy.Coroutines.Coroutine.Yield();
                     }
                     // Running action
-                    _lastResult = await _action(_resCondition.Item2);
+                    LastResult = await CustomAction(ResCondition.Item2);
                 }
                 else
-                    _lastResult = ActionResult.Done;
-                
-                _waitTimerAction.Reset();
+                    LastResult = ActionResult.Done;
+
+                WaitTimerAction.Reset();
                 return
-                    (_lastResult == ActionResult.Refresh || _lastResult == ActionResult.Running)
-                    ? ActionResult.Running
-                    : ActionResult.Done;
+                    (LastResult == ActionResult.Refresh || LastResult == ActionResult.Running)
+                        ? ActionResult.Running
+                        : ActionResult.Done;
             }
         }
 
         internal class ActionsSequence : Action
         {
-            private readonly List<Action> Actions;
+            private readonly List<Action> _actions;
 
             public ActionsSequence(params Action[] actions)
             {
-                Actions = actions.ToList();
+                _actions = actions.ToList();
             }
 
             public ActionsSequence(ActionsSequence actionsSequence)
             {
-                Actions = actionsSequence.Actions;
+                _actions = actionsSequence._actions;
             }
 
             public ActionsSequence()
             {
-                Actions = new List<Action>();
+                _actions = new List<Action>();
             }
 
             public void AddAction(Action action)
             {
-                Actions.Add(action);
+                _actions.Add(action);
             }
 
             public override async Task<ActionResult> ExecuteAction()
             {
                 //GarrisonButler.Diagnostic("ActionSequence.ExecuteAction(): count=" + Actions.Count);
                 //int count = 0;
-                foreach (Action actionBasic in Actions)
+                foreach (var actionBasic in _actions)
                 {
                     //count++;
                     //GarrisonButler.Diagnostic("ActionSequence.ExecuteAction():   #" + count + " - " + actionBasic.ToString());
                     var result = await actionBasic.ExecuteAction();
-                    if (result == ActionResult.Running)
-                        return ActionResult.Running;
-                    if (result == ActionResult.Refresh)
-                        return ActionResult.Refresh;
+                    switch (result)
+                    {
+                        case ActionResult.Running:
+                            return ActionResult.Running;
+                        case ActionResult.Refresh:
+                            return ActionResult.Refresh;
+                    }
                 }
                 return ActionResult.Done;
             }
         }
-
     }
+
     internal enum ActionResult
     {
         Refresh,

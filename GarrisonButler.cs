@@ -10,7 +10,6 @@ using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
 using Styx.Common;
-using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
@@ -26,7 +25,6 @@ namespace GarrisonButler
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
         internal static readonly List<Mission> CacheCompletedList = new List<Mission>();
-        private static readonly WaitTimer logTimer = new WaitTimer(TimeSpan.FromSeconds(5));
         public static StyxLog CurrentHonorbuddyLog = default(StyxLog);
 
         public GarrisonButler()
@@ -44,7 +42,7 @@ namespace GarrisonButler
         internal static GarrisonButler Instance { get; private set; }
 
 
-        private void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
+        private static void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
         {
             Diagnostic("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");
             if (args.Args[1].ToString() == "nil")
@@ -59,9 +57,9 @@ namespace GarrisonButler
                 }
                 else
                 {
-                    string idstring = args.Args[0].ToString();
+                    var idstring = args.Args[0].ToString();
 
-                    Mission mission = CacheCompletedList.FirstOrDefault(m => m.MissionId == idstring);
+                    var mission = CacheCompletedList.FirstOrDefault(m => m.MissionId == idstring);
                     if (mission != null)
                     {
                         mission.PrintCompletedMission();
@@ -74,7 +72,7 @@ namespace GarrisonButler
             }
         }
 
-        private void GARRISON_MISSION_COMPLETE_RESPONSE(object sender, LuaEventArgs args)
+        private static void GARRISON_MISSION_COMPLETE_RESPONSE(object sender, LuaEventArgs args)
         {
             Diagnostic("LuaEvent: GARRISON_MISSION_COMPLETE_RESPONSE ");
             // Store the success of the mission
@@ -92,7 +90,7 @@ namespace GarrisonButler
                 {
                     var success = Lua.ParseLuaValue<Boolean>(args.Args[1].ToString());
 
-                    Mission mission = MissionLua.GetCompletedMissionById(args.Args[0].ToString());
+                    var mission = MissionLua.GetCompletedMissionById(args.Args[0].ToString());
                     mission.Success = success;
                     if (success)
                     {
@@ -108,7 +106,7 @@ namespace GarrisonButler
 
         internal static void Log(string message, params object[] args)
         {
-            string messFormat = String.Format("[{0}] {1}: {2}", NameStatic, Version, message);
+            var messFormat = String.Format("[{0}] {1}: {2}", NameStatic, Version, message);
             Logging.Write(Colors.LightSeaGreen, messFormat, args);
         }
 
@@ -124,7 +122,7 @@ namespace GarrisonButler
 
         internal static void DiagnosticLogTimeTaken(string activity, int elapsedTimeInMs)
         {
-            DiagnosticLogTimeTaken(activity, (double)elapsedTimeInMs);
+            DiagnosticLogTimeTaken(activity, (double) elapsedTimeInMs);
         }
 
         internal static void DiagnosticLogTimeTaken(string activity, double elapsedTimeInMs)
@@ -134,22 +132,22 @@ namespace GarrisonButler
 
         internal static void DiagnosticLogTimeTaken(string activity, TimeSpan timeTaken)
         {
-            string formattedTime = String.Format("{0:mm\\:ss\\:fff}", timeTaken);
-            int count = formattedTime.Count(c => c == ':');
+            var formattedTime = String.Format("{0:mm\\:ss\\:fff}", timeTaken);
+            var count = formattedTime.Count(c => c == ':');
 
             if (count == 2)
             {
-                int firstIndex = formattedTime.IndexOf(':');
+                var firstIndex = formattedTime.IndexOf(':');
 
                 formattedTime = formattedTime.Substring(0, firstIndex)
-                    + "m:"
-                    + formattedTime.Substring(firstIndex + 1);
+                                + "m:"
+                                + formattedTime.Substring(firstIndex + 1);
 
-                int lastIndex = formattedTime.LastIndexOf(':');
+                var lastIndex = formattedTime.LastIndexOf(':');
 
                 formattedTime = formattedTime.Substring(0, lastIndex)
-                    + "s:"
-                    + formattedTime.Substring(lastIndex + 1, formattedTime.Length - lastIndex - 1);
+                                + "s:"
+                                + formattedTime.Substring(lastIndex + 1, formattedTime.Length - lastIndex - 1);
 
                 formattedTime += "ms";
             }
@@ -174,9 +172,9 @@ namespace GarrisonButler
 
         #region overrides
 
-        internal static bool LootIsOpen = false;
+        internal static bool LootIsOpen;
         private Composite _root;
-        private DateTime lastRunTime = DateTime.MinValue;
+        private DateTime _lastRunTime = DateTime.MinValue;
 
         public override string Name
         {
@@ -203,18 +201,13 @@ namespace GarrisonButler
         {
             get
             {
-                TimeSpan timeElapsed = DateTime.Now - lastRunTime;
-                if (timeElapsed.TotalMinutes > GaBSettings.Get().TimeMinBetweenRun)
-                {
-                    bool anyToDo = Coroutine.AnythingTodo();
-                    if (anyToDo)
-                    {
-                        lastRunTime = DateTime.Now;
-                        Coroutine.ReadyToSwitch = false;
-                    }
-                    return anyToDo;
-                }
-                return false;
+                var timeElapsed = DateTime.Now - _lastRunTime;
+                if (!(timeElapsed.TotalMinutes > GaBSettings.Get().TimeMinBetweenRun)) return false;
+                var anyToDo = Coroutine.AnythingTodo();
+                if (!anyToDo) return false;
+                _lastRunTime = DateTime.Now;
+                Coroutine.ReadyToSwitch = false;
+                return true;
             }
         }
 

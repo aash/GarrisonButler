@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,28 +8,14 @@ namespace GarrisonButler.Libraries
     {
         public static bool IsNullOrEmpty(this IEnumerable source)
         {
-            if (source != null)
-            {
-                foreach (object obj in source)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            if (source == null) return true;
+            return !source.Cast<object>().Any();
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> source)
         {
-            if (source != null)
-            {
-                foreach (T obj in source)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            if (source == null) return true;
+            return !source.Any();
         }
 
         public static IEnumerable GetEmptyIfNull(this IEnumerable source)
@@ -42,6 +27,5 @@ namespace GarrisonButler.Libraries
         {
             return source ?? Enumerable.Empty<T>();
         }
-
     }
 }

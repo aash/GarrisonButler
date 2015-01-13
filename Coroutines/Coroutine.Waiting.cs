@@ -4,7 +4,6 @@ using GarrisonButler.Coroutines;
 #region
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.Config;
@@ -24,17 +23,14 @@ namespace GarrisonButler
         private static bool _hbRelogSkipped;
         private static int _hbRelogSkippedCounter;
 
+// ReSharper disable once CSharpWarnings::CS1998
         private static async Task<ActionResult> Waiting()
         {
-            int townHallLevel = BuildingsLua.GetTownHallLevel();
+            var townHallLevel = BuildingsLua.GetTownHallLevel();
             if (townHallLevel < 1)
                 return ActionResult.Failed;
 
-            List<WoWPoint> myFactionWaitingPoints;
-            if (Me.IsAlliance)
-                myFactionWaitingPoints = AllyWaitingPoints;
-            else
-                myFactionWaitingPoints = HordeWaitingPoints;
+            var myFactionWaitingPoints = Me.IsAlliance ? AllyWaitingPoints : HordeWaitingPoints;
 
             if (myFactionWaitingPoints[townHallLevel - 1] == new WoWPoint())
             {
@@ -45,11 +41,11 @@ namespace GarrisonButler
             return ActionResult.Done;
         }
 
-        private async static Task<bool> JobDoneSwitch()
+        private static async Task<bool> JobDoneSwitch()
         {
             var hbRelogApi = new HBRelogApi();
 
-            if (hbRelogApi.IsConnected && GaBSettings.Get().HBRelogMode)
+            if (hbRelogApi.IsConnected && GaBSettings.Get().HbRelogMode)
             {
                 if (_hbRelogSkipped == false)
                 {
@@ -72,70 +68,68 @@ namespace GarrisonButler
             }
             else if (BotManager.Current.Name == "Mixed Mode")
             {
-                var botBase = (MixedModeEx)BotManager.Current;
-                if (botBase.PrimaryBot.Name.ToLower().Contains("angler"))
-                {
-                    WoWPoint fishingSpot = Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde;
-                    GarrisonButler.Log(
-                        "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
-                    if (Me.Location.Distance(fishingSpot) > 2)
-                    {
-                        if (await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.") == ActionResult.Running)
-                            return true;
-                    }
-                }
+                var botBase = (MixedModeEx) BotManager.Current;
+                if (!botBase.PrimaryBot.Name.ToLower().Contains("angler")) return true;
+                var fishingSpot = Me.IsAlliance ? FishingSpotAlly : FishingSpotHorde;
+                GarrisonButler.Log(
+                    "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
+                if (!(Me.Location.Distance(fishingSpot) > 2)) return true;
+                if (await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.") == ActionResult.Running)
+                    return true;
             }
 
             return true;
         }
+
         private static bool AnythingLeftToDoBeforeEnd()
         {
-            if (ReadyToSwitch)
-                return false;
-            return true;
+            return !ReadyToSwitch;
         }
 
         public static bool AnythingTodo()
         {
             RefreshBuildings();
             // dailies cd
-            if (helperTriggerWithTimer(ShouldRunDailies, ref _dailiesWaitTimer, ref _dailiesTriggered,
+            if (HelperTriggerWithTimer(ShouldRunDailies, ref _dailiesWaitTimer, ref _dailiesTriggered,
                 DailiesWaitTimerValue))
                 return true;
             // Cache
-            if (helperTriggerWithTimer(ShouldRunCache, ref _cacheWaitTimer, ref _cacheTriggered, CacheWaitTimerValue))
+            if (HelperTriggerWithTimer(ShouldRunCache, ref _cacheWaitTimer, ref _cacheTriggered, CacheWaitTimerValue))
                 return true;
 
             // Mine
-            if (helperTriggerWithTimer(ShouldRunMine, ref _mineWaitTimer, ref _mineTriggered, MineWaitTimerValue))
+            if (HelperTriggerWithTimer(ShouldRunMine, ref _mineWaitTimer, ref _mineTriggered, MineWaitTimerValue))
                 return true;
 
             // gardenla
-            if (helperTriggerWithTimer(ShouldRunGarden, ref _gardenWaitTimer, ref _gardenTriggered, GardenWaitTimerValue))
+            if (HelperTriggerWithTimer(ShouldRunGarden, ref _gardenWaitTimer, ref _gardenTriggered, GardenWaitTimerValue))
                 return true;
 
             // Start or pickup work orders
-            if (helperTriggerWithTimer(ShouldRunPickUpOrStartShipment, ref _startOrderWaitTimer, ref _startOrderTriggered,
+            if (HelperTriggerWithTimer(ShouldRunPickUpOrStartShipment, ref _startOrderWaitTimer,
+                ref _startOrderTriggered,
                 StartOrderWaitTimerValue))
                 return true;
 
             // Missions
-            if (helperTriggerWithTimer(ShouldRunTurnInMissions, ref _turnInMissionWaitTimer, ref _turnInMissionsTriggered,
+            if (HelperTriggerWithTimer(ShouldRunTurnInMissions, ref _turnInMissionWaitTimer,
+                ref _turnInMissionsTriggered,
                 TurnInMissionWaitTimerValue))
                 return true;
 
             // Missions completed 
-            if (helperTriggerWithTimer(ShouldRunStartMission, ref _startMissionWaitTimer, ref _startMissionTriggered,
+            if (HelperTriggerWithTimer(ShouldRunStartMission, ref _startMissionWaitTimer, ref _startMissionTriggered,
                 StartMissionWaitTimerValue))
                 return true;
 
             // Salvage
-            if (helperTriggerWithTimer(ShouldRunSalvage, ref _salvageWaitTimer, ref _salvageTriggered,
+            if (HelperTriggerWithTimer(ShouldRunSalvage, ref _salvageWaitTimer, ref _salvageTriggered,
                 SalvageWaitTimerValue))
                 return true;
 
             // Salvage
-            if (helperTriggerWithTimer(CanRunLastRound, ref _lastRoundWaitTimer, ref _lastRoundTriggered,
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (HelperTriggerWithTimer(CanRunLastRound, ref _lastRoundWaitTimer, ref _lastRoundTriggered,
                 LastRoundWaitTimerValue))
                 return true;
 
@@ -144,7 +138,7 @@ namespace GarrisonButler
 
 
         // The trigger must be set off by someone else to avoid pauses in the behavior! 
-        private static bool helperTriggerWithTimer(Func<bool> condition, ref WaitTimer timer, ref bool toModify,
+        private static bool HelperTriggerWithTimer(Func<bool> condition, ref WaitTimer timer, ref bool toModify,
             int timerValueInSeconds)
         {
             if (timer != null && !timer.IsFinished)
@@ -154,9 +148,7 @@ namespace GarrisonButler
                 timer = new WaitTimer(TimeSpan.FromSeconds(timerValueInSeconds));
             timer.Reset();
 
-            if (condition())
-                toModify = true;
-            else toModify = false;
+            toModify = condition();
 
             return toModify;
         }

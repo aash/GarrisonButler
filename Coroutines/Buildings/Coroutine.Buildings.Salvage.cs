@@ -39,16 +39,17 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[Salvage] Deactivated in user settings.");
                 return false;
             }
-            IEnumerable<Building> salvageBuildings = _buildings.Where(b => b.id == 52 || b.id == 140 || b.id == 141);
-            if (!salvageBuildings.Any())
+            var salvageBuildings = _buildings.Where(b => b.Id == 52 || b.Id == 140 || b.Id == 141);
+            var buildings = salvageBuildings as Building[] ?? salvageBuildings.ToArray();
+            if (!buildings.Any())
             {
                 GarrisonButler.Diagnostic("[Salvage] No recycle center detected.");
                 return false;
             }
-            building = salvageBuildings.First();
+            building = buildings.First();
 
             salvageCratesFound = Me.BagItems.Where(i => SalvageCratesIds.Contains((int) i.Entry));
-            int numSalvageCrates = salvageCratesFound.Count();
+            var numSalvageCrates = salvageCratesFound.Count();
             if (numSalvageCrates == 0)
             {
                 GarrisonButler.Diagnostic("[Salvage] Recycle center detected but no salvage crates detected in bags.");
@@ -67,7 +68,7 @@ namespace GarrisonButler
             if (!CanRunSalvage(out salvageCrates, out building))
                 return ActionResult.Done;
 
-            WoWUnit unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
+            var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             // can't find it? Let's try to get closer to the default location.
             if (unit == null)
             {
@@ -78,7 +79,7 @@ namespace GarrisonButler
             // If we don't dismount earlier, the bot will determine that it has reached the
             // unit when it is within 2 yards of the location.  Need to stop and dismount earlier,
             // then call "MoveTo" again after the dismount logic to finish the movement by foot
-            if(Me.Location.Distance(unit.Location) > 10)
+            if (Me.Location.Distance(unit.Location) > 10)
                 if (await MoveTo(unit.Location) == ActionResult.Running)
                     return ActionResult.Running;
 
@@ -91,7 +92,7 @@ namespace GarrisonButler
             if (await MoveTo(unit.Location) == ActionResult.Running)
                 return ActionResult.Running;
 
-            foreach (WoWItem salvageCrate in salvageCrates)
+            foreach (var salvageCrate in salvageCrates)
             {
                 salvageCrate.UseContainerItem();
                 await CommonCoroutines.SleepForLagDuration();

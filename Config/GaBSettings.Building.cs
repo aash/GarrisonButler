@@ -20,7 +20,7 @@ namespace GarrisonButler.Config
             CanStartOrder = canStartOrder;
             MaxCanStartOrder = maxCanStartOrder;
             CanCollectOrder = canCollectOrder;
-            Name = nameFromBuildingID(buildingIds.GetEmptyIfNull().FirstOrDefault());
+            Name = NameFromBuildingId(buildingIds.GetEmptyIfNull().FirstOrDefault());
         }
 
         public BuildingSettings()
@@ -28,7 +28,7 @@ namespace GarrisonButler.Config
             BuildingIds = new List<int>();
         }
 
-        [XmlText()]
+        [XmlText]
         public string Name { get; set; }
 
         [XmlAttribute("BuildingIds")]
@@ -45,24 +45,26 @@ namespace GarrisonButler.Config
 
         public override string ToString()
         {
-            string ret = "Name:" + Name + " - [";
-            for (int i = 0; i < BuildingIds.Count; i++)
+            var ret = "Name:" + Name + " - [";
+            for (var i = 0; i < BuildingIds.Count; i++)
             {
                 if (i != 0)
                     ret += ", ";
-                int Id = BuildingIds[i];
-                ret += Id;
+                var id = BuildingIds[i];
+                ret += id;
             }
             ret += "] - Collect: " + CanCollectOrder + " - Start: " + CanStartOrder + " #" + MaxCanStartOrder;
             return ret;
         }
 
-        public static string nameFromBuildingID(int Id)
+        public static string NameFromBuildingId(int id)
         {
-            string tempName = Enum.GetName(typeof (buildings), Id);
+            var tempName = Enum.GetName(typeof (Buildings), id);
+            if (tempName == null) return "Unknown";
+
             var withoutNumbers = new String(tempName.Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
-            string withoutLevel = withoutNumbers.Replace("Lvl", "");
-            string withSpaces = AddSpacesToSentence(withoutLevel);
+            var withoutLevel = withoutNumbers.Replace("Lvl", "");
+            var withSpaces = AddSpacesToSentence(withoutLevel);
             return withSpaces;
         }
 
@@ -72,7 +74,7 @@ namespace GarrisonButler.Config
                 return "";
             var newText = new StringBuilder(text.Length*2);
             newText.Append(text[0]);
-            for (int i = 1; i < text.Length; i++)
+            for (var i = 1; i < text.Length; i++)
             {
                 if (char.IsUpper(text[i]) && text[i - 1] != ' ')
                     newText.Append(' ');

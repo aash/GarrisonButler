@@ -18,7 +18,7 @@ namespace GarrisonButler.API
 
         public static Building GetBuildingById(String buildingId)
         {
-            String lua =
+            var lua =
                 "C_Garrison.RequestLandingPageShipmentInfo();" +
                 "local RetInfo = {}; local Temp = {}; local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
@@ -53,47 +53,46 @@ namespace GarrisonButler.API
                     "for j_=0,20 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", buildingId);
 
-            List<String> building = Lua.GetReturnValues(lua);
+            var building = Lua.GetReturnValues(lua);
 
             if (building.IsNullOrEmpty())
                 return null;
 
-            int id = building[0].ToInt32();
-            int plotId = building[1].ToInt32();
-            String buildingLevel = building[2];
-            String name = building[3];
-            int rank = building[4].ToInt32();
-            bool isBuilding = building[5].ToBoolean();
-            String timeStart = building[6];
-            String buildTime = building[7];
-            bool canActivate = building[8].ToBoolean();
-            String canUpgrade = building[9];
-            String isPrebuilt = building[11];
-            String nameShipment = building[12];
-            int shipmentCapacity = building[13].ToInt32();
-            int shipmentsReady = building[14].ToInt32();
-            int shipmentsTotal = building[15].ToInt32();
-            String creationTime = building[16];
-            String duration = building[17];
-            String itemName = building[18];
-            String itemQuality = building[19];
-            String itemID = building[20];
+            var id = building[0].ToInt32();
+            var plotId = building[1].ToInt32();
+            var buildingLevel = building[2];
+            var name = building[3];
+            var rank = building[4].ToInt32();
+            var isBuilding = building[5].ToBoolean();
+            var timeStart = building[6];
+            var buildTime = building[7];
+            var canActivate = building[8].ToBoolean();
+            var canUpgrade = building[9];
+            var isPrebuilt = building[11];
+            var nameShipment = building[12];
+            var shipmentCapacity = building[13].ToInt32();
+            var shipmentsReady = building[14].ToInt32();
+            var shipmentsTotal = building[15].ToInt32();
+            var creationTime = building[16];
+            var duration = building[17];
+            var itemName = building[18];
+            var itemQuality = building[19];
+            var itemId = building[20];
 
             return new Building(StyxWoW.Me.IsAlliance, id, plotId, buildingLevel, name, rank, isBuilding,
                 timeStart, buildTime, canActivate, canUpgrade, isPrebuilt, nameShipment,
-                shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, itemName, itemQuality, itemID);
+                shipmentCapacity, shipmentsReady, shipmentsTotal, creationTime, duration, itemName, itemQuality, itemId);
         }
 
         public static List<string> GetListBuildingsId()
         {
-            String lua =
-                "local RetInfo = {}; local buildings = C_Garrison.GetBuildings();" +
-                "for i = 1, #buildings do " +
-                "table.insert(RetInfo,tostring(buildings[i].buildingID));" +
-                "end;" +
-                "return unpack(RetInfo)";
+            const string lua = "local RetInfo = {}; local buildings = C_Garrison.GetBuildings();" +
+                               "for i = 1, #buildings do " +
+                               "table.insert(RetInfo,tostring(buildings[i].buildingID));" +
+                               "end;" +
+                               "return unpack(RetInfo)";
 
-            List<string> followerId = Lua.GetReturnValues(lua);
+            var followerId = Lua.GetReturnValues(lua);
             return followerId;
         }
 
@@ -113,7 +112,7 @@ namespace GarrisonButler.API
 
         public static int GetNumberShipmentReadyByBuildingId(int buildingId)
         {
-            String lua =
+            var lua =
                 "local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +
@@ -132,7 +131,7 @@ namespace GarrisonButler.API
 
         public static int GetNumberShipmentLeftToStart(int buildingId)
         {
-            String lua =
+            var lua =
                 "C_Garrison.RequestLandingPageShipmentInfo();" +
                 "local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
@@ -152,7 +151,7 @@ namespace GarrisonButler.API
 
         public static int GetShipmentTotal(int buildingId)
         {
-            String lua =
+            var lua =
                 "C_Garrison.RequestLandingPageShipmentInfo();" +
                 "local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
@@ -172,7 +171,7 @@ namespace GarrisonButler.API
 
         public static int GetGarrisonRessources()
         {
-            String lua =
+            const string lua =
                 "local name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered = GetCurrencyInfo(824)" +
                 "return tostring(amount);";
 
@@ -182,22 +181,21 @@ namespace GarrisonButler.API
         // Must be using a capacitive frame!
         public static int GetCapacitiveFrameMaxShipments()
         {
-            String lua =
-                "local amount = 99;" +
-                "for i = 1, C_Garrison.GetNumShipmentReagents() do " +
-                "local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(i);" +
-                "if i == 1 then " +
-                "amount = quantity / needed;" +
-                "end;" +
-                "local ratio = quantity/needed;" +
-                "if ratio < amount then " +
-                "amount = ratio;" +
-                "end;" +
-                "end;" +
-                "return tostring(amount);";
+            const string lua = "local amount = 99;" +
+                               "for i = 1, C_Garrison.GetNumShipmentReagents() do " +
+                               "local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(i);" +
+                               "if i == 1 then " +
+                               "amount = quantity / needed;" +
+                               "end;" +
+                               "local ratio = quantity/needed;" +
+                               "if ratio < amount then " +
+                               "amount = ratio;" +
+                               "end;" +
+                               "end;" +
+                               "return tostring(amount);";
 
-            float res = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToFloat();
-            global::GarrisonButler.GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
+            var res = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToFloat();
+            GarrisonButler.Diagnostic("LUA - GetCapacitiveFrameMaxShipments: " + res);
             return (int) res;
         }
     }
