@@ -497,6 +497,10 @@ namespace GarrisonButler
                 {
                     Navigator.PlayerMover.MoveTowards(unit.Location); 
                 }
+                else
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.");
+                }
                 return res;
             });
 
