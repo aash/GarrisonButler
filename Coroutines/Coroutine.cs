@@ -152,7 +152,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
-                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbagsTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
+                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
                     10000, 1000));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
