@@ -556,10 +556,31 @@ namespace GarrisonButler
             building.workFrameWorkAroundTries = 0;
 
 
+            // Only returns ActionResult.Done or ActionResult.Failed
+            // Returning ActionResult.Done means it is the GarrisonCapacitiveFrame
             if (await IfGossip(unit) == ActionResult.Failed)
             {
                 return ActionResult.Running;
             };
+
+            // One more check to make sure this is the right frame!!!
+            if (!InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+            {
+                if (building.workFrameWorkAroundTries < Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
+                    building.workFrameWorkAroundTries++;
+                else
+                {
+                    GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
+                        building.id, building.name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                    return ActionResult.Done;
+                }
+                GarrisonButler.Warning(
+                    "[ShipmentStart,{0}] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
+                    building.id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                await WorkAroundBugFrame();
+                return ActionResult.Running;
+            }
+            building.workFrameWorkAroundTries = 0;
 
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
 
@@ -638,39 +659,65 @@ namespace GarrisonButler
         }
 
 
+        /// <summary>
+        /// Will return immediately if the frame detected is GarrisonCapacitiveDisplayFrame.
+        /// </summary>
+        /// <param name="pnj"></param>
+        /// <returns>Only returns ActionResult.Done or ActionResult.Failed.  ActionResult.Done is returned when GarrisonFrame found.</returns>
         private async static Task<ActionResult> IfGossip(WoWUnit pnj)
         {
-            GossipFrame frame = GossipFrame.Instance;
-
-            if (frame == null)
-                return ActionResult.Done;
-
+            // STEP 0 - Return if GarrisonFrame detected
             if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
                 return ActionResult.Done;
 
-            var cachedEntryIndexes = new int[frame.GossipOptionEntries.Count];
+            // STEP 1 - Return if unit isn't valid or null
+            if (pnj == null)
+                return ActionResult.Failed;
+
+            if (pnj.IsValid == false)
+                return ActionResult.Failed;
+
+            GossipFrame frame = GossipFrame.Instance;
+
+            // STEP 2 - Return if garrison frame not valid
+            if (frame == null)
+                return ActionResult.Failed;
+
+            // STEP 3 - Enumerate the possible entries to a cached data structure
+            var cachedEntryIndexes = new int[frame.GossipOptionEntries.GetEmptyIfNull().Count()];
             for (int i = 0; i < cachedEntryIndexes.Length; i++)
             {
                 cachedEntryIndexes[i] = frame.GossipOptionEntries[i].Index;
             }
-            GarrisonButler.Diagnostic("[Gossip] Found {0} possible options.", cachedEntryIndexes.Length);
+            GarrisonButler.Diagnostic("[Gossip,{0}] Found {1} possible options.", pnj.Entry, cachedEntryIndexes.Length);
             
-            // Let's go through all of them and find the right one. 
+            // STEP 4 - Go through all of the CACHED gossip entries and find the right one.
+            //          Each entry has a 10s timeout to complete a loop in the foreach
             foreach (var cachedIndex in cachedEntryIndexes)
             {
                 var timeoutTimer = new WaitTimer(TimeSpan.FromSeconds(10));
                 bool atLeastOne = true;
                 frame = GossipFrame.Instance;
-                GarrisonButler.Diagnostic("[Gossip] Trying options: {0}", cachedIndex);
+                GarrisonButler.Diagnostic("[Gossip,{0}] Trying option: {1}", pnj.Entry, cachedIndex);
 
-                // Check if frame not open
+                // STEP 4a - Attempt to open the frame if it is not open
+                //           a) Tries to move to the unit
+                //           b) Tries to interact with unit
                 timeoutTimer.Reset();
                 while (((frame.GossipOptionEntries == null ||
                     frame.GossipOptionEntries.Count <= 0) 
                     && !timeoutTimer.IsFinished) || atLeastOne)
                 {
                     if (await MoveToInteract(pnj) == ActionResult.Running)
+                    {
                         await Buddy.Coroutines.Coroutine.Yield(); // return ActionResult.Running;
+                        //ActionResult.Runing can happen in these cases:
+                        // MoveResult.Moved
+                        // MoveResult.PathGenerated
+                        // MoveResult.PathGenerationFailed
+                        // MoveResult.UnstuckAttempt
+                        continue;
+                    }
 
                     pnj.Interact();
                     await CommonCoroutines.SleepForLagDuration();
@@ -679,17 +726,21 @@ namespace GarrisonButler
                     await Buddy.Coroutines.Coroutine.Yield();
                     atLeastOne = false;
                 }
-                // Check that this index is still valid
+
+                // STEP 4b - Check that this index is still valid
                 if(frame == null || frame.GossipOptionEntries.GetEmptyIfNull().All(o => o.Index != cachedIndex))
                     continue;
 
+                // STEP 4c - Attempt to select the gossip option
                 frame.SelectGossipOption(cachedIndex);
                 await CommonCoroutines.SleepForLagDuration();
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
 
+                // STEP 4d - Return if the GarrisonCapacitiveDisplayFrame was found
                 if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
                     return ActionResult.Done;
 
+                // STEP 4e - Close this gossip frame because it didn't end up being the correct gossip chosen
                 await Buddy.Coroutines.Coroutine.Yield();
                 var newFrame = GossipFrame.Instance;
                 if (newFrame != null)
