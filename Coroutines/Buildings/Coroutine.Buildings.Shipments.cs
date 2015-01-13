@@ -10,6 +10,7 @@ using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common;
+using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
 using Styx.Pathing;
@@ -528,11 +529,12 @@ namespace GarrisonButler
 
             if (!await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
-                var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
+                var gossipFrame = GossipFrame.Instance;
+                var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame()
+                    || gossipFrame != null;
                 if (!res)
                 {
                     unit.Interact();
-                    IfGossip(unit);
                 }
                 return res;
             }))
@@ -541,17 +543,24 @@ namespace GarrisonButler
                     building.workFrameWorkAroundTries++;
                 else
                 {
-                    GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
+                    GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME/GOSSIP WORKAROUND ({2})",
                         building.id, building.name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                     return ActionResult.Done;
                 }
                 GarrisonButler.Warning(
-                    "[ShipmentStart,{0}] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
+                    "[ShipmentStart,{0}] Failed to open Work order or Gossip frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
                     building.id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                 await WorkAroundBugFrame();
                 return ActionResult.Running;
             }
             building.workFrameWorkAroundTries = 0;
+
+
+            if (await IfGossip(unit) == ActionResult.Failed)
+            {
+                return ActionResult.Running;
+            };
+
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
@@ -628,20 +637,73 @@ namespace GarrisonButler
             }
         }
 
-        private static void IfGossip(WoWUnit pnj)
+
+        private async static Task<ActionResult> IfGossip(WoWUnit pnj)
         {
-            if (GossipFrame.Instance != null)
+            GossipFrame frame = GossipFrame.Instance;
+
+            if (frame == null)
+                return ActionResult.Done;
+
+            var cachedEntryIndexes = new int[frame.GossipOptionEntries.Count];
+            for (int i = 0; i < cachedEntryIndexes.Length; i++)
             {
-                GossipFrame frame = GossipFrame.Instance;
-                if (frame.GossipOptionEntries.GetEmptyIfNull().Any())
-                {
-                    foreach (GossipEntry gossipOptionEntry in frame.GossipOptionEntries)
-                    {
-                        Logging.WriteDiagnostic("Gossip: " + gossipOptionEntry.Type);
-                    }
-                    frame.SelectGossipOption(frame.GossipOptionEntries.Count - 1);
-                }
+                cachedEntryIndexes[i] = frame.GossipOptionEntries[i].Index;
             }
+            GarrisonButler.Diagnostic("[Gossip] Found {0} possible options.", cachedEntryIndexes.Length);
+            
+            // Let's go through all of them and find the right one. 
+            foreach (var cachedIndex in cachedEntryIndexes)
+            {
+                var timeoutTimer = new WaitTimer(TimeSpan.FromSeconds(10));
+                bool atLeastOne = true;
+                frame = GossipFrame.Instance;
+                GarrisonButler.Diagnostic("[Gossip] Trying options: {0}", cachedIndex);
+
+                // Check if frame not open
+                timeoutTimer.Reset();
+                while (((frame.GossipOptionEntries == null ||
+                    frame.GossipOptionEntries.Count <= 0) 
+                    && !timeoutTimer.IsFinished) || atLeastOne)
+                {
+                    if (await MoveToInteract(pnj) == ActionResult.Running)
+                        await Buddy.Coroutines.Coroutine.Yield(); // return ActionResult.Running;
+
+                    pnj.Interact();
+                    await CommonCoroutines.SleepForLagDuration();
+                    await CommonCoroutines.SleepForRandomUiInteractionTime();
+                    frame = GossipFrame.Instance;
+                    await Buddy.Coroutines.Coroutine.Yield();
+                    atLeastOne = false;
+                }
+                // Check that this index is still valid
+                if(frame == null || frame.GossipOptionEntries.GetEmptyIfNull().All(o => o.Index != cachedIndex))
+                    continue;
+
+                frame.SelectGossipOption(cachedIndex);
+                await CommonCoroutines.SleepForLagDuration();
+                await CommonCoroutines.SleepForRandomUiInteractionTime();
+
+                if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+                    return ActionResult.Done;
+
+                await Buddy.Coroutines.Coroutine.Yield();
+                var newFrame = GossipFrame.Instance;
+                if (newFrame != null)
+                {
+                    await Buddy.Coroutines.Coroutine.Wait(5000, () =>
+                    {
+                        newFrame.Close();
+                        newFrame = GossipFrame.Instance;
+                        return (newFrame.GossipOptionEntries == null ||
+                    newFrame.GossipOptionEntries.Count <= 0);
+                    });
+                    await CommonCoroutines.SleepForLagDuration();
+                    await CommonCoroutines.SleepForRandomUiInteractionTime();
+                }
+                await Buddy.Coroutines.Coroutine.Yield();
+            }
+            return ActionResult.Failed;
         }
 
 
