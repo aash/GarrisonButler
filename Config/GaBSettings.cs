@@ -51,11 +51,11 @@ namespace GarrisonButler.Config
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
         public int TimeMinBetweenRun { get; set; }
+        public bool HbRelogMode { get; set; }
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
 
-        public bool HbRelogMode { get; set; }
 
         private static GaBSettings DefaultConfig()
         {

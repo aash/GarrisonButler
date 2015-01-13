@@ -152,10 +152,10 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTpToGarrison,
                     10000, 1000));
+                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000,
                     1000));
                 _mainSequence.AddAction(InitializeBuildingsCoroutines());
@@ -448,12 +448,14 @@ namespace GarrisonButler
             if (HbApi.IsInGarrison()) return new Tuple<bool, WoWItem>(false, null);
             if (!GaBSettings.Get().UseGarrisonHearthstone)
             {
-                TreeRoot.Stop(
-                    "Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
-                return new Tuple<bool, WoWItem>(true, null);
+                //TreeRoot.Stop(
+                //    "Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
+                return new Tuple<bool, WoWItem>(false, null);
             }
             var stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
-            return stone == null ? new Tuple<bool, WoWItem>(false, null) : new Tuple<bool, WoWItem>(true, stone);
+            return (stone == null || stone.CooldownTimeLeft.TotalSeconds > 1)
+                ? new Tuple<bool, WoWItem>(false, null) 
+                : new Tuple<bool, WoWItem>(true, stone);
         }
 
         private static async Task<bool> RestoreUiIfNeeded()

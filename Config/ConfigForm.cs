@@ -409,7 +409,7 @@ namespace GarrisonButler.Config
 
                 var hbRelogMode =
                     CreateCheckBoxWithBinding(
-                        "Activate HBRelog Mode: auto skip to next task when done (Cautious, not tested!)", "HbRelogMode",
+                        "Activate HBRelog Mode: auto skip to next task when done.", "HbRelogMode",
                         GaBSettings.Get());
                 mainWrapPanel.Children.Add(hbRelogMode);
 
