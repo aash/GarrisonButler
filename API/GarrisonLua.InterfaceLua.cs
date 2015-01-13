@@ -27,10 +27,15 @@ namespace GarrisonButler.API
         public static bool IsGarrisonCapacitiveDisplayFrame()
         {
             const string lua =
-                "if not GarrisonCapacitiveDisplayFrame then return false; else return tostring(GarrisonCapacitiveDisplayFrame:IsVisible());end;";
-
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+                @"  if not GarrisonCapacitiveDisplayFrame then 
+                        return tostring(false);
+                    else 
+                        if GarrisonCapacitiveDisplayFrame:IsVisible() == true then
+                            return tostring(true);
+                        end;
+                    end;
+                    return tostring(false);";
+            return  Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static void ClickStartOrderButton()
