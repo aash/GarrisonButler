@@ -507,16 +507,17 @@ namespace GarrisonButler
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
 
-            if (!await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+            if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
                 var gossipFrame = GossipFrame.Instance;
-                var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame()
-                    || gossipFrame != null;
-                if (!res)
+                // Will try workaround if GossipFrame isn't valid/visible & GarrisonFrame isn't valid
+                var shouldTryWorkAround = !InterfaceLua.IsGarrisonCapacitiveDisplayFrame()
+                    && (gossipFrame == null ? true : !gossipFrame.IsVisible);
+                if (shouldTryWorkAround)
                 {
                     unit.Interact();
                 }
-                return res;
+                return shouldTryWorkAround;
             }))
             {
                 if (building.WorkFrameWorkAroundTries < Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
@@ -661,10 +662,16 @@ namespace GarrisonButler
 
             GossipFrame frame = GossipFrame.Instance;
 
-            // STEP 2 - Return if garrison frame not valid
+            // STEP 2 - Return if gossip frame not valid / null
             if (frame == null)
             {
                 GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed due to gossip frame null");
+                return ActionResult.Failed;
+            }
+
+            if(frame.IsVisible == false)
+            {
+                GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed due to gossip frame not visible");
                 return ActionResult.Failed;
             }
 

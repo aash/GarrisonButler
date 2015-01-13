@@ -46,6 +46,11 @@ namespace GarrisonButler
                 var max = 0;
                 //GarrisonButler.Diagnostic("Moved time: {0}", WoWMovement.ActiveMover.MovementInfo.TimeMoved);
                 //GarrisonButler.Diagnostic("path.Index: {0}", path.Index);
+                if(path.Index >= path.Path.Points.Length)
+                {
+                    GarrisonButler.Warning("[MovePath] Index outside bounds of array for Path.Points.Length={0} and path.Index={1}",
+                        path.Path.Points.Length, path.Index);
+                }
                 while (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && path.Index > 3 &&
                        max < 5)
                 {
