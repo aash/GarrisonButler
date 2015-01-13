@@ -499,7 +499,8 @@ namespace GarrisonButler
                 }
                 else
                 {
-                    GarrisonButler.Diagnostic("[ShipmentStart] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.");
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.",
+                        building.Id);
                 }
                 return res;
             });
