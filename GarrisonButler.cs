@@ -174,7 +174,7 @@ namespace GarrisonButler
 
         internal static bool LootIsOpen;
         private Composite _root;
-        private DateTime _lastRunTime = DateTime.MinValue;
+        public DateTime _lastRunTime = DateTime.MinValue;
 
         public override string Name
         {
@@ -197,6 +197,9 @@ namespace GarrisonButler
             get { return false; }
         }
 
+        /// <summary>
+        /// Returns false in 2 conditions - #1 time is less than 60s from last run or #2 nothing to do
+        /// </summary>
         public override bool RequirementsMet
         {
             get

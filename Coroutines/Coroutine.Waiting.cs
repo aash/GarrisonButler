@@ -41,6 +41,10 @@ namespace GarrisonButler
             return ActionResult.Done;
         }
 
+        /// <summary>
+        /// If enabled, does HBRelog ... If MixedMode, takes care of angler (returns true) .... otherwise returns true
+        /// </summary>
+        /// <returns></returns>
         private static async Task<bool> JobDoneSwitch()
         {
             var hbRelogApi = new HBRelogApi();

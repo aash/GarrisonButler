@@ -376,7 +376,11 @@ namespace GarrisonButler
                 if (!GarrisonButler.Instance.RequirementsMet)
                 {
                     await JobDoneSwitch();
-                    GarrisonButler.Log("Taking a break for 60s");
+                    int timeBetweenRuns = GaBSettings.Get().TimeMinBetweenRun;
+                    uint remainingTime = GarrisonButler.Instance._lastRunTime == DateTime.MinValue
+                        ? (uint)timeBetweenRuns
+                        : (uint)(timeBetweenRuns - (DateTime.Now - GarrisonButler.Instance._lastRunTime).TotalMilliseconds);
+                    GarrisonButler.Log("Taking a break for {0}s - {1}s remaining", timeBetweenRuns, remainingTime);
                     return false;
                 }
 
