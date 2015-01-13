@@ -85,6 +85,8 @@ namespace GarrisonButler
             //GarrisonButler.Diagnostic(ToString());
         }
 
+        public int workFrameWorkAroundTries { get; set; }
+
         public override string ToString()
         {
             return

@@ -547,12 +547,12 @@ namespace GarrisonButler
                 else
                 {
                     GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
-                        building.id, building.name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                        building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                     return ActionResult.Done;
                 }
                 GarrisonButler.Warning(
                     "[ShipmentStart,{0}] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
-                    building.id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                    building.Id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                 await WorkAroundBugFrame();
                 return ActionResult.Running;
             }
