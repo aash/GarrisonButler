@@ -51,6 +51,8 @@ namespace GarrisonButler
         private String _timeStart;
 
         public int WorkFrameWorkAroundTries = 0;
+        public int GossipFrameTries = 0;
+        public const int GossipFrameMaxTries = 15;
         public const int WorkFrameWorkAroundMaxTriesUntilBlacklist = 10;
         // Settings
 

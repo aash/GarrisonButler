@@ -640,20 +640,32 @@ namespace GarrisonButler
         {
             // STEP 0 - Return if GarrisonFrame detected
             if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+            {
+                GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Done due to IsGarrisonCapacitiveDisplayFrame()");
                 return ActionResult.Done;
+            }
 
             // STEP 1 - Return if unit isn't valid or null
             if (pnj == null)
+            {
+                GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed due to pnj==null");
                 return ActionResult.Failed;
+            }
 
             if (pnj.IsValid == false)
+            {
+                GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed due to pnj.IsValid==false");
                 return ActionResult.Failed;
+            }
 
             GossipFrame frame = GossipFrame.Instance;
 
             // STEP 2 - Return if garrison frame not valid
             if (frame == null)
+            {
+                GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed due to gossip frame null");
                 return ActionResult.Failed;
+            }
 
             // STEP 3 - Enumerate the possible entries to a cached data structure
             var cachedEntryIndexes = new int[frame.GossipOptionEntries.GetEmptyIfNull().Count()];
@@ -729,6 +741,8 @@ namespace GarrisonButler
                 }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
+
+            GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed at end of function");
             return ActionResult.Failed;
         }
 
