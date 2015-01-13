@@ -136,6 +136,8 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("[Mail] LUA returned VisibleMail=" + numMail);
             GarrisonButler.Diagnostic("[Mail] LUA returned server TotalMail=" + totalMail);
 
+            await Buddy.Coroutines.Coroutine.Sleep(1000);
+
             //WorkAroundHBMailLoggingBugStart();
             var hbMailLoggingBugOriginalLogLevel = GarrisonButler.CurrentHonorbuddyLog.LoggingLevel;
             var hbMailLoggingBugOriginalFileLogLevel = GarrisonButler.CurrentHonorbuddyLog.LogFileLevel;
