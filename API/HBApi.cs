@@ -14,18 +14,9 @@ namespace GarrisonButler.API
 {
     internal class HbApi
     {
-        internal static readonly List<uint> GarrisonsZonesId = new List<uint>
-        {
-            7078, // Lunarfall - Ally
-            7004 // Frostwall - Horde
-        };
 
         internal static LocalPlayer Me = StyxWoW.Me;
 
-        internal static bool IsInGarrison()
-        {
-            return GarrisonsZonesId.Contains(Me.ZoneId);
-        }
 
         /// <summary>
         /// Stacks all items in bags.

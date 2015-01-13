@@ -151,6 +151,26 @@ namespace GarrisonButler
             return ActionResult.Done;
         }
 
+        /// <summary>
+        /// Will use item and if used will wait for condition to turn true for max time of waiTimeCondition
+        /// </summary>
+        /// <param name="waitTimeCondition"></param>
+        /// <param name="conditionExit"></param>
+        /// <returns></returns>
+        public static Func<WoWItem, Task<ActionResult>> UseItemInbagsWithTimer(int waitTimeCondition = 0,
+            Func<bool> conditionExit = null)
+        {
+            return (async delegate(WoWItem item)
+                {
+                    var res = await UseItemInbags(item);
+                    if (res == ActionResult.Done && conditionExit != null)
+                        await Buddy.Coroutines.Coroutine.Wait(waitTimeCondition, conditionExit);
+                    return res;
+                }
+            );
+        }
+    
+
         public static async Task<ActionResult> DeleteItemInbags(WoWItem item)
         {
             GarrisonButler.Log("[Item] Deleting one of: {0}", item.Name);

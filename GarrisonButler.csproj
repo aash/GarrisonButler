@@ -48,6 +48,7 @@
     <Compile Include="Config\OldSettings\MailCondition.cs" />
     <Compile Include="Config\OldSettings\MailItem.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
+    <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />
     <Compile Include="API\GarrisonLua.Building.cs" />

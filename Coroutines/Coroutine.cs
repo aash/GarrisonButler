@@ -152,7 +152,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
-                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbags, ShouldTpToGarrison,
+                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbagsTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
                     10000, 1000));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
@@ -401,11 +401,11 @@ namespace GarrisonButler
                 NativeNavigation = Navigator.NavigationProvider;
                 _customNavigation = new NavigationGaB();
             }
-            if (HbApi.IsInGarrison() && !CustomNavigationLoaded)
+            if (Me.IsInGarrison() && !CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = _customNavigation;
             }
-            else if (!HbApi.IsInGarrison() && CustomNavigationLoaded)
+            else if (!Me.IsInGarrison() && CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = NativeNavigation;
             }
@@ -445,7 +445,7 @@ namespace GarrisonButler
 
         internal static Tuple<bool, WoWItem> ShouldTpToGarrison()
         {
-            if (HbApi.IsInGarrison()) return new Tuple<bool, WoWItem>(false, null);
+            if (Me.IsInGarrison()) return new Tuple<bool, WoWItem>(false, null);
             if (!GaBSettings.Get().UseGarrisonHearthstone)
             {
                 //TreeRoot.Stop(
