@@ -645,6 +645,9 @@ namespace GarrisonButler
             if (frame == null)
                 return ActionResult.Done;
 
+            if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+                return ActionResult.Done;
+
             var cachedEntryIndexes = new int[frame.GossipOptionEntries.Count];
             for (int i = 0; i < cachedEntryIndexes.Length; i++)
             {
