@@ -204,11 +204,21 @@ namespace GarrisonButler
         {
             get
             {
-                var timeElapsed = DateTime.Now - _lastRunTime;
-                if (!(timeElapsed.TotalMinutes > GaBSettings.Get().TimeMinBetweenRun)) return false;
+                if (Coroutine.ReadyToSwitch)
+                {
+                    var timeElapsed = DateTime.Now - _lastRunTime;
+                    if (!(timeElapsed.TotalSeconds > GaBSettings.Get().TimeMinBetweenRun)) return false;
+                    _lastRunTime = DateTime.Now;
+                    int timeBetweenRuns = GaBSettings.Get().TimeMinBetweenRun;
+                    uint remainingTime = GarrisonButler.Instance._lastRunTime == DateTime.MinValue
+                        ? (uint)timeBetweenRuns
+                        : (uint)(timeBetweenRuns - (DateTime.Now - GarrisonButler.Instance._lastRunTime).TotalSeconds);
+
+                    GarrisonButler.Log("One more check and then taking a break for {0}s", timeBetweenRuns);
+                }
+
                 var anyToDo = Coroutine.AnythingTodo();
                 if (!anyToDo) return false;
-                _lastRunTime = DateTime.Now;
                 Coroutine.ReadyToSwitch = false;
                 return true;
             }
