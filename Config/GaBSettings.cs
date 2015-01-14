@@ -230,14 +230,24 @@ namespace GarrisonButler.Config
 
         public static void Load()
         {
+            GaBSettings upgraded = null; 
             try
             {
                 GarrisonButler.Diagnostic("Loading configuration");
                 //Trying to load and upgrade as old one first.
-                var upgraded = UpgradeIfPossible();
+                upgraded = UpgradeIfPossible();
+            }
+            catch (Exception e)
+            {
+                GarrisonButler.Diagnostic("Failed to upgrade configuration, will load as current format.");
+                GarrisonButler.Diagnostic("Exception: " + e.GetType());
+            }
+        
+            try
+            {
                 if (upgraded != null)
                 {
-                    GarrisonButler.Diagnostic("Updated settings to version {0}.", GarrisonButler.Version);
+                    GarrisonButler.Diagnostic("Upgraded settings to version {0}.", GarrisonButler.Version);
                     CurrentSettings = upgraded;
                     UpdateSettings(CurrentSettings);
                     Save();
@@ -257,10 +267,9 @@ namespace GarrisonButler.Config
             }
             catch (Exception e)
             {
-                GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
+                GarrisonButler.Warning("Failed to load configuration, creating default configuration. Please configure GarrisonButler!");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
                 CurrentSettings = DefaultConfig();
-                Save();
             }
         }
 

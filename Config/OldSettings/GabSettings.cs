@@ -124,14 +124,14 @@ namespace GarrisonButler.Config.OldSettings
         {
             try
             {
-                GarrisonButler.Diagnostic("Loading configuration");
+                GarrisonButler.Diagnostic("Loading old format configuration.");
                 var reader =
                     new XmlSerializer(typeof (GaBSettings));
                 var file =
                     new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
                 CurrentSettings = (GaBSettings) reader.Deserialize(file);
                 file.Close();
-                GarrisonButler.Diagnostic("Configuration successfully loaded.");
+                GarrisonButler.Diagnostic("Old format configuration successfully loaded.");
             }
             catch (Exception)
             {

@@ -8,7 +8,7 @@ namespace GarrisonButler.Libraries
     public static class ObjectsExtensions
     {
         /// <summary>
-        /// Returns if an item can be mailed. Check for Null included
+        /// Close garrison window and interact with object
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
