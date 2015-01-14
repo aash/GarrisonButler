@@ -47,6 +47,7 @@
     <Compile Include="Config\OldSettings\GabSettings.cs" />
     <Compile Include="Config\OldSettings\MailCondition.cs" />
     <Compile Include="Config\OldSettings\MailItem.cs" />
+    <Compile Include="Config\OldSettings\ModuleVersion.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\WoWObjectExtensions.cs" />

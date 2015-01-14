@@ -46,12 +46,9 @@ namespace GarrisonButler.Config.OldSettings
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
-
-
         public int TimeMinBetweenRun { get; set; }
-
         public ModuleVersion ConfigVersion { get; set; }
-        public bool HbRelogMode { get; set; }
+        public bool HBRelogMode { get; set; }
 
         private static GaBSettings DefaultConfig()
         {
@@ -99,26 +96,26 @@ namespace GarrisonButler.Config.OldSettings
         }
 
 
-        public static void Save()
-        {
-            Get().ConfigVersion = GarrisonButler.Version;
+        //public static void Save()
+        //{
+        //    Get().ConfigVersion = GarrisonButler.Version;
 
-            try
-            {
-                var writer =
-                    new XmlSerializer(typeof (GaBSettings));
-                var file =
-                    new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"),
-                        false);
-                writer.Serialize(file, CurrentSettings);
-                file.Close();
-            }
-            catch (Exception e)
-            {
-                GarrisonButler.Diagnostic("Failed to save configuration");
-                GarrisonButler.Diagnostic("Exception: " + e.GetType());
-            }
-        }
+        //    try
+        //    {
+        //        var writer =
+        //            new XmlSerializer(typeof (GaBSettings));
+        //        var file =
+        //            new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"),
+        //                false);
+        //        writer.Serialize(file, CurrentSettings);
+        //        file.Close();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        GarrisonButler.Diagnostic("Failed to save configuration");
+        //        GarrisonButler.Diagnostic("Exception: " + e.GetType());
+        //    }
+        //}
 
         public static GaBSettings LoadOnly()
         {

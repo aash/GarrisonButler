@@ -94,13 +94,13 @@ namespace GarrisonButler.Config
             ActivateBuildings = oldSettings.ActivateBuildings;
             BuildingsSettings = oldSettings.BuildingsSettings.Select(b => b.FromOld()).ToList();
             CompletedMissions = oldSettings.CompletedMissions;
-            ConfigVersion = oldSettings.ConfigVersion;
+            ConfigVersion = oldSettings.ConfigVersion.FromOld();
             DailySettings = oldSettings.DailySettings.Select(d => d.FromOld()).ToList();
             DeleteCoffee = oldSettings.DeleteCoffee;
             DeleteMiningPick = oldSettings.DeleteMiningPick;
             ForceJunkSell = oldSettings.ForceJunkSell;
             GarrisonCache = oldSettings.GarrisonCache;
-            HbRelogMode = oldSettings.HbRelogMode;
+            HbRelogMode = oldSettings.HBRelogMode;
             HarvestGarden = oldSettings.HarvestGarden;
             HarvestMine = oldSettings.HarvestMine;
             MailItems = oldSettings.MailItems.Select(m => m.FromOld()).ToList();
@@ -206,7 +206,10 @@ namespace GarrisonButler.Config
                     if (oldSettings.ConfigVersion == null)
                         GarrisonButler.Diagnostic("Couldn't load old version number.");
 
-                    GarrisonButler.Diagnostic("Old version of settings detected.");
+                    var oldVersion = oldSettings.ConfigVersion;
+                    if (oldVersion == null || oldVersion.FromOld() >= new ModuleVersion(1, 4, 0, 0)) return null;
+                    GarrisonButler.Log("Old settings version detected: {0}", oldVersion);
+
                     return oldSettings;
                 }
             }
@@ -220,23 +223,15 @@ namespace GarrisonButler.Config
         private static GaBSettings UpgradeIfPossible()
         {
             var oldSettings = LoadOld();
-
-            if (oldSettings == null)
-            {
-                GarrisonButler.Diagnostic("UpgradeIfPossible(): oldSettings == null");
-                return null;
-            }
-
-            var newSettings = new GaBSettings(oldSettings);
-            return newSettings;
+            return oldSettings == null ? null : new GaBSettings(oldSettings);
         }
 
         public static void Load()
         {
-            GaBSettings upgraded = null; 
+            GaBSettings upgraded = null;
+            GarrisonButler.Log("Loading configuration...");
             try
             {
-                GarrisonButler.Diagnostic("Loading configuration");
                 //Trying to load and upgrade as old one first.
                 upgraded = UpgradeIfPossible();
             }
@@ -250,14 +245,14 @@ namespace GarrisonButler.Config
             {
                 if (upgraded != null)
                 {
-                    GarrisonButler.Diagnostic("Upgraded settings to version {0}.", GarrisonButler.Version);
+                    GarrisonButler.Log("Successfully upgraded settings to version {0}.", GarrisonButler.Version);
                     CurrentSettings = upgraded;
                     UpdateSettings(CurrentSettings);
                     Save();
                 }
                 else
                 {
-                    GarrisonButler.Diagnostic("Loading settings from version {0}.", GarrisonButler.Version);
+                    GarrisonButler.Log("Loading settings from version {0}.", GarrisonButler.Version);
                     var reader =
                         new XmlSerializer(typeof (GaBSettings));
                     var file =
@@ -266,7 +261,7 @@ namespace GarrisonButler.Config
                     file.Close();
                     UpdateSettings(CurrentSettings);
                 }
-                GarrisonButler.Diagnostic("Configuration successfully loaded.");
+                GarrisonButler.Log("Configuration successfully loaded.");
             }
             catch (Exception e)
             {
