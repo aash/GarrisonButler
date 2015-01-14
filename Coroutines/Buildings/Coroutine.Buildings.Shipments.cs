@@ -594,12 +594,14 @@ namespace GarrisonButler
                     {
                         GarrisonButler.Log("[ShipmentStart] Finished starting work orders at {0}.",
                             buildingShipment.Name);
+                        InterfaceLua.CloseLandingPage();
                         return ActionResult.Done;
                     }
                         GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
                     }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
+            InterfaceLua.CloseLandingPage();
             return ActionResult.Refresh;
         }
 
@@ -815,6 +817,7 @@ namespace GarrisonButler
                         if (buildingShipment.ShipmentsReady == 0)
                         {
                             GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
+                            InterfaceLua.CloseLandingPage();
                             return ActionResult.Done;
                         }
                             GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
@@ -823,6 +826,7 @@ namespace GarrisonButler
                 }
                 return ActionResult.Refresh;
             }
+            InterfaceLua.CloseLandingPage();
             return ActionResult.Done; // should never reach that point!
         }
 
