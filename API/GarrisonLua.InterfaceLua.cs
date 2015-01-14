@@ -24,6 +24,22 @@ namespace GarrisonButler.API
             return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
+        public static bool IsSplashFrame()
+        {
+            const string lua =
+                @"if not SplashFrame then 
+                      return tostring(false);
+                  else 
+                      if SplashFrame:IsVisible() == true then
+                          return tostring(true);
+                      end;
+                  end;
+                  return tostring(false);";
+            var results = Lua.GetReturnValues(lua);
+
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+
         public static bool IsGarrisonCapacitiveDisplayFrame()
         {
             const string lua =
@@ -48,6 +64,16 @@ namespace GarrisonButler.API
         public static void ToggleLandingPage()
         {
             Lua.DoString("GarrisonLandingPage_Toggle()");
+        }
+
+        public static void CloseLandingPage()
+        {
+            Lua.DoString("HideUIPanel(GarrisonLandingPage);");
+        }
+
+        public static void CloseSplashFrame()
+        {
+            Lua.DoString("HideUIPanel(SplashFrame);");
         }
 
         public static void MarkMailAsRead(int index)

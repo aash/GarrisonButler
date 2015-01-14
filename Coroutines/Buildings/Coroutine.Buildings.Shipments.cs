@@ -488,7 +488,7 @@ namespace GarrisonButler
             if (await MoveToInteract(unit) == ActionResult.Running)
                 return ActionResult.Running;
 
-            unit.Interact();
+            unit.InteractAndCloseGarrisonWindow();
 
             await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
@@ -515,7 +515,7 @@ namespace GarrisonButler
                     && (gossipFrame == null ? true : !gossipFrame.IsVisible);
                 if (shouldTryWorkAround)
                 {
-                    unit.Interact();
+                    unit.InteractAndCloseGarrisonWindow();
                 }
                 return shouldTryWorkAround;
             }))
@@ -623,10 +623,10 @@ namespace GarrisonButler
             // Total time to try workaround is 5s
             // Need to do it this way because MoveToTable is a Task which returns true
             // when it needs to do more work (such as between MoveTo pulses)
-            while (keepGoing && (workaroundTimer.ElapsedMilliseconds < 5000))
+            while (keepGoing && (workaroundTimer.ElapsedMilliseconds < 6000))
             {
                 var task = MoveToTable();
-                var result = await Buddy.Coroutines.Coroutine.ExternalTask(task, 5000);
+                var result = await Buddy.Coroutines.Coroutine.ExternalTask(task, 6000);
                 keepGoing = result.Completed && result.Result;
                 await Buddy.Coroutines.Coroutine.Yield();
             }
@@ -711,7 +711,7 @@ namespace GarrisonButler
                         continue;
                     }
 
-                    pnj.Interact();
+                    pnj.InteractAndCloseGarrisonWindow();
                     await CommonCoroutines.SleepForLagDuration();
                     await CommonCoroutines.SleepForRandomUiInteractionTime();
                     frame = GossipFrame.Instance;

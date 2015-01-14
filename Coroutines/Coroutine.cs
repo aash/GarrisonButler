@@ -169,6 +169,11 @@ namespace GarrisonButler
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
+
+                if (InterfaceLua.IsSplashFrame())
+                    GarrisonButler.Log("OnStart(): Splash Frame was open, closing now");
+
+                InterfaceLua.CloseSplashFrame();
             }
             catch (Exception e)
             {
