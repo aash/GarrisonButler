@@ -72,6 +72,11 @@ namespace GarrisonButler.Config.OldSettings
                 new DailyProfession("Secret of Draenor Tailoring", 118722, 176058, TradeskillID.Tailoring)
             };
 
+        private DailyProfession()
+        {
+            Spell = null;
+        }
+
         private DailyProfession(string name, uint itemId, uint spellId, TradeskillID tradeskillId)
         {
             Name = name;

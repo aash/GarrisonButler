@@ -820,8 +820,8 @@ namespace GarrisonButler
                             InterfaceLua.CloseLandingPage();
                             return ActionResult.Done;
                         }
-                            GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
-                        }
+                        GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
+                    }
                     await Buddy.Coroutines.Coroutine.Yield();
                 }
                 return ActionResult.Refresh;

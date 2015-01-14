@@ -222,7 +222,10 @@ namespace GarrisonButler.Config
             var oldSettings = LoadOld();
 
             if (oldSettings == null)
+            {
+                GarrisonButler.Diagnostic("UpgradeIfPossible(): oldSettings == null");
                 return null;
+            }
 
             var newSettings = new GaBSettings(oldSettings);
             return newSettings;

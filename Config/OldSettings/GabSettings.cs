@@ -133,8 +133,9 @@ namespace GarrisonButler.Config.OldSettings
                 file.Close();
                 GarrisonButler.Diagnostic("Old format configuration successfully loaded.");
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                GarrisonButler.Diagnostic("LoadOnly(): Exception occured. {0}" + e.GetType());
                 return null;
             }
             return CurrentSettings;

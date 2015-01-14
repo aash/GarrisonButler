@@ -285,10 +285,15 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            if ((obj == null) || !(obj is ModuleVersion))
-            {
+            if ((this as object) == null)
                 return false;
-            }
+
+            if (obj == null)
+                return false;
+
+            if (!(obj is ModuleVersion))
+                return false;
+
             var version1 = (ModuleVersion) obj;
             if (((_major == version1.Major) && (_minor == version1.Minor)) && (_build == version1.Build) &&
                 (_revision == version1.Revision))
@@ -320,7 +325,13 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool operator ==(ModuleVersion v1, ModuleVersion v2)
         {
-            return v1 != null && v1.Equals(v2);
+            if ((v1 as object) == null)
+                return v2 == null;
+
+            if ((v2 as object) == null)
+                return false;
+
+            return v1.Equals(v2);
         }
 
         /// <summary>
@@ -353,11 +364,11 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool operator !=(ModuleVersion v1, ModuleVersion v2)
         {
-            if (v1 == null)
-                return v2 != null;
-            if (v2 == null)
+            if ((v1 as object) == null)
+                return (v2 as object) != null;
+            if ((v2 as object) == null)
                 return true;
-            return (v1 != v2);
+            return (!v1.Equals(v2));
         }
 
         /// <summary>
@@ -368,7 +379,7 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool operator <(ModuleVersion v1, ModuleVersion v2)
         {
-            if (v1 == null)
+            if ((v1 as object) == null)
             {
                 throw new ArgumentNullException("v1");
             }
@@ -383,10 +394,8 @@ namespace GarrisonButler.Libraries
         /// <returns></returns>
         public static bool operator <=(ModuleVersion v1, ModuleVersion v2)
         {
-            if (v1 == null)
-            {
-                throw new ArgumentNullException("v1");
-            }
+            if ((v1 as object) == null)
+                return !((v2 as object) == null);
             return (v1.CompareTo(v2) <= 0);
         }
 
