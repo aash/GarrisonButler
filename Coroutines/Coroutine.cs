@@ -239,8 +239,13 @@ namespace GarrisonButler
             var profile = ProfileManager.CurrentProfile;
 
 
-            // Deleting vendor mounts to avoid infinite Mount/unmount issues inside small buildings.  
-            Mount.GroundMounts.RemoveAll(m => m.CreatureSpellId == 61425);
+            // Deleting vendor mounts to avoid infinite Mount/unmount issues inside small buildings.
+            const int GrandExpeditionYak = 122708;
+            const int TravelersTundraMammothAlliance = 61425;
+            const int TravelersTundraMammothHorde = 61447;
+            Mount.GroundMounts.RemoveAll(m => m.CreatureSpellId == GrandExpeditionYak
+                || m.CreatureSpellId == TravelersTundraMammothAlliance
+                || m.CreatureSpellId == TravelersTundraMammothHorde);
 
 
             // get all visible vendors
