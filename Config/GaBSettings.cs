@@ -184,7 +184,7 @@ namespace GarrisonButler.Config
 
                 try
                 {
-                    charSettingsDirectory = Settings.CharacterSettingsDirectory
+                    charSettingsDirectory = Settings.CharacterSettingsDirectory;
                 }
                 catch(Exception e)
                 {
