@@ -23,34 +23,36 @@ namespace GarrisonButler.API
         /// </summary>
         internal static void StackItems()
         {
-            Lua.DoString(@"
-            local items={}  
-            local done = 1  
-            for bag = 0,4 do  
-                for slot=1,GetContainerNumSlots(bag) do  
-                    local id = GetContainerItemID(bag,slot)  
-                    local _,c,l = GetContainerItemInfo(bag, slot)  
-                    if id ~= nil then  
-                        local n,_,_,_,_,_,_, maxStack = GetItemInfo(id)  
-                        if c < maxStack then  
-                            if items[id] == nil then  
-                                items[id] = {left=maxStack-c,bag=bag,slot=slot,locked = l or 0}  
-                            else  
-                                if items[id].locked == 0 then  
-                                    PickupContainerItem(bag, slot)  
-                                    PickupContainerItem(items[id].bag, items[id].slot)  
-                                    items[id] = nil  
-                                else  
-                                    items[id] = {left=maxStack-c,bag=bag,slot=slot,locked = l or 0}  
-                                end  
-                                done = 0  
-                            end  
-                        end  
-                    end  
-                end  
-            end  
-            return done 
-        ");
+            Lua.DoString("SortBags()");
+            // old version, manual stacking. 
+//            Lua.DoString(@"
+//            local items={}  
+//            local done = 1  
+//            for bag = 0,4 do  
+//                for slot=1,GetContainerNumSlots(bag) do  
+//                    local id = GetContainerItemID(bag,slot)  
+//                    local _,c,l = GetContainerItemInfo(bag, slot)  
+//                    if id ~= nil then  
+//                        local n,_,_,_,_,_,_, maxStack = GetItemInfo(id)  
+//                        if c < maxStack then  
+//                            if items[id] == nil then  
+//                                items[id] = {left=maxStack-c,bag=bag,slot=slot,locked = l or 0}  
+//                            else  
+//                                if items[id].locked == 0 then  
+//                                    PickupContainerItem(bag, slot)  
+//                                    PickupContainerItem(items[id].bag, items[id].slot)  
+//                                    items[id] = nil  
+//                                else  
+//                                    items[id] = {left=maxStack-c,bag=bag,slot=slot,locked = l or 0}  
+//                                end  
+//                                done = 0  
+//                            end  
+//                        end  
+//                    end  
+//                end  
+//            end  
+//            return done 
+//        ");
         }
 
         /// <summary>
