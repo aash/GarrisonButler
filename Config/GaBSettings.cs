@@ -54,6 +54,7 @@ namespace GarrisonButler.Config
         public bool CompletedMissions { get; set; }
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
+        public bool DisableLastRoundCheck { get; set; }
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }

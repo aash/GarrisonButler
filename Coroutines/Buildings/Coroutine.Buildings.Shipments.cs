@@ -488,7 +488,7 @@ namespace GarrisonButler
             if (await MoveToInteract(unit) == ActionResult.Running)
                 return ActionResult.Running;
 
-            unit.InteractAndCloseGarrisonWindow();
+            unit.Interact();
 
             await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
@@ -515,7 +515,7 @@ namespace GarrisonButler
                     && (gossipFrame == null ? true : !gossipFrame.IsVisible);
                 if (shouldTryWorkAround)
                 {
-                    unit.InteractAndCloseGarrisonWindow();
+                    unit.Interact();
                 }
                 return shouldTryWorkAround;
             }))
@@ -627,8 +627,8 @@ namespace GarrisonButler
             // when it needs to do more work (such as between MoveTo pulses)
             while (keepGoing && (workaroundTimer.ElapsedMilliseconds < 6000))
             {
-                var task = MoveToTable();
-                var result = await Buddy.Coroutines.Coroutine.ExternalTask(task, 6000);
+                //var task = MoveToTable();
+                var result = await Buddy.Coroutines.Coroutine.ExternalTask(Task.Run(new System.Func<Task<bool>>(MoveToTable)), 6000);
                 keepGoing = result.Completed && result.Result;
                 await Buddy.Coroutines.Coroutine.Yield();
             }
@@ -713,7 +713,7 @@ namespace GarrisonButler
                         continue;
                     }
 
-                    pnj.InteractAndCloseGarrisonWindow();
+                    pnj.Interact();
                     await CommonCoroutines.SleepForLagDuration();
                     await CommonCoroutines.SleepForRandomUiInteractionTime();
                     frame = GossipFrame.Instance;
@@ -814,16 +814,23 @@ namespace GarrisonButler
                         await CommonCoroutines.SleepForRandomUiInteractionTime();
                         buildingShipment.Refresh();
                         InterfaceLua.ToggleLandingPage();
+                        await CommonCoroutines.SleepForLagDuration();
+                        await CommonCoroutines.SleepForRandomUiInteractionTime();
                         if (buildingShipment.ShipmentsReady == 0)
                         {
                             GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
                             InterfaceLua.CloseLandingPage();
+                            await CommonCoroutines.SleepForLagDuration();
+                            await CommonCoroutines.SleepForRandomUiInteractionTime();
                             return ActionResult.Done;
                         }
                         GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
                     }
                     await Buddy.Coroutines.Coroutine.Yield();
                 }
+                InterfaceLua.CloseLandingPage();
+                await CommonCoroutines.SleepForLagDuration();
+                await CommonCoroutines.SleepForRandomUiInteractionTime();
                 return ActionResult.Refresh;
             }
             InterfaceLua.CloseLandingPage();

@@ -48,7 +48,7 @@ namespace GarrisonButler.Config
             {
                 Width = 600;
                 Height = 400;
-                MinHeight = 300;
+                MinHeight = 400;
                 MinWidth = 600;
                 Title = GarrisonButler.NameStatic + " v" + GarrisonButler.Version;
                 var tabControl = new TabControl {Height = double.NaN, Width = double.NaN};
@@ -465,6 +465,10 @@ namespace GarrisonButler.Config
                 var forceJunkSell = CreateCheckBoxWithBinding("Force auto sell grey items", "ForceJunkSell",
                     GaBSettings.Get());
                 mainWrapPanel.Children.Add(forceJunkSell);
+
+                var disableLastRoundCheck = CreateCheckBoxWithBinding("Disable last round check", "DisableLastRoundCheck",
+                    GaBSettings.Get());
+                mainWrapPanel.Children.Add(disableLastRoundCheck);
 
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;

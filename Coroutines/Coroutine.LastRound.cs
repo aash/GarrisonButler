@@ -32,6 +32,8 @@ namespace GarrisonButler
 
         private static bool CanRunLastRound()
         {
+            if (GaBSettings.Get().DisableLastRoundCheck)
+                return false;
             var elapsedTime = DateTime.Now - _lastRoundCheckTime;
             return elapsedTime.TotalMinutes > GaBSettings.Get().TimeMinBetweenRun;
         }

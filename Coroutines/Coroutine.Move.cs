@@ -52,6 +52,11 @@ namespace GarrisonButler
                     break;
 
                 case MoveResult.PathGenerated:
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: PathGenerated");
+                    break;
+
+                default:
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: " + _lastMoveResult.ToString());
                     break;
             }
             return ActionResult.Running;
