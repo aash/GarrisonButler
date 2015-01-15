@@ -218,6 +218,9 @@ namespace GarrisonButler
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Warning(e.ToString());
             }
             return true;

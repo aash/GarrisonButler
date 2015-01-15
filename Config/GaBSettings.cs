@@ -188,6 +188,9 @@ namespace GarrisonButler.Config
                 }
                 catch(Exception e)
                 {
+                    if (e is Buddy.Coroutines.CoroutineStoppedException)
+                        throw;
+
                     GarrisonButler.Warning("Error saving settings because Honorbuddy failed to return CharacterSettingsDirectory - e:" + e.GetType());
                 }
 
@@ -200,6 +203,9 @@ namespace GarrisonButler.Config
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Diagnostic("Failed to save configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
             }
@@ -227,8 +233,11 @@ namespace GarrisonButler.Config
                     return oldSettings;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Diagnostic("Couldn't see the settings as an old version.");
             }
             return null;
@@ -251,6 +260,9 @@ namespace GarrisonButler.Config
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Diagnostic("Failed to upgrade configuration, will load as current format.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
             }
@@ -279,6 +291,9 @@ namespace GarrisonButler.Config
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Warning("Failed to load configuration, creating default configuration. Please configure GarrisonButler!");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
                 CurrentSettings = DefaultConfig();

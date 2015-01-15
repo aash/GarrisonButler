@@ -54,6 +54,9 @@ namespace GarrisonButler.Libraries
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Warning(
                     "[ItemsExtensions] Error while checking ProtectedItemsManager. Will consider item as protected to be safe.");
                 GarrisonButler.Diagnostic("[ItemsExtensions] Error of type: ", e.GetType());

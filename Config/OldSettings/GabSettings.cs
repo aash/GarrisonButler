@@ -132,6 +132,9 @@ namespace GarrisonButler.Config.OldSettings
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Diagnostic("LoadOnly(): Exception occured. {0}" + e.GetType());
                 return null;
             }
@@ -152,6 +155,9 @@ namespace GarrisonButler.Config.OldSettings
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
                 GarrisonButler.Diagnostic("Exception: " + e.GetType());
                 // TO DELETE

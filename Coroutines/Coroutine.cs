@@ -177,6 +177,9 @@ namespace GarrisonButler
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Warning(e.ToString());
             }
         }
@@ -432,8 +435,10 @@ namespace GarrisonButler
                     res = i.Quality == WoWItemQuality.Poor;
                 }
                     // ReSharper disable once EmptyGeneralCatchClause
-                catch (Exception)
+                catch (Exception e)
                 {
+                    if (e is Buddy.Coroutines.CoroutineStoppedException)
+                        throw;
                 }
                 return res;
             }))

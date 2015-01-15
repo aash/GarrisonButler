@@ -30,6 +30,9 @@ namespace GarrisonButler.Libraries
             }
             catch (Exception e)
             {
+                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    throw;
+
                 GarrisonButler.Warning(
                     "[PlayerExtensions] Error while checking if LocalPlayer is in Garrison.");
                 GarrisonButler.Diagnostic("[PlayerExtensions] Error of type: ", e.GetType());
