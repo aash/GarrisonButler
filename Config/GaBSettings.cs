@@ -179,8 +179,20 @@ namespace GarrisonButler.Config
             {
                 var writer =
                     new XmlSerializer(typeof (GaBSettings));
+
+                string charSettingsDirectory = String.Empty;
+
+                try
+                {
+                    charSettingsDirectory = Settings.CharacterSettingsDirectory;
+                }
+                catch(Exception e)
+                {
+                    GarrisonButler.Warning("Error saving settings because Honorbuddy failed to return CharacterSettingsDirectory - e:" + e.GetType());
+                }
+
                 var file =
-                    new StreamWriter(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"),
+                    new StreamWriter(Path.Combine(charSettingsDirectory, "GarrisonButlerSettings.xml"),
                         false);
                 writer.Serialize(file, CurrentSettings);
                 file.Close();

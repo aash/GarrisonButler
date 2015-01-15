@@ -50,21 +50,25 @@ namespace GarrisonButler.Config
 
             var columnHeader0 = new GridViewColumnHeader {Tag = "ItemId", Content = "Item ID", Width = double.NaN};
             columnHeader0.Click += MailColumnHeader_Click;
+            var column0binding = new Binding("ItemId");
+            column0binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             var column0 = new GridViewColumn
             {
                 Header = columnHeader0,
                 Width = double.NaN,
-                DisplayMemberBinding = new Binding("ItemId")
+                DisplayMemberBinding = column0binding
             };
             gridView.Columns.Add(column0);
 
             var columnHeader1 = new GridViewColumnHeader {Tag = "Recipient", Content = "Recipient", Width = double.NaN};
             columnHeader1.Click += MailColumnHeader_Click;
+            var column1binding = new Binding("Recipient.Value");
+            column1binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             var column1 = new GridViewColumn
             {
                 Header = columnHeader1,
                 Width = double.NaN,
-                DisplayMemberBinding = new Binding("Recipient.Value")
+                DisplayMemberBinding = column1binding
             };
             gridView.Columns.Add(column1);
 
@@ -76,11 +80,13 @@ namespace GarrisonButler.Config
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };
             columnHeader2.Click += MailColumnHeader_Click;
+            var column2binding = new Binding("Comment");
+            column2binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             var column2 = new GridViewColumn
             {
                 Header = columnHeader2,
                 Width = double.NaN,
-                DisplayMemberBinding = new Binding("Comment")
+                DisplayMemberBinding = column2binding
             };
             gridView.Columns.Add(column2);
 
@@ -92,11 +98,13 @@ namespace GarrisonButler.Config
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };
             columnHeader3.Click += MailColumnHeader_Click;
+            var column3binding = new Binding("Condition");
+            column3binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             var column3 = new GridViewColumn
             {
                 Header = columnHeader3,
                 Width = double.NaN,
-                DisplayMemberBinding = new Binding("Condition")
+                DisplayMemberBinding = column3binding
             };
             gridView.Columns.Add(column3);
 
@@ -108,11 +116,13 @@ namespace GarrisonButler.Config
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };
             columnHeader4.Click += MailColumnHeader_Click;
+            var column4binding = new Binding("CheckValue");
+            column4binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             var column4 = new GridViewColumn
             {
                 Header = columnHeader4,
                 Width = double.NaN,
-                DisplayMemberBinding = new Binding("CheckValue")
+                DisplayMemberBinding = column4binding
             };
             gridView.Columns.Add(column4);
 
@@ -149,6 +159,7 @@ namespace GarrisonButler.Config
             var checkBox = new CheckBox {Content = label};
             // binding
             var binding = new Binding(attributeName) {Source = source};
+            binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
             return checkBox;
         }
@@ -217,6 +228,9 @@ namespace GarrisonButler.Config
             // binding
             var toCharBinding = new Binding("GreensToChar") { Source = GaBSettings.Get() };
             toCharBinding.ValidationRules.Add(new IsValidCharacterNameRule());
+            toCharBinding.Mode = BindingMode.TwoWay;
+            toCharBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            //http://msdn.microsoft.com/en-us/library/system.windows.data.binding.updatesourcetrigger(v=vs.110).aspx
             toCharTextBox.SetBinding(TextBox.TextProperty, toCharBinding);
 
             stackpanelTextBox.Children.Add(toChar);
@@ -405,15 +419,19 @@ namespace GarrisonButler.Config
             if (item != null)
             {
                 var bindingId = new Binding("ItemId") {Source = item};
+                bindingId.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addItemIdTextBox.SetBinding(TextBox.TextProperty, bindingId);
 
                 var bindingRecipient = new Binding("Value") {Source = item.Recipient};
+                bindingRecipient.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addRecipientTextBox.SetBinding(TextBox.TextProperty, bindingRecipient);
 
                 var bindingComment = new Binding("Comment") {Source = item};
+                bindingComment.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addCommentTextBox.SetBinding(TextBox.TextProperty, bindingComment);
 
                 var bindingCheckValue = new Binding("CheckValue") {Source = item};
+                bindingCheckValue.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addRuleValueTextBox.SetBinding(TextBox.TextProperty, bindingCheckValue);
 
                 var toSelect =
