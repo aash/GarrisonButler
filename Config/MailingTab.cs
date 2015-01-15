@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Globalization;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using Styx.Helpers;
@@ -145,27 +146,111 @@ namespace GarrisonButler.Config
 
         protected CheckBox CreateCheckBoxWithBinding(string label, string attributeName, object source)
         {
-            var checkBox = new CheckBox {Content = label, Height = 25};
+            var checkBox = new CheckBox {Content = label};
             // binding
             var binding = new Binding(attributeName) {Source = source};
             checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
             return checkBox;
         }
 
-        private UIElement MailOptions()
+        //protected TextBox CreateTextBoxWithBinding(string attributeName, object source)
+        //{
+        //    var checkBox = new TextBox { Height = 25 };
+        //    // binding
+        //    var binding = new Binding(attributeName) { Source = source };
+        //    checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
+        //    return checkBox;
+        //}
+
+        private Grid MailOptions()
         {
-            var mainWrapPanel = new WrapPanel {Orientation = Orientation.Horizontal, Width = double.NaN};
+            var grid = new Grid { Height = double.NaN, Width = double.NaN };
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
+            //grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
+
+            Grid.SetRow(grid, 1);
+            Grid.SetColumn(grid, 0);
+
+            var stackpanelTextBox = new StackPanel { Orientation = Orientation.Horizontal };
 
             var retrieveMail = CreateCheckBoxWithBinding("Retrieve Mail",
                 "RetrieveMail", GaBSettings.Get());
-            retrieveMail.Margin = new Thickness(0, 0, 5, 0);
-            mainWrapPanel.Children.Add(retrieveMail);
+            retrieveMail.Margin = new Thickness(5, 0, 5, 0);
+            retrieveMail.VerticalAlignment = VerticalAlignment.Center;
+            stackpanelTextBox.Children.Add(retrieveMail);
 
             var sendMail = CreateCheckBoxWithBinding("Send Mail",
                 "SendMail", GaBSettings.Get());
-            mainWrapPanel.Children.Add(sendMail);
+            sendMail.Margin = new Thickness(5, 0, 5, 0);
+            sendMail.VerticalAlignment = VerticalAlignment.Center;
+            stackpanelTextBox.Children.Add(sendMail);
 
-            return mainWrapPanel;
+            var sendDisenchantableGreens = CreateCheckBoxWithBinding("Send Disenchantable Greens",
+                "SendDisenchantableGreens", GaBSettings.Get());
+            sendDisenchantableGreens.Margin = new Thickness(5, 0, 5, 0);
+            sendDisenchantableGreens.VerticalAlignment = VerticalAlignment.Center;
+            stackpanelTextBox.Children.Add(sendDisenchantableGreens);
+
+            var separatorSendGreensToChar = new System.Windows.Controls.Separator
+            {
+                Height=sendDisenchantableGreens.Height
+            };
+
+            stackpanelTextBox.Children.Add(separatorSendGreensToChar);
+
+            var toChar = new Label
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(5, 0, 5, 0),
+                Content = "To Character:"
+            };
+
+            var toCharTextBox = new TextBox
+            {
+                Width = 100,
+                MinWidth = 30,
+                TextWrapping = TextWrapping.Wrap,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                MaxLength = 12
+            };
+            // binding
+            var toCharBinding = new Binding("GreensToChar") { Source = GaBSettings.Get() };
+            toCharBinding.ValidationRules.Add(new IsValidCharacterNameRule());
+            toCharTextBox.SetBinding(TextBox.TextProperty, toCharBinding);
+
+            stackpanelTextBox.Children.Add(toChar);
+            stackpanelTextBox.Children.Add(toCharTextBox);
+
+            Grid.SetRow(stackpanelTextBox, 0);
+            Grid.SetColumn(stackpanelTextBox, 0);
+            grid.Children.Add(stackpanelTextBox);
+
+            return grid;
+        }
+
+        public class IsValidCharacterNameRule : ValidationRule
+        {
+            public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+            {
+                var str = value as string;
+                if (str == null)
+                {
+                    return new ValidationResult(false, "Please enter text");
+                }
+
+                if(str == String.Empty)
+                {
+                    return new ValidationResult(false, "Please enter text");
+                }
+
+                if(str.Length > 12)
+                {
+                    return new ValidationResult(false, "Character name cannot be longer than 12 characters");
+                }
+
+                return new ValidationResult(true, null);
+            }
         }
 
         private Grid InputBoxes()

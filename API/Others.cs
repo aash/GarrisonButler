@@ -2,6 +2,8 @@
 using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace GarrisonButler.API
 {
@@ -17,8 +19,8 @@ namespace GarrisonButler.API
                     return tostring(0);
                 end;
                 return tostring(maxStack)";
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToInt32();
+            var result = Lua.GetReturnValues(lua);
+            return result.GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
 
         internal static bool HasNewMail()
@@ -28,24 +30,69 @@ namespace GarrisonButler.API
                     return tostring(false);
                 end;
                 return tostring(has);";
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            var result = Lua.GetReturnValues(lua);
+            return result.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         internal static bool IsUsableSpell(int id)
         {
-            const string lua = @"local usable, nomana = IsUsableSpell({0});
-                 return tostring(usable);";
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            string lua = string.Format(@"local usable, nomana = IsUsableSpell({0});
+                 return tostring(usable);", id);
+            var result = Lua.GetReturnValues(lua);
+            return result.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         internal static bool IsPlayerSpell(int id)
         {
             const string lua = @"local isKnown = IsPlayerSpell({0});
                  return tostring(isKnown);";
-            var t = Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
-            return t.ToBoolean();
+            var result = Lua.GetReturnValues(lua);
+            return result.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+
+        internal static string GetItemTypeString(int id)
+        {
+            string lua =
+                string.Format(@"local _,_,_,_,_, itemType = GetItemInfo({0});
+                  if not itemType then
+                      return tostring(0);
+                  else
+                      return tostring(itemType);
+                  end;", id);
+
+            var result = Lua.GetReturnValues(lua);
+
+            return result.GetEmptyIfNull().FirstOrDefault();
+        }
+
+        internal static string GetWeaponTypeString()
+        {
+            const string lua =
+                @"local WEAPON, ARMOR = GetAuctionItemClasses();
+                  if not WEAPON then
+                      return tostring(0);
+                  else
+                      return tostring(WEAPON);
+                  end;";
+
+            var result = Lua.GetReturnValues(lua);
+
+            return result.GetEmptyIfNull().FirstOrDefault();
+        }
+
+        internal static string GetArmorTypeString()
+        {
+            const string lua =
+                @"local WEAPON, ARMOR = GetAuctionItemClasses();
+                  if not ARMOR then
+                      return tostring(0);
+                  else
+                      return tostring(ARMOR);
+                  end;";
+
+            var result = Lua.GetReturnValues(lua);
+
+            return result.GetEmptyIfNull().FirstOrDefault();
         }
     }
 }

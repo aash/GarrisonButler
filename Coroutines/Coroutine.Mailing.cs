@@ -224,8 +224,105 @@ namespace GarrisonButler
             var toMail =
                 GaBSettings.Get().MailItems.GetEmptyIfNull().Where(m => m.CanMail()).ToList();
 
+            var greensToMail =
+                CanMailGreens();
+
+            if(greensToMail.Item2 != null)
+                toMail.AddRange(greensToMail.Item2);
+
             if (toMail.GetEmptyIfNull().Any()) return new Tuple<bool, List<MailItem>>(true, toMail);
             GarrisonButler.Diagnostic("[Mailing] No items to mail.");
+            return new Tuple<bool, List<MailItem>>(false, null);
+        }
+
+        private static Tuple<bool, List<MailItem>> CanMailGreens()
+        {
+            if (!GaBSettings.Get().SendMail)
+            {
+                GarrisonButler.Diagnostic("[Mailing] Sending mail deactivated in user settings, can't send greens.");
+                return new Tuple<bool, List<MailItem>>(false, null);
+            }
+
+            if(!GaBSettings.Get().SendDisenchantableGreens)
+            {
+                GarrisonButler.Diagnostic("[Mailing] Sending greens deactivated in user settings.");
+                return new Tuple<bool, List<MailItem>>(false, null);
+            }
+
+            var returnList = new List<MailItem>();
+            var sendTo = GaBSettings.Get().GreensToChar;
+
+            if(sendTo.Length <= 0 || sendTo.Length > 12)
+            {
+                GarrisonButler.Warning("[Mailing] Sending greens enabled but send to character is invalid");
+                return new Tuple<bool, List<MailItem>>(false, null);
+            }
+
+            List<WoWItem> items = Me.BagItems.Where(d => d != null && d.IsValid).ToList();
+            //TODO remove later as this list is just used for diagnostic
+            List<WoWItem> greenItems = new List<WoWItem>();
+            var skippedNonGreens = 0;
+            var skippedNonMailable = 0;
+            var skippedNonDisenchantable = 0;
+            var skippedMinerCoffee = 0;
+            var skippedMiningPick = 0;
+
+            foreach(WoWItem curItem in items)
+            {
+                var itemid = curItem == null ? "" : curItem.Entry.ToString();
+                var name =  curItem == null ? "" : curItem.Name;
+                
+                if (curItem.Quality != WoWItemQuality.Uncommon)
+                {
+                    //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is not green: itemid={0} name={1}", itemid, name);
+                    skippedNonGreens++;
+                    continue;
+                }
+
+                if(!curItem.IsMailable())
+                {
+                    //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is not mailable: itemid={0} name={1}", itemid, name);
+                    skippedNonMailable++;
+                    continue;
+                }
+
+                if (curItem.Entry == PreserverdMiningPickItemId)
+                {
+                    //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is Miner's Coffee: itemid={0} name={1}", itemid, name);
+                    skippedMiningPick++;
+                    continue;
+                }
+
+                if (curItem.Entry == MinersCofeeItemId)
+                {
+                    //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is Preserved Mining Pick: itemid={0} name={1}", itemid, name);
+                    skippedMinerCoffee++;
+                    continue;
+                }
+
+                if (!curItem.IsDisenchantable())
+                {
+                    //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is not disenchantable: itemid={0} name={1}", itemid, name);
+                    skippedNonDisenchantable++;
+                    continue;
+                }
+
+                GarrisonButler.Diagnostic("[Mailing] Adding green with itemid={0} name={1} to mailing collection", itemid, name);
+                returnList.Add(new MailItem((uint)curItem.Entry, sendTo, new MailCondition(MailCondition.Conditions.NumberInBagsSuperiorOrEqualTo, 0), 0));
+                greenItems.Add(curItem);
+            }
+
+            GarrisonButler.Diagnostic("[Mailing] Searching for greens skipped {0} non-greens, {1} non-mailable, {2} non-disenchantable, {3} stack Miner's Coffee and {4} stack Preserved Mining Pick",
+                skippedNonGreens, skippedNonMailable, skippedNonDisenchantable, skippedMinerCoffee, skippedMiningPick);
+
+            if(returnList.Count > 0)
+            {
+                GarrisonButler.Diagnostic("[Mailing] Found {0} greens to mail.", returnList.Count);
+                greenItems.ForEach(d => GarrisonButler.Diagnostic("  -id: {0} name: {1}", d.Entry, d.Name));
+                return new Tuple<bool, List<MailItem>>(true, returnList);
+            }
+
+            GarrisonButler.Diagnostic("[Mailing] No greens to mail.");
             return new Tuple<bool, List<MailItem>>(false, null);
         }
 

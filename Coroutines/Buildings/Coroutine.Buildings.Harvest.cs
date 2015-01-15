@@ -18,7 +18,7 @@ namespace GarrisonButler
         private static WoWPoint _cachedToHarvestLocation = WoWPoint.Empty;
         private static float _cachedInteractRangeSqr;
 
-        private static async Task<bool> HarvestWoWGameOject(WoWObject toHarvest)
+        private static async Task<bool> HarvestWoWGameObject(WoWObject toHarvest)
         {
             var node = BotPoi.Current.AsObject as WoWGameObject;
             if (node == null || !node.IsValid)
@@ -66,7 +66,7 @@ namespace GarrisonButler
             {
                 _cachedToHarvestLocation = toHarvest.Location;
                 _cachedInteractRangeSqr = toHarvest.InteractRangeSqr;
-                if (await HarvestWoWGameOject(toHarvest)) // returns false if toHarvest becomes null or invalid
+                if (await HarvestWoWGameObject(toHarvest)) // returns false if toHarvest becomes null or invalid
                 {
                     if ((!toHarvest.WithinInteractRange) &&
                         (!(Me.Location.DistanceSqr(_cachedToHarvestLocation) <= _cachedInteractRangeSqr)))

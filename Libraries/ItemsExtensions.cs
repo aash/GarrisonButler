@@ -16,7 +16,27 @@ namespace GarrisonButler.Libraries
             return item != null
                    && item.IsValid
                    && !item.IsConjured
-                   && !item.IsMe;
+                   && !item.IsMe
+                   && !item.IsSoulbound;
+        }
+
+        public static bool IsDisenchantable(this WoWItem item)
+        {
+            var armorTypeString = API.ApiLua.GetArmorTypeString();
+            var weaponTypeString = API.ApiLua.GetWeaponTypeString();
+            var itemType = API.ApiLua.GetItemTypeString((int)item.Entry);
+
+            return item != null
+                   && item.IsValid
+                   && !item.IsConjured
+                   && !item.IsMe
+                   && !item.IsAccountBound
+                   && (itemType == armorTypeString || itemType == weaponTypeString)
+                   && (item.Quality == Styx.WoWItemQuality.Uncommon
+                        || item.Quality == Styx.WoWItemQuality.Rare
+                        || item.Quality == Styx.WoWItemQuality.Epic)
+                   && !item.IsProtected()
+                   && !item.IsOpenable;
         }
 
         /// <summary>
