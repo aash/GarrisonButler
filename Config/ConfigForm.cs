@@ -475,6 +475,7 @@ namespace GarrisonButler.Config
                 var checkBox = new CheckBox {Content = label, Height = 25};
                 // binding
                 var binding = new Binding(attributeName) {Source = source};
+                binding.UpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged;
                 checkBox.SetBinding(ToggleButton.IsCheckedProperty, binding);
                 return checkBox;
             }
@@ -492,9 +493,9 @@ namespace GarrisonButler.Config
             protected override void OnClosing(CancelEventArgs e)
             {
                 //do my stuff before closing
-                GaBSettings.Save();
                 base.OnClosing(e);
                 _myWindow = null;
+                GaBSettings.Save();
             }
 
             private UIElement BuildingBox(BuildingSettings building)
@@ -555,6 +556,7 @@ namespace GarrisonButler.Config
                 };
                 // binding
                 var maxStartBinding = new Binding("MaxCanStartOrder") {Source = building};
+                maxStartBinding.UpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged;
                 maxStartBinding.ValidationRules.Add(new IsValidNumberOrderRule());
                 maxTextBox.SetBinding(TextBox.TextProperty, maxStartBinding);
 
