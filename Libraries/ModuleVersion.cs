@@ -288,7 +288,7 @@ namespace GarrisonButler.Libraries
             if ((this as object) == null)
                 return false;
 
-            if (obj == null)
+            if (obj == null) 
                 return false;
 
             if (!(obj is ModuleVersion))
