@@ -390,8 +390,8 @@ namespace GarrisonButler
                 // max start by user ?
                 if (maxToStart <= 0)
                 {
-                    GarrisonButler.Diagnostic(
-                        String.Format("[ShipmentStart,{0}] Can't start more work orders.", building.Id),
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Can't start more work orders. {1} - ShipmentsTotal={2}, MaxCanStartOrder={3}",
+                        building.Id,
                         building.Name,
                         building.ShipmentsTotal,
                         buildingsettings.MaxCanStartOrder);
@@ -607,12 +607,14 @@ namespace GarrisonButler
 
         private static int GetMaxShipmentToStart(Building building)
         {
-            var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder;
+            var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder; 
             var maxInProgress = maxSettings == 0
                 ? building.ShipmentCapacity
                 : Math.Min(building.ShipmentCapacity, maxSettings);
             var maxToStart = maxInProgress - building.ShipmentsTotal;
             maxToStart = Math.Min(building.CanCompleteOrder(), maxToStart);
+            GarrisonButler.Diagnostic("GetMaxShipmentToStart: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
+                maxSettings, maxInProgress, building.ShipmentCapacity, building.CanCompleteOrder(), maxToStart);
             return maxToStart;
         }
 
