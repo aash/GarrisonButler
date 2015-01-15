@@ -236,8 +236,12 @@ namespace GarrisonButler
                 ProfileManager.LoadEmpty();
                 _currentProfile = ProfileManager.CurrentProfile;
             }
-
             var profile = ProfileManager.CurrentProfile;
+
+
+            // Deleting vendor mounts to avoid infinite Mount/unmount issues inside small buildings.  
+            Mount.GroundMounts.RemoveAll(m => m.CreatureSpellId == 61425);
+
 
             // get all visible vendors
             var vendors =
