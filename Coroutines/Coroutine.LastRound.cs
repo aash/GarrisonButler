@@ -20,7 +20,8 @@ namespace GarrisonButler
         {
             new WoWPoint(5595.488, 4530.896, 126.0771),
             new WoWPoint(5502.666, 4475.98, 138.9149),
-            new WoWPoint(5440.396, 4572.317, 135.7494)
+            new WoWPoint(5440.396, 4572.317, 135.7494),
+            new WoWPoint(5472.146, 4610.901, 134.6462)
         };
 
         private static readonly List<WoWPoint> LastRoundWaypointsAlly = new List<WoWPoint>
