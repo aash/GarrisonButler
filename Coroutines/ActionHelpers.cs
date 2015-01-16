@@ -176,6 +176,14 @@ namespace GarrisonButler.Coroutines
                     WaitTimerCondition.Reset();
                 }
 
+                if (WaitTimerCondition.IsFinished)
+                {
+                    var tempRes = Condition();
+                    if (tempRes.Item1 == ResCondition.Item1)
+                        ResCondition = tempRes;
+                    WaitTimerCondition.Reset();
+                }
+
                 // If condition of action verified
                 if (ResCondition.Item1)
                 {

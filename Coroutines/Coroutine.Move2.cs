@@ -120,7 +120,7 @@ namespace GarrisonButler
 
             var moverLocation = activeMover.Location;
 
-            if (moverLocation.Distance(location) < 4.0f)
+            if (moverLocation.Distance(location) < 2.0f)
             {
                 Clear();
                 _lastMoveResult = MoveResult.ReachedDestination;
