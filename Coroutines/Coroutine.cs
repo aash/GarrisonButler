@@ -1,4 +1,5 @@
-﻿using Bots.DungeonBuddy.Helpers;
+﻿using Styx.CommonBot.Profiles.Quest.Order;
+using Bots.DungeonBuddy.Helpers;
 using GarrisonButler.API;
 using Styx.CommonBot.Profiles;
 
@@ -239,13 +240,13 @@ namespace GarrisonButler
             var profile = ProfileManager.CurrentProfile;
 
 
-            // Deleting vendor mounts to avoid infinite Mount/unmount issues inside small buildings.
-            const int GrandExpeditionYak = 122708;
-            const int TravelersTundraMammothAlliance = 61425;
-            const int TravelersTundraMammothHorde = 61447;
-            Mount.GroundMounts.RemoveAll(m => m.CreatureSpellId == GrandExpeditionYak
-                || m.CreatureSpellId == TravelersTundraMammothAlliance
-                || m.CreatureSpellId == TravelersTundraMammothHorde);
+            //// Deleting vendor mounts to avoid infinite Mount/unmount issues inside small buildings.
+            //const int GrandExpeditionYak = 122708;
+            //const int TravelersTundraMammothAlliance = 61425;
+            //const int TravelersTundraMammothHorde = 61447;
+            //Mount.GroundMounts.RemoveAll(m => m.CreatureSpellId == GrandExpeditionYak
+            //    || m.CreatureSpellId == TravelersTundraMammothAlliance
+            //    || m.CreatureSpellId == TravelersTundraMammothHorde);
 
 
             // get all visible vendors
@@ -365,10 +366,11 @@ namespace GarrisonButler
 
             if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
                 return true;
+            
 
-            if (await VendorBehavior.ExecuteCoroutine())
+            if (await VendorCoroutineWorkaround() == ActionResult.Running)
                 return true;
-
+            
             if (await LootBehavior.ExecuteCoroutine())
                 return true;
 
@@ -454,11 +456,38 @@ namespace GarrisonButler
             {
                 GarrisonButler.Log("[Vendor] Selling Junk.");
                 Vendors.ForceSell = true;
-                return await _vendorBehavior.ExecuteCoroutine() ? ActionResult.Running : ActionResult.Done;
+                return await VendorCoroutineWorkaround();
             }
             Vendors.ForceSell = false;
             GarrisonButler.Diagnostic("[Vendor] No Junk detected.");
             return ActionResult.Done;
+        }
+
+        private static DateTime _mountVendorTimeStart = default(DateTime);
+
+        private static async Task<ActionResult> VendorCoroutineWorkaround()
+        {
+            if (!Vendors.ForceSell &&
+                (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
+                 StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
+                return ActionResult.Done;
+
+            if (_mountVendorTimeStart == default(DateTime))
+                _mountVendorTimeStart = DateTime.Now;
+
+            var checkTime = (DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5;
+            if(checkTime)
+                if (await MoveToTable())
+                    return ActionResult.Running;
+
+            _mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
+
+            var resultCoroutine = await VendorBehavior.ExecuteCoroutine() ? ActionResult.Running : ActionResult.Done;
+            
+            if(resultCoroutine == ActionResult.Done)
+                _mountVendorTimeStart = default(DateTime);
+
+            return resultCoroutine;
         }
 
         internal static Tuple<bool, WoWItem> ShouldTpToGarrison()
