@@ -219,11 +219,11 @@ namespace GarrisonButler.Config
 
             var toCharTextBox = new TextBox
             {
-                Width = 100,
-                MinWidth = 30,
+                Width = 130,
+                MinWidth = 100,
                 TextWrapping = TextWrapping.Wrap,
                 VerticalContentAlignment = VerticalAlignment.Center,
-                MaxLength = 12
+                MaxLength = 50
             };
             // binding
             var toCharBinding = new Binding("GreensToChar") { Source = GaBSettings.Get() };
@@ -258,9 +258,9 @@ namespace GarrisonButler.Config
                     return new ValidationResult(false, "Please enter text");
                 }
 
-                if(str.Length > 12)
+                if(str.Length > 50)
                 {
-                    return new ValidationResult(false, "Character name cannot be longer than 12 characters");
+                    return new ValidationResult(false, "Character name cannot be longer than 50 characters");
                 }
 
                 return new ValidationResult(true, null);
