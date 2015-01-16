@@ -10,13 +10,12 @@ using GarrisonButler.Libraries;
 using JetBrains.Annotations;
 using Styx;
 using Styx.CommonBot.Coroutines;
-using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonButler.Objects
 {
     /// <summary>
-    /// Represents a condition for a mail item
+    ///     Represents a condition for a mail item
     /// </summary>
     public class MailCondition : INotifyPropertyChanged, IComparable
     {
@@ -28,60 +27,10 @@ namespace GarrisonButler.Objects
             None = 99
         }
 
-        private string _name;
-        private Conditions _condition;
-        private int _checkValue;
         private static List<MailCondition> _allPossibleConditions;
-
-        #region GetSet
-
-        /// <summary>
-        /// Name of the condition as displayed in UI
-        /// </summary>
-        [XmlAttribute("Name")]
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (value == _name) return;
-                _name = value;
-                _condition = GetCondition(_name);
-                OnPropertyChanged1();
-            }
-        }
-
-        /// <summary>
-        /// Condition of the item
-        /// </summary>        
-        [XmlAttribute("Rule")]
-        public Conditions Condition
-        {
-            get { return _condition; }
-            set
-            {
-                if (value == _condition) return;
-                _condition = value;
-                OnPropertyChanged1();
-            }
-        }
-
-        /// <summary>
-        /// Value to check against for condition
-        /// </summary>
-        [XmlAttribute("CheckValue")]
-        public int CheckValue
-        {
-            get { return _checkValue; }
-            set
-            {
-                if (value == _checkValue) return;
-                _checkValue = value;
-                OnPropertyChanged1();
-            }
-        }
-
-        #endregion
+        private int _checkValue;
+        private Conditions _condition;
+        private string _name;
 
         public MailCondition(Conditions condition, int checkValue)
         {
@@ -97,8 +46,18 @@ namespace GarrisonButler.Objects
             _name = GetName(_condition);
         }
 
+        public int CompareTo(object obj)
+        {
+            var mailCondition = obj as MailCondition;
+            return mailCondition != null
+                ? String.Compare(Name, mailCondition.Name, StringComparison.Ordinal)
+                : Name.CompareTo(obj);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         /// <summary>
-        /// Retrieve the name from condition, to be used for initialization only.
+        ///     Retrieve the name from condition, to be used for initialization only.
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
@@ -152,16 +111,8 @@ namespace GarrisonButler.Objects
             return Name;
         }
 
-        public int CompareTo(object obj)
-        {
-            var mailCondition = obj as MailCondition;
-            return mailCondition != null
-                ? String.Compare(Name, mailCondition.Name, StringComparison.Ordinal)
-                : Name.CompareTo(obj);
-        }
-
         /// <summary>
-        /// Returns value of the condition 
+        ///     Returns value of the condition
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
@@ -189,7 +140,7 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Returns a static list of all the possible conditions implemented
+        ///     Returns a static list of all the possible conditions implemented
         /// </summary>
         /// <returns></returns>
         public static List<MailCondition> GetAllPossibleConditions()
@@ -204,7 +155,7 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Returns items to send or null if none.
+        ///     Returns items to send or null if none.
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
@@ -231,12 +182,69 @@ namespace GarrisonButler.Objects
             return null;
         }
 
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged1([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #region GetSet
+
+        /// <summary>
+        ///     Name of the condition as displayed in UI
+        /// </summary>
+        [XmlAttribute("Name")]
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (value == _name) return;
+                _name = value;
+                _condition = GetCondition(_name);
+                OnPropertyChanged1();
+            }
+        }
+
+        /// <summary>
+        ///     Condition of the item
+        /// </summary>
+        [XmlAttribute("Rule")]
+        public Conditions Condition
+        {
+            get { return _condition; }
+            set
+            {
+                if (value == _condition) return;
+                _condition = value;
+                OnPropertyChanged1();
+            }
+        }
+
+        /// <summary>
+        ///     Value to check against for condition
+        /// </summary>
+        [XmlAttribute("CheckValue")]
+        public int CheckValue
+        {
+            get { return _checkValue; }
+            set
+            {
+                if (value == _checkValue) return;
+                _checkValue = value;
+                OnPropertyChanged1();
+            }
+        }
+
+        #endregion
+
         #region Rules
 
         // A rule must have a method returning a bool and a method returning the list of items
 
         /// <summary>
-        /// Return true if the specified character have more than x count of ItemId in bags.
+        ///     Return true if the specified character have more than x count of ItemId in bags.
         /// </summary>
         /// <param name="itemId"></param>
         /// <param name="x"></param>
@@ -248,7 +256,8 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Return array of items to send to respect the following rule: if the specified character have more than x count of ItemId in bags send everything.
+        ///     Return array of items to send to respect the following rule: if the specified character have more than x count of
+        ///     ItemId in bags send everything.
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
@@ -258,7 +267,7 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Return true if the specified character have x or more than x count of ItemId in bags.
+        ///     Return true if the specified character have x or more than x count of ItemId in bags.
         /// </summary>
         /// <param name="itemId"></param>
         /// <param name="x"></param>
@@ -266,11 +275,12 @@ namespace GarrisonButler.Objects
         private static bool IsNumberInBagsSuperiorOrEqualTo(uint itemId, int x)
         {
             var numInBags = GetNumberItemInBags(itemId);
-            return numInBags >= x;
+            return numInBags != 0 && numInBags >= x;
         }
 
         /// <summary>
-        /// Return array of items to send to respect the following rule: if the specified character have x or more than x count of itemId in bags send everything.
+        ///     Return array of items to send to respect the following rule: if the specified character have x or more than x count
+        ///     of itemId in bags send everything.
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
@@ -280,7 +290,7 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Returns if there is more of the specified ItemId than the threshold.
+        ///     Returns if there is more of the specified ItemId than the threshold.
         /// </summary>
         /// <param name="itemId"></param>
         /// <param name="threshold"></param>
@@ -291,25 +301,130 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Return array of items to send to respect the following rule: if the specified character have x or more than x count of itemId in bags send everything.
+        ///     Return array of items to send to respect the following rule: if the specified character have x or more than x count
+        ///     of itemId in bags send everything.
         /// </summary>
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
         private static async Task<IEnumerable<WoWItem>> GetNumberKeepNumberInBags(uint itemId, int x)
         {
-            await HbApi.StackAllItemsIfPossible();
-            await CommonCoroutines.SleepForLagDuration();
-            await Buddy.Coroutines.Coroutine.Yield();
-            SplitItemStack(x, itemId);
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
+            var items = StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemId).ToList();
 
-            // This is the pain... Not sure it will work
-            var items = GetAllItems(itemId).ToList();
-            var toKeep = items.FirstOrDefault(i => i.StackCount == x);
-            return toKeep == default(WoWItem)
-                ? new List<WoWItem>()
-                : items.Where(i => i != toKeep);
+            // No items corresponding in bags
+            if (!items.Any())
+                return new List<WoWItem>();
+
+            //if min amount is 0 returning all corresponding items
+            if (x == 0)
+                return items;
+
+            // Max size of a stack of itemId
+            var maxStackSize = ApiLua.GetMaxStackItem(itemId);
+            var sizeToCut = x;
+            var stacksToKeep = new List<WoWItem>();
+            var rest = (x%maxStackSize);
+            var numberOfStacks = x/maxStackSize;
+
+            if (x > maxStackSize)
+            {
+                // everything is supposed to be stacked, we just need to split one stack for the rest.
+
+                // There should be number Of full Stacks 
+                var getStacks = GetStacks(itemId, numberOfStacks, maxStackSize).ToArray();
+                if (!getStacks.Any())
+                {
+                    GarrisonButler.Diagnostic(
+                        "[MailCondition] Couldn't find enough full stacks for split over maxStack. [Id:{0}/#:{1}]",
+                        itemId, x);
+                    return new List<WoWItem>();
+                }
+
+                if (rest == 0)
+                    return items.Where(i => !getStacks.Contains(i));
+
+                sizeToCut = rest;
+            }
+
+            var possibleStacksToCut =
+                items.Where(i => i.StackCount >= sizeToCut && !stacksToKeep.Contains(i));
+
+            if (!possibleStacksToCut.Any())
+            {
+                return new List<WoWItem>();
+            }
+
+            var stackCut = await CutAndGetStack(sizeToCut, itemId);
+            if (stackCut == default(WoWItem))
+            {
+                // Error 
+                return new List<WoWItem>();
+            }
+            stacksToKeep.Add(stackCut);
+            var fullStacks = GetStacks(itemId, numberOfStacks, maxStackSize).ToArray();
+            if (fullStacks.Count() < numberOfStacks)
+            {
+                // it means we splited one of the full stacks
+                var splitedFull = GetStacks(itemId, 1, maxStackSize - sizeToCut).ToArray();
+                if (!splitedFull.Any())
+                {
+                    // error
+                    return new List<WoWItem>();
+                }
+                stacksToKeep.Add(splitedFull.First());
+            }
+            stacksToKeep.AddRange(fullStacks);
+            return StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemId && !stacksToKeep.Contains(i));
+        }
+
+
+        /// <summary>
+        ///     Cut a stack and get returns the part of the size asked if found otherwise default WoWItem.
+        /// </summary>
+        /// <param name="sizeToCut"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        private static async Task<WoWItem> CutAndGetStack(int sizeToCut, uint itemId)
+        {
+            // TO DO check for the action to be done before returning
+            await SplitOneStack(sizeToCut, itemId);
+            await CommonCoroutines.SleepForLagDuration();
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+            await Buddy.Coroutines.Coroutine.Yield(); // This should refresh the object manager.
+
+            // let's find this stack
+            var stacksCutSize = GetStacks(itemId, 1, sizeToCut).ToList();
+            if (!stacksCutSize.Any())
+            {
+                return default(WoWItem); // Error finding correct stack size
+            }
+            return stacksCutSize.First();
+        }
+
+
+        /// <summary>
+        ///     Return a number of stacks. if not enough return what exists.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <param name="number"></param>
+        /// <param name="sizeStacks"></param>
+        /// <returns></returns>
+        private static IEnumerable<WoWItem> GetStacks(uint itemId, int number, int sizeStacks)
+        {
+            if (sizeStacks == 0)
+                return new List<WoWItem>();
+
+            var stacks =
+                StyxWoW.Me.BagItems.GetEmptyIfNull()
+                    .Where(i => i.Entry == itemId && i.StackCount == sizeStacks)
+                    .ToList();
+
+            if (stacks.Count() >= number)
+                return stacks.Take(number);
+
+            GarrisonButler.Diagnostic("Error getting {0}x(Size:{3}) stacks of {1} in bags. Returning {2} stacks", itemId,
+                number, stacks.Count, sizeStacks);
+            return stacks;
         }
 
         #endregion
@@ -317,7 +432,7 @@ namespace GarrisonButler.Objects
         #region Helpers
 
         /// <summary>
-        /// Returns all the stacks of the specified itemId in bags which can be mailed (isMailable extension).
+        ///     Returns all the stacks of the specified itemId in bags which can be mailed (isMailable extension).
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
@@ -327,7 +442,7 @@ namespace GarrisonButler.Objects
         }
 
         /// <summary>
-        /// Returns number of specified itemId in bags which can be mailed (isMailable extension).
+        ///     Returns number of specified itemId in bags which can be mailed (isMailable extension).
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
@@ -337,62 +452,30 @@ namespace GarrisonButler.Objects
                 StyxWoW.Me.BagItems.GetEmptyIfNull().Sum(i => i.IsMailable() && i.Entry == itemId ? i.StackCount : 0);
         }
 
+        ///// <summary>
+        ///// Split a stack of itemId in a stack of amount and the rest. 
+        ///// Will stack items if found ItemId in bags.
+        ///// if amount is superior to max stack size ex, (wants 300, got 330, max 200) cuts in (200/100/30)
+        ///// </summary>
+        ///// <param name="amount">The amount you want to be able to pick from bags</param>
+        ///// <param name="itemdId"></param>
+
+
         /// <summary>
-        /// Split a stack of itemId in a stack of amount and the rest.
+        ///     Split a stack of itemId in stack size-amount and amount.
         /// </summary>
         /// <param name="amount"></param>
-        /// <param name="itemdId"></param>
-        private static void SplitItemStack(int amount, uint itemdId)
+        /// <param name="itemId"></param>
+        private static async Task SplitOneStack(int amount, uint itemId)
         {
-            var possibleStacks =
-                StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemdId && i.StackCount >= amount);
-            if (!possibleStacks.Any())
-                return;
+            var item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == itemId && i.StackCount > amount);
 
-            Lua.DoString(
-                string.Format(
-                    "local amount = {0}; ", amount) +
-                string.Format(
-                    "local item = {0}; ", itemdId) +
-                "local ItemBagNr = 0; " +
-                "local ItemSlotNr = 1; " +
-                "local EmptyBagNr = 0; " +
-                "local EmptySlotNr = 1; " +
-                "for b=0,4 do " +
-                "for s=1,GetContainerNumSlots(b) do " +
-                "if ((GetContainerItemID(b,s) == item)) " + /*"and (select(3, GetContainerItemInfo(b,s)) == nil)) */
-                "then " +
-                "ItemBagNr = b; " +
-                "ItemSlotNr = s; " +
-                "end; " +
-                "end; " +
-                "end; " +
-                "for b=0,4 do " +
-                "for s=1,GetContainerNumSlots(b) do " +
-                "if GetContainerItemID(b,s) == nil then " +
-                "EmptyBagNr = b; " +
-                "EmptySlotNr = s; " +
-                "end; " +
-                "end; " +
-                "end; " +
-                "ClearCursor(); " +
-                "SplitContainerItem(ItemBagNr,ItemSlotNr,amount); " +
-                "if CursorHasItem() then " +
-                "PickupContainerItem(EmptyBagNr,EmptySlotNr); " +
-                "ClearCursor(); " +
-                "end;"
-                );
+            if (item != default(WoWItem))
+            {
+                await item.Split(amount);
+            }
         }
 
         #endregion
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged1([CallerMemberName] string propertyName = null)
-        {
-            var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

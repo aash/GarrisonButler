@@ -245,7 +245,7 @@ namespace GarrisonButler.Coroutines
         }
     }
 
-    internal enum ActionResult
+    public enum ActionResult
     {
         Refresh,
         Done,

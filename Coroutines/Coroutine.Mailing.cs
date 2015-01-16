@@ -23,14 +23,12 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static bool _checkedMailbox;
-        private static int _numMailsOnLastCheck;
-
-        private static readonly Stopwatch MailboxCheckTimer = new Stopwatch();
-            // Only check mail every 60s if no items exist in mail frame
 
         private const int CheckIntervalWhileStillWaiting = 65;
-        private static int _mailCheckInterval = CheckIntervalWhileStillWaiting; // in seconds
+        private static bool _checkedMailbox;
+        private static int _numMailsOnLastCheck;
+        private static readonly Stopwatch MailboxCheckTimer = new Stopwatch();
+        // Only check mail every 60s if no items exist in mail frame
         private static bool _allowMailTimerStart = true;
 
         private static Tuple<bool, int> HasMails()
@@ -227,7 +225,7 @@ namespace GarrisonButler
             var greensToMail =
                 CanMailGreens();
 
-            if(greensToMail.Item2 != null)
+            if (greensToMail.Item2 != null)
                 toMail.AddRange(greensToMail.Item2);
 
             if (toMail.GetEmptyIfNull().Any()) return new Tuple<bool, List<MailItem>>(true, toMail);
@@ -243,7 +241,7 @@ namespace GarrisonButler
                 return new Tuple<bool, List<MailItem>>(false, null);
             }
 
-            if(!GaBSettings.Get().SendDisenchantableGreens)
+            if (!GaBSettings.Get().SendDisenchantableGreens)
             {
                 GarrisonButler.Diagnostic("[Mailing] Sending greens deactivated in user settings.");
                 return new Tuple<bool, List<MailItem>>(false, null);
@@ -252,26 +250,26 @@ namespace GarrisonButler
             var returnList = new List<MailItem>();
             var sendTo = GaBSettings.Get().GreensToChar;
 
-            if(sendTo.Length <= 0 || sendTo.Length > 12)
+            if (sendTo.Length <= 0 || sendTo.Length > 12)
             {
                 GarrisonButler.Warning("[Mailing] Sending greens enabled but send to character is invalid");
                 return new Tuple<bool, List<MailItem>>(false, null);
             }
 
-            List<WoWItem> items = Me.BagItems.Where(d => d != null && d.IsValid).ToList();
+            var items = Me.BagItems.Where(d => d != null && d.IsValid).ToList();
             //TODO remove later as this list is just used for diagnostic
-            List<WoWItem> greenItems = new List<WoWItem>();
+            var greenItems = new List<WoWItem>();
             var skippedNonGreens = 0;
             var skippedNonMailable = 0;
             var skippedNonDisenchantable = 0;
             var skippedMinerCoffee = 0;
             var skippedMiningPick = 0;
 
-            foreach(WoWItem curItem in items)
+            foreach (var curItem in items)
             {
                 var itemid = curItem == null ? "" : curItem.Entry.ToString();
-                var name =  curItem == null ? "" : curItem.Name;
-                
+                var name = curItem == null ? "" : curItem.Name;
+
                 if (curItem.Quality != WoWItemQuality.Uncommon)
                 {
                     //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is not green: itemid={0} name={1}", itemid, name);
@@ -279,7 +277,7 @@ namespace GarrisonButler
                     continue;
                 }
 
-                if(!curItem.IsMailable())
+                if (!curItem.IsMailable())
                 {
                     //GarrisonButler.Diagnostic("[Mailing] Skipping item because it is not mailable: itemid={0} name={1}", itemid, name);
                     skippedNonMailable++;
@@ -307,15 +305,18 @@ namespace GarrisonButler
                     continue;
                 }
 
-                GarrisonButler.Diagnostic("[Mailing] Adding green with itemid={0} name={1} to mailing collection", itemid, name);
-                returnList.Add(new MailItem((uint)curItem.Entry, sendTo, new MailCondition(MailCondition.Conditions.NumberInBagsSuperiorOrEqualTo, 0), 0));
+                GarrisonButler.Diagnostic("[Mailing] Adding green with itemid={0} name={1} to mailing collection",
+                    itemid, name);
+                returnList.Add(new MailItem(curItem.Entry, sendTo,
+                    new MailCondition(MailCondition.Conditions.NumberInBagsSuperiorOrEqualTo, 0), 0));
                 greenItems.Add(curItem);
             }
 
-            GarrisonButler.Diagnostic("[Mailing] Searching for greens skipped {0} non-greens, {1} non-mailable, {2} non-disenchantable, {3} stack Miner's Coffee and {4} stack Preserved Mining Pick",
+            GarrisonButler.Diagnostic(
+                "[Mailing] Searching for greens skipped {0} non-greens, {1} non-mailable, {2} non-disenchantable, {3} stack Miner's Coffee and {4} stack Preserved Mining Pick",
                 skippedNonGreens, skippedNonMailable, skippedNonDisenchantable, skippedMinerCoffee, skippedMiningPick);
 
-            if(returnList.Count > 0)
+            if (returnList.Count > 0)
             {
                 GarrisonButler.Diagnostic("[Mailing] Found {0} greens to mail.", returnList.Count);
                 greenItems.ForEach(d => GarrisonButler.Diagnostic("  -id: {0} name: {1}", d.Entry, d.Name));
@@ -351,6 +352,10 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
             }
 
+            // Stacking all items
+            await HbApi.StackAllItemsIfPossible();
+            await CommonCoroutines.SleepForLagDuration();
+            await Buddy.Coroutines.Coroutine.Yield();
 
             //Splitting list based on recipients
             var mailsPerRecipient = mailItems
@@ -358,34 +363,63 @@ namespace GarrisonButler
                 .GroupBy(i => i.Recipient.Value)
                 .Select(x => x.Select(i => i))
                 .ToList();
+
+            if (!mailsPerRecipient.Any())
+            {
+                GarrisonButler.Diagnostic("[Mailing] No mail per recipient found.");
+                return ActionResult.Done;
+            }
+
             foreach (var mailsRecipient in mailsPerRecipient)
             {
-                var items = mailsRecipient.ToList();
-                // list all items to send to this recipient
                 var listItems = new List<WoWItem>();
+
+                var items = mailsRecipient.ToList();
+                if (!items.Any())
+                {
+                    GarrisonButler.Diagnostic("[Mailing] No mailItem found for the current recipient");
+                    continue;
+                }
+
+                // list all items to send to this recipient
                 foreach (var mail in items)
                 {
-                    listItems.AddRange(await mail.GetItemsToSend());
+                    var itemsTosend = (await mail.GetItemsToSend()).ToList();
+
+                    if (!itemsTosend.Any())
+                        GarrisonButler.Diagnostic("[Mailing] No item to send for ItemId:{0}.", mail.ItemId);
+                    else
+                        listItems.AddRange(itemsTosend);
                 }
+
+
                 // send if any to send
                 if (listItems.GetEmptyIfNull().Any())
                 {
                     if (items.GetEmptyIfNull().FirstOrDefault() == default(MailItem))
+                    {
                         return ActionResult.Done;
+                    }
 
                     var firstOrDefault = items.GetEmptyIfNull().FirstOrDefault();
                     if (firstOrDefault != null)
                     {
+                        GarrisonButler.Diagnostic("[Mailing] Send - Adding to mail ItemId:{0}.", firstOrDefault.ItemId);
                         await
                             mailFrame.SendMailWithManyAttachmentsCoroutine(firstOrDefault.Recipient.ToString(),
                                 listItems.GetEmptyIfNull().ToArray());
                         await CommonCoroutines.SleepForRandomUiInteractionTime();
                         InterfaceLua.ClickSendMail();
+                        GarrisonButler.Diagnostic("[Mailing] Send - Sent ItemId:{0}.", firstOrDefault.ItemId);
                     }
                 }
+                else
+                    GarrisonButler.Diagnostic("[Mailing] List to send empty.");
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             return ActionResult.Done;
         }
+
+        private static int _mailCheckInterval = CheckIntervalWhileStillWaiting; // in seconds
     }
 }
