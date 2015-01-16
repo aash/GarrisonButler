@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Threading.Tasks;
 using GarrisonButler.Coroutines;
 using Styx;
@@ -56,7 +57,7 @@ namespace GarrisonButler
                     break;
 
                 default:
-                    GarrisonButler.Diagnostic("[Navigation] MoveResult: " + _lastMoveResult.ToString());
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: " + Enum.GetName(typeof(MoveResult), _lastMoveResult));
                     break;
             }
             return ActionResult.Running;
