@@ -301,7 +301,7 @@ namespace GarrisonButler
                 case (int) Buildings.BarnLvl2:
                 case (int) Buildings.BarnLvl3:
                     PnjId = alliance ? 84524 : 85048;
-                    ReagentIds = new List<int> {119810, 119813, 119814};
+                    ReagentIds = new List<int> { 119810, 119813, 119814, 119815, 119817, 119819 };
                     NumberReagent = 1;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
