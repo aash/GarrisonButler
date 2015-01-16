@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing.Design;
+using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Coroutines;
+using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common.Helpers;
+using Styx.CommonBot.Coroutines;
+using Styx.Helpers;
 using Styx.WoWInternals;
 
 namespace GarrisonButler.API
@@ -92,6 +98,29 @@ namespace GarrisonButler.API
             Lua.DoString(luaString);
             return ActionResult.Done;
         }
+        private static async Task<ActionResult> DoStringWhile(string luaString, Func<Task<bool>> condition, int maxTime)
+        {
+            var start = DateTime.Now;
+            var now = DateTime.Now;
+            var test = !await condition();
+            while (test)
+            {
+                if ((now - start).TotalMilliseconds >= TimeOut)
+                    return ActionResult.Failed;
+                await AntiSpamProtection();
+                Lua.DoString(luaString);
+                await Buddy.Coroutines.Coroutine.Yield();
+                test = !await condition();
+            }
+            return ActionResult.Done;
+        }
+
+        private static async Task<List<string>> GetReturnValues(string luaString)
+        {
+            await AntiSpamProtection();
+            var results = Lua.GetReturnValues(luaString);
+            return results;
+        }
 
         /// <summary>
         ///     Split an item from a bag/slot to a free bag/slot with desired stack size.
@@ -118,5 +147,32 @@ namespace GarrisonButler.API
             ObjectManager.Update();
             return result;
         }
+
+        public static async Task<ActionResult> CloseLandingPage()
+        {
+            const string luaString = "HideUIPanel(GarrisonLandingPage);";
+            return await DoStringWhile(luaString, async () => !await IsLandingPageOpen(), 2000);
+        }
+        public static async Task<ActionResult> OpenLandingPage()
+        {
+            const string luaString = "GarrisonLandingPage_Toggle()";
+            return await DoStringWhile(luaString, async () => await IsLandingPageOpen(), 2000);
+        }
+
+        public static async Task<bool> IsLandingPageOpen()
+        {
+            const string lua =
+               @"if not GarrisonLandingPage then 
+                      return tostring(false);
+                  else 
+                      if GarrisonLandingPage:IsVisible() == true then
+                          return tostring(true);
+                      end;
+                  end;
+                  return tostring(false);";
+            var results = await GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+
     }
 }

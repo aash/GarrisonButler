@@ -527,6 +527,7 @@ namespace GarrisonButler
                     GarrisonButler.Warning(
                         "[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME/GOSSIP WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                    await ButlerLua.CloseLandingPage();
                     return ActionResult.Done;
                 }
                 GarrisonButler.Warning(
@@ -554,6 +555,7 @@ namespace GarrisonButler
                 {
                     GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                    await ButlerLua.CloseLandingPage();
                     return ActionResult.Done;
                 }
                 GarrisonButler.Warning(
@@ -584,24 +586,21 @@ namespace GarrisonButler
                 var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
                 if (buildingShipment != null)
                 {
-                    InterfaceLua.ToggleLandingPage();
-                    await CommonCoroutines.SleepForLagDuration();
-                    await CommonCoroutines.SleepForRandomUiInteractionTime();
+                    await ButlerLua.OpenLandingPage();
                     buildingShipment.Refresh();
-                    InterfaceLua.ToggleLandingPage();
                     var max = GetMaxShipmentToStart(buildingShipment);
                     if (max == 0)
                     {
                         GarrisonButler.Log("[ShipmentStart] Finished starting work orders at {0}.",
                             buildingShipment.Name);
-                        InterfaceLua.CloseLandingPage();
+                        await ButlerLua.CloseLandingPage();
                         return ActionResult.Done;
                     }
                         GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
                     }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            InterfaceLua.CloseLandingPage();
+            await ButlerLua.CloseLandingPage();
             return ActionResult.Refresh;
         }
 
@@ -799,11 +798,13 @@ namespace GarrisonButler
                 if (actionResult == ActionResult.Running)
                     return ActionResult.Running;
 
-                InterfaceLua.ToggleLandingPage();
-                await CommonCoroutines.SleepForRandomUiInteractionTime();
+                await ButlerLua.OpenLandingPage();
 
                 if (actionResult == ActionResult.Refresh)
+                {
+                    await ButlerLua.CloseLandingPage(); 
                     return ActionResult.Refresh;
+                }
 
 
                 for (var i = 0; i < 10; i++)
@@ -811,31 +812,22 @@ namespace GarrisonButler
                     var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
                     if (buildingShipment != null)
                     {
-                        InterfaceLua.ToggleLandingPage();
-                        await CommonCoroutines.SleepForLagDuration();
-                        await CommonCoroutines.SleepForRandomUiInteractionTime();
+                        await ButlerLua.OpenLandingPage();
                         buildingShipment.Refresh();
-                        InterfaceLua.ToggleLandingPage();
-                        await CommonCoroutines.SleepForLagDuration();
-                        await CommonCoroutines.SleepForRandomUiInteractionTime();
                         if (buildingShipment.ShipmentsReady == 0)
                         {
                             GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
-                            InterfaceLua.CloseLandingPage();
-                            await CommonCoroutines.SleepForLagDuration();
-                            await CommonCoroutines.SleepForRandomUiInteractionTime();
+                            await ButlerLua.CloseLandingPage();
                             return ActionResult.Done;
                         }
                         GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
                     }
                     await Buddy.Coroutines.Coroutine.Yield();
                 }
-                InterfaceLua.CloseLandingPage();
-                await CommonCoroutines.SleepForLagDuration();
-                await CommonCoroutines.SleepForRandomUiInteractionTime();
+                await ButlerLua.CloseLandingPage();
                 return ActionResult.Refresh;
             }
-            InterfaceLua.CloseLandingPage();
+            await ButlerLua.CloseLandingPage();
             return ActionResult.Done; // should never reach that point!
         }
 
