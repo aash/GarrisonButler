@@ -185,7 +185,14 @@ namespace GarrisonButler
                     if (tableForLoc.WithinInteractRange)
                     {
                         tableForLoc.Interact();
+                        GarrisonButler.Diagnostic("[Missions] Interacting with mission table.");
                         return true;
+                    }
+                    else
+                    {
+                        GarrisonButler.Diagnostic("[Missions] Can't interaction with mission table, not in range!");
+                        GarrisonButler.Diagnostic("[Missions] Table at: {0}", tableForLoc.Location);
+                        GarrisonButler.Diagnostic("[Missions] Me at: {0}", Me.Location);
                     }
                 }
                 else
