@@ -79,22 +79,6 @@ namespace GarrisonButler.Libraries
         /// <param name="amount"></param>
         public static async Task<ActionResult> Split(this WoWItem item, int amount)
         {
-            // Get a list of all bags
-            //var bags = (new List<WoWBagSlot>()
-            //{
-            //    WoWBagSlot.Bag1,
-            //    WoWBagSlot.Bag2,
-            //    WoWBagSlot.Bag3,
-            //    WoWBagSlot.Bag4,
-            //}).Select(woWBagSlot => StyxWoW.Me.GetBag(woWBagSlot))
-            //  .Where(bag => bag != null).ToList();
-            //bags.Add(StyxWoW.Me.GetBagAtIndex(0));
-
-            //var bagItems = StyxWoW.Me.BagItemGuids.Select(ObjectManager.GetObjectByGuid<WoWItem>).Where((param0 => param0 != null));
-            //var freeItems = StyxWoW.Me.BagItemGuids.Select(ObjectManager.GetObjectByGuid<WoWItem>).Where((param0 => param0 != null));
-
-            //var count = bagItems.Count();
-            var bags = new List<WoWBag>();
             var freeBagIndex = int.MinValue;
             var freeBagSlot = int.MinValue;
             var Backpack = StyxWoW.Me.Inventory.Backpack;
@@ -108,7 +92,6 @@ namespace GarrisonButler.Libraries
                     break;
                 }
             }
-
             for (var index = 0U; index < 4U; ++index)
             {
                 WoWBag bagAtIndex = StyxWoW.Me.GetBagAtIndex(index);
@@ -137,7 +120,12 @@ namespace GarrisonButler.Libraries
             // No free slots
             if (freeBagIndex == int.MinValue
                 || freeBagSlot == int.MinValue)
+            {
+                GarrisonButler.Diagnostic("[Items] Split - No free bag slot found.");
                 return ActionResult.Failed;
+            }
+
+            GarrisonButler.Diagnostic("[Items] Split - freeBag={0}, freeSlot={1}", freeBagIndex, freeBagSlot);
 
             return await ButlerLua.SplitItem(item.BagIndex, item.BagSlot, amount, freeBagIndex, freeBagSlot);
         }

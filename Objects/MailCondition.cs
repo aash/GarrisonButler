@@ -351,13 +351,14 @@ namespace GarrisonButler.Objects
 
             if (!possibleStacksToCut.Any())
             {
+                GarrisonButler.Diagnostic("[MailCondition] Couldn't find a valid stack to cut. [Id:{0}/sizeToCut:{1}/#stacksToKeep:{2}]", itemId, sizeToCut, stacksToKeep.Count);
                 return new List<WoWItem>();
             }
 
             var stackCut = await CutAndGetStack(sizeToCut, itemId);
             if (stackCut == default(WoWItem))
             {
-                // Error 
+                GarrisonButler.Diagnostic("[MailCondition] Couldn't find resulting stack of split. [Id:{0}/sizeToCut:{1}/#stacksToKeep:{2}]", itemId, sizeToCut, stacksToKeep.Count);
                 return new List<WoWItem>();
             }
             stacksToKeep.Add(stackCut);
@@ -368,7 +369,7 @@ namespace GarrisonButler.Objects
                 var splitedFull = GetStacks(itemId, 1, maxStackSize - sizeToCut).ToArray();
                 if (!splitedFull.Any())
                 {
-                    // error
+                    GarrisonButler.Diagnostic("[MailCondition] Couldn't find resulting stack of split from full stack splitting. [Id:{0}/sizeToCut:{1}/#stacksToKeep:{2}]", itemId, sizeToCut, stacksToKeep.Count);
                     return new List<WoWItem>();
                 }
                 stacksToKeep.Add(splitedFull.First());

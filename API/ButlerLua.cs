@@ -100,13 +100,15 @@ namespace GarrisonButler.API
         }
         private static async Task<ActionResult> DoStringWhile(string luaString, Func<Task<bool>> condition, int maxTime)
         {
-            var start = DateTime.Now;
-            var now = DateTime.Now;
+            var waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(maxTime));
             var test = !await condition();
             while (test)
             {
-                if ((now - start).TotalMilliseconds >= TimeOut)
+                if (waitTimer.IsFinished)
+                {
+                    GarrisonButler.Diagnostic("[ButlerLua] Lua call condition termination timed out.");
                     return ActionResult.Failed;
+                }
                 await AntiSpamProtection();
                 Lua.DoString(luaString);
                 await Buddy.Coroutines.Coroutine.Yield();
@@ -133,6 +135,14 @@ namespace GarrisonButler.API
         /// <param name="toSlot"></param>
         public static async Task<ActionResult> SplitItem(int fromBag, int fromSlot, int amount, int toBag, int toSlot)
         {
+            var fromBagWoW = fromBag + 1;
+            var toBagWoW = toBag + 1;
+            var fromSlotWoW = fromSlot + 1;
+            var toSlotWoW = toSlot + 1;
+            GarrisonButler.Diagnostic(
+                "[ButlerLua] SplitItem fromBag:{0}, fromSlot:{1}, amount:{2}, tobag:{3}, toSlot:{4}.",
+                fromBagWoW, fromSlotWoW, amount, toBagWoW, toSlotWoW);
+
             var luaString = String.Format(@"
                 ClearCursor(); 
                 SplitContainerItem({0},{1},{2});
@@ -140,7 +150,7 @@ namespace GarrisonButler.API
                     PickupContainerItem({3},{4});
                     ClearCursor();
                 end;",
-                fromBag+1, fromSlot+1, amount, toBag+1, toSlot);
+                fromBagWoW, fromSlotWoW, amount, toBagWoW, toSlotWoW);
 
             var result = await DoString(luaString);
             // Refeshing object manager since we did changes on the bag items.
