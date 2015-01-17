@@ -146,7 +146,14 @@ namespace GarrisonButler
             GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
 
             var openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
-
+            if (numMail > 5)
+            {
+                for (int i = 0; i < numMail%5; i++)
+                {
+                    await Buddy.Coroutines.Coroutine.Yield();
+                    openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
+                }
+            }
             _checkedMailbox = true;
 
             GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = hbMailLoggingBugOriginalLogLevel;
