@@ -73,7 +73,7 @@ namespace GarrisonButler
                         return ActionResult.Running;
                     
                     GarrisonButler.Diagnostic("[Harvest] STEP 0: Done with harvesting.");
-                    return ActionResult.Running;
+                    return ActionResult.Refresh;
                 }
             }
 

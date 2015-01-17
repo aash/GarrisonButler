@@ -35,7 +35,7 @@ namespace GarrisonButler
 
         public static string NameStatic
         {
-            get { return "GarrisonButler ICE"; }
+            get { return "GarrisonButler Lite"; }
         }
 
         // internal AutoAnglerProfile Profile { get; private set; }
