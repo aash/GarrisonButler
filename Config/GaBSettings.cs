@@ -39,7 +39,7 @@ namespace GarrisonButler.Config
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
         public bool SendDisenchantableGreens { get; set; }
-        public string GreensToChar { get; set; }
+        public SafeString GreensToChar { get; set; }
         public bool ForceJunkSell { get; set; }
         public bool GarrisonCache { get; set; }
         public bool HarvestGarden { get; set; }
