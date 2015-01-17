@@ -398,6 +398,9 @@ namespace GarrisonButler
                     return false;
                 }
 
+            // Reset of mount vendor workaround
+            _mountVendorTimeStart = default(DateTime);
+
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
             var resultActions = await _mainSequence.ExecuteAction();
@@ -475,18 +478,15 @@ namespace GarrisonButler
             if (_mountVendorTimeStart == default(DateTime))
                 _mountVendorTimeStart = DateTime.Now;
 
-            var checkTime = (DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5;
-            if(checkTime)
-                if (await MoveToTable())
-                    return ActionResult.Running;
+            while ((DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5)
+            {
+                if (!await MoveToTable())
+                    break;
+            }
 
             _mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
 
             var resultCoroutine = await VendorBehavior.ExecuteCoroutine() ? ActionResult.Running : ActionResult.Done;
-            
-            if(resultCoroutine == ActionResult.Done)
-                _mountVendorTimeStart = default(DateTime);
-
             return resultCoroutine;
         }
 
