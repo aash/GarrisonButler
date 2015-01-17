@@ -226,7 +226,7 @@ namespace GarrisonButler.Config
                 MaxLength = 50
             };
             // binding
-            var toCharBinding = new Binding("GreensToChar") { Source = GaBSettings.Get() };
+            var toCharBinding = new Binding("Value") { Source = GaBSettings.Get().GreensToChar };
             toCharBinding.ValidationRules.Add(new IsValidCharacterNameRule());
             toCharBinding.Mode = BindingMode.TwoWay;
             toCharBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
