@@ -86,5 +86,20 @@ namespace GarrisonButler
                 TraceLineHitFlags.Collision, out ground);
             return ground != WoWPoint.Empty ? ground.Z : float.MinValue;
         }
+
+        private async static Task<ActionResult> MoveToInteract(WoWPoint cachedToHarvestLocation, float cachedInteractRangeSqr)
+        {
+            if (Me.Location.Distance(cachedToHarvestLocation) > cachedInteractRangeSqr)
+                return await MoveTo(cachedToHarvestLocation, "[Navigation] Moving to interact at cached location " + cachedToHarvestLocation);
+
+            GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact at cached location " +
+                                      cachedToHarvestLocation);
+            if (Me.IsMoving)
+                Navigator.PlayerMover.MoveStop();
+
+            await CommonCoroutines.SleepForLagDuration();
+
+            return ActionResult.Done;
+        }
     }
 }
