@@ -250,7 +250,7 @@ namespace GarrisonButler
             var returnList = new List<MailItem>();
             var sendTo = GaBSettings.Get().GreensToChar;
 
-            if (sendTo.Value.Length <= 0 || sendTo.Value.Length > 12)
+            if (sendTo.Value.Length <= 0)
             {
                 GarrisonButler.Warning("[Mailing] Sending greens enabled but send to character is invalid");
                 return new Tuple<bool, List<MailItem>>(false, null);
