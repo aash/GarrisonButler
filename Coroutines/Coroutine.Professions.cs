@@ -132,7 +132,7 @@ namespace GarrisonButler
             if (await DoCd(daily))
                 return ActionResult.Running;
 
-            return ActionResult.Done;
+            return ActionResult.Refresh;
         }
 
         public static async Task<ActionResult> MoveToMine()
