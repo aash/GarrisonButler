@@ -475,6 +475,11 @@ namespace GarrisonButler
                 return ActionResult.Done;
             }
 
+            if (building.PrepOrder != null)
+            {
+                await building.PrepOrder(GetMaxShipmentToStart(building))();
+            }
+
             var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {

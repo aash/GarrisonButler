@@ -2,11 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
+using JetBrains.Annotations;
 using Styx.Helpers;
 
 #endregion
@@ -14,8 +18,10 @@ using Styx.Helpers;
 namespace GarrisonButler.Config
 {
     [XmlRoot("GarrisonButlerSettings")]
-    public class GaBSettings
+    public class GaBSettings:INotifyPropertyChanged
     {
+        private List<Pigment> _pigments;
+
         private GaBSettings()
         {
         }
@@ -34,6 +40,19 @@ namespace GarrisonButler.Config
         [XmlArrayItem("Daily", typeof (DailyProfession))]
         [XmlArray("DailySettings")]
         public List<DailyProfession> DailySettings { get; set; }
+
+        [XmlArrayItem("Pigment", typeof (Pigment))]
+        [XmlArray("PigmentsSettings")]
+        public List<Pigment> Pigments
+        {
+            get { return _pigments; }
+            set
+            {
+                if (Equals(value, _pigments)) return;
+                _pigments = value;
+                OnPropertyChanged();
+            }
+        }
 
         public bool UseGarrisonHearthstone { get; set; }
         public bool RetrieveMail { get; set; }
@@ -88,6 +107,9 @@ namespace GarrisonButler.Config
 
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
+            
+            // Pigments for milling
+            ret.Pigments = Pigment.AllPigments;
             return ret;
         }
 
@@ -171,6 +193,17 @@ namespace GarrisonButler.Config
             return true;
         }
 
+        internal void UpdateMissingValuesFromSettings()
+        {
+            // If not filled
+            var newPigmentsValues = Pigment.AllPigments.Where(p => _pigments.All(pig => pig.Id != p.Id)).ToArray();
+            if (newPigmentsValues.Any())
+            {
+                GarrisonButler.Diagnostic("Updating pigments settings with values:");
+                ObjectDumper.WriteToHb(newPigmentsValues,3);
+                _pigments.AddRange(newPigmentsValues);
+            }
+        }
 
         public static void Save()
         {
@@ -288,6 +321,7 @@ namespace GarrisonButler.Config
                     file.Close();
                     UpdateSettings(CurrentSettings);
                 }
+                CurrentSettings.UpdateMissingValuesFromSettings();
                 GarrisonButler.Log("Configuration successfully loaded.");
             }
             catch (Exception e)
@@ -304,6 +338,15 @@ namespace GarrisonButler.Config
         private static void PrintConfig()
         {
             ObjectDumper.WriteToHb(CurrentSettings, 3); //Deactivated because logs toon char in recipient for now
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

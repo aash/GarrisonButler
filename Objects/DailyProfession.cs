@@ -3,12 +3,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
+using GarrisonButler.API;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
+using GarrisonButler.Libraries;
 using Styx;
+using Styx.CommonBot.Profiles.Quest.Order;
 using Styx.Patchables;
 using Styx.WoWInternals;
 using Styx.WoWInternals.DBC;
+using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
@@ -144,6 +150,9 @@ namespace GarrisonButler.Objects
             if (Spell == null)
                 Spell = GetRecipeSpell();
 
+            if (Spell.CooldownTimeLeft.TotalSeconds > 0)
+                return 0;
+
             var maxRepeat = Int32.MaxValue;
             var spellReagents = Spell.InternalInfo.SpellReagents;
             if (spellReagents.Reagent == null)
@@ -157,17 +166,93 @@ namespace GarrisonButler.Objects
                 var required = spellReagents.ReagentCount[index];
                 if (required <= 0)
                     continue;
-                var numInBags =
-                    StyxWoW.Me.BagItems.Sum(i => i != null && i.IsValid && i.Entry == reagent ? i.StackCount : 0);
-                numInBags +=
-                    StyxWoW.Me.ReagentBankItems.Sum(i => i != null && i.IsValid && i.Entry == reagent ? i.StackCount : 0);
-                var repeatNum = (int) (numInBags/required);
+                // get number in bags
+                var numInBags = HbApi.GetNumberItemInBags((uint)reagent);
+
+                // add number in reagent banks
+                numInBags += HbApi.GetNumberItemInReagentBank((uint)reagent);
+
+                numInBags += HbApi.GetNumberItemByMillingBags((uint)reagent, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+
+
+                var repeatNum = (int)(numInBags / required);
                 if (repeatNum < maxRepeat)
                     maxRepeat = repeatNum;
             }
-            return Spell.CooldownTimeLeft.TotalSeconds > 0 ? 0 : maxRepeat;
+            return maxRepeat;
         }
 
+        public async Task<ActionResult> PreCraftOperations()
+        {
+            // Check if we have all reagents
+            // If we do return done
+            // If not then we need to 
+
+            if (Spell == null)
+                Spell = GetRecipeSpell();
+
+            var spellReagents = Spell.InternalInfo.SpellReagents;
+            if (spellReagents.Reagent == null)
+                return ActionResult.Done;
+
+            for (var index = 0; index < spellReagents.Reagent.Length; index++)
+            {
+                var reagent = spellReagents.Reagent[index];
+                if (reagent == 0)
+                    continue;
+                var required = spellReagents.ReagentCount[index];
+                if (required <= 0)
+                    continue;
+                // get number in bags
+                var numInBags = HbApi.GetNumberItemInBags((uint)reagent);
+
+                // add number in reagent banks
+                numInBags += HbApi.GetNumberItemInReagentBank((uint)reagent);
+
+                if (numInBags < required)
+                {
+                    // TO DO Deams auto detection of spell's profession to not check milling when doing blacksmithing recipe.
+                    // add number that we could get from milling
+                    // Find all pigments corresponding to current reagent id and where at least one source is activated
+                    var pigments =
+                        GaBSettings.Get()
+                            .Pigments.GetEmptyIfNull()
+                            .Where(p => p.Id == reagent && p.MilledFrom.Any(i => i.Activated))
+                            .ToArray();
+                    if (pigments.Any())
+                    {
+                        var numByMilling = 0;
+                        var itemsToMillFrom = pigments.SelectMany(p => p.MilledFrom).SelectMany(p => HbApi.GetItemInBags(p.ItemId).Where(i=> i.StackCount >= 5)).ToArray();
+                        if (itemsToMillFrom.Any())
+                        {
+                            // mill until we run out or we have enough
+                            while (numInBags < required && itemsToMillFrom.Any())
+                            {
+                                await itemsToMillFrom.First().Mill();
+                                numInBags = HbApi.GetNumberItemInBags((uint) reagent);
+                                numInBags += HbApi.GetNumberItemInReagentBank((uint)reagent);
+                                itemsToMillFrom = pigments.SelectMany(p => p.MilledFrom).SelectMany(p => HbApi.GetItemInBags(p.ItemId).Where(i => i.StackCount >= 5)).ToArray();
+                                await Buddy.Coroutines.Coroutine.Yield();
+                            }
+                            GarrisonButler.Diagnostic(
+                                numInBags >= required
+                                    ? "Succesfully milled to get enough reagent. ItemId={0}"
+                                    : "Failed milled to get enough reagent. ItemId={0}", reagent);
+                        }
+                        else
+                        {
+                            GarrisonButler.Diagnostic("No items to mill from found in bags.");
+                        }
+                    }
+                    if (numInBags < required)
+                    {
+                        GarrisonButler.Diagnostic("Failed to get enough of reagent: ItemId={0}", reagent);
+                        return ActionResult.Failed;
+                    }
+                }
+            }
+            return ActionResult.Done;
+        }
         public WoWSpell GetRecipeSpell()
         {
             var skillLine = (SkillLine) TradeskillId;

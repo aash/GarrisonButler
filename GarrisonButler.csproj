@@ -43,6 +43,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>GarrisonButlerImages.resx</DependentUpon>
     </Compile>
+    <Compile Include="Config\MillingTab.cs" />
     <Compile Include="Config\OldSettings\DailyProfession.cs" />
     <Compile Include="Config\OldSettings\GaBSettings.Building.cs" />
     <Compile Include="Config\OldSettings\GabSettings.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Config\OldSettings\ModuleVersion.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
+    <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />
     <Compile Include="API\GarrisonLua.Building.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="Coroutines\Coroutine.Move.data.cs" />
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.cs" />
     <Compile Include="Coroutines\Followers\Coroutine.Mission.cs" />
+    <Compile Include="Coroutines\Coroutine.Milling.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coroutines\Coroutine.Move.cs" />

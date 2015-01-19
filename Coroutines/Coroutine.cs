@@ -333,24 +333,6 @@ namespace GarrisonButler
 
         public static async Task<bool> RootLogic()
         {
-            //ModuleVersion configVersion = GaBSettings.Get().ConfigVersion;
-            /*if (configVersion.Build != GarrisonButler.Version.Build ||
-                configVersion.Major != GarrisonButler.Version.Major ||
-                configVersion.Minor != GarrisonButler.Version.Minor ||
-                configVersion.Revision != GarrisonButler.Version.Revision)
-            {
-                // Popup to explain this is a beta and they need to reconfigure their configs.
-                Bots.DungeonBuddy.Helpers.Alert.Show("GarrisonButler Lite Edition",
-                    "Hey!\n" +
-                    "Since GarrisonButler is still on heavy development you are required to verify your settings for each new build you install.\n" +
-                    "If you have any issues, please post a full log on the GarrisonButler Forum page.\n" +
-                    "Bot safe,\n" +
-                    "Deams\n",
-                    60, true, false, new System.Action(() => { new ConfigForm(); }));
-                TreeRoot.Stop("Configuration of GarrisonButler outdated or inexistant.");
-                return true;
-            }
-            */
             // Fast checks
             CheckResetAfk();
 

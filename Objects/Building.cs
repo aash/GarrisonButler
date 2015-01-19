@@ -7,6 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using Styx;
+using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
+using GarrisonButler.Libraries;
 
 #endregion
 
@@ -16,14 +19,14 @@ namespace GarrisonButler
     {
         public delegate int CanCompleteOrderD();
 
-        public delegate Task<bool> PrepOrderD();
+        public delegate Func<Task<ActionResult>> PrepOrderD(int numberToStart);
 
         private readonly String _itemId;
         public List<uint> Displayids;
         public int NumberReagent;
         public WoWPoint Pnj;
         public int PnjId;
-        public PrepOrderD PrepOrder = () => new Task<bool>(() => false);
+        public PrepOrderD PrepOrder;
         public int ReagentId;
         public List<int> ReagentIds;
         private String _buildTime;
@@ -233,35 +236,62 @@ namespace GarrisonButler
 
         private int CanCompleteOrderMillable()
         {
-            return CanCompleteOrderItem();
-            //long count = 0;
-            //WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
-            //if (itemInBags != null)
-            //    count += itemInBags.StackCount;
+            var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+            if(inscription == null)
+                return CanCompleteOrderItem();
 
-            //WoWItem itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
-            //if (itemInReagentBank != null)
-            //    count += itemInReagentBank.StackCount;
+            // get number in bags
+            var count = HbApi.GetNumberItemInBags((uint)ReagentId);
 
-            //if (count >= NumberReagent)
-            //    return true;
-            //return false;
+            // add number in reagent banks
+            count += HbApi.GetNumberItemInReagentBank((uint)ReagentId);
 
-            //IEnumerable<WoWItem> millableInBags =
-            //    StyxWoW.Me.BagItems.Where(i => MillableFrom.Contains(i.Entry) && i.StackCount > 5);
-            //if (millableInBags.Any())
-            //{
-            //    if (MillOne(millableInBags.ToList()))
-            //        return false;
-            //    count = 0;
-            //    itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
-            //    if (itemInBags != null)
-            //        count += itemInBags.StackCount;
+            GarrisonButler.Diagnostic("[ShipmentStart] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
+                NumberReagent, count >= NumberReagent);
 
-            //    if (itemInReagentBank != null)
-            //        count += itemInReagentBank.StackCount;
-            //}
-            //return count >= NumberReagent;
+           
+            count += HbApi.GetNumberItemByMillingBags((uint)ReagentId, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+            
+            GarrisonButler.Diagnostic("[ShipmentStart] Total found with milling {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
+                NumberReagent, count >= NumberReagent);
+
+            return (int)count/NumberReagent;
+        }
+
+
+        private Func<Task<ActionResult>> MillBeforeOrder(int numberToStart)
+        {
+            return async () =>
+            {
+                // Do we need to mill
+                var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+                if (inscription == null)
+                    return ActionResult.Done;
+
+                // get number in bags
+                var count = HbApi.GetNumberItemInBags((uint) ReagentId);
+                // add number in reagent banks
+                count += HbApi.GetNumberItemInReagentBank((uint) ReagentId);
+
+                if (count/NumberReagent >= numberToStart)
+                    return ActionResult.Done;
+
+                // if we do, mill until we don't
+                var millable = HbApi.GetAllItemsToMillFrom((uint) ReagentId, GaBSettings.Get().Pigments).ToArray();
+                while (millable.Any() && count/NumberReagent < numberToStart)
+                {
+                    await millable.First().Mill();
+                    await Buddy.Coroutines.Coroutine.Yield();
+                    count = HbApi.GetNumberItemInBags((uint) ReagentId);
+                    count += HbApi.GetNumberItemInReagentBank((uint) ReagentId);
+                    millable = HbApi.GetAllItemsToMillFrom((uint) ReagentId, GaBSettings.Get().Pigments).ToArray();
+                }
+
+                if (count/NumberReagent >= numberToStart)
+                    return ActionResult.Done;
+
+                return ActionResult.Failed;
+            };
         }
 
         private void GetOrderInfo(bool alliance)
@@ -583,7 +613,7 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     CanCompleteOrder = CanCompleteOrderMillable;
-                    // PrepOrder = 
+                    PrepOrder = MillBeforeOrder;
                     // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     MillItemPnj = 77372;
                     Displayids = new List<uint>

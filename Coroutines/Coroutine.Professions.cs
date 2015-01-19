@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Objects;
@@ -143,15 +144,9 @@ namespace GarrisonButler
 
         private static async Task<bool> DoCd(DailyProfession daily)
         {
+            await daily.PreCraftOperations();
             GarrisonButler.Log("[Profession] Realizing daily CD: " + daily.Spell.Name);
-            if (Me.IsMoving)
-                WoWMovement.MoveStop();
-            if (Me.Mounted)
-                await CommonCoroutines.LandAndDismount();
-            await CommonCoroutines.SleepForLagDuration();
-            daily.Spell.Cast();
-            await CommonCoroutines.SleepForLagDuration();
-            await Buddy.Coroutines.Coroutine.Wait(10000, () => !Me.IsCasting);
+            await HbApi.CastSpell(daily.Spell);
             return false;
         }
     }

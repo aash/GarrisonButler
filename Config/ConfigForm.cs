@@ -69,8 +69,14 @@ namespace GarrisonButler.Config
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
                 {
                     var mailingTab = new MailingTab();
-                    var mailing = new TabItem {Header = "Mailing", Content = mailingTab.ContentTabMailing()};
+                    var mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
                     tabControl.Items.Add(mailing);
+                }
+                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                {
+                    var millingTab = new MillingTab();
+                    var milling = new TabItem { Header = "Milling", Content = millingTab.ContentTabMilling() };
+                    tabControl.Items.Add(milling);
                 }
 
                 var aboutTabItem = new TabItem {Header = "About", Content = ContentTabAbout()};

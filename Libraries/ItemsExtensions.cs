@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Buddy.Coroutines;
 using GarrisonButler.API;
@@ -128,6 +129,41 @@ namespace GarrisonButler.Libraries
             GarrisonButler.Diagnostic("[Items] Split - freeBag={0}, freeSlot={1}", freeBagIndex, freeBagSlot);
 
             return await ButlerLua.SplitItem(item.BagIndex, item.BagSlot, amount, freeBagIndex, freeBagSlot);
+        }
+
+        /// <summary>
+        /// Return the number in bags.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static long GetNumberItemInBags(this WoWItem item)
+        {
+            return HbApi.GetNumberItemInBags(item.Entry);
+        }
+
+        /// <summary>
+        /// Return the number in reagent bank.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static long GetNumberItemInReagentBank(this WoWItem item)
+        {
+            return HbApi.GetNumberItemInReagentBank(item.Entry);
+        }
+
+        /// <summary>
+        /// Return the list of this item in bags
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static IEnumerable<WoWItem> GetInBags(this WoWItem item)
+        {
+            return HbApi.GetItemInBags(item.Entry);
+        }
+
+        public static async Task<ActionResult> Mill(this WoWItem item)
+        {
+            return await HbApi.MillHerbFromBags(item.Entry);
         }
     }
 }
