@@ -61,6 +61,8 @@ namespace GarrisonButler.Config
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
         public DateTime LastCheckTradingPost { get; set; }
+        public int itemIdTradingPost { get; set; }
+        public int numberReagentTradingPost { get; set; }
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }

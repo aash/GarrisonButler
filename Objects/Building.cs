@@ -755,26 +755,42 @@ namespace GarrisonButler
                 || GaBSettings.Get().LastCheckTradingPost < lastReset)
             {
                 // moving to pnj
-                if ((await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status == ActionResult.Running)
-                    return new Result(ActionResult.Running);
+                var moveResult = (await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
+                while (moveResult == ActionResult.Running)
+                {
+                    await Buddy.Coroutines.Coroutine.Yield();
+                    moveResult = (await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
+                }
 
                 // Check reagent
                 var reagent = await ButlerLua.GetShipmentReagentInfo();
-                if (reagent.Item1 == -1) return new Result(ActionResult.Failed);
-                   
+                if (reagent.Item1 == -1)
+                {
+                    GarrisonButler.Diagnostic("[TradingPost] Failed to find reagent id");
+                    return new Result(ActionResult.Failed);
+                }
+
+                GarrisonButler.Diagnostic("[TradingPost] Found reagentId={0}, #={1}, time={2}", reagent.Item1, reagent.Item2, serverTimeLua);
                 // Override value
-                ReagentId = reagent.Item1;
-                NumberReagent = reagent.Item2;
+                GaBSettings.Get().itemIdTradingPost = reagent.Item1;
+                GaBSettings.Get().numberReagentTradingPost = reagent.Item2;
                 GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
                 GaBSettings.Save();
                 return new Result(ActionResult.Refresh);
             }
+            ReagentId = GaBSettings.Get().itemIdTradingPost;
+            NumberReagent = GaBSettings.Get().numberReagentTradingPost;
 
             var rea =
                 GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
             if (rea == null)
+            {
+                GarrisonButler.Diagnostic("[TradingPost] Couldn't find matching reagent activated in settings, reagentId={0}, #={1}", ReagentId, NumberReagent);
+                ObjectDumper.WriteToHb(GaBSettings.Get().TradingPostReagentsSettings, 3);
                 return new Result(ActionResult.Failed);
+            }
             // Done with the check of reagent, so we switch to simple routine.
+            GarrisonButler.Diagnostic("[TradingPost] Calling CanCompleteOrder with reagentId={0}, #={1}", ReagentId, NumberReagent);
             return await CanCompleteOrderItem();
         }
 

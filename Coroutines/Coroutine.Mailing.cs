@@ -53,7 +53,7 @@ namespace GarrisonButler
             }
 
             if (!_checkedMailbox)
-                return new Result(ActionResult.Failed);
+                return new Result(ActionResult.Running);
             
             return ApiLua.HasNewMail() 
                 ? new Result(ActionResult.Running) : new Result(ActionResult.Failed);

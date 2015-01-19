@@ -638,7 +638,7 @@ namespace GarrisonButler
 
             maxToStart = Math.Min(maxCanComplete, maxToStart);
             GarrisonButler.Diagnostic("GetMaxShipmentToStart: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
-                maxSettings, maxInProgress, building.ShipmentCapacity, building.CanCompleteOrder(), maxToStart);
+                maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart);
             return new Result(ActionResult.Done,maxToStart);
         }
 
