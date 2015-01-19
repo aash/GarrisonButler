@@ -60,28 +60,28 @@ namespace GarrisonButler
             return true;
         }
 
-        private static async Task<ActionResult> DoSalvages()
+        private static async Task<Result> DoSalvages()
         {
             IEnumerable<WoWItem> salvageCrates;
             Building building;
 
             if (!CanRunSalvage(out salvageCrates, out building))
-                return ActionResult.Done;
+                return new Result(ActionResult.Done);
 
             var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             // can't find it? Let's try to get closer to the default location.
             if (unit == null)
             {
                 await MoveTo(building.Pnj, "[Salvage] Moving to building at " + building.Pnj);
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
 
             // If we don't dismount earlier, the bot will determine that it has reached the
             // unit when it is within 2 yards of the location.  Need to stop and dismount earlier,
             // then call "MoveTo" again after the dismount logic to finish the movement by foot
             if (Me.Location.Distance(unit.Location) > 10)
-                if (await MoveTo(unit.Location) == ActionResult.Running)
-                    return ActionResult.Running;
+                if ((await MoveTo(unit.Location)).Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
 
             if (Me.Mounted)
             {
@@ -89,8 +89,8 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
             }
 
-            if (await MoveTo(unit.Location) == ActionResult.Running)
-                return ActionResult.Running;
+            if ((await MoveTo(unit.Location)).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
 
             foreach (var salvageCrate in salvageCrates)
             {
@@ -99,7 +99,7 @@ namespace GarrisonButler
                 await Buddy.Coroutines.Coroutine.Wait(5000, () => !Me.IsCasting);
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            return ActionResult.Running;
+            return new Result(ActionResult.Running);
         }
     }
 }

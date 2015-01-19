@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
+using GarrisonButler.Coroutines;
 using Styx;
 
 #endregion
@@ -14,7 +15,7 @@ namespace GarrisonButler
 {
     public class Building
     {
-        public delegate int CanCompleteOrderD();
+        public delegate Task<Result> CanCompleteOrderD();
 
         public delegate Task<bool> PrepOrderD();
 
@@ -29,7 +30,10 @@ namespace GarrisonButler
         private String _buildTime;
         private String _buildingLevel;
         internal bool CanActivate;
-        public CanCompleteOrderD CanCompleteOrder = () => 0;
+        public CanCompleteOrderD CanCompleteOrder = () =>
+        {
+                return new Task<Result>(() => new Result(ActionResult.Done, 0));
+        };
         private String _canUpgrade;
         public String CreationTime;
         private int _currencyId;
@@ -133,30 +137,32 @@ namespace GarrisonButler
         }
 
 
-        private int CanCompleteOrderItem()
+        private async Task<Result> CanCompleteOrderItem()
         {
-            long count = 0;
-            var itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
-            if (itemInBags != null)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name, itemInBags.StackCount);
-                count += itemInBags.StackCount;
-            }
+                long count = 0;
+                var itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
+                if (itemInBags != null)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
+                        itemInBags.StackCount);
+                    count += itemInBags.StackCount;
+                }
 
-            var itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
-            if (itemInReagentBank != null)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
-                    itemInReagentBank.StackCount);
-                count += itemInReagentBank.StackCount;
-            }
+                var itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
+                if (itemInReagentBank != null)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
+                        itemInReagentBank.StackCount);
+                    count += itemInReagentBank.StackCount;
+                }
 
-            GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
-                NumberReagent, count >= NumberReagent);
-            return (int) count/NumberReagent;
+                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
+                    count,
+                    NumberReagent, count >= NumberReagent);
+                return new Result(ActionResult.Done, (int) count/NumberReagent);
         }
 
-        private int CanCompleteOrderItems()
+        private async Task<Result> CanCompleteOrderItems()
         {
             var maxCanStart = 0;
 
@@ -193,10 +199,10 @@ namespace GarrisonButler
             }
 
             GarrisonButler.Diagnostic("[ShipmentStart] The max that can be started is {0}: {1}", maxCanStart, Name);
-            return maxCanStart;
+            return new Result(ActionResult.Done, maxCanStart);
         }
 
-        private int CanCompleteOrderOneOfItems()
+        private async Task<Result> CanCompleteOrderOneOfItems()
         {
             var maxCanStart = 0;
             foreach (var reagentId in ReagentIds)
@@ -223,17 +229,17 @@ namespace GarrisonButler
                 if (count >= NumberReagent)
                     maxCanStart = Math.Max((int) count/NumberReagent, maxCanStart);
             }
-            return maxCanStart;
+            return new Result(ActionResult.Done, maxCanStart);
         }
 
-        private int CanCompleteOrderCurrency()
+        private async Task<Result> CanCompleteOrderCurrency()
         {
-            return BuildingsLua.GetGarrisonRessources()/NumberReagent;
+            return new Result(ActionResult.Done, BuildingsLua.GetGarrisonRessources()/NumberReagent);
         }
 
-        private int CanCompleteOrderMillable()
+        private async Task<Result> CanCompleteOrderMillable()
         {
-            return CanCompleteOrderItem();
+            return await CanCompleteOrderItem();
             //long count = 0;
             //WoWItem itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
             //if (itemInBags != null)
@@ -685,6 +691,7 @@ namespace GarrisonButler
                 case (int) Buildings.TradingPostLvl1:
                 case (int) Buildings.TradingPostLvl2:
                 case (int) Buildings.TradingPostLvl3:
+                    //CanCompleteOrder = CanCompleteOrderTradingPost;
                     Displayids = new List<uint>
                     {
                         18574, // Garrison Building  Trading Post V1
@@ -696,6 +703,23 @@ namespace GarrisonButler
                     };
                     break; // This one changes everyday... 
             }
+        }
+
+        private async Task<Result> CanCompleteOrderTradingPost()
+        {
+            // Before being able to calculate it, we need to know what's today's reagent.
+            // It can be saved in settings with the date.
+
+                // moving to pnj
+
+                // checking reagent
+
+                // set today's reagent with date/time (check reset time of servers)
+                // Check if there's a way to know it has reset
+
+            // calculate number in bags and reagent bank
+
+            return new Result(ActionResult.Done, 0);
         }
 
 

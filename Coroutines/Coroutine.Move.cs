@@ -19,7 +19,7 @@ namespace GarrisonButler
         private static MoveResult _lastMoveResult;
 
 // ReSharper disable once CSharpWarnings::CS1998
-        public static async Task<ActionResult> MoveTo(WoWPoint destination, string destinationMessage = null)
+        public static async Task<Result> MoveTo(WoWPoint destination, string destinationMessage = null)
         {
             if (destinationMessage != null && destinationMessage != _oldDestMessage)
             {
@@ -39,14 +39,14 @@ namespace GarrisonButler
 
                 case MoveResult.Failed:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: Failed.");
-                    return ActionResult.Failed;
+                    return new Result(ActionResult.Failed);
 
                 case MoveResult.ReachedDestination:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination.");
-                    return ActionResult.Done;
+                    return new Result(ActionResult.Done);
 
                 case MoveResult.Moved:
-                    return ActionResult.Running;
+                    return new Result(ActionResult.Running);
 
                 case MoveResult.PathGenerationFailed:
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: PathGenerationFailed.");
@@ -60,11 +60,11 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[Navigation] MoveResult: " + Enum.GetName(typeof(MoveResult), _lastMoveResult));
                     break;
             }
-            return ActionResult.Running;
+            return new Result(ActionResult.Running);
             //MoveResult.UnstuckAttempt, MoveResult.Moved, MoveResult.PathGenerated
         }
 
-        public static async Task<ActionResult> MoveToInteract(WoWObject woWObject)
+        public static async Task<Result> MoveToInteract(WoWObject woWObject)
         {
             if (!woWObject.WithinInteractRange)
                 return await MoveTo(woWObject.Location, "[Navigation] Moving to interact with " + woWObject.SafeName);
@@ -75,7 +75,7 @@ namespace GarrisonButler
 
             await CommonCoroutines.SleepForLagDuration();
 
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
         public static float GetGroundZ(WoWPoint p)
@@ -87,7 +87,7 @@ namespace GarrisonButler
             return ground != WoWPoint.Empty ? ground.Z : float.MinValue;
         }
 
-        private async static Task<ActionResult> MoveToInteract(WoWPoint cachedToHarvestLocation, float cachedInteractRangeSqr)
+        private async static Task<Result> MoveToInteract(WoWPoint cachedToHarvestLocation, float cachedInteractRangeSqr)
         {
             if (Me.Location.Distance(cachedToHarvestLocation) > cachedInteractRangeSqr)
                 return await MoveTo(cachedToHarvestLocation, "[Navigation] Moving to interact at cached location " + cachedToHarvestLocation);
@@ -99,7 +99,7 @@ namespace GarrisonButler
 
             await CommonCoroutines.SleepForLagDuration();
 
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
     }
 }

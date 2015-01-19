@@ -180,13 +180,6 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
                     GarrisonButler.Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
                     GarrisonButler.Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
-                    
-                    LootFrame.NativeLootSlotInfo test = new LootFrame.NativeLootSlotInfo();
-                    
-                       IntPtr addr = StyxWoW<IntPtr>(StyxWoW.Offsets, CallingConvention.ThisCall, (object) StyxWoW.Offsets.\u0001.\u0007\u0002, (object) slot);
-      if (\u008D\u0006.\u0081\u0018(addr, \u008B\u0008.\u0005\u001B(0)))
-        return 0U;
-      LootFrame.NativeLootSlotInfo nativeLootSlotInfo = StyxWoW.Memory.Read<LootFrame.NativeLootSlotInfo>(addr);
                 }
             }
             LootIsOpen = true;
@@ -220,7 +213,7 @@ namespace GarrisonButler
         }
 
         /// <summary>
-        /// Returns false in 2 conditions - #1 time is less than 60s from last run or #2 nothing to do
+        /// Returns false in 2 conditions - #1 time is less than 60s(default) from last run or #2 nothing to do
         /// </summary>
         public override bool RequirementsMet
         {
@@ -239,7 +232,8 @@ namespace GarrisonButler
                     GarrisonButler.Log("One more check and then taking a break for {0}s", timeBetweenRuns);
                 }
 
-                var anyToDo = Coroutine.AnythingTodo();
+                Coroutine.AnythingTodo().RunSynchronously();
+                var anyToDo = Coroutine.AnythingTodo().Result;
                 if (!anyToDo) return false;
                 Coroutine.ReadyToSwitch = false;
                 return true;

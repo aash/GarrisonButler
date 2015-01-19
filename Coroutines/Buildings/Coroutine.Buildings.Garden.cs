@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -24,17 +26,12 @@ namespace GarrisonButler
             235391 // Talador Orchid
         };
 
-        private static bool ShouldRunGarden()
-        {
-            return CanRunGarden().Item1;
-        }
-
-        private static Tuple<bool, WoWGameObject> CanRunGarden()
+        private async static Task<Result> CanRunGarden()
         {
             if (!GaBSettings.Get().HarvestGarden)
             {
                 GarrisonButler.Diagnostic("[Garden] Deactivated in user settings.");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
             // Do i have a garden?
             if (!_buildings.Any(b => ShipmentsMap.GetEmptyIfNull().Count() >= 2 && ShipmentsMap
@@ -46,7 +43,7 @@ namespace GarrisonButler
                 ))
             {
                 GarrisonButler.Diagnostic("[Garden] Building not detected in Garrison's Buildings.");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
 
             // Is there something to gather? 
@@ -59,11 +56,11 @@ namespace GarrisonButler
             if (herbToGather == null)
             {
                 GarrisonButler.Diagnostic("[Garden] No herb detected.");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
 
             GarrisonButler.Diagnostic("[Garden] Herb detected at :" + herbToGather.Location);
-            return new Tuple<bool, WoWGameObject>(true, herbToGather);
+            return new Result(ActionResult.Running, herbToGather);
         }
     }
 }

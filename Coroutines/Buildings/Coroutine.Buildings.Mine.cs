@@ -43,25 +43,20 @@ namespace GarrisonButler
         };
 
 
-        private static bool ShouldRunMine()
-        {
-            return CanRunMine().Item1;
-        }
-
-        private static Tuple<bool, WoWGameObject> CanRunMine()
+        private async static Task<Result> CanRunMine()
         {
             // Settings
             if (!GaBSettings.Get().HarvestMine)
             {
                 GarrisonButler.Diagnostic("[Mine] Deactivated in user settings.");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
 
             // Do i have a mine?
             if (!_buildings.Any(b => ShipmentsMap[0].BuildingIds.Contains(b.Id)))
             {
                 GarrisonButler.Diagnostic("[Mine] Building not detected in Garrison's Buildings.");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
 
             //// Is there something to mine?
@@ -82,12 +77,12 @@ namespace GarrisonButler
             if (gameObjects.IsNullOrEmpty())
             {
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
             var closest = Dijkstra.GetClosestObject(Me.Location, gameObjects.ToArray());
 
             GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + closest.Location);
-            return new Tuple<bool, WoWGameObject>(true, closest);
+            return new Result(ActionResult.Running, closest);
         }
 
         private static bool MeIsInMine()
@@ -135,20 +130,21 @@ namespace GarrisonButler
             };
         }
 
-        public static async Task<ActionResult> UseItemInbags(WoWItem item)
+        public static async Task<Result> UseItemInbags(object obj)
         {
+            var item = obj as WoWItem; 
             if (item == null)
-                return ActionResult.Failed;
+                return new Result(ActionResult.Failed);
 
             if (!item.IsValid)
-                return ActionResult.Failed;
+                return new Result(ActionResult.Failed);
 
             item.Use();
             GarrisonButler.Log("[Item] Using: {0}", item.Name);
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);
 
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
         /// <summary>
@@ -157,22 +153,31 @@ namespace GarrisonButler
         /// <param name="waitTimeCondition"></param>
         /// <param name="conditionExit"></param>
         /// <returns></returns>
-        public static Func<WoWItem, Task<ActionResult>> UseItemInbagsWithTimer(int waitTimeCondition = 0,
+        public static Func<object, Task<Result>> UseItemInbagsWithTimer(int waitTimeCondition = 0,
             Func<bool> conditionExit = null)
         {
-            return (async delegate(WoWItem item)
-                {
-                    var res = await UseItemInbags(item);
-                    if (res == ActionResult.Done && conditionExit != null)
-                        await Buddy.Coroutines.Coroutine.Wait(waitTimeCondition, conditionExit);
-                    return res;
+            return (async delegate(object item)
+            {
+                var wowItem = item as WoWItem;
+                if(wowItem == null)
+                    return new Result(ActionResult.Failed);
+
+                var res = await UseItemInbags(wowItem);
+                if (res.Status == ActionResult.Done && conditionExit != null)
+                    await Buddy.Coroutines.Coroutine.Wait(waitTimeCondition, conditionExit);
+
+                return res;
                 }
             );
         }
-    
 
-        public static async Task<ActionResult> DeleteItemInbags(WoWItem item)
+
+        public static async Task<Result> DeleteItemInbags(object obj)
         {
+            var item = obj as WoWItem;
+            if (item == null)
+                return new Result(ActionResult.Failed);
+
             GarrisonButler.Log("[Item] Deleting one of: {0}", item.Name);
             Lua.DoString(
                 string.Format(
@@ -198,7 +203,7 @@ namespace GarrisonButler
                 );
             await CommonCoroutines.SleepForLagDuration();
             // To stop the task from continually running forever
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
 

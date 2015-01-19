@@ -31,12 +31,12 @@ namespace GarrisonButler
         // Only check mail every 60s if no items exist in mail frame
         private static bool _allowMailTimerStart = true;
 
-        private static Tuple<bool, int> HasMails()
+        private async static Task<Result> HasMails()
         {
             if (!GaBSettings.Get().RetrieveMail)
             {
                 GarrisonButler.Diagnostic("[Mail] Checking mail deactivated in user settings.");
-                return new Tuple<bool, int>(false, 0);
+                return new Result(ActionResult.Failed);
             }
 
             // Only check mail every 5 minutes by default
@@ -46,18 +46,20 @@ namespace GarrisonButler
                 // Timer has not finished yet, indicate "no mail"
                 if (MailboxCheckTimer.Elapsed.TotalSeconds < (_mailCheckInterval))
                 {
-                    return new Tuple<bool, int>(false, 0);
+                    return new Result(ActionResult.Failed);
                 }
                 MailboxCheckTimer.Reset();
                 MailboxCheckTimer.Stop();
             }
 
-            if (!_checkedMailbox) return new Tuple<bool, int>(true, 0);
-
-            return ApiLua.HasNewMail() ? new Tuple<bool, int>(true, 0) : new Tuple<bool, int>(false, 0);
+            if (!_checkedMailbox)
+                return new Result(ActionResult.Failed);
+            
+            return ApiLua.HasNewMail() 
+                ? new Result(ActionResult.Running) : new Result(ActionResult.Failed);
         }
 
-        private static async Task<ActionResult> MoveAndInteractWithMailbox()
+        private static async Task<Result> MoveAndInteractWithMailbox()
         {
             var mailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
                 .GetEmptyIfNull()
@@ -71,12 +73,12 @@ namespace GarrisonButler
             }
 
             if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
-                if (await MoveToInteract(mailbox) == ActionResult.Running)
-                    return ActionResult.Running;
+                if ((await MoveToInteract(mailbox)).Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
 
             mailbox.Interact();
             await CommonCoroutines.SleepForLagDuration();
-            return ActionResult.Running;
+            return new Result(ActionResult.Running);
         }
 
         //static LogLevel HBMailLoggingBugOriginalLogLevel;
@@ -100,7 +102,7 @@ namespace GarrisonButler
         //    GarrisonButler.CurrentHonorbuddyLog.FileLogging = HBMailLoggingBugOriginalFileLoggingFlag;
         //}
 
-        public static async Task<ActionResult> GetMails(int osef)
+        public static async Task<Result> GetMails(object o)
         {
             // If check interval is 65s, we must wait for the wow server to allow another refresh
             if ((MailboxCheckTimer.IsRunning) && (_mailCheckInterval == CheckIntervalWhileStillWaiting))
@@ -108,7 +110,7 @@ namespace GarrisonButler
                 // Need to keep waiting for timer
                 if (MailboxCheckTimer.Elapsed.TotalSeconds < (_mailCheckInterval))
                 {
-                    return ActionResult.Running;
+                    return new Result(ActionResult.Running);
                 }
                 GarrisonButler.Diagnostic("[Mail] " + _mailCheckInterval + "s mailbox timer finished inside GetMails()");
                 MailboxCheckTimer.Reset();
@@ -118,8 +120,8 @@ namespace GarrisonButler
             // Get to the mailbox
             if (!MailFrame.Instance.IsVisible)
             {
-                if (await MoveAndInteractWithMailbox() == ActionResult.Running)
-                    return ActionResult.Running;
+                if ((await MoveAndInteractWithMailbox()).Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
             }
 
             // Wait for server to load mails after opening mailbox
@@ -200,7 +202,7 @@ namespace GarrisonButler
                 _mailCheckInterval = 65;
                 MailboxCheckTimer.Reset();
                 MailboxCheckTimer.Start();
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
             GarrisonButler.Log("[Mail] Waiting 5 minutes to check mail again.");
             _numMailsOnLastCheck = 0;
@@ -215,15 +217,15 @@ namespace GarrisonButler
             _mailCheckInterval = 60*5; // 5 minutes
             MailboxCheckTimer.Reset();
             MailboxCheckTimer.Start();
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
-        private static Tuple<bool, List<MailItem>> CanMailItem()
+        private async static Task<Result> CanMailItem()
         {
             if (!GaBSettings.Get().SendMail)
             {
                 GarrisonButler.Diagnostic("[Mailing] Sending mail deactivated in user settings.");
-                return new Tuple<bool, List<MailItem>>(false, null);
+                return new Result(ActionResult.Failed);
             }
 
             var toMail =
@@ -235,9 +237,11 @@ namespace GarrisonButler
             if (greensToMail.Item2 != null)
                 toMail.AddRange(greensToMail.Item2);
 
-            if (toMail.GetEmptyIfNull().Any()) return new Tuple<bool, List<MailItem>>(true, toMail);
+            if (toMail.GetEmptyIfNull().Any())
+                return new Result(ActionResult.Running, toMail);
+            
             GarrisonButler.Diagnostic("[Mailing] No items to mail.");
-            return new Tuple<bool, List<MailItem>>(false, null);
+            return new Result(ActionResult.Failed);
         }
 
         private static Tuple<bool, List<MailItem>> CanMailGreens()
@@ -334,9 +338,12 @@ namespace GarrisonButler
             return new Tuple<bool, List<MailItem>>(false, null);
         }
 
-        public static async Task<ActionResult> MailItem(List<MailItem> mailItems)
+        public static async Task<Result> MailItem(object obj)
         {
             var mailFrame = MailFrame.Instance;
+            var mailItems = obj as List<MailItem>;
+            if (mailItems == null)
+                return new Result(ActionResult.Failed);
 
             if (!mailFrame.IsVisible)
             {
@@ -352,8 +359,8 @@ namespace GarrisonButler
                 }
 
                 if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
-                    if (await MoveToInteract(mailbox) == ActionResult.Running)
-                        return ActionResult.Running;
+                    if ((await MoveToInteract(mailbox)).Status == ActionResult.Running)
+                        return new Result(ActionResult.Running);
 
                 mailbox.Interact();
                 await CommonCoroutines.SleepForLagDuration();
@@ -374,7 +381,7 @@ namespace GarrisonButler
             if (!mailsPerRecipient.Any())
             {
                 GarrisonButler.Diagnostic("[Mailing] No mail per recipient found.");
-                return ActionResult.Done;
+                return new Result(ActionResult.Done);
             }
 
             foreach (var mailsRecipient in mailsPerRecipient)
@@ -405,7 +412,7 @@ namespace GarrisonButler
                 {
                     if (items.GetEmptyIfNull().FirstOrDefault() == default(MailItem))
                     {
-                        return ActionResult.Done;
+                        return new Result(ActionResult.Done);
                     }
 
                     var firstOrDefault = items.GetEmptyIfNull().FirstOrDefault();
@@ -424,7 +431,7 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[Mailing] List to send empty.");
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
         private static int _mailCheckInterval = CheckIntervalWhileStillWaiting; // in seconds

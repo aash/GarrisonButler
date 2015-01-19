@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -24,26 +26,22 @@ namespace GarrisonButler
             237720
         };
 
-        private static Tuple<bool, WoWGameObject> CanRunCache()
+        private async static Task<Result> CanRunCache()
         {
             if (!GaBSettings.Get().GarrisonCache)
             {
                 GarrisonButler.Diagnostic("[Cache] Cache deactivated in user settings");
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
             }
             // Check
             var cache =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .FirstOrDefault(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry));
-            if (cache != default(WoWGameObject)) return new Tuple<bool, WoWGameObject>(true, cache);
+            if (cache != default(WoWGameObject)) 
+                return new Result(ActionResult.Running, cache);
             GarrisonButler.Diagnostic("[Cache] Cache not found, skipping...");
-            return new Tuple<bool, WoWGameObject>(false, null);
-        }
-
-        private static bool ShouldRunCache()
-        {
-            return CanRunCache().Item1;
+            return new Result(ActionResult.Failed);
         }
     }
 }
