@@ -1,4 +1,8 @@
-﻿using GarrisonButler.API;
+﻿using Buddy.Coroutines;
+using System.Threading;
+using System.Windows.Navigation;
+using GreyMagic;
+using GarrisonButler.API;
 using GarrisonButler.Coroutines;
 
 #region
@@ -22,13 +26,15 @@ namespace GarrisonButler
     {
         private static bool _hbRelogSkipped;
         private static int _hbRelogSkippedCounter;
+        private static WoWPoint waitingSpot;
+        private static bool waitingSpotInit = false;
 
 // ReSharper disable once CSharpWarnings::CS1998
-        private static async Task<ActionResult> Waiting()
+        private static async Task<Result> Waiting()
         {
             var townHallLevel = BuildingsLua.GetTownHallLevel();
             if (townHallLevel < 1)
-                return ActionResult.Failed;
+                return new Result(ActionResult.Failed);
 
             var myFactionWaitingPoints = Me.IsAlliance ? AllyWaitingPoints : HordeWaitingPoints;
 
@@ -37,8 +43,24 @@ namespace GarrisonButler
                 throw new NotImplementedException(
                     "This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
+            if (!waitingSpotInit)
+            {
+                var r = new Random(DateTime.Now.Second);
+                var randomX = (float)(r.NextDouble() - 0.5) * 5;
+                var randomY = (float)(r.NextDouble() - 0.5) * 5;
+                var toAdd = Me.IsAlliance ? TableAlliance : TableHorde;
+                toAdd.X = toAdd.X + randomX;
+                toAdd.Y = toAdd.Y + randomY;
+                waitingSpot = Dijkstra.ClosestToNodes(toAdd);
+                waitingSpotInit = true;
+            }
+
+            if ((await
+                    MoveTo(waitingSpot, "Moving to random waiting spot next to mission table.")).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
+            
             GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
         /// <summary>
@@ -78,85 +100,23 @@ namespace GarrisonButler
                 GarrisonButler.Log(
                     "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
                 if (!(Me.Location.Distance(fishingSpot) > 2)) return true;
-                if (await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.") == ActionResult.Running)
+                if ((await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.")).Status == ActionResult.Running)
                     return true;
             }
 
             return true;
         }
 
-        private static bool AnythingLeftToDoBeforeEnd()
+        public async static void AnythingTodo()
         {
-            return !ReadyToSwitch;
+            if (!ReadyToSwitch)
+            {
+                AnyTodo = false;
+                return;
+            }
+            AnyTodo = await _mainSequence.AtLeastOneTrue();
         }
 
-        public static bool AnythingTodo()
-        {
-            RefreshBuildings();
-            // dailies cd
-            if (HelperTriggerWithTimer(ShouldRunDailies, ref _dailiesWaitTimer, ref _dailiesTriggered,
-                DailiesWaitTimerValue))
-                return true;
-            // Cache
-            if (HelperTriggerWithTimer(ShouldRunCache, ref _cacheWaitTimer, ref _cacheTriggered, CacheWaitTimerValue))
-                return true;
-
-            // Mine
-            if (HelperTriggerWithTimer(ShouldRunMine, ref _mineWaitTimer, ref _mineTriggered, MineWaitTimerValue))
-                return true;
-
-            // gardenla
-            if (HelperTriggerWithTimer(ShouldRunGarden, ref _gardenWaitTimer, ref _gardenTriggered, GardenWaitTimerValue))
-                return true;
-
-            // Start or pickup work orders
-            if (HelperTriggerWithTimer(ShouldRunPickUpOrStartShipment, ref _startOrderWaitTimer,
-                ref _startOrderTriggered,
-                StartOrderWaitTimerValue))
-                return true;
-
-            // Missions
-            if (HelperTriggerWithTimer(ShouldRunTurnInMissions, ref _turnInMissionWaitTimer,
-                ref _turnInMissionsTriggered,
-                TurnInMissionWaitTimerValue))
-                return true;
-
-            // Missions completed 
-            if (HelperTriggerWithTimer(ShouldRunStartMission, ref _startMissionWaitTimer, ref _startMissionTriggered,
-                StartMissionWaitTimerValue))
-                return true;
-
-            // Salvage
-            if (HelperTriggerWithTimer(ShouldRunSalvage, ref _salvageWaitTimer, ref _salvageTriggered,
-                SalvageWaitTimerValue))
-                return true;
-
-            // Salvage
-            // ReSharper disable once ConvertIfStatementToReturnStatement
-            if (HelperTriggerWithTimer(CanRunLastRound, ref _lastRoundWaitTimer, ref _lastRoundTriggered,
-                LastRoundWaitTimerValue))
-                return true;
-
-            return AnythingLeftToDoBeforeEnd();
-        }
-
-
-        // The trigger must be set off by someone else to avoid pauses in the behavior! 
-        private static bool HelperTriggerWithTimer(Func<bool> condition, ref WaitTimer timer, ref bool toModify,
-            int timerValueInSeconds)
-        {
-            if (timer != null && !timer.IsFinished)
-                return toModify;
-
-            if (timer == null)
-                timer = new WaitTimer(TimeSpan.FromSeconds(timerValueInSeconds));
-            timer.Reset();
-
-            toModify = condition();
-
-            return toModify;
-        }
-
-        // The trigger must be set off by someone else to avoid pauses in the behavior! 
+        internal static bool AnyTodo = false;
     }
 }

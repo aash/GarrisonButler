@@ -289,22 +289,28 @@ namespace GarrisonButler
             RefreshBuildings();
         }
 
-        private static bool ShouldRunPickUpOrStartShipment()
+        private static async Task<Result> ShouldRunPickUpOrStartShipment()
         {
-            return
-                _buildings.Any(
-                    building =>
-                        CanPickUpShipmentGeneration(building)().Item1 || CanStartShipmentGeneration(building)().Item1);
+            foreach (var building in _buildings)
+            {
+                var canPickUp = await CanPickUpShipmentGeneration(building)();
+                var canStart = await CanStartShipmentGeneration(building)();
+                if (canPickUp.Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
+                if (canStart.Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
             }
+            return new Result(ActionResult.Failed);
+        }
         
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
             var sequence = new ActionHelpers.ActionsSequence();
             foreach (var building in _buildings)
             {
-                sequence.AddAction(new ActionHelpers.ActionOnTimerCached<WoWGameObject>(PickUpShipment,
+                sequence.AddAction(new ActionHelpers.ActionOnTimerCached(PickUpShipment,
                     CanPickUpShipmentGeneration(building)));
-                sequence.AddAction(new ActionHelpers.ActionOnTimerCached<Building>(StartShipment,
+                sequence.AddAction(new ActionHelpers.ActionOnTimerCached(StartShipment,
                     CanStartShipmentGeneration(building)));
             }
             return sequence;
@@ -314,37 +320,37 @@ namespace GarrisonButler
         {
             var sequence = new ActionHelpers.ActionsSequence();
 
-            sequence.AddAction(new ActionHelpers.ActionOnTimerCached<WoWGameObject>(PickUpShipment,
+            sequence.AddAction(new ActionHelpers.ActionOnTimerCached(PickUpShipment,
                 CanPickUpShipmentGeneration(building)));
-            sequence.AddAction(new ActionHelpers.ActionOnTimerCached<Building>(StartShipment,
+            sequence.AddAction(new ActionHelpers.ActionOnTimerCached(StartShipment,
                 CanStartShipmentGeneration(building)));
 
             return sequence;
         }
         
         [SuppressMessage("ReSharper", "InvertIf")]
-        internal static Func<Tuple<bool, Building>> CanStartShipmentGeneration(Building building)
+        internal static Func<Task<Result>> CanStartShipmentGeneration(Building building)
         {
-            return () =>
+            return async () =>
             {
                 if (building == null)
                 {
                     GarrisonButler.Diagnostic(
                         "[ShipmentStart] Building is null, either not built or not properly scanned.");
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 building.Refresh();
                 var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.Id);
                 if (buildingsettings == null)
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
 
                 // Activated by user ?
                 if (!buildingsettings.CanStartOrder)
                 {
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] Deactivated in user settings: {1}", building.Id,
                         building.Name);
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 if (building.WorkFrameWorkAroundTries >= Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
@@ -352,7 +358,7 @@ namespace GarrisonButler
                     GarrisonButler.Warning(
                         "[ShipmentStart,{0}] Building has been blacklisted due to reaching maximum Blizzard Workframe Bug workaround tries ({1})",
                         building.Id, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 // No Shipment left to start
@@ -360,7 +366,7 @@ namespace GarrisonButler
                 {
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] No shipment left to start: {1}", building.Id,
                         building.Name);
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 // Structs cannot be null
@@ -373,7 +379,7 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] preQuest not completed A={2} H={3}: {1}",
                         building.Id, building.Name, shipmentObjectFound.ShipmentPreQuestIdAlliance,
                         shipmentObjectFound.ShipmentPreQuestIdHorde);
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
 
@@ -383,9 +389,12 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic(
                         "[ShipmentStart,{0}] Building under construction, can't start work order: {1}",
                         building.Id, building.Name);
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
-                var maxToStart = GetMaxShipmentToStart(building);
+                var maxToStartCheck = await GetMaxShipmentToStart(building);
+                var maxToStart = maxToStartCheck.Status == ActionResult.Done
+                    ? (int) maxToStartCheck.Result1
+                    : 0;
 
                 // max start by user ?
                 if (maxToStart <= 0)
@@ -395,33 +404,25 @@ namespace GarrisonButler
                         building.Name,
                         building.ShipmentsTotal,
                         buildingsettings.MaxCanStartOrder);
-                    return new Tuple<bool, Building>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
-                //MaxToStart = Math.Min(building.canCompleteOrder(), MaxToStart);
-                //// Do I fulfill the conditions to complete the order? 
-                //if (MaxToStart <= 0)
-                //{
-                //    GarrisonButler.Diagnostic(
-                //        "[ShipmentStart] Do not fulfill the requirements to start a new work order: {0}", building.name);
-                //    return new Tuple<bool, Building>(false, null);
-                //}
 
                 GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found {1} new work orders to start: {2}",
                     building.Id, maxToStart, building.Name);
-                return new Tuple<bool, Building>(true, building);
+                return new Result(ActionResult.Running, building);
             };
         }
         
         [SuppressMessage("ReSharper", "InvertIf")]
-        internal static Func<Tuple<bool, WoWGameObject>> CanPickUpShipmentGeneration(Building building)
+        internal static Func<Task<Result>> CanPickUpShipmentGeneration(Building building)
         {
-            return () =>
+            return async () =>
             {
                 if (building == null)
                 {
                     GarrisonButler.Diagnostic(
                         "[ShipmentPickUp] Building is null, either not built or not properly scanned.");
-                    return new Tuple<bool, WoWGameObject>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 building.Refresh();
@@ -430,17 +431,17 @@ namespace GarrisonButler
                 if (building.ShipmentsReady <= 0)
                 {
                     GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.Name);
-                    return new Tuple<bool, WoWGameObject>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
                 var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.Id);
                 if (buildingsettings == null)
-                    return new Tuple<bool, WoWGameObject>(false, null);
+                    return new Result(ActionResult.Failed);
 
                 // Activated by user ?
                 if (!buildingsettings.CanCollectOrder)
                 {
                     GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.Name);
-                    return new Tuple<bool, WoWGameObject>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 // Get the list of the building objects
@@ -457,41 +458,32 @@ namespace GarrisonButler
                     {
                         GarrisonButler.Diagnostic("[ShipmentPickUp]     ID {0}", id);
                     }
-                    return new Tuple<bool, WoWGameObject>(false, null);
+                    return new Result(ActionResult.Failed);
                 }
 
                 GarrisonButler.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}",
                     building.ShipmentsReady,
                     building.Name);
-                return new Tuple<bool, WoWGameObject>(true, buildingAsObject);
+                return new Result(ActionResult.Running, buildingAsObject);
             };
         }
 
-        private static async Task<ActionResult> StartShipment(Building building)
+        internal static async Task<Result> MoveToAndOpenCapacitiveFrame(Building building)
         {
-            if (building == null)
-            {
-                GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
-                return ActionResult.Done;
-            }
+            var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
+                .FirstOrDefault(u => building.PnjIds != null ? building.PnjIds.Contains((int)u.Entry) : u.Entry == building.PnjId);
 
-            if (building.PrepOrder != null)
-            {
-                await building.PrepOrder(GetMaxShipmentToStart(building))();
-            }
-
-            var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
                 await
                     MoveTo(building.Pnj,
                         String.Format("[ShipmentStart,{0}] Could not find unit ({1}), moving to default location.",
                             building.Id, building.PnjId));
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
 
-            if (await MoveToInteract(unit) == ActionResult.Running)
-                return ActionResult.Running;
+            if ((await MoveToInteract(unit)).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
 
             unit.Interact();
 
@@ -533,13 +525,13 @@ namespace GarrisonButler
                         "[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME/GOSSIP WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                     await ButlerLua.CloseLandingPage();
-                    return ActionResult.Done;
+                    return new Result(ActionResult.Done);
                 }
                 GarrisonButler.Warning(
                     "[ShipmentStart,{0}] Failed to open Work order or Gossip frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
                     building.Id, building.WorkFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                 await WorkAroundBugFrame();
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
             building.WorkFrameWorkAroundTries = 0;
 
@@ -548,7 +540,7 @@ namespace GarrisonButler
             // Returning ActionResult.Done means it is the GarrisonCapacitiveFrame
             if (await IfGossip(unit) == ActionResult.Failed)
             {
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
 
             // One more check to make sure this is the right frame!!!
@@ -561,22 +553,42 @@ namespace GarrisonButler
                     GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                     await ButlerLua.CloseLandingPage();
-                    return ActionResult.Done;
+                    return new Result(ActionResult.Done);
                 }
                 GarrisonButler.Warning(
                     "[ShipmentStart,{0}] Failed to open Work order frame. Maybe Blizzard bug, trying to move away.  Try #{1} out of {2} max.",
                     building.Id, building.workFrameWorkAroundTries, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                 await WorkAroundBugFrame();
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
             building.workFrameWorkAroundTries = 0;
 
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
+            return new Result(ActionResult.Done);
+        }
+        private static async Task<Result> StartShipment(object obj)
+        {
+            var building = obj as Building;
+            
+            if (building == null)
+            {
+                GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
+                return new Result(ActionResult.Failed);
+            }
+
+            if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
+            
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  
 
-            var maxToStart = GetMaxShipmentToStart(building);
+            int maxToStart = 0;
+                var ResCheckMax = await GetMaxShipmentToStart(building);
+            
+            if (ResCheckMax.Status == ActionResult.Done)
+                maxToStart = (int) ResCheckMax.Result1;
+            
 
             for (var i = 0; i < maxToStart; i++)
             {
@@ -593,33 +605,41 @@ namespace GarrisonButler
                 {
                     await ButlerLua.OpenLandingPage();
                     buildingShipment.Refresh();
-                    var max = GetMaxShipmentToStart(buildingShipment);
+                    var maxCheck = await GetMaxShipmentToStart(buildingShipment);
+                    var max = maxCheck.Status == ActionResult.Done
+                        ? (int)maxCheck.Result1
+                        : 0;
                     if (max == 0)
                     {
                         GarrisonButler.Log("[ShipmentStart] Finished starting work orders at {0}.",
                             buildingShipment.Name);
                         await ButlerLua.CloseLandingPage();
-                        return ActionResult.Done;
+                        return new Result(ActionResult.Done);
                     }
                         GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
                     }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             await ButlerLua.CloseLandingPage();
-            return ActionResult.Refresh;
+            return new Result(ActionResult.Refresh);
         }
 
-        private static int GetMaxShipmentToStart(Building building)
+        private async static Task<Result> GetMaxShipmentToStart(Building building)
         {
             var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder; 
             var maxInProgress = maxSettings == 0
                 ? building.ShipmentCapacity
                 : Math.Min(building.ShipmentCapacity, maxSettings);
             var maxToStart = maxInProgress - building.ShipmentsTotal;
-            maxToStart = Math.Min(building.CanCompleteOrder(), maxToStart);
+            var canCompleteOrder = await building.CanCompleteOrder();
+            int maxCanComplete = 0;
+            if (canCompleteOrder.Status == ActionResult.Done)
+                maxCanComplete = (int) canCompleteOrder.Result1;
+
+            maxToStart = Math.Min(maxCanComplete, maxToStart);
             GarrisonButler.Diagnostic("GetMaxShipmentToStart: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
-                maxSettings, maxInProgress, building.ShipmentCapacity, building.CanCompleteOrder(), maxToStart);
-            return maxToStart;
+                maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart);
+            return new Result(ActionResult.Done,maxToStart);
         }
 
         private static async Task WorkAroundBugFrame()
@@ -708,7 +728,7 @@ namespace GarrisonButler
                     frame.GossipOptionEntries.Count <= 0) 
                     && !timeoutTimer.IsFinished) || atLeastOne)
                 {
-                    if (await MoveToInteract(pnj) == ActionResult.Running)
+                    if ((await MoveToInteract(pnj)).Status == ActionResult.Running)
                     {
                         await Buddy.Coroutines.Coroutine.Yield(); // return ActionResult.Running;
                         //ActionResult.Runing can happen in these cases:
@@ -763,9 +783,16 @@ namespace GarrisonButler
         }
 
 
-        private static async Task<ActionResult> PickUpShipment(WoWGameObject building)
+        private static async Task<Result> PickUpShipment(object obj)
         {
             WoWPoint locationToLookAt;
+            var building = obj as WoWGameObject;
+
+            if (obj == null)
+            {
+                GarrisonButler.Diagnostic("[ShipmentCollect] object is null.");
+                return new Result(ActionResult.Failed);
+            }
 
             // Fix for the mine position
             var minesIds = _buildings.Where(
@@ -791,24 +818,24 @@ namespace GarrisonButler
             if (shipmentToCollect == null)
             {
                 if (
-                    await
+                    (await
                         MoveTo(building.Location,
-                            "[ShipmentCollect] Moving to Building to search for shipment to pick up.") ==
+                            "[ShipmentCollect] Moving to Building to search for shipment to pick up.")).Status ==
                     ActionResult.Running)
-                    return ActionResult.Running;
+                    return new Result(ActionResult.Running);
             }
             else
             {
-                var actionResult = await HarvestWoWGameObjectCachedLocation(shipmentToCollect);
-                if (actionResult == ActionResult.Running)
-                    return ActionResult.Running;
+                var resultHarvesting = await HarvestWoWGameObjectCachedLocation(shipmentToCollect);
+                if (resultHarvesting.Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
 
                 await ButlerLua.OpenLandingPage();
 
-                if (actionResult == ActionResult.Refresh)
+                if (resultHarvesting.Status == ActionResult.Refresh)
                 {
                     await ButlerLua.CloseLandingPage(); 
-                    return ActionResult.Refresh;
+                    return new Result(ActionResult.Refresh);
                 }
 
 
@@ -823,17 +850,17 @@ namespace GarrisonButler
                         {
                             GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
                             await ButlerLua.CloseLandingPage();
-                            return ActionResult.Done;
+                            return new Result(ActionResult.Done);
                         }
                         GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
                     }
                     await Buddy.Coroutines.Coroutine.Yield();
                 }
                 await ButlerLua.CloseLandingPage();
-                return ActionResult.Refresh;
+                return new Result(ActionResult.Refresh);
             }
             await ButlerLua.CloseLandingPage();
-            return ActionResult.Done; // should never reach that point!
+            return new Result(ActionResult.Done); // should never reach that point!
         }
 
         private struct Shipment

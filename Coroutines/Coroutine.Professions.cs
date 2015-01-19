@@ -62,12 +62,7 @@ namespace GarrisonButler
             }
         }
 
-        private static bool ShouldRunDailies()
-        {
-            return CanRunDailies().Item1;
-        }
-
-        private static Tuple<bool, DailyProfession> CanRunDailies()
+        private async static Task<Result> CanRunDailies()
         {
             // Check
             InitializeDailies();
@@ -75,7 +70,7 @@ namespace GarrisonButler
             if (!_detectedDailyProfessions.Any())
             {
                 GarrisonButler.Diagnostic("[Profession] No daily profession CD detected.");
-                return new Tuple<bool, DailyProfession>(false, null);
+                return new Result(ActionResult.Failed);
             }
 
             //if (_detectedDailyProfessions == null)
@@ -94,26 +89,30 @@ namespace GarrisonButler
                 var daily = possibleDailies.First();
                 GarrisonButler.Diagnostic("[Profession] Found possible daily CD - TS {0} - {1} - #{2}",
                     daily.TradeskillId, daily.Spell.Name, daily.GetMaxRepeat());
-                return new Tuple<bool, DailyProfession>(true, daily);
+                return new Result(ActionResult.Running, daily);
             }
             GarrisonButler.Diagnostic("[Profession] No possible daily CD found.");
-            return new Tuple<bool, DailyProfession>(false, null);
+            return new Result(ActionResult.Failed);
         }
 
-        public static async Task<ActionResult> DoDailyCd(DailyProfession daily)
+        public static async Task<Result> DoDailyCd(object obj)
         {
+            var daily = obj as DailyProfession;
+            if (daily == null)
+                return new Result(ActionResult.Failed);
+
             if (daily.NeedAnvil())
             {
                 return await FindAnvilAndDoCd(daily);
             }
             if (await DoCd(daily))
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
 
             _dailiesTriggered = false;
-            return ActionResult.Refresh;
+            return new Result(ActionResult.Refresh);
         }
 
-        private static async Task<ActionResult> FindAnvilAndDoCd(DailyProfession daily)
+        private static async Task<Result> FindAnvilAndDoCd(DailyProfession daily)
         {
             var anvil =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
@@ -124,19 +123,19 @@ namespace GarrisonButler
             if (anvil == null)
             {
                 GarrisonButler.Diagnostic("Can't find an Anvil around, moving inside Garrison.");
-                return await MoveToMine();
+                return new Result(await MoveToMine());
             }
             GarrisonButler.Log("[Profession] Current CD requires an anvil, moving to the safest one.");
-            if (await MoveToInteract(anvil) == ActionResult.Running)
-                return ActionResult.Running;
+            if ((await MoveToInteract(anvil)).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
 
             if (await DoCd(daily))
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
 
-            return ActionResult.Refresh;
+            return new Result(ActionResult.Refresh);
         }
 
-        public static async Task<ActionResult> MoveToMine()
+        public static async Task<Result> MoveToMine()
         {
             var locationToLookAt = Me.IsAlliance ? new WoWPoint(1907, 93, 83) : new WoWPoint(5473, 4444, 144);
             return await MoveTo(locationToLookAt, "[Profession] Moving to mine to search for an Anvil.");

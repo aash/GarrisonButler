@@ -24,6 +24,7 @@ namespace GarrisonButler.Config
 
         private GaBSettings()
         {
+            GreensToChar = new SafeString();
         }
 
         [XmlIgnore]
@@ -54,10 +55,14 @@ namespace GarrisonButler.Config
             }
         }
 
+        [XmlArrayItem("Item", typeof(BItem))]
+        [XmlArray("TradePostReagents")]
+        public List<BItem> TradingPostReagentsSettings { get; set; } 
         public bool UseGarrisonHearthstone { get; set; }
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
         public bool SendDisenchantableGreens { get; set; }
+        [XmlElement("RecipientGreenDisenchant")]
         public SafeString GreensToChar { get; set; }
         public bool ForceJunkSell { get; set; }
         public bool GarrisonCache { get; set; }
@@ -74,6 +79,9 @@ namespace GarrisonButler.Config
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
+        public DateTime LastCheckTradingPost { get; set; }
+        public int itemIdTradingPost { get; set; }
+        public int numberReagentTradingPost { get; set; }
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
@@ -107,10 +115,37 @@ namespace GarrisonButler.Config
 
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
+
+            // Trading post
+            ret.PopulateMissingSettings();
             
             // Pigments for milling
             ret.Pigments = Pigment.AllPigments;
             return ret;
+        }
+
+        private void PopulateMissingSettings()
+        {
+            
+            // populate list for trade post
+            if(TradingPostReagentsSettings == null)
+                TradingPostReagentsSettings = new List<BItem>();
+
+            foreach (TradingPostReagents tradePostReagent in (TradingPostReagents[])Enum.GetValues(typeof(TradingPostReagents)))
+            {
+                if (TradingPostReagentsSettings.All(t => t.ItemId != (uint) tradePostReagent))
+                {
+                    TradingPostReagentsSettings.Add(new BItem((uint)tradePostReagent, EnumHelper.GetDescription(tradePostReagent)));
+                }
+            }
+            // If not filled
+            var newPigmentsValues = Pigment.AllPigments.Where(p => _pigments.All(pig => pig.Id != p.Id)).ToArray();
+            if (newPigmentsValues.Any())
+            {
+                GarrisonButler.Diagnostic("Updating pigments settings with values:");
+                ObjectDumper.WriteToHb(newPigmentsValues, 3);
+                _pigments.AddRange(newPigmentsValues);
+            }
         }
 
         private GaBSettings(OldSettings.GaBSettings oldSettings)
@@ -193,17 +228,7 @@ namespace GarrisonButler.Config
             return true;
         }
 
-        internal void UpdateMissingValuesFromSettings()
-        {
-            // If not filled
-            var newPigmentsValues = Pigment.AllPigments.Where(p => _pigments.All(pig => pig.Id != p.Id)).ToArray();
-            if (newPigmentsValues.Any())
-            {
-                GarrisonButler.Diagnostic("Updating pigments settings with values:");
-                ObjectDumper.WriteToHb(newPigmentsValues,3);
-                _pigments.AddRange(newPigmentsValues);
-            }
-        }
+       
 
         public static void Save()
         {
@@ -321,7 +346,7 @@ namespace GarrisonButler.Config
                     file.Close();
                     UpdateSettings(CurrentSettings);
                 }
-                CurrentSettings.UpdateMissingValuesFromSettings();
+                CurrentSettings.PopulateMissingSettings();
                 GarrisonButler.Log("Configuration successfully loaded.");
             }
             catch (Exception e)

@@ -81,10 +81,10 @@ namespace GarrisonButler
 
         private static bool _lastRoundInit;
 
-        private static async Task<ActionResult> LastRound()
+        private static async Task<Result> LastRound()
         {
             if (!CanRunLastRound())
-                return ActionResult.Done;
+                return new Result(ActionResult.Done);
 
             var myLastRoundPoints = Me.IsAlliance ? LastRoundWaypointsAlly : LastRoundWaypointsHorde;
             if (!_lastRoundInit)
@@ -104,19 +104,19 @@ namespace GarrisonButler
             {
                 _lastRoundTemp = 0;
                 _lastRoundCheckTime = DateTime.Now;
-                return ActionResult.Done;
+                return new Result(ActionResult.Done);
             }
             if (
-                await
+                (await
                     MoveTo(myLastRoundPoints[_lastRoundTemp],
-                        "Doing a last round to check if something was not too far to see before.") ==
+                        "Doing a last round to check if something was not too far to see before.")).Status ==
                 ActionResult.Running)
             {
-                return ActionResult.Running;
+                return new Result(ActionResult.Running);
             }
 
             _lastRoundTemp++;
-            return ActionResult.Running;
+            return new Result(ActionResult.Running);
         }
     }
 }

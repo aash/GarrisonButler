@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
@@ -45,75 +46,77 @@ namespace GarrisonButler
             236193
         };
 
-        public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
+        public static ActionHelpers.ActionsSequence InitializeMineAndGarden()
         {
-            // Initializing coroutines
-            GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
+            GarrisonButler.Diagnostic("Initialization Mine and Garden coroutines...");
             var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
 
             var mine = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl1) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl2) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl3));
+                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl1) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl2) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl3));
 
             var garden = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl1) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl2) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl3));
+                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl1) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl2) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl3));
 
             if (mine != default(Building))
             {
                 // Harvest mine
                 buildingsActionsSequence.AddAction(
-                    new ActionHelpers.ActionOnTimerCached<WoWGameObject>(
+                    new ActionHelpers.ActionOnTimerCached(
                         HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
                         5000,
                         100,
-                        // Drink coffee
-                        new ActionHelpers.ActionOnTimer<WoWItem>(
+                    // Drink coffee
+                        new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
-                            () =>
+                            async () =>
                             {
                                 var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 1)();
                                 return
-                                    new Tuple<bool, WoWItem>(
-                                        canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee, canUse.Item2);
+                                    new Result(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee
+                                        ? ActionResult.Running : ActionResult.Failed, canUse.Item2);
                             }, 10000, 3000),
-                        // Use Mining Pick 
-                        new ActionHelpers.ActionOnTimer<WoWItem>(
+                    // Use Mining Pick 
+                        new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
-                            () =>
+                            async () =>
                             {
                                 var canUse =
                                     CanUseItemInBags(PreserverdMiningPickItemId, PreserverdMiningPickAura, 1)();
                                 return
-                                    new Tuple<bool, WoWItem>(
-                                        canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick, canUse.Item2);
+                                    new Result(
+                                        canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick
+                                        ? ActionResult.Running : ActionResult.Failed, canUse.Item2);
                             }, 10000, 3000),
-                        // Delete Coffee 
-                        new ActionHelpers.ActionOnTimer<WoWItem>(
+                    // Delete Coffee 
+                        new ActionHelpers.ActionOnTimer(
                             DeleteItemInbags,
-                            () =>
+                            async () =>
                             {
                                 var tooMany =
                                     TooManyItemInBags(MinersCofeeItemId, 5)();
                                 return
-                                    new Tuple<bool, WoWItem>(
-                                        tooMany.Item1 && GaBSettings.Get().DeleteCoffee, tooMany.Item2);
+                                    new Result(
+                                        tooMany.Item1 && GaBSettings.Get().DeleteCoffee
+                                        ? ActionResult.Running : ActionResult.Failed, tooMany.Item2);
                             }, 10000, 3000),
-                        // Delete Mining Pick 
-                        new ActionHelpers.ActionOnTimer<WoWItem>(
+                    // Delete Mining Pick 
+                        new ActionHelpers.ActionOnTimer(
                             DeleteItemInbags,
-                            () =>
+                            async () =>
                             {
                                 var tooMany =
                                     TooManyItemInBags(PreserverdMiningPickItemId, 5)();
                                 return
-                                    new Tuple<bool, WoWItem>(
-                                        tooMany.Item1 && GaBSettings.Get().DeleteMiningPick, tooMany.Item2);
+                                    new Result(
+                                        tooMany.Item1 && GaBSettings.Get().DeleteMiningPick
+                                        ? ActionResult.Running : ActionResult.Failed, tooMany.Item2);
                             }, 10000, 30000)));
 
                 // Take care of mine shipments
@@ -123,23 +126,32 @@ namespace GarrisonButler
             {
                 // Harvest garden
                 buildingsActionsSequence.AddAction(
-                    new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation,
+                    new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation,
                         CanRunGarden, 5000));
 
                 // Take care of garden shipments
                 buildingsActionsSequence.AddAction(PickUpOrStartSequence(garden));
             }
+            return buildingsActionsSequence;
+        }
+
+        public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
+        {
+            // Initializing coroutines
+            GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
+            var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
+
             // Take care of all shipments
             buildingsActionsSequence.AddAction(PickUpOrStartSequenceAll());
 
             // Garrison cache
             buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation, CanRunCache,
+                new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation, CanRunCache,
                     10000));
 
             // Buildings activation
             buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimerCached<WoWGameObject>(HarvestWoWGameObjectCachedLocation,
+                new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation,
                     CanActivateAtLeastOneBuilding, 10000));
 
             GarrisonButler.Diagnostic("Initialization Buildings done!");
@@ -157,10 +169,10 @@ namespace GarrisonButler
         }
 
 
-        internal static Tuple<bool, WoWGameObject> CanActivateAtLeastOneBuilding()
+        internal static async Task<Result> CanActivateAtLeastOneBuilding()
         {
             if (!GaBSettings.Get().ActivateBuildings)
-                return new Tuple<bool, WoWGameObject>(false, null);
+                return new Result(ActionResult.Failed);
 
             var allToActivate =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
@@ -169,9 +181,8 @@ namespace GarrisonButler
                     .OrderBy(o => o.Location.X);
 
             if (!allToActivate.Any())
-            {
-                return new Tuple<bool, WoWGameObject>(false, null);
-            }
+                return new Result(ActionResult.Failed);
+
 
             var toActivate = allToActivate.First();
 
@@ -179,7 +190,7 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("Building  " + toActivate.SafeName + " - " + toActivate.Entry + " - " +
                                       toActivate.DisplayId + ": " + toActivate.Location);
 
-            return new Tuple<bool, WoWGameObject>(true, toActivate);
+            return new Result(ActionResult.Running, toActivate);
         }
     }
 }

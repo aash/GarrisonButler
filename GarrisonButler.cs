@@ -3,14 +3,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
 using GarrisonButler.API;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
+using Styx;
 using Styx.Common;
 using Styx.CommonBot;
+using Styx.CommonBot.Frames;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 
@@ -20,7 +25,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 5, 0, 1);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 7, 4, 0);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
@@ -167,6 +172,18 @@ namespace GarrisonButler
 
         private static void LootOpened(object sender, LuaEventArgs args)
         {
+            var lootFrame = LootFrame.Instance;
+            if (lootFrame != null)
+            {
+                for (int i = 0; i < lootFrame.LootItems; i++)
+                {
+                    GarrisonButler.Diagnostic("[Loot] Found LootName {0}.", lootFrame.LootInfo(i).LootName);
+                    GarrisonButler.Diagnostic("[Loot] Found LootIcon {0}.", lootFrame.LootInfo(i).LootIcon);
+                    GarrisonButler.Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
+                    GarrisonButler.Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
+                    GarrisonButler.Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
+                }
+            }
             LootIsOpen = true;
         }
 
@@ -198,7 +215,7 @@ namespace GarrisonButler
         }
 
         /// <summary>
-        /// Returns false in 2 conditions - #1 time is less than 60s from last run or #2 nothing to do
+        /// Returns false in 2 conditions - #1 time is less than 60s(default) from last run or #2 nothing to do
         /// </summary>
         public override bool RequirementsMet
         {
@@ -216,9 +233,8 @@ namespace GarrisonButler
 
                     GarrisonButler.Log("One more check and then taking a break for {0}s", timeBetweenRuns);
                 }
-
-                var anyToDo = Coroutine.AnythingTodo();
-                if (!anyToDo) return false;
+                Coroutine.AnythingTodo();
+                if (!Coroutine.AnyTodo) return false;
                 Coroutine.ReadyToSwitch = false;
                 return true;
             }

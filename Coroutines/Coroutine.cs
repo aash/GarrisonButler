@@ -153,18 +153,20 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
-                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<WoWItem>(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
+                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
                     10000, 1000));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<int>(GetMails, HasMails));
-                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<DailyProfession>(DoDailyCd, CanRunDailies, 15000,
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails));
+                _mainSequence.AddAction(InitializeMineAndGarden());
+                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(DoDailyCd, CanRunDailies, 15000,
                     1000));
                 _mainSequence.AddAction(InitializeBuildingsCoroutines());
                 _mainSequence.AddAction(InitializeMissionsCoroutines());
+
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer<List<MailItem>>(MailItem, CanMailItem, 15000,
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(MailItem, CanMailItem, 15000,
                         1000));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
@@ -207,7 +209,7 @@ namespace GarrisonButler
                 if (await HbApi.StackAllItemsIfPossible())
                     return true;
 
-                if (await SellJunkCoroutine() == ActionResult.Running)
+                if ((await SellJunkCoroutine()).Status == ActionResult.Running)
                     return true;
 
                 // Without a timer it will spam Alert messages over and over
@@ -350,7 +352,7 @@ namespace GarrisonButler
                 return true;
             
 
-            if (await VendorCoroutineWorkaround() == ActionResult.Running)
+            if ((await VendorCoroutineWorkaround()).Status == ActionResult.Running)
                 return true;
             
             if (await LootBehavior.ExecuteCoroutine())
@@ -386,7 +388,7 @@ namespace GarrisonButler
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
             var resultActions = await _mainSequence.ExecuteAction();
-            if (resultActions == ActionResult.Running || resultActions == ActionResult.Refresh)
+            if (resultActions.Status == ActionResult.Running || resultActions.Status == ActionResult.Refresh)
             {
                 //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
@@ -414,14 +416,14 @@ namespace GarrisonButler
             }
         }
 
-        private static async Task<ActionResult> SellJunk()
+        private static async Task<Result> SellJunk()
         {
             if (GaBSettings.Get().ForceJunkSell) return await SellJunkCoroutine();
             GarrisonButler.Diagnostic("[Vendor] Force junk behavior deactivated in User settings.");
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
-        private static async Task<ActionResult> SellJunkCoroutine()
+        private static async Task<Result> SellJunkCoroutine()
         {
             if (Me.BagItems.Any(i =>
             {
@@ -445,17 +447,17 @@ namespace GarrisonButler
             }
             Vendors.ForceSell = false;
             GarrisonButler.Diagnostic("[Vendor] No Junk detected.");
-            return ActionResult.Done;
+            return new Result(ActionResult.Done);
         }
 
         private static DateTime _mountVendorTimeStart = default(DateTime);
 
-        private static async Task<ActionResult> VendorCoroutineWorkaround()
+        private static async Task<Result> VendorCoroutineWorkaround()
         {
             if (!Vendors.ForceSell &&
                 (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
                  StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
-                return ActionResult.Done;
+                return new Result(ActionResult.Done);
 
             if (_mountVendorTimeStart == default(DateTime))
                 _mountVendorTimeStart = DateTime.Now;
@@ -468,23 +470,25 @@ namespace GarrisonButler
 
             _mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
 
-            var resultCoroutine = await VendorBehavior.ExecuteCoroutine() ? ActionResult.Running : ActionResult.Done;
+            var resultCoroutine = await VendorBehavior.ExecuteCoroutine() ? new Result(ActionResult.Running) : new Result(ActionResult.Done);
             return resultCoroutine;
         }
 
-        internal static Tuple<bool, WoWItem> ShouldTpToGarrison()
+        internal static async Task<Result> ShouldTpToGarrison()
         {
-            if (Me.IsInGarrison()) return new Tuple<bool, WoWItem>(false, null);
+            if (Me.IsInGarrison())
+                return new Result(ActionResult.Failed);
+
             if (!GaBSettings.Get().UseGarrisonHearthstone)
             {
                 //TreeRoot.Stop(
                 //    "Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
-                return new Tuple<bool, WoWItem>(false, null);
+                return new Result(ActionResult.Failed);
             }
             var stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
             return (stone == null || stone.CooldownTimeLeft.TotalSeconds > 1)
-                ? new Tuple<bool, WoWItem>(false, null) 
-                : new Tuple<bool, WoWItem>(true, stone);
+                ? new Result(ActionResult.Failed)
+                : new Result(ActionResult.Running, stone);
         }
 
         private static async Task<bool> RestoreUiIfNeeded()

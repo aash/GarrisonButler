@@ -55,7 +55,7 @@ namespace GarrisonButler.API
 
             return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
-
+        
         public static void ClickStartOrderButton()
         {
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
