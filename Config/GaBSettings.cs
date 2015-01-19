@@ -18,6 +18,7 @@ namespace GarrisonButler.Config
     {
         private GaBSettings()
         {
+            GreensToChar = new SafeString();
         }
 
         [XmlIgnore]
@@ -39,6 +40,7 @@ namespace GarrisonButler.Config
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
         public bool SendDisenchantableGreens { get; set; }
+        [XmlElement("RecipientGreenDisenchant")]
         public SafeString GreensToChar { get; set; }
         public bool ForceJunkSell { get; set; }
         public bool GarrisonCache { get; set; }

@@ -226,10 +226,14 @@ namespace GarrisonButler.Config
                 MaxLength = 50
             };
             // binding
-            var toCharBinding = new Binding("Value") { Source = GaBSettings.Get().GreensToChar };
-            toCharBinding.ValidationRules.Add(new IsValidCharacterNameRule());
-            toCharBinding.Mode = BindingMode.TwoWay;
-            toCharBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            var toCharBinding = new Binding("GreensToChar.Value")
+            {
+                Source = GaBSettings.Get(),
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                ValidationRules = { new IsValidCharacterNameRule() },
+                Mode = BindingMode.TwoWay,
+            };
+           
             //http://msdn.microsoft.com/en-us/library/system.windows.data.binding.updatesourcetrigger(v=vs.110).aspx
             toCharTextBox.SetBinding(TextBox.TextProperty, toCharBinding);
 

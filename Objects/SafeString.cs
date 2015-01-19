@@ -22,6 +22,11 @@ namespace GarrisonButler.Objects
             }
         }
 
+        public int Length
+        {
+            get { return Value.Length; }
+        }
+
         public SafeString(string value)
         {
             Value = value;
@@ -29,20 +34,9 @@ namespace GarrisonButler.Objects
 
         public SafeString()
         {
-            Value = "";
+            Value = "None";
         }
 
-        //public static implicit operator string(SafeString d)
-        //{
-        //    if (d == null)
-        //        d = new SafeString(); 
-        //    return d.Value;
-        //}
-
-        //public static implicit operator SafeString(string d)
-        //{
-        //    return new SafeString(d);
-        //}
 
         public static string ToStringSafe()
         {
@@ -72,3 +66,14 @@ namespace GarrisonButler.Objects
         }
     }
 }
+//public static implicit operator string(SafeString d)
+//{
+//    if (d == null)
+//        d = new SafeString(); 
+//    return d.Value;
+//}
+
+//public static implicit operator SafeString(string d)
+//{
+//    return new SafeString(d);
+//}
