@@ -468,17 +468,11 @@ namespace GarrisonButler
             };
         }
 
-        private static async Task<Result> StartShipment(object obj)
+        internal static async Task<Result> MoveToAndOpenCapacitiveFrame(Building building)
         {
-            var building = obj as Building;
+            var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
+                .FirstOrDefault(u => building.PnjIds != null ? building.PnjIds.Contains((int)u.Entry) : u.Entry == building.PnjId);
             
-            if (building == null)
-            {
-                GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
-                return new Result(ActionResult.Failed);
-            }
-
-            var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().FirstOrDefault(u => u.Entry == building.PnjId);
             if (unit == null)
             {
                 await
@@ -498,7 +492,7 @@ namespace GarrisonButler
                 var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
                 if (!res)
                 {
-                    Navigator.PlayerMover.MoveTowards(unit.Location); 
+                    Navigator.PlayerMover.MoveTowards(unit.Location);
                 }
                 else
                 {
@@ -570,6 +564,21 @@ namespace GarrisonButler
             building.workFrameWorkAroundTries = 0;
 
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
+            return new Result(ActionResult.Done);
+        }
+        private static async Task<Result> StartShipment(object obj)
+        {
+            var building = obj as Building;
+            
+            if (building == null)
+            {
+                GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
+                return new Result(ActionResult.Failed);
+            }
+
+            if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
+            
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  

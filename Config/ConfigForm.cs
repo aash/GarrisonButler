@@ -73,6 +73,10 @@ namespace GarrisonButler.Config
                     tabControl.Items.Add(mailing);
                 }
 
+                var tradingPostTab = new TradingPostTab();
+                var tradingPost = new TabItem { Header = "Trading Post", Content = tradingPostTab.ContentTradingPostTab() };
+                tabControl.Items.Add(tradingPost);
+
                 var aboutTabItem = new TabItem {Header = "About", Content = ContentTabAbout()};
                 tabControl.Items.Add(aboutTabItem);
 

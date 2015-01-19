@@ -8,8 +8,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using GarrisonButler.API;
+using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using Styx;
+using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
@@ -26,6 +28,7 @@ namespace GarrisonButler
         public int NumberReagent;
         public WoWPoint Pnj;
         public int PnjId;
+        public List<int> PnjIds;
         public PrepOrderD PrepOrder = () => new Task<bool>(() => false);
         public int ReagentId;
         public List<int> ReagentIds;
@@ -693,7 +696,39 @@ namespace GarrisonButler
                 case (int) Buildings.TradingPostLvl1:
                 case (int) Buildings.TradingPostLvl2:
                 case (int) Buildings.TradingPostLvl3:
-                    //CanCompleteOrder = CanCompleteOrderTradingPost;
+                    Pnj = alliance
+                        ? new WoWPoint(1872.647, 310.0204, 82.61102)
+                        : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    CanCompleteOrder = CanCompleteOrderTradingPost;
+                    PnjIds = alliance 
+                        ? new List<int>()
+                            {
+                                87207,
+                                87211,
+                                87208,
+                                87213,
+                                87214,
+                                87217,
+                                87215,
+                                87212,
+                                87209,
+                                87216,
+                                87210
+                            }
+                        : new List<int>()
+                            {
+                                86803,
+                                87112,
+                                87113,
+                                87114,
+                                87115,
+                                87116,
+                                87117,
+                                87118,
+                                87119,
+                                87120,
+                                87121
+                            };
                     Displayids = new List<uint>
                     {
                         18574, // Garrison Building  Trading Post V1
@@ -703,7 +738,7 @@ namespace GarrisonButler
                         15404, // Garrison Building Horde Trading Post V2
                         20150 // Garrison Building Horde Trading Post V3
                     };
-                    break; // This one changes everyday... 
+                    break; 
             }
         }
 
@@ -711,17 +746,32 @@ namespace GarrisonButler
         {
             // Before being able to calculate it, we need to know what's today's reagent.
             // It can be saved in settings with the date.
-
+            var serverTimeLua = await ButlerLua.GetServerDate();
+            var secBeforeReset = TimeSpan.FromSeconds(await ButlerLua.GetTimeBeforeResetInSec());
+            var nextReset = serverTimeLua + secBeforeReset;
+            var lastReset = nextReset - TimeSpan.FromHours(24);
+            
+            if (GaBSettings.Get().LastCheckTradingPost == default(DateTime)
+                || GaBSettings.Get().LastCheckTradingPost < lastReset)
+            {
                 // moving to pnj
+                if ((await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
 
-                // checking reagent
+                // Check reagent
+                var reagent = await ButlerLua.GetShipmentReagentInfo();
+                if (reagent.Item1 == -1) return new Result(ActionResult.Failed);
 
-                // set today's reagent with date/time (check reset time of servers)
-                // Check if there's a way to know it has reset
-
-            // calculate number in bags and reagent bank
-
-            return new Result(ActionResult.Done, 0);
+                // Override value
+                ReagentId = reagent.Item1;
+                NumberReagent = reagent.Item2;
+                GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
+                GaBSettings.Save();
+                return new Result(ActionResult.Refresh);
+            }
+            // Done with the check of reagent, so we switch to simple routine.
+            CanCompleteOrder = CanCompleteOrderItem;
+            return new Result(ActionResult.Refresh, 0);
         }
 
 
@@ -812,14 +862,12 @@ namespace GarrisonButler
     {
         [Description("Draenic Dust")]
         DraenicDust = 109693,
-
         [Description("Sumptuous Fur")]
         SumptuousFur = 111557,
-
         [Description("Raw Beast Hide")]
         RawBeastHide = 110609,
-        // Herb
 
+        // Herb
         [Description("Talador Orchid")]
         TaladorOrchid = 109129,
         [Description("Nagrand Arrow Bloom")]
@@ -832,11 +880,13 @@ namespace GarrisonButler
         Fireweed = 109125,
         [Description("Frostweed")]
         Frostweed = 109124,
+
         // Ore
         [Description("True Iron Ore")]
         TrueIronOre = 109119,
         [Description("Blackrock Ore")]
         BlackrockOre = 109118,
+
         // Meat
         [Description("Raw Clefthoof Meat")]
         RawClefthoofMeat = 109131,
@@ -850,6 +900,7 @@ namespace GarrisonButler
         RawRiverbeastMeat = 109135,
         [Description("Raw Boar Meat")]
         RawBoarMeat = 109136,
+
         // Fish
         [Description("Crescent Saberfish Flesh")]
         CrescentSaberfishFlesh = 109137,

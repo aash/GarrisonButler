@@ -183,6 +183,92 @@ namespace GarrisonButler.API
             var results = await GetReturnValues(lua);
             return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
+        
+        public static async Task<Tuple<int, int>> GetServerTime()
+        {
+            const string lua = @"  
+                    local hour,minute = GetGameTime();
+                    local RetInfo = {};
+                    table.insert(RetInfo,tostring(hour));
+                    table.insert(RetInfo,tostring(minute));
+                    return unpack(RetInfo);";
+            var results = await GetReturnValues(lua);
+            var hour = results.GetEmptyIfNull().ElementAt(0).ToInt32();
+            var minutes = results.GetEmptyIfNull().ElementAt(1).ToInt32();
+            return new Tuple<int, int>(hour, minutes);
+        }
+        public static async Task<int> GetTimeBeforeResetInSec()
+        {
+            const string lua = @"  
+                    local timeInSeconds = GetQuestResetTime();
+                    return tostring(timeInSeconds);";
+            var results = await GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToInt32();
+        }
 
+        public static async Task<DateTime> GetServerDate()
+        {
+            const string lua = "local date = date(\"*t\"); return unpack(date);";
+            var results = await GetReturnValues(lua);
+            var dateServer = results.GetEmptyIfNull().ToArray();
+            if (dateServer.Count() < 9)
+            {
+                GarrisonButler.Diagnostic("Error while loading lua date.");
+                return DateTime.Now;
+            }
+            var hour = dateServer[0].ToInt32();
+            var min = dateServer[0].ToInt32();
+            var sec = dateServer[0].ToInt32();
+            var wday = dateServer[0].ToInt32();
+            var day = dateServer[0].ToInt32();
+            var month = dateServer[0].ToInt32();
+            var year = dateServer[0].ToInt32();
+            var yday = dateServer[0].ToInt32();
+            var isdst = dateServer[0].ToBoolean();
+            DateTime date = new DateTime(year,month,day,hour,min,sec);
+            return date;
+        }
+
+        public async static Task<Tuple<int,int>> GetShipmentReagentInfo()
+        {
+            const string lua =
+                @"local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(i);
+                    local RetInfo = {};
+                    table.insert(RetInfo,tostring(itemID));
+                    table.insert(RetInfo,tostring(needed));
+                    return unpack(RetInfo);";
+            var results = (await GetReturnValues(lua)).GetEmptyIfNull().ToArray();
+            if (results.Count() < 2)
+            {
+                GarrisonButler.Diagnostic("Error retrieving ShipmentReagentInfo.");
+                return new Tuple<int, int>(-1, -1);
+            }
+            return new Tuple<int, int>(results[0].ToInt32(), results[1].ToInt32());
+        }
+
+        public struct ServerDate
+        {
+            public ServerDate(int hours, int minutes, int seconds, int day, int month, int year) : this()
+            {
+                Hours = hours;
+                Minutes = minutes;
+                Seconds = seconds;
+                Day = day;
+                Month = month;
+                Year = year;
+            }
+
+            public int Hours { get; set; }
+
+            public int Minutes { get; set; }
+
+            public int Seconds { get; set; }
+
+            public int Day { get; set; }
+
+            public int Month { get; set; }
+
+            public int Year { get; set; }
+        }
     }
 }

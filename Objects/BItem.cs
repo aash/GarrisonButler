@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Xml;
+using System.Xml.Serialization;
 using JetBrains.Annotations;
-using Styx.XmlEngine;
 
 namespace GarrisonButler.Objects
 {
@@ -37,7 +38,7 @@ namespace GarrisonButler.Objects
             }
         }
 
-        [XmlAttribute("Name")]
+        [XmlText()]
         public string Name { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;

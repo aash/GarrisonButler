@@ -60,6 +60,7 @@ namespace GarrisonButler.Config
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
+        public DateTime LastCheckTradingPost { get; set; }
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
@@ -93,12 +94,19 @@ namespace GarrisonButler.Config
 
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
+
+            // Trading post
+            ret.PopulateMissingSettings();
             return ret;
         }
 
         private void PopulateMissingSettings()
         {
+            
             // populate list for trade post
+            if(TradingPostReagentsSettings == null)
+                TradingPostReagentsSettings = new List<BItem>();
+
             foreach (TradingPostReagents tradePostReagent in (TradingPostReagents[])Enum.GetValues(typeof(TradingPostReagents)))
             {
                 if (TradingPostReagentsSettings.All(t => t.ItemId != (uint) tradePostReagent))
