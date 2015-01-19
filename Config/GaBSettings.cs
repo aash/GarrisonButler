@@ -36,6 +36,9 @@ namespace GarrisonButler.Config
         [XmlArray("DailySettings")]
         public List<DailyProfession> DailySettings { get; set; }
 
+        [XmlArrayItem("Item", typeof(BItem))]
+        [XmlArray("TradePostReagents")]
+        public List<BItem> TradingPostReagentsSettings { get; set; } 
         public bool UseGarrisonHearthstone { get; set; }
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
@@ -91,6 +94,18 @@ namespace GarrisonButler.Config
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
             return ret;
+        }
+
+        private void PopulateMissingSettings()
+        {
+            // populate list for trade post
+            foreach (TradingPostReagents tradePostReagent in (TradingPostReagents[])Enum.GetValues(typeof(TradingPostReagents)))
+            {
+                if (TradingPostReagentsSettings.All(t => t.ItemId != (uint) tradePostReagent))
+                {
+                    TradingPostReagentsSettings.Add(new BItem((uint)tradePostReagent, EnumHelper.GetDescription(tradePostReagent)));
+                }
+            }
         }
 
         private GaBSettings(OldSettings.GaBSettings oldSettings)
@@ -290,6 +305,7 @@ namespace GarrisonButler.Config
                     file.Close();
                     UpdateSettings(CurrentSettings);
                 }
+                CurrentSettings.PopulateMissingSettings();
                 GarrisonButler.Log("Configuration successfully loaded.");
             }
             catch (Exception e)

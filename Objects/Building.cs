@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Coroutines;
@@ -808,35 +810,63 @@ namespace GarrisonButler
 
     public enum TradingPostReagents
     {
+        [Description("Draenic Dust")]
         DraenicDust = 109693,
+
+        [Description("Sumptuous Fur")]
         SumptuousFur = 111557,
+
+        [Description("Raw Beast Hide")]
         RawBeastHide = 110609,
         // Herb
+
+        [Description("Talador Orchid")]
         TaladorOrchid = 109129,
+        [Description("Nagrand Arrow Bloom")]
         NagrandArrowbloom = 109128,
+        [Description("Starflower")]
         Starflower = 109127,
+        [Description("Gorgrond FlyTrap")]
         GorgrondFlytrap = 109126,
+        [Description("Fireweed")]
         Fireweed = 109125,
+        [Description("Frostweed")]
         Frostweed = 109124,
         // Ore
+        [Description("True Iron Ore")]
         TrueIronOre = 109119,
+        [Description("Blackrock Ore")]
         BlackrockOre = 109118,
         // Meat
+        [Description("Raw Clefthoof Meat")]
         RawClefthoofMeat = 109131,
+        [Description("Raw Talbuk Meat")]
         RawTalbukMeat = 109132,
+        [Description("Rylak Egg")]
         RylakEgg = 109133,
+        [Description("Raw Elekk Meat")]
         RawElekkMeat = 109134,
+        [Description("Raw Riverbeast Meat")]
         RawRiverbeastMeat = 109135,
+        [Description("Raw Boar Meat")]
         RawBoarMeat = 109136,
         // Fish
+        [Description("Crescent Saberfish Flesh")]
         CrescentSaberfishFlesh = 109137,
+        [Description("Jawless Skulker Flesh")]
         JawlessSkulkerFlesh = 109138,
+        [Description("Fat Sleeper Flesh")]
         FatSleeperFlesh = 109139,
+        [Description("Blind Lake Sturgeon Flesh")]
         BlindLakeSturgeonFlesh = 109140,
+        [Description("Fire Ammonite Tentacle")]
         FireAmmoniteTentacle = 109141,
+        [Description("Sea Scorpion Segment")]
         SeaScorpionSegment = 109142,
+        [Description("Abyssal Gulper Eel Flesh")]
         AbyssalGulperEelFlesh = 109143,
     }
+     
     public enum Buildings
     {
         MineLvl1 = 61,
