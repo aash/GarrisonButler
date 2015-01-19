@@ -761,7 +761,7 @@ namespace GarrisonButler
                 // Check reagent
                 var reagent = await ButlerLua.GetShipmentReagentInfo();
                 if (reagent.Item1 == -1) return new Result(ActionResult.Failed);
-
+                   
                 // Override value
                 ReagentId = reagent.Item1;
                 NumberReagent = reagent.Item2;
@@ -769,9 +769,13 @@ namespace GarrisonButler
                 GaBSettings.Save();
                 return new Result(ActionResult.Refresh);
             }
+
+            var rea =
+                GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
+            if (rea == null)
+                return new Result(ActionResult.Failed);
             // Done with the check of reagent, so we switch to simple routine.
-            CanCompleteOrder = CanCompleteOrderItem;
-            return new Result(ActionResult.Refresh, 0);
+            return await CanCompleteOrderItem();
         }
 
 

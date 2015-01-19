@@ -34,7 +34,7 @@ namespace GarrisonButler.Objects
 
         public SafeString()
         {
-            Value = "None";
+            Value = "";
         }
 
 
