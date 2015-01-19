@@ -157,10 +157,12 @@ namespace GarrisonButler
                     10000, 1000));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails));
+                _mainSequence.AddAction(InitializeMineAndGarden());
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(DoDailyCd, CanRunDailies, 15000,
                     1000));
                 _mainSequence.AddAction(InitializeBuildingsCoroutines());
                 _mainSequence.AddAction(InitializeMissionsCoroutines());
+
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
                 if (GarrisonButler.NameStatic.ToLower().Contains("ice"))

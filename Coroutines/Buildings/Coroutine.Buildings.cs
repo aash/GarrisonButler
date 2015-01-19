@@ -46,23 +46,22 @@ namespace GarrisonButler
             236193
         };
 
-        public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
+        public static ActionHelpers.ActionsSequence InitializeMineAndGarden()
         {
-            // Initializing coroutines
-            GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
+            GarrisonButler.Diagnostic("Initialization Mine and Garden coroutines...");
             var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
 
             var mine = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl1) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl2) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl3));
+                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl1) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl2) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl3));
 
             var garden = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl1) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl2) ||
-                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl3));
+                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl1) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl2) ||
+                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl3));
 
             if (mine != default(Building))
             {
@@ -73,7 +72,7 @@ namespace GarrisonButler
                         CanRunMine,
                         5000,
                         100,
-                        // Drink coffee
+                    // Drink coffee
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
                             async () =>
@@ -83,7 +82,7 @@ namespace GarrisonButler
                                     new Result(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee
                                         ? ActionResult.Running : ActionResult.Failed, canUse.Item2);
                             }, 10000, 3000),
-                        // Use Mining Pick 
+                    // Use Mining Pick 
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
                             async () =>
@@ -95,7 +94,7 @@ namespace GarrisonButler
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick
                                         ? ActionResult.Running : ActionResult.Failed, canUse.Item2);
                             }, 10000, 3000),
-                        // Delete Coffee 
+                    // Delete Coffee 
                         new ActionHelpers.ActionOnTimer(
                             DeleteItemInbags,
                             async () =>
@@ -107,7 +106,7 @@ namespace GarrisonButler
                                         tooMany.Item1 && GaBSettings.Get().DeleteCoffee
                                         ? ActionResult.Running : ActionResult.Failed, tooMany.Item2);
                             }, 10000, 3000),
-                        // Delete Mining Pick 
+                    // Delete Mining Pick 
                         new ActionHelpers.ActionOnTimer(
                             DeleteItemInbags,
                             async () =>
@@ -133,6 +132,15 @@ namespace GarrisonButler
                 // Take care of garden shipments
                 buildingsActionsSequence.AddAction(PickUpOrStartSequence(garden));
             }
+            return buildingsActionsSequence;
+        }
+
+        public static ActionHelpers.ActionsSequence InitializeBuildingsCoroutines()
+        {
+            // Initializing coroutines
+            GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
+            var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
+
             // Take care of all shipments
             buildingsActionsSequence.AddAction(PickUpOrStartSequenceAll());
 
