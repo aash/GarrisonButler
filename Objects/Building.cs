@@ -782,6 +782,37 @@ namespace GarrisonButler
         }
     }
 
+    public enum TradingPostReagents
+    {
+        DraenicDust = 109693,
+        SumptuousFur = 111557,
+        RawBeastHide = 110609,
+        // Herb
+        TaladorOrchid = 109129,
+        NagrandArrowbloom = 109128,
+        Starflower = 109127,
+        GorgrondFlytrap = 109126,
+        Fireweed = 109125,
+        Frostweed = 109124,
+        // Ore
+        TrueIronOre = 109119,
+        BlackrockOre = 109118,
+        // Meat
+        RawClefthoofMeat = 109131,
+        RawTalbukMeat = 109132,
+        RylakEgg = 109133,
+        RawElekkMeat = 109134,
+        RawRiverbeastMeat = 109135,
+        RawBoarMeat = 109136,
+        // Fish
+        CrescentSaberfishFlesh = 109137,
+        JawlessSkulkerFlesh = 109138,
+        FatSleeperFlesh = 109139,
+        BlindLakeSturgeonFlesh = 109140,
+        FireAmmoniteTentacle = 109141,
+        SeaScorpionSegment = 109142,
+        AbyssalGulperEelFlesh = 109143,
+    }
     public enum Buildings
     {
         MineLvl1 = 61,

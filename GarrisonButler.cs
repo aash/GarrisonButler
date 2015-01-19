@@ -3,14 +3,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
+using Styx;
 using Styx.Common;
 using Styx.CommonBot;
+using Styx.CommonBot.Frames;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 
@@ -167,6 +170,25 @@ namespace GarrisonButler
 
         private static void LootOpened(object sender, LuaEventArgs args)
         {
+            var lootFrame = LootFrame.Instance;
+            if (lootFrame != null)
+            {
+                for (int i = 0; i < lootFrame.LootItems; i++)
+                {
+                    GarrisonButler.Diagnostic("[Loot] Found LootName {0}.", lootFrame.LootInfo(i).LootName);
+                    GarrisonButler.Diagnostic("[Loot] Found LootIcon {0}.", lootFrame.LootInfo(i).LootIcon);
+                    GarrisonButler.Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
+                    GarrisonButler.Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
+                    GarrisonButler.Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
+                    
+                    LootFrame.NativeLootSlotInfo test = new LootFrame.NativeLootSlotInfo();
+                    
+                       IntPtr addr = StyxWoW<IntPtr>(StyxWoW.Offsets, CallingConvention.ThisCall, (object) StyxWoW.Offsets.\u0001.\u0007\u0002, (object) slot);
+      if (\u008D\u0006.\u0081\u0018(addr, \u008B\u0008.\u0005\u001B(0)))
+        return 0U;
+      LootFrame.NativeLootSlotInfo nativeLootSlotInfo = StyxWoW.Memory.Read<LootFrame.NativeLootSlotInfo>(addr);
+                }
+            }
             LootIsOpen = true;
         }
 
