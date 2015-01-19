@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
+using Bots.Quest.Actions;
 using Styx.Common.Helpers;
 
 #endregion
@@ -17,6 +19,7 @@ namespace GarrisonButler.Coroutines
         {
             public abstract Task<Result> ExecuteAction();
             internal Func<Task<Result>> Condition;
+            public Result ResCondition = new Result(ActionResult.Failed);
         }
 
         internal class ActionBasic : Action
@@ -70,7 +73,6 @@ namespace GarrisonButler.Coroutines
             protected WaitTimer WaitTimerCondition;
             protected Result LastResult;
             protected bool NeedToCache = false;
-            protected Result ResCondition;
 
             public override string ToString()
             {
@@ -106,7 +108,8 @@ namespace GarrisonButler.Coroutines
             public override async Task<Result> ExecuteAction()
             {
                 // Check time between a recheck once done
-                if (LastResult.Status == ActionResult.Done && !WaitTimerAction.IsFinished)
+                if ((LastResult.Status == ActionResult.Done || LastResult.Status == ActionResult.Failed)
+                        && !WaitTimerAction.IsFinished)
                     return new Result(ActionResult.Done);
 
                 // Check time while running to not overload
@@ -158,7 +161,8 @@ namespace GarrisonButler.Coroutines
             public override async Task<Result> ExecuteAction()
             {
                 // Check time between a recheck once done
-                if (LastResult.Status == ActionResult.Done && !WaitTimerAction.IsFinished)
+                if ((LastResult.Status == ActionResult.Done || LastResult.Status == ActionResult.Failed)
+                        && !WaitTimerAction.IsFinished)
                     return new Result(ActionResult.Done);
 
                 // Check time while running to not overload
@@ -200,6 +204,8 @@ namespace GarrisonButler.Coroutines
                     LastResult = new Result(ActionResult.Done);
 
                 WaitTimerAction.Reset();
+
+                // To do for all actions class - add max failed attempts. 
                 return
                     (LastResult.Status == ActionResult.Refresh || LastResult.Status == ActionResult.Running)
                         ? new Result(ActionResult.Running)
@@ -231,14 +237,29 @@ namespace GarrisonButler.Coroutines
                 _actions.Add(action);
             }
 
-            public async Task<Result> AtLeastOneTrue()
+            public async Task<bool> AtLeastOneTrue()
             {
-                foreach (var action in _actions)
+                foreach(var action in _actions)
                 {
-                    if ((await action.Condition()).Status == ActionResult.Running)
-                        return new Result(ActionResult.Running);
+                    // Check if it is a sequence
+                    var seq = action as ActionsSequence;
+                    if (seq != null)
+                    {
+                        if (await seq.AtLeastOneTrue())
+                            return true;
+                    }
+                    // check if null
+                    if (action.Condition == null)
+                        continue;
+
+                    var res = await action.Condition();
+                    if (res.Status == ActionResult.Running)
+                    {
+                        GarrisonButler.Diagnostic("[ActionSequence] Found an action to fire.");
+                        return true;
+                    }
                 }
-                return new Result(ActionResult.Failed);
+                return false;
             }
 
             public override async Task<Result> ExecuteAction()

@@ -4,11 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using CommonBehaviors.Actions;
 using GarrisonButler.API;
 using GarrisonButler.Config;
+using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common;
@@ -231,10 +233,8 @@ namespace GarrisonButler
 
                     GarrisonButler.Log("One more check and then taking a break for {0}s", timeBetweenRuns);
                 }
-
-                Coroutine.AnythingTodo().RunSynchronously();
-                var anyToDo = Coroutine.AnythingTodo().Result;
-                if (!anyToDo) return false;
+                Coroutine.AnythingTodo();
+                if (!Coroutine.AnyTodo) return false;
                 Coroutine.ReadyToSwitch = false;
                 return true;
             }

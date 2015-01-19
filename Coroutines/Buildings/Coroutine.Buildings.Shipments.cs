@@ -409,7 +409,7 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found {1} new work orders to start: {2}",
                     building.Id, maxToStart, building.Name);
-                return new Result(ActionResult.Running, new Tuple<bool, Building>(true, building));
+                return new Result(ActionResult.Running, building);
             };
         }
         

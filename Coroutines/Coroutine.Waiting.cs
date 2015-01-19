@@ -1,4 +1,8 @@
-﻿using GarrisonButler.API;
+﻿using Buddy.Coroutines;
+using System.Threading;
+using System.Windows.Navigation;
+using GreyMagic;
+using GarrisonButler.API;
 using GarrisonButler.Coroutines;
 
 #region
@@ -22,6 +26,8 @@ namespace GarrisonButler
     {
         private static bool _hbRelogSkipped;
         private static int _hbRelogSkippedCounter;
+        private static WoWPoint waitingSpot;
+        private static bool waitingSpotInit = false;
 
 // ReSharper disable once CSharpWarnings::CS1998
         private static async Task<Result> Waiting()
@@ -37,6 +43,22 @@ namespace GarrisonButler
                 throw new NotImplementedException(
                     "This level of garrison is not supported! Please upgrade at least to level 2 the main building.");
             }
+            if (!waitingSpotInit)
+            {
+                var r = new Random(DateTime.Now.Second);
+                var randomX = (float)(r.NextDouble() - 0.5) * 5;
+                var randomY = (float)(r.NextDouble() - 0.5) * 5;
+                var toAdd = Me.IsAlliance ? TableAlliance : TableHorde;
+                toAdd.X = toAdd.X + randomX;
+                toAdd.Y = toAdd.Y + randomY;
+                waitingSpot = Dijkstra.ClosestToNodes(toAdd);
+                waitingSpotInit = true;
+            }
+
+            if ((await
+                    MoveTo(waitingSpot, "Moving to random waiting spot next to mission table.")).Status == ActionResult.Running)
+                return new Result(ActionResult.Running);
+            
             GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
             return new Result(ActionResult.Done);
         }
@@ -85,12 +107,16 @@ namespace GarrisonButler
             return true;
         }
 
-        public async static Task<bool> AnythingTodo()
+        public async static void AnythingTodo()
         {
             if (!ReadyToSwitch)
-                return false;
-
-            return (await _mainSequence.AtLeastOneTrue()).Status == ActionResult.Running;
+            {
+                AnyTodo = false;
+                return;
+            }
+            AnyTodo = await _mainSequence.AtLeastOneTrue();
         }
+
+        internal static bool AnyTodo = false;
     }
 }
