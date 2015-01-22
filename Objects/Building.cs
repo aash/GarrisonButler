@@ -14,6 +14,8 @@ using Styx;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
+using Styx.CommonBot.Coroutines;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
@@ -24,7 +26,7 @@ namespace GarrisonButler
     {
         public delegate Task<Result> CanCompleteOrderD();
 
-        public delegate Func<Task<ActionResult>> PrepOrderD(int numberToStart);
+        public delegate Task<Result> PrepOrderD(int numberToStart);
 
         private readonly String _itemId;
         public List<uint> Displayids;
@@ -32,7 +34,7 @@ namespace GarrisonButler
         public WoWPoint Pnj;
         public int PnjId;
         public List<int> PnjIds;
-        public PrepOrderD PrepOrder = () => new Task<bool>(() => false);
+        public PrepOrderD PrepOrder;
         public int ReagentId;
         public List<int> ReagentIds;
         private String _buildTime;
@@ -249,7 +251,7 @@ namespace GarrisonButler
         {
             var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
             if(inscription == null)
-                return CanCompleteOrderItem();
+                return await CanCompleteOrderItem();
 
             // get number in bags
             var count = HbApi.GetNumberItemInBags((uint)ReagentId);
@@ -266,43 +268,111 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("[ShipmentStart] Total found with milling {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
                 NumberReagent, count >= NumberReagent);
 
-            return (int)count/NumberReagent;
+            return new Result(ActionResult.Done,(int)count/NumberReagent);
         }
 
 
-        private Func<Task<ActionResult>> MillBeforeOrder(int numberToStart)
+        private async Task<Result> MillBeforeOrder(int numberToStart)
         {
-            return async () =>
+            // Do we need to mill
+            // get number in bags
+            var count = HbApi.GetNumberItemInBags((uint) ReagentId);
+            // add number in reagent banks
+            count += HbApi.GetNumberItemInReagentBank((uint) ReagentId);
+
+            if (count/NumberReagent >= numberToStart)
+                return new Result(ActionResult.Done);
+                
+            // We need to mill
+            // If we don't have inscription check if we have mortar in bags
+            var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+            if (inscription == null || inscription.CurrentValue <= 0)
             {
-                // Do we need to mill
-                var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
-                if (inscription == null)
-                    return ActionResult.Done;
-
-                // get number in bags
-                var count = HbApi.GetNumberItemInBags((uint) ReagentId);
-                // add number in reagent banks
-                count += HbApi.GetNumberItemInReagentBank((uint) ReagentId);
-
-                if (count/NumberReagent >= numberToStart)
-                    return ActionResult.Done;
-
-                // if we do, mill until we don't
-                var millable = HbApi.GetAllItemsToMillFrom((uint) ReagentId, GaBSettings.Get().Pigments).ToArray();
-                while (millable.Any() && count/NumberReagent < numberToStart)
+                // We need mortar
+                var millingItem = HbApi.GetItemInBags(114942).FirstOrDefault();
+                if (millingItem == default(WoWItem) || millingItem.StackCount <= 0)
                 {
-                    await millable.First().Mill();
-                    await Buddy.Coroutines.Coroutine.Yield();
-                    count = HbApi.GetNumberItemInBags((uint) ReagentId);
-                    count += HbApi.GetNumberItemInReagentBank((uint) ReagentId);
-                    millable = HbApi.GetAllItemsToMillFrom((uint) ReagentId, GaBSettings.Get().Pigments).ToArray();
+                    // We don't have a mortar in bag, let's craft one
+                    // We need 5 blackrock ore
+                    var oreInBags = HbApi.GetNumberItemInBags(109118);
+                    var oreInBank = HbApi.GetNumberItemInReagentBank(109118);
+                    if (oreInBags + oreInBank < 5)
+                    {
+                        GarrisonButler.Diagnostic(
+                            "[MillBeforeOrder] Inscription profession not found and not enough Blackrock ore to craft a mortar. InBags={0}, InReagentBank={1}.",
+                            oreInBags, oreInBank);
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    // Enough ore, moving to vendor and crafting
+
+                    // Moving to vendor
+                    // Alliance - Eric Broadoak, ID: 77372
+                    // Horde - ID: http://www.wowhead.com/npc=79829/urgra
+                    
+                    var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
+                        .FirstOrDefault(u => u.Entry == (StyxWoW.Me.IsAlliance ? 77372 : 79829));
+
+                    if (unit == null)
+                    {
+                        await
+                            Coroutine.MoveTo(Pnj,
+                                String.Format("[MillBeforeOrder,{0}] Could not find unit ({1}), moving to default location.",
+                                    Id, PnjId));
+                        return new Result(ActionResult.Running);
+                    }
+
+                    if ((await Coroutine.MoveToInteract(unit)).Status == ActionResult.Running)
+                        return new Result(ActionResult.Running);
+
+                    unit.Interact();
+                    
+                    // Crafting
+                    if (!(await ButlerLua.IsTradeSkillFrameOpen()))
+                    {    
+                        GarrisonButler.Diagnostic("[MillBeforeOrder] TradeSkillFrame not open.");
+                        return new Result(ActionResult.Running);
+                    }
+
+                    if (!await ButlerLua.CraftDraenicMortar())
+                    {
+                        GarrisonButler.Diagnostic("[MillBeforeOrder] CraftDraenicMortar returned false.");
+                        return new Result(ActionResult.Running);
+                    }
+
+                    // wait for cast
+                    await Buddy.Coroutines.Coroutine.Wait(10000, () =>
+                    {
+                        ObjectManager.Update();
+                        return HbApi.GetNumberItemInBags(114942) > 0;
+                    });
+                    await CommonCoroutines.SleepForLagDuration();
+
+                    // Final check for item in bags
+                    millingItem = HbApi.GetItemInBags(114942).FirstOrDefault();
+                    if (millingItem == default(WoWItem) || millingItem.StackCount <= 0)
+                    {
+                        GarrisonButler.Diagnostic("[MillBeforeOrder] No Draenic mortar in bags after crafting it.");
+                        return new Result(ActionResult.Failed);
+                    }
+                    return new Result(ActionResult.Running);
                 }
+            }
 
-                if (count/NumberReagent >= numberToStart)
-                    return ActionResult.Done;
+            
 
-                return ActionResult.Failed;
-            };
+            // Mill until we don't need anymore
+            var millable = HbApi.GetAllItemsToMillFrom((uint) ReagentId, GaBSettings.Get().Pigments).ToArray();
+            if (millable.Any() && count/NumberReagent < numberToStart)
+            {
+                await millable.First().Mill();
+                return new Result(ActionResult.Running);
+            }
+
+            if (count/NumberReagent >= numberToStart)
+                return new Result(ActionResult.Done);
+
+            return new Result(ActionResult.Failed);
         }
 
         private void GetOrderInfo(bool alliance)
@@ -623,10 +693,17 @@ namespace GarrisonButler
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
-                    CanCompleteOrder = CanCompleteOrderMillable;
-                    PrepOrder = MillBeforeOrder;
-                    // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
-                    MillItemPnj = 77372;
+                    if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                    {
+                        CanCompleteOrder = CanCompleteOrderMillable;
+                        PrepOrder = MillBeforeOrder;
+                        MillItemPnj = 77372;
+                    }
+                    else
+                    {
+                        CanCompleteOrder = CanCompleteOrderItem;
+                    }
+                        // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     Displayids = new List<uint>
                     {
                         15388, // Garrison Building  Inscription V1

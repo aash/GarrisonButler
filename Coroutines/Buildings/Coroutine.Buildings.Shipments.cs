@@ -369,6 +369,15 @@ namespace GarrisonButler
                     return new Result(ActionResult.Failed);
                 }
 
+                // Under construction
+                if (building.IsBuilding || building.CanActivate)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart,{0}] Building under construction, can't start work order: {1}",
+                        building.Id, building.Name);
+                    return new Result(ActionResult.Failed);
+                }
+
                 // Structs cannot be null
                 var shipmentObjectFound = ShipmentsMap.FirstOrDefault(s => s.BuildingIds.Contains(building.Id));
 
@@ -382,21 +391,12 @@ namespace GarrisonButler
                     return new Result(ActionResult.Failed);
                 }
 
-
-                // Under construction
-                if (building.IsBuilding || building.CanActivate)
-                {
-                    GarrisonButler.Diagnostic(
-                        "[ShipmentStart,{0}] Building under construction, can't start work order: {1}",
-                        building.Id, building.Name);
-                    return new Result(ActionResult.Failed);
-                }
+                // max start by user ?
                 var maxToStartCheck = await GetMaxShipmentToStart(building);
                 var maxToStart = maxToStartCheck.Status == ActionResult.Done
                     ? (int) maxToStartCheck.Result1
                     : 0;
 
-                // max start by user ?
                 if (maxToStart <= 0)
                 {
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] Can't start more work orders. {1} - ShipmentsTotal={2}, MaxCanStartOrder={3}",
@@ -576,6 +576,16 @@ namespace GarrisonButler
                 return new Result(ActionResult.Failed);
             }
 
+            int maxToStart = 0;
+            var ResCheckMax = await GetMaxShipmentToStart(building);
+
+            if (ResCheckMax.Status == ActionResult.Done)
+                maxToStart = (int)ResCheckMax.Result1;
+
+            if (building.PrepOrder != null)
+                if ((await building.PrepOrder(maxToStart)).Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
+
             if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
                 return new Result(ActionResult.Running);
             
@@ -583,12 +593,6 @@ namespace GarrisonButler
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  
 
-            int maxToStart = 0;
-                var ResCheckMax = await GetMaxShipmentToStart(building);
-            
-            if (ResCheckMax.Status == ActionResult.Done)
-                maxToStart = (int) ResCheckMax.Result1;
-            
 
             for (var i = 0; i < maxToStart; i++)
             {
@@ -598,16 +602,17 @@ namespace GarrisonButler
                 await Buddy.Coroutines.Coroutine.Yield();
             }
 
-            for (var i = 0; i < 10; i++)
+            var timeout = new WaitTimer(TimeSpan.FromMilliseconds(10000));
+            while(!timeout.IsFinished)
             {
                 var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
                 if (buildingShipment != null)
                 {
                     await ButlerLua.OpenLandingPage();
                     buildingShipment.Refresh();
-                    var maxCheck = await GetMaxShipmentToStart(buildingShipment);
-                    var max = maxCheck.Status == ActionResult.Done
-                        ? (int)maxCheck.Result1
+                    var resCheck = await GetMaxShipmentToStart(building);
+                    var max = resCheck.Status == ActionResult.Done
+                        ? (int)resCheck.Result1
                         : 0;
                     if (max == 0)
                     {
@@ -616,8 +621,8 @@ namespace GarrisonButler
                         await ButlerLua.CloseLandingPage();
                         return new Result(ActionResult.Done);
                     }
-                        GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
-                    }
+                    GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
+                }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             await ButlerLua.CloseLandingPage();

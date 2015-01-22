@@ -141,6 +141,12 @@ namespace GarrisonButler
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
         }
 
+        public static bool AutoLootDefaultValue
+        {
+            get { return _autoLootDefaultValue; }
+            set { _autoLootDefaultValue = value; }
+        }
+
         internal static void OnStart()
         {
             try
@@ -286,6 +292,12 @@ namespace GarrisonButler
 
         internal static void OnStop()
         {
+            // Record and set auto loot
+            if (_autoLootinit == true)
+            {
+                ButlerLua.SetAutoLootValue(AutoLootDefaultValue);
+                _autoLootinit = false;
+            }
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
             _mainSequence = null;
             Navigator.NavigationProvider = NativeNavigation;
@@ -339,6 +351,14 @@ namespace GarrisonButler
             CheckResetAfk();
 
             CheckNavigationSystem();
+
+            // Record and set auto loot
+            if (_autoLootinit == false)
+            {
+                _autoLootDefaultValue = await ButlerLua.GetAutoLootValue();
+                ButlerLua.SetAutoLootValue(true);
+                _autoLootinit = true;
+            }
 
             CheckForVendors();
 
@@ -451,6 +471,8 @@ namespace GarrisonButler
         }
 
         private static DateTime _mountVendorTimeStart = default(DateTime);
+        private static bool _autoLootinit;
+        private static bool _autoLootDefaultValue;
 
         private static async Task<Result> VendorCoroutineWorkaround()
         {

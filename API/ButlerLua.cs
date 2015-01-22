@@ -101,8 +101,8 @@ namespace GarrisonButler.API
         private static async Task<ActionResult> DoStringWhile(string luaString, Func<Task<bool>> condition, int maxTime)
         {
             var waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(maxTime));
-            var test = !await condition();
-            while (test)
+            var done = await condition();
+            while (!done)
             {
                 if (waitTimer.IsFinished)
                 {
@@ -112,7 +112,7 @@ namespace GarrisonButler.API
                 await AntiSpamProtection();
                 Lua.DoString(luaString);
                 await Buddy.Coroutines.Coroutine.Yield();
-                test = !await condition();
+                done = await condition();
             }
             return ActionResult.Done;
         }
@@ -161,12 +161,12 @@ namespace GarrisonButler.API
         public static async Task<ActionResult> CloseLandingPage()
         {
             const string luaString = "HideUIPanel(GarrisonLandingPage);";
-            return await DoStringWhile(luaString, async () => !await IsLandingPageOpen(), 2000);
+            return await DoStringWhile(luaString, async () => !await IsLandingPageOpen(), 3000);
         }
         public static async Task<ActionResult> OpenLandingPage()
         {
             const string luaString = "GarrisonLandingPage_Toggle()";
-            return await DoStringWhile(luaString, async () => await IsLandingPageOpen(), 2000);
+            return await DoStringWhile(luaString, async () => await IsLandingPageOpen(), 3000);
         }
 
         public static async Task<bool> IsLandingPageOpen()
@@ -176,6 +176,20 @@ namespace GarrisonButler.API
                       return tostring(false);
                   else 
                       if GarrisonLandingPage:IsVisible() == true then
+                          return tostring(true);
+                      end;
+                  end;
+                  return tostring(false);";
+            var results = await GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+        public static async Task<bool> IsTradeSkillFrameOpen()
+        {
+            const string lua =
+               @"if not TradeSkillFrame then 
+                      return tostring(false);
+                  else 
+                      if TradeSkillFrame:IsVisible() == true then
                           return tostring(true);
                       end;
                   end;
@@ -228,7 +242,7 @@ namespace GarrisonButler.API
             DateTime date = new DateTime(year,month,day,hour,min,sec);
             return date;
         }
-
+        
         public async static Task<Tuple<int,int>> GetShipmentReagentInfo()
         {
             const string lua =
@@ -245,5 +259,49 @@ namespace GarrisonButler.API
             }
             return new Tuple<int, int>(results[0].ToInt32(), results[1].ToInt32());
         }
+
+        public static async Task<bool> CraftDraenicMortar()
+        {
+            const string lua =
+                " for i=1,GetNumTradeSkills()do " +
+                "   local na,_,n=GetTradeSkillInfo(i)" +
+                "   if na==\"Draenic Mortar\" then " +
+                "       DoTradeSkill(i,1);" +
+                "       return tostring(true);" +
+                "   end;" +
+                " end;" +
+                " return tostring(false);";
+
+            var results = (await GetReturnValues(lua)).GetEmptyIfNull().ToArray();
+            if (!results.Any())
+            {
+                GarrisonButler.Diagnostic("Error retrieving CraftDraenicMortar lua answer.");
+                return false;
+            }
+            return results[0].ToBoolean();
+        }
+
+        public static async Task<bool> GetAutoLootValue()
+        {
+            const string lua =
+                " local loot = GetCVar(\"autoLootDefault\");" +
+                " return tostring(loot);";
+
+            var results = (await GetReturnValues(lua)).GetEmptyIfNull().ToArray();
+            if (!results.Any())
+            {
+                GarrisonButler.Diagnostic("Error retrieving GetAutoLootValue lua answer.");
+                return false;
+            }
+            return results[0].ToInt32() != 0;
+        }
+
+        // NOT AWAITED 
+        public static void SetAutoLootValue(bool value)
+        {
+            string lua = string.Format("SetCVar(\"autoLootDefault\",{0});", value ? 1 : 0);
+            Lua.DoString(lua);
+        }
+
     }
 }

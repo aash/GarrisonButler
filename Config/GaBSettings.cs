@@ -139,6 +139,9 @@ namespace GarrisonButler.Config
                 }
             }
             // If not filled
+            if (_pigments == null)
+                _pigments = new List<Pigment>();
+            
             var newPigmentsValues = Pigment.AllPigments.Where(p => _pigments.All(pig => pig.Id != p.Id)).ToArray();
             if (newPigmentsValues.Any())
             {

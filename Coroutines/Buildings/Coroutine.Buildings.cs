@@ -141,6 +141,11 @@ namespace GarrisonButler
             GarrisonButler.Diagnostic("Initialization Buildings coroutines...");
             var buildingsActionsSequence = new ActionHelpers.ActionsSequence();
 
+            // Buildings activation
+            buildingsActionsSequence.AddAction(
+                new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation,
+                    CanActivateAtLeastOneBuilding, 10000));
+
             // Take care of all shipments
             buildingsActionsSequence.AddAction(PickUpOrStartSequenceAll());
 
@@ -148,11 +153,6 @@ namespace GarrisonButler
             buildingsActionsSequence.AddAction(
                 new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation, CanRunCache,
                     10000));
-
-            // Buildings activation
-            buildingsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation,
-                    CanActivateAtLeastOneBuilding, 10000));
 
             GarrisonButler.Diagnostic("Initialization Buildings done!");
             return buildingsActionsSequence;

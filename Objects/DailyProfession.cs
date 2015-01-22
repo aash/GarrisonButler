@@ -10,6 +10,9 @@ using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
+using Styx.Common.Helpers;
+using Styx.CommonBot;
+using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Profiles.Quest.Order;
 using Styx.Patchables;
 using Styx.WoWInternals;
@@ -150,13 +153,14 @@ namespace GarrisonButler.Objects
             if (Spell == null)
                 Spell = GetRecipeSpell();
 
-            if (Spell.CooldownTimeLeft.TotalSeconds > 0)
-                return 0;
-
+            
             var maxRepeat = Int32.MaxValue;
             var spellReagents = Spell.InternalInfo.SpellReagents;
             if (spellReagents.Reagent == null)
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] No reagents found for spell, returned max int value.", Spell.Id, Spell.Name);
                 return maxRepeat;
+            }
 
             for (var index = 0; index < spellReagents.Reagent.Length; index++)
             {
@@ -172,8 +176,14 @@ namespace GarrisonButler.Objects
                 // add number in reagent banks
                 numInBags += HbApi.GetNumberItemInReagentBank((uint)reagent);
 
-                numInBags += HbApi.GetNumberItemByMillingBags((uint)reagent, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
-
+                // If has inscription
+                var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+                if (inscription != null)
+                {
+                    // add number from milling simulation
+                    numInBags += HbApi.GetNumberItemByMillingBags((uint) reagent,
+                        GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+                }
 
                 var repeatNum = (int)(numInBags / required);
                 if (repeatNum < maxRepeat)
@@ -189,20 +199,32 @@ namespace GarrisonButler.Objects
             // If not then we need to 
 
             if (Spell == null)
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] Spell null at entry point PreCraftOperations.");
                 Spell = GetRecipeSpell();
+            }
 
             var spellReagents = Spell.InternalInfo.SpellReagents;
             if (spellReagents.Reagent == null)
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] Reagents null.");
                 return ActionResult.Done;
+            }
 
             for (var index = 0; index < spellReagents.Reagent.Length; index++)
             {
                 var reagent = spellReagents.Reagent[index];
                 if (reagent == 0)
+                {
+                    GarrisonButler.Diagnostic("[DailyProfession] Current reagent id = 0, #reagents={0}, index={1}.", spellReagents.Reagent.Length, index);
                     continue;
+                }
                 var required = spellReagents.ReagentCount[index];
                 if (required <= 0)
+                {
+                    GarrisonButler.Diagnostic("[DailyProfession] Required <= 0, Current reagent id={0}, required={1}", reagent, required);
                     continue;
+                }
                 // get number in bags
                 var numInBags = HbApi.GetNumberItemInBags((uint)reagent);
 
@@ -213,40 +235,53 @@ namespace GarrisonButler.Objects
                 {
                     // TO DO Deams auto detection of spell's profession to not check milling when doing blacksmithing recipe.
                     // add number that we could get from milling
-                    // Find all pigments corresponding to current reagent id and where at least one source is activated
-                    var pigments =
-                        GaBSettings.Get()
-                            .Pigments.GetEmptyIfNull()
-                            .Where(p => p.Id == reagent && p.MilledFrom.Any(i => i.Activated))
-                            .ToArray();
-                    if (pigments.Any())
+
+                    var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+                    if (inscription != null)
                     {
-                        var numByMilling = 0;
-                        var itemsToMillFrom = pigments.SelectMany(p => p.MilledFrom).SelectMany(p => HbApi.GetItemInBags(p.ItemId).Where(i=> i.StackCount >= 5)).ToArray();
-                        if (itemsToMillFrom.Any())
+                        // Find all pigments corresponding to current reagent id and where at least one source is activated
+                        var pigments =
+                            GaBSettings.Get()
+                                .Pigments.GetEmptyIfNull()
+                                .Where(p => p.Id == reagent && p.MilledFrom.Any(i => i.Activated))
+                                .ToArray();
+                        if (pigments.Any())
                         {
-                            // mill until we run out or we have enough
-                            while (numInBags < required && itemsToMillFrom.Any())
+                            var numByMilling = 0;
+                            var itemsToMillFrom =
+                                pigments.SelectMany(p => p.MilledFrom)
+                                    .SelectMany(p => HbApi.GetItemInBags(p.ItemId).Where(i => i.StackCount >= 5))
+                                    .ToArray();
+                            if (itemsToMillFrom.Any())
                             {
-                                await itemsToMillFrom.First().Mill();
-                                numInBags = HbApi.GetNumberItemInBags((uint) reagent);
-                                numInBags += HbApi.GetNumberItemInReagentBank((uint)reagent);
-                                itemsToMillFrom = pigments.SelectMany(p => p.MilledFrom).SelectMany(p => HbApi.GetItemInBags(p.ItemId).Where(i => i.StackCount >= 5)).ToArray();
-                                await Buddy.Coroutines.Coroutine.Yield();
+                                // mill until we run out or we have enough
+                                while (numInBags < required && itemsToMillFrom.Any())
+                                {
+                                    await CommonCoroutines.SleepForLagDuration();
+                                    await CommonCoroutines.SleepForLagDuration();
+                                    await itemsToMillFrom.First().Mill();
+                                    numInBags = HbApi.GetNumberItemInBags((uint) reagent);
+                                    numInBags += HbApi.GetNumberItemInReagentBank((uint) reagent);
+                                    itemsToMillFrom =
+                                        pigments.SelectMany(p => p.MilledFrom)
+                                            .SelectMany(p => HbApi.GetItemInBags(p.ItemId).Where(i => i.StackCount >= 5))
+                                            .ToArray();
+                                    //await Buddy.Coroutines.Coroutine.Yield(); // Not needed since milling operation already yield
+                                }
+                                GarrisonButler.Diagnostic(
+                                    numInBags >= required
+                                        ? "Succesfully milled to get enough reagent. ItemId={0}"
+                                        : "Failed milled to get enough reagent. ItemId={0}", reagent);
                             }
-                            GarrisonButler.Diagnostic(
-                                numInBags >= required
-                                    ? "Succesfully milled to get enough reagent. ItemId={0}"
-                                    : "Failed milled to get enough reagent. ItemId={0}", reagent);
-                        }
-                        else
-                        {
-                            GarrisonButler.Diagnostic("No items to mill from found in bags.");
+                            else
+                            {
+                                GarrisonButler.Diagnostic("No items to mill from found in bags.");
+                            }
                         }
                     }
                     if (numInBags < required)
                     {
-                        GarrisonButler.Diagnostic("Failed to get enough of reagent: ItemId={0}", reagent);
+                        GarrisonButler.Diagnostic("Failed to get enough of reagent from preCraft processing: ItemId={0}", reagent);
                         return ActionResult.Failed;
                     }
                 }
@@ -281,6 +316,85 @@ namespace GarrisonButler.Objects
 
             return recipes.FirstOrDefault(s => s.CreatesItemId == ItemId)
                    ?? recipes.FirstOrDefault(s => s.Id == ItemId);
+        }
+
+        // Check if has 
+        public bool CanCast()
+        {
+            if (Spell.CooldownTimeLeft.TotalSeconds > 0)
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] Spell cooldown > 0, CD={0}, id={1}, name={2}", Spell.CooldownTimeLeft, Spell.Id, Spell.Name);
+                return false;
+            }
+
+            if (!Spell.IsValid)
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] Spell is not valid id={0}, name={1}", Spell.Id, Spell.Name);
+                return false;
+            }
+
+            SkillLine skillLine = default(SkillLine);
+            switch (TradeskillId)
+            {
+                case tradeskillID.Alchemy:
+                    skillLine = SkillLine.Alchemy;
+                    break;
+
+                case tradeskillID.Blacksmithing:
+                    skillLine = SkillLine.Blacksmithing;
+                    break;
+
+                case tradeskillID.Cooking:
+                    skillLine = SkillLine.Cooking;
+                    break;
+
+                case tradeskillID.Enchanting:
+                    skillLine = SkillLine.Enchanting;
+                    break;
+
+                case tradeskillID.Engineering:
+                    skillLine = SkillLine.Engineering;
+                    break;
+
+                case tradeskillID.Fishing:
+                    skillLine = SkillLine.Fishing;
+                    break;
+
+                case tradeskillID.Herbalism:
+                    skillLine = SkillLine.Herbalism;
+                    break;
+
+                case tradeskillID.Inscription:
+                    skillLine = SkillLine.Inscription;
+                    break;
+
+                case tradeskillID.Jewelcrafting:
+                    skillLine = SkillLine.Jewelcrafting;
+                    break;
+                    
+                case tradeskillID.Leatherworking:
+                    skillLine = SkillLine.Leatherworking;
+                    break;
+
+                case tradeskillID.Mining:
+                    skillLine = SkillLine.Mining;
+                    break;
+
+                case tradeskillID.Skinning:
+                    skillLine = SkillLine.Skinning;
+                    break;
+
+                case tradeskillID.Tailoring:
+                    skillLine = SkillLine.Tailoring;
+                    break;
+            }
+            if (skillLine == default(SkillLine))
+            {
+                GarrisonButler.Diagnostic("[DailyProfession] Could not find skillLine, assuming known.");
+                return true;
+            }
+            var skill = StyxWoW.Me.GetSkill(skillLine);
+            return skill != null && skill.IsValid && skill.CurrentValue > Spell.BaseLevel && skill.MaxValue > 699;
         }
     }
 }
