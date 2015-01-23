@@ -132,7 +132,7 @@ namespace GarrisonButler
                 144, // lvl 2
                 145 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+            37062, 37088),
 
             // Inn / Tavern
             new Shipment(new List<int>
@@ -393,6 +393,9 @@ namespace GarrisonButler
 
                 // max start by user ?
                 var maxToStartCheck = await GetMaxShipmentToStart(building);
+                if (maxToStartCheck.Status == ActionResult.Running)
+                    return maxToStartCheck;
+
                 var maxToStart = maxToStartCheck.Status == ActionResult.Done
                     ? (int) maxToStartCheck.Result1
                     : 0;
@@ -636,7 +639,11 @@ namespace GarrisonButler
                 ? building.ShipmentCapacity
                 : Math.Min(building.ShipmentCapacity, maxSettings);
             var maxToStart = maxInProgress - building.ShipmentsTotal;
+            
             var canCompleteOrder = await building.CanCompleteOrder();
+            if (canCompleteOrder.Status == ActionResult.Running)
+                return canCompleteOrder;
+
             int maxCanComplete = 0;
             if (canCompleteOrder.Status == ActionResult.Done)
                 maxCanComplete = (int) canCompleteOrder.Result1;

@@ -161,7 +161,7 @@ namespace GarrisonButler
                 _mainSequence = new ActionHelpers.ActionsSequence();
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
                     10000, 1000));
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                if (GarrisonButler.IsIceVersion())
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails));
                 _mainSequence.AddAction(InitializeMineAndGarden());
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(DoDailyCd, CanRunDailies, 15000,
@@ -171,7 +171,7 @@ namespace GarrisonButler
 
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                if (GarrisonButler.IsIceVersion())
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(MailItem, CanMailItem, 15000,
                         1000));
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));

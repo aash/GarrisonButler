@@ -250,7 +250,12 @@ namespace GarrisonButler
         private async Task<Result> CanCompleteOrderMillable()
         {
             var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
-            if(inscription == null)
+            var mortar = HbApi.GetItemInBags(114942).FirstOrDefault();
+            var oreInBags = HbApi.GetNumberItemInBags(109118);
+            var oreInBank = HbApi.GetNumberItemInReagentBank(109118);
+            if( (inscription == null ||  inscription.CurrentValue <= 0) 
+                && (mortar == default(WoWItem) || mortar.StackCount <= 0)
+                && (oreInBags + oreInBank < 5))
                 return await CanCompleteOrderItem();
 
             // get number in bags
@@ -261,8 +266,7 @@ namespace GarrisonButler
 
             GarrisonButler.Diagnostic("[ShipmentStart] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
                 NumberReagent, count >= NumberReagent);
-
-           
+            
             count += HbApi.GetNumberItemByMillingBags((uint)ReagentId, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
             
             GarrisonButler.Diagnostic("[ShipmentStart] Total found with milling {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
@@ -693,7 +697,7 @@ namespace GarrisonButler
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
-                    if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                    if (GarrisonButler.IsIceVersion())
                     {
                         CanCompleteOrder = CanCompleteOrderMillable;
                         PrepOrder = MillBeforeOrder;
@@ -863,10 +867,9 @@ namespace GarrisonButler
             {
                 // moving to pnj
                 var moveResult = (await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
-                while (moveResult == ActionResult.Running)
+                if (moveResult == ActionResult.Running)
                 {
-                    await Buddy.Coroutines.Coroutine.Yield();
-                    moveResult = (await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
+                    return new Result(ActionResult.Running);
                 }
 
                 // Check reagent
@@ -877,13 +880,12 @@ namespace GarrisonButler
                     return new Result(ActionResult.Failed);
                 }
 
-                GarrisonButler.Diagnostic("[TradingPost] Found reagentId={0}, #={1}, time={2}", reagent.Item1, reagent.Item2, serverTimeLua);
+                GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1, reagent.Item2, serverTimeLua);
                 // Override value
                 GaBSettings.Get().itemIdTradingPost = reagent.Item1;
                 GaBSettings.Get().numberReagentTradingPost = reagent.Item2;
                 GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
                 GaBSettings.Save();
-                return new Result(ActionResult.Refresh);
             }
             ReagentId = GaBSettings.Get().itemIdTradingPost;
             NumberReagent = GaBSettings.Get().numberReagentTradingPost;

@@ -176,15 +176,17 @@ namespace GarrisonButler.Objects
                 // add number in reagent banks
                 numInBags += HbApi.GetNumberItemInReagentBank((uint)reagent);
 
-                // If has inscription
-                var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
-                if (inscription != null)
+                if (GarrisonButler.IsIceVersion())
                 {
-                    // add number from milling simulation
-                    numInBags += HbApi.GetNumberItemByMillingBags((uint) reagent,
-                        GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+                    // If has inscription
+                    var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+                    if (inscription != null)
+                    {
+                        // add number from milling simulation
+                        numInBags += HbApi.GetNumberItemByMillingBags((uint) reagent,
+                            GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+                    }
                 }
-
                 var repeatNum = (int)(numInBags / required);
                 if (repeatNum < maxRepeat)
                     maxRepeat = repeatNum;
@@ -271,7 +273,7 @@ namespace GarrisonButler.Objects
                                 GarrisonButler.Diagnostic(
                                     numInBags >= required
                                         ? "Succesfully milled to get enough reagent. ItemId={0}"
-                                        : "Failed milled to get enough reagent. ItemId={0}", reagent);
+                                        : "Failed milling to get enough reagent. ItemId={0}", reagent);
                             }
                             else
                             {

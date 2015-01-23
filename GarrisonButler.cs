@@ -25,7 +25,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 7, 5, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 7, 6, 0);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
@@ -46,7 +46,11 @@ namespace GarrisonButler
         // internal AutoAnglerProfile Profile { get; private set; }
         internal static GarrisonButler Instance { get; private set; }
 
+        internal static bool IsIceVersion()
+        {
+            return GarrisonButler.NameStatic.ToLower().Contains("ice");
 
+        }
         private static void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
         {
             Diagnostic("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");

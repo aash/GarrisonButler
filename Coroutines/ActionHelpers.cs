@@ -178,6 +178,8 @@ namespace GarrisonButler.Coroutines
                 {
                     ResCondition = await Condition();
                     WaitTimerCondition.Reset();
+                    if (ResCondition.Status == ActionResult.Refresh)
+                        return ResCondition;
                 }
 
                 if (WaitTimerCondition.IsFinished)

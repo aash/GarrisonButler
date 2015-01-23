@@ -274,7 +274,6 @@ namespace GarrisonButler
                     else distance += u.DistanceFromStart;
                     u = u.Previous;
                 }
-                GarrisonButler.Diagnostic("[Dijkstra] Distance to {0}: {1}", target.ToString(), distance);
                 return distance;
             }
         }

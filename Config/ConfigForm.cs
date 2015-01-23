@@ -66,14 +66,12 @@ namespace GarrisonButler.Config
                 var professionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
                 tabControl.Items.Add(professionTabItem);
 
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
+                if (GarrisonButler.IsIceVersion())
                 {
                     var mailingTab = new MailingTab();
                     var mailing = new TabItem { Header = "Mailing", Content = mailingTab.ContentTabMailing() };
                     tabControl.Items.Add(mailing);
-                }
-                if (GarrisonButler.NameStatic.ToLower().Contains("ice"))
-                {
+                
                     var millingTab = new MillingTab();
                     var milling = new TabItem { Header = "Milling", Content = millingTab.ContentTabMilling() };
                     tabControl.Items.Add(milling);
@@ -390,7 +388,7 @@ namespace GarrisonButler.Config
                 var myImage = new BitmapImage();
                 var myMemStream = new MemoryStream();
                 var garrisonButlerSplashImage =
-                    GarrisonButler.NameStatic.ToLower().Contains("ice")
+                    GarrisonButler.IsIceVersion()
                         ? GarrisonButlerImages.GarrisonButlerICESplashImage
                         : GarrisonButlerImages.GarrisonButlerLiteSplashImage;
                 garrisonButlerSplashImage.Save(myMemStream, garrisonButlerSplashImage.RawFormat);

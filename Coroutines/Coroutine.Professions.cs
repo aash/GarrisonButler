@@ -142,7 +142,10 @@ namespace GarrisonButler
 
         private static async Task<bool> DoCd(DailyProfession daily)
         {
-            await daily.PreCraftOperations();
+            if (GarrisonButler.IsIceVersion())
+            {
+                await daily.PreCraftOperations();
+            }
             GarrisonButler.Log("[Profession] Realizing daily CD: " + daily.Spell.Name);
             await HbApi.CastSpell(daily.Spell);
             return false;
