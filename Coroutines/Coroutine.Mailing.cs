@@ -12,6 +12,7 @@ using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using Styx;
 using Styx.Common;
+using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
 using Styx.WoWInternals;
@@ -148,14 +149,14 @@ namespace GarrisonButler
             GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
 
             var openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
-            if (numMail > 5)
+            var timeout = new WaitTimer(TimeSpan.FromMilliseconds(60000));
+            
+            while (mailFrame.GetAllMails().Any(m=> !m.WasRead || (m.ItemCount > 0 && m.CODAmount <= 0)) && !timeout.IsFinished)
             {
-                for (int i = 0; i < numMail%5; i++)
-                {
-                    await Buddy.Coroutines.Coroutine.Yield();
-                    openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
-                }
+                openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
+                await Buddy.Coroutines.Coroutine.Yield();
             }
+           
             _checkedMailbox = true;
 
             GarrisonButler.CurrentHonorbuddyLog.LoggingLevel = hbMailLoggingBugOriginalLogLevel;
