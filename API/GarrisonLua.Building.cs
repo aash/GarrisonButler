@@ -113,6 +113,7 @@ namespace GarrisonButler.API
         public static int GetNumberShipmentReadyByBuildingId(int buildingId)
         {
             var lua =
+                "C_Garrison.RequestLandingPageShipmentInfo();" +
                 "local buildings = C_Garrison.GetBuildings();" +
                 String.Format(
                     "for i = 1, #buildings do " +

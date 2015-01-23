@@ -10,6 +10,7 @@ using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
+using GarrisonButler.LuaObjects;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
@@ -492,8 +493,7 @@ namespace GarrisonButler
 
             await Buddy.Coroutines.Coroutine.Wait(2000, () =>
             {
-                var res = InterfaceLua.IsGarrisonCapacitiveDisplayFrame();
-                if (!res)
+                if (CapacitiveDisplayFrame.Instance == null)
                 {
                     Navigator.PlayerMover.MoveTowards(unit.Location); 
                 }
@@ -502,7 +502,7 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.",
                         building.Id);
                 }
-                return res;
+                return CapacitiveDisplayFrame.Instance == null;
             });
 
             await CommonCoroutines.SleepForRandomUiInteractionTime();
@@ -511,8 +511,8 @@ namespace GarrisonButler
             {
                 var gossipFrame = GossipFrame.Instance;
                 // Will try workaround if GossipFrame isn't valid/visible & GarrisonFrame isn't valid
-                var shouldTryWorkAround = !InterfaceLua.IsGarrisonCapacitiveDisplayFrame()
-                    && (gossipFrame == null ? true : !gossipFrame.IsVisible);
+                var shouldTryWorkAround = CapacitiveDisplayFrame.Instance == null
+                    && (gossipFrame == null || !gossipFrame.IsVisible);
                 if (shouldTryWorkAround)
                 {
                     unit.Interact();
@@ -527,7 +527,7 @@ namespace GarrisonButler
                     GarrisonButler.Warning(
                         "[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME/GOSSIP WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
-                    await ButlerLua.CloseLandingPage();
+                    //await ButlerLua.CloseLandingPage();
                     return new Result(ActionResult.Done);
                 }
                 GarrisonButler.Warning(
@@ -547,7 +547,7 @@ namespace GarrisonButler
             }
 
             // One more check to make sure this is the right frame!!!
-            if (!InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+            if (CapacitiveDisplayFrame.Instance == null)
             {
                 if (building.workFrameWorkAroundTries < Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
                     building.workFrameWorkAroundTries++;
@@ -555,7 +555,7 @@ namespace GarrisonButler
                 {
                     GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
-                    await ButlerLua.CloseLandingPage();
+                    //await ButlerLua.CloseLandingPage();
                     return new Result(ActionResult.Done);
                 }
                 GarrisonButler.Warning(
@@ -599,7 +599,7 @@ namespace GarrisonButler
 
             for (var i = 0; i < maxToStart; i++)
             {
-                InterfaceLua.ClickStartOrderButton();
+                CapacitiveDisplayFrame.ClickStartOrderButton();
                 building.Refresh();
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
                 await Buddy.Coroutines.Coroutine.Yield();
@@ -611,7 +611,7 @@ namespace GarrisonButler
                 var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
                 if (buildingShipment != null)
                 {
-                    await ButlerLua.OpenLandingPage();
+                    //await ButlerLua.OpenLandingPage();
                     buildingShipment.Refresh();
                     var resCheck = await GetMaxShipmentToStart(building);
                     var max = resCheck.Status == ActionResult.Done
@@ -621,14 +621,14 @@ namespace GarrisonButler
                     {
                         GarrisonButler.Log("[ShipmentStart] Finished starting work orders at {0}.",
                             buildingShipment.Name);
-                        await ButlerLua.CloseLandingPage();
+                        //await ButlerLua.CloseLandingPage();
                         return new Result(ActionResult.Done);
                     }
                     GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
                 }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
-            await ButlerLua.CloseLandingPage();
+            //await ButlerLua.CloseLandingPage();
             return new Result(ActionResult.Refresh);
         }
 
@@ -681,7 +681,7 @@ namespace GarrisonButler
         private async static Task<ActionResult> IfGossip(WoWUnit pnj)
         {
             // STEP 0 - Return if GarrisonFrame detected
-            if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+            if (CapacitiveDisplayFrame.Instance != null)
             {
                 GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Done due to IsGarrisonCapacitiveDisplayFrame()");
                 return ActionResult.Done;
@@ -769,7 +769,7 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
 
                 // STEP 4d - Return if the GarrisonCapacitiveDisplayFrame was found
-                if (InterfaceLua.IsGarrisonCapacitiveDisplayFrame())
+                if (CapacitiveDisplayFrame.Instance != null)
                     return ActionResult.Done;
 
                 // STEP 4e - Close this gossip frame because it didn't end up being the correct gossip chosen
@@ -842,11 +842,11 @@ namespace GarrisonButler
                 if (resultHarvesting.Status == ActionResult.Running)
                     return new Result(ActionResult.Running);
 
-                await ButlerLua.OpenLandingPage();
+                //await ButlerLua.OpenLandingPage();
 
                 if (resultHarvesting.Status == ActionResult.Refresh)
                 {
-                    await ButlerLua.CloseLandingPage(); 
+                    //await ButlerLua.CloseLandingPage(); 
                     return new Result(ActionResult.Refresh);
                 }
 
@@ -856,22 +856,22 @@ namespace GarrisonButler
                     var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
                     if (buildingShipment != null)
                     {
-                        await ButlerLua.OpenLandingPage();
+                        //await ButlerLua.OpenLandingPage();
                         buildingShipment.Refresh();
                         if (buildingShipment.ShipmentsReady == 0)
                         {
                             GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
-                            await ButlerLua.CloseLandingPage();
+                            //await ButlerLua.CloseLandingPage();
                             return new Result(ActionResult.Done);
                         }
                         GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
                     }
                     await Buddy.Coroutines.Coroutine.Yield();
                 }
-                await ButlerLua.CloseLandingPage();
+                //await ButlerLua.CloseLandingPage();
                 return new Result(ActionResult.Refresh);
             }
-            await ButlerLua.CloseLandingPage();
+            //await ButlerLua.CloseLandingPage();
             return new Result(ActionResult.Done); // should never reach that point!
         }
 

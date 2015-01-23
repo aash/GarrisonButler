@@ -12,6 +12,7 @@ using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
+using GarrisonButler.LuaObjects;
 using Styx;
 using Styx.Common;
 using Styx.CommonBot;
@@ -263,14 +264,28 @@ namespace GarrisonButler
 
             Diagnostic("Attaching to GARRISON_MISSION_STARTED");
             Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
-
+            
             Diagnostic("Attaching to LOOT_OPENED");
             Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
 
             Diagnostic("Attaching to LOOT_CLOSED");
             Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
+
+            CapacitiveDisplayFrame.Initialize();
         }
 
+        public static void GARRISON_LANDINGPAGE_SHIPMENTS(object sender, LuaEventArgs args)
+        {
+            GarrisonButler.Diagnostic("LuaEvent: GARRISON_LANDINGPAGE_SHIPMENTS");
+            //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
+        }
+        public static void SHIPMENT_UPDATE(object sender, LuaEventArgs args)
+        {
+            GarrisonButler.Diagnostic("LuaEvent: SHIPMENT_UPDATE");
+            //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
+            //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
+        }
         public override void OnDeselected()
         {
             Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
@@ -283,6 +298,9 @@ namespace GarrisonButler
             Lua.Events.DetachEvent("LOOT_OPENED", LootOpened);
             Diagnostic("Detaching from LOOT_CLOSED");
             Lua.Events.DetachEvent("LOOT_CLOSED", LootClosed);
+
+            CapacitiveDisplayFrame.OnDeselected();
+
             base.OnDeselected();
         }
 

@@ -40,23 +40,23 @@ namespace GarrisonButler.API
             return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
-        public static bool IsGarrisonCapacitiveDisplayFrame()
-        {
-            const string lua =
-                @"if not GarrisonCapacitiveDisplayFrame then 
-                      return tostring(false);
-                  else 
-                      if GarrisonCapacitiveDisplayFrame:IsVisible() == true then
-                          return tostring(true);
-                      end;
-                  end;
-                  return tostring(false);";
-            var results = Lua.GetReturnValues(lua);
+//        public static bool IsGarrisonCapacitiveDisplayFrame()
+//        {
+//            const string lua =
+//                @"if not GarrisonCapacitiveDisplayFrame then 
+//                      return tostring(false);
+//                  else 
+//                      if GarrisonCapacitiveDisplayFrame:IsVisible() == true then
+//                          return tostring(true);
+//                      end;
+//                  end;
+//                  return tostring(false);";
+//            var results = Lua.GetReturnValues(lua);
 
-            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
-        }
+//            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+//        }
         
-        public static void ClickStartOrderButton()
+        public static void ClickStartOrderButtonCapacitiveFrame()
         {
             Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
         }

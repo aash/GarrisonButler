@@ -158,7 +158,7 @@ namespace GarrisonButler.API
             return result;
         }
 
-        public static async Task<ActionResult> CloseLandingPage()
+        public static async Task<ActionResult> CloseLandingPageOld()
         {
             const string luaString = "HideUIPanel(GarrisonLandingPage);";
             return await DoStringWhile(luaString, async () => !await IsLandingPageOpen(), 3000);
@@ -168,11 +168,11 @@ namespace GarrisonButler.API
             const string luaString = "GarrisonLandingPage_Toggle()";
             return await DoStringWhile(luaString, async () => await IsLandingPageOpen(), 3000);
         }
-        public static async Task<ActionResult> OpenLandingPage()
-        {
-            const string luaString = "C_Garrison.RequestLandingPageShipmentInfo();";
-            return await DoString(luaString);
-        }
+        //public static async Task<ActionResult> OpenLandingPage()
+        //{
+        //    const string luaString = "C_Garrison.RequestLandingPageShipmentInfo();";
+        //    return await DoString(luaString);
+        //}
 
 
         public static async Task<bool> IsLandingPageOpen()
