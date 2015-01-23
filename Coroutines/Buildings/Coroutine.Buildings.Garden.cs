@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace GarrisonButler
             235391 // Talador Orchid
         };
 
-        private async static Task<Result> CanRunGarden()
+        private static async Task<Result> CanRunGarden()
         {
             if (!GaBSettings.Get().HarvestGarden)
             {

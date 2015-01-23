@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace GarrisonButler
             237720
         };
 
-        private async static Task<Result> CanRunCache()
+        private static async Task<Result> CanRunCache()
         {
             if (!GaBSettings.Get().GarrisonCache)
             {
@@ -38,7 +37,7 @@ namespace GarrisonButler
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
                     .FirstOrDefault(o => GarrisonCaches.GetEmptyIfNull().Contains(o.Entry));
-            if (cache != default(WoWGameObject)) 
+            if (cache != default(WoWGameObject))
                 return new Result(ActionResult.Running, cache);
             GarrisonButler.Diagnostic("[Cache] Cache not found, skipping...");
             return new Result(ActionResult.Failed);

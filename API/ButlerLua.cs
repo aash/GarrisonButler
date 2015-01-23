@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing.Design;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common.Helpers;
-using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
 
@@ -20,7 +18,7 @@ namespace GarrisonButler.API
         /// <summary>
         ///     Timer to avoid spamming too many LUA calls.
         /// </summary>
-        private static WaitTimer _antiLuaSpamTimer;
+        private static readonly WaitTimer AntiLuaSpamTimer;
 
         /// <summary>
         ///     Actual time waited between calls in ms.
@@ -33,7 +31,7 @@ namespace GarrisonButler.API
         //private static ButlerLua _instance;
         static ButlerLua()
         {
-            _antiLuaSpamTimer = new WaitTimer(TimeSpan.FromMilliseconds(_actualWaitTime));
+            AntiLuaSpamTimer = new WaitTimer(TimeSpan.FromMilliseconds(_actualWaitTime));
         }
 
         //public static ButlerLua Instance
@@ -61,8 +59,8 @@ namespace GarrisonButler.API
             }
             else
                 _actualWaitTime = 10;
-            _antiLuaSpamTimer.WaitTime = TimeSpan.FromMilliseconds(_actualWaitTime);
-            _antiLuaSpamTimer.Reset();
+            AntiLuaSpamTimer.WaitTime = TimeSpan.FromMilliseconds(_actualWaitTime);
+            AntiLuaSpamTimer.Reset();
         }
 
         /// <summary>
@@ -74,7 +72,7 @@ namespace GarrisonButler.API
         {
             var start = DateTime.Now;
             var now = DateTime.Now;
-            while (!_antiLuaSpamTimer.IsFinished)
+            while (!AntiLuaSpamTimer.IsFinished)
             {
                 if ((now - start).TotalMilliseconds >= TimeOut)
                     throw new TimeoutException(
@@ -82,7 +80,7 @@ namespace GarrisonButler.API
                                       " (Started:{0},Now:{1},Timeout:{2},CurrentWait:{3}",
                             start, now, TimeOut, _actualWaitTime));
 
-                await Buddy.Coroutines.Coroutine.Sleep(_antiLuaSpamTimer.TimeLeft);
+                await Buddy.Coroutines.Coroutine.Sleep(AntiLuaSpamTimer.TimeLeft);
                 now = DateTime.Now;
             }
             RefreshWaitTime();
@@ -92,12 +90,13 @@ namespace GarrisonButler.API
         ///     Execute an Lua string after passing through the anti spam.
         /// </summary>
         /// <param name="luaString"></param>
-        private static async Task<ActionResult> DoString(string luaString)
+        internal static async Task<ActionResult> DoString(string luaString)
         {
             await AntiSpamProtection();
             Lua.DoString(luaString);
             return ActionResult.Done;
         }
+
         private static async Task<ActionResult> DoStringWhile(string luaString, Func<Task<bool>> condition, int maxTime)
         {
             var waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(maxTime));
@@ -158,41 +157,10 @@ namespace GarrisonButler.API
             return result;
         }
 
-        public static async Task<ActionResult> CloseLandingPageOld()
-        {
-            const string luaString = "HideUIPanel(GarrisonLandingPage);";
-            return await DoStringWhile(luaString, async () => !await IsLandingPageOpen(), 3000);
-        }
-        public static async Task<ActionResult> OpenLandingPageOld()
-        {
-            const string luaString = "GarrisonLandingPage_Toggle()";
-            return await DoStringWhile(luaString, async () => await IsLandingPageOpen(), 3000);
-        }
-        //public static async Task<ActionResult> OpenLandingPage()
-        //{
-        //    const string luaString = "C_Garrison.RequestLandingPageShipmentInfo();";
-        //    return await DoString(luaString);
-        //}
-
-
-        public static async Task<bool> IsLandingPageOpen()
-        {
-            const string lua =
-               @"if not GarrisonLandingPage then 
-                      return tostring(false);
-                  else 
-                      if GarrisonLandingPage:IsVisible() == true then
-                          return tostring(true);
-                      end;
-                  end;
-                  return tostring(false);";
-            var results = await GetReturnValues(lua);
-            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
-        }
         public static async Task<bool> IsTradeSkillFrameOpen()
         {
             const string lua =
-               @"if not TradeSkillFrame then 
+                @"if not TradeSkillFrame then 
                       return tostring(false);
                   else 
                       if TradeSkillFrame:IsVisible() == true then
@@ -203,7 +171,7 @@ namespace GarrisonButler.API
             var results = await GetReturnValues(lua);
             return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
-        
+
         public static async Task<Tuple<int, int>> GetServerTime()
         {
             const string lua = @"  
@@ -217,6 +185,7 @@ namespace GarrisonButler.API
             var minutes = results.GetEmptyIfNull().ElementAt(1).ToInt32();
             return new Tuple<int, int>(hour, minutes);
         }
+
         public static async Task<int> GetTimeBeforeResetInSec()
         {
             const string lua = @"  
@@ -225,12 +194,13 @@ namespace GarrisonButler.API
             var results = await GetReturnValues(lua);
             return results.GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
+
         public static async Task<DateTime> GetServerDate()
         {
-            string lua = "local todayDate = date(\"*t\");" +
-                         "local ret = {};" +
-                         "for k,v in pairs(todayDate) do table.insert(ret,tostring(v)); end;" +
-                                       "return unpack(ret);";
+            var lua = "local todayDate = date(\"*t\");" +
+                      "local ret = {};" +
+                      "for k,v in pairs(todayDate) do table.insert(ret,tostring(v)); end;" +
+                      "return unpack(ret);";
             var results = await GetReturnValues(lua);
             var dateServer = results.GetEmptyIfNull().ToArray();
             if (dateServer.Count() < 6)
@@ -245,11 +215,11 @@ namespace GarrisonButler.API
             var day = dateServer[3].ToInt32();
             var month = dateServer[4].ToInt32();
             var year = dateServer[5].ToInt32();
-            DateTime date = new DateTime(year,month,day,hour,min,sec);
+            var date = new DateTime(year, month, day, hour, min, sec);
             return date;
         }
-        
-        public async static Task<Tuple<int,int>> GetShipmentReagentInfo()
+
+        public static async Task<Tuple<int, int>> GetShipmentReagentInfo()
         {
             const string lua =
                 @"local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(1);
@@ -305,9 +275,8 @@ namespace GarrisonButler.API
         // NOT AWAITED 
         public static void SetAutoLootValue(bool value)
         {
-            string lua = string.Format("SetCVar(\"autoLootDefault\",{0});", value ? 1 : 0);
+            var lua = string.Format("SetCVar(\"autoLootDefault\",{0});", value ? 1 : 0);
             Lua.DoString(lua);
         }
-
     }
 }

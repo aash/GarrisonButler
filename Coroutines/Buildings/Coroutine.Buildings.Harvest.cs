@@ -72,7 +72,7 @@ namespace GarrisonButler
                     if ((!toHarvest.WithinInteractRange) &&
                         (!(Me.Location.DistanceSqr(_cachedToHarvestLocation) <= _cachedInteractRangeSqr)))
                         return new Result(ActionResult.Running);
-                    
+
                     GarrisonButler.Diagnostic("[Harvest] STEP 0: Done with harvesting.");
                     return new Result(ActionResult.Refresh);
                 }
@@ -90,14 +90,15 @@ namespace GarrisonButler
             // STEP 2 - Make sure we are within interact range of the location of toHarvest
             if (_cachedToHarvestLocation != WoWPoint.Empty &&
                 (Me.Location.DistanceSqr(_cachedToHarvestLocation) > _cachedInteractRangeSqr))
-                if ((await MoveToInteract(_cachedToHarvestLocation, _cachedInteractRangeSqr)).Status == ActionResult.Running)
+                if ((await MoveToInteract(_cachedToHarvestLocation, _cachedInteractRangeSqr)).Status ==
+                    ActionResult.Running)
                     // returns false for Failed and ReachedDestination
                     return new Result(ActionResult.Running);
 
 
             // If we are here it means we moved to the cache location but at no points
             // on the way the node was discovered again.
-            
+
             GarrisonButler.Diagnostic("[Harvest] STEP 5 - Finished");
 
             return new Result(ActionResult.Refresh);

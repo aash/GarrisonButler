@@ -1,19 +1,16 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.Threading.Tasks;
 using GarrisonButler.API;
-using Styx.CommonBot.Frames;
 using Styx.WoWInternals;
+
+#endregion
 
 namespace GarrisonButler.LuaObjects
 {
     public class CapacitiveDisplayFrame
     {
-        private static CapacitiveDisplayFrame _instance;
-
-        public static CapacitiveDisplayFrame Instance
-        {
-            get { return _instance; }
-            set { _instance = value; }
-        }
+        public static CapacitiveDisplayFrame Instance { get; set; }
 
         public static void Initialize()
         {
@@ -36,22 +33,31 @@ namespace GarrisonButler.LuaObjects
             GarrisonButler.Diagnostic("Detaching from SHIPMENT_CRAFTER_CLOSED");
             Lua.Events.DetachEvent("SHIPMENT_CRAFTER_CLOSED", Closed);
         }
+
         private static void Opened(object sender, LuaEventArgs args)
         {
             GarrisonButler.Diagnostic("[CapacitiveFrame] Opened.");
-            _instance = new CapacitiveDisplayFrame();
+            Instance = new CapacitiveDisplayFrame();
         }
 
         private static void Closed(object sender, LuaEventArgs args)
         {
             GarrisonButler.Diagnostic("[CapacitiveFrame] Closed.");
-            _instance = null;
+            Instance = null;
         }
 
-        public static void ClickStartOrderButton()
+        public static async Task ClickStartOrderButton(Building building)
         {
-            InterfaceLua.ClickStartOrderButtonCapacitiveFrame();
+            var currentStarted = building.ShipmentsTotal;
+            await ButlerLua.DoString("C_Garrison.RequestShipmentCreation()");
+            if (await Buddy.Coroutines.Coroutine.Wait(10000, () => currentStarted != building.ShipmentsTotal))
+            {
+                GarrisonButler.Log("Successfully started a work order at {0}.", building.Name);
+            }
+            else
+            {
+                GarrisonButler.Log("Failed to start a work order at {0}.", building.Name);
+            }
         }
-
     }
 }

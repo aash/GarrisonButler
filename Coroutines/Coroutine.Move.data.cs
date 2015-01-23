@@ -21,8 +21,7 @@ namespace GarrisonButler
             HordeTownHall3
         };
 
-        internal static List<List<List<Func<List<WoWPoint>>>>> HordeBuildings = new List
-            <List<List<Func<List<WoWPoint>>>>>
+        internal static List<List<List<Func<List<WoWPoint>>>>> HordeBuildings = new List<List<List<Func<List<WoWPoint>>>>>
         {
             // garrison level 1
             new List<List<Func<List<WoWPoint>>>>
@@ -7775,8 +7774,7 @@ namespace GarrisonButler
             AllianceTownHall3
         };
 
-        internal static List<List<List<Func<List<WoWPoint>>>>> AllianceBuildings = new List
-            <List<List<Func<List<WoWPoint>>>>>
+        internal static List<List<List<Func<List<WoWPoint>>>>> AllianceBuildings = new List<List<List<Func<List<WoWPoint>>>>>
         {
             // garrison level 1
             new List<List<Func<List<WoWPoint>>>>

@@ -2,9 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Buddy.Coroutines;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
@@ -51,7 +51,7 @@ namespace GarrisonButler
         }
 
 
-        private async static Task<Result> CanRunStartMission()
+        private static async Task<Result> CanRunStartMission()
         {
             if (!GaBSettings.Get().StartMissions)
             {
@@ -191,22 +191,22 @@ namespace GarrisonButler
                         GarrisonButler.Diagnostic("[Missions] Interacting with mission table.");
                         return true;
                     }
-                    else
-                    {
-                        GarrisonButler.Diagnostic("[Missions] Can't interaction with mission table, not in range!");
-                        GarrisonButler.Diagnostic("[Missions] Table at: {0}", tableForLoc.Location);
-                        GarrisonButler.Diagnostic("[Missions] Me at: {0}", Me.Location);
-                    }
+                    GarrisonButler.Diagnostic("[Missions] Can't interaction with mission table, not in range!");
+                    GarrisonButler.Diagnostic("[Missions] Table at: {0}", tableForLoc.Location);
+                    GarrisonButler.Diagnostic("[Missions] Me at: {0}", Me.Location);
                 }
                 else
                 {
-                    if ((await MoveTo(_tablePosition, "[Missions] Moving to command table")).Status == ActionResult.Running)
+                    if ((await MoveTo(_tablePosition, "[Missions] Moving to command table")).Status ==
+                        ActionResult.Running)
                         return true;
                 }
             }
             else
             {
-                if ((await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table")).Status ==
+                if (
+                    (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table"))
+                        .Status ==
                     ActionResult.Running)
                     return true;
             }
@@ -228,7 +228,7 @@ namespace GarrisonButler
             }
             catch (Exception e)
             {
-                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                if (e is CoroutineStoppedException)
                     throw;
 
                 GarrisonButler.Warning(e.ToString());
@@ -236,7 +236,7 @@ namespace GarrisonButler
             return true;
         }
 
-        private async static Task<Result> CanRunTurnInMissions()
+        private static async Task<Result> CanRunTurnInMissions()
         {
             var canRun = GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0;
             return canRun

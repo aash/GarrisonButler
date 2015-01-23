@@ -1,7 +1,5 @@
-﻿using Buddy.Coroutines;
-using System.Threading;
-using System.Windows.Navigation;
-using GreyMagic;
+﻿#region
+
 using GarrisonButler.API;
 using GarrisonButler.Coroutines;
 
@@ -13,8 +11,9 @@ using Bots.Professionbuddy.Dynamic;
 using GarrisonButler.Config;
 using NewMixedMode;
 using Styx;
-using Styx.Common.Helpers;
 using Styx.CommonBot;
+
+#endregion
 
 #endregion
 
@@ -27,7 +26,7 @@ namespace GarrisonButler
         private static bool _hbRelogSkipped;
         private static int _hbRelogSkippedCounter;
         private static WoWPoint waitingSpot;
-        private static bool waitingSpotInit = false;
+        private static bool waitingSpotInit;
 
 // ReSharper disable once CSharpWarnings::CS1998
         private static async Task<Result> Waiting()
@@ -46,8 +45,8 @@ namespace GarrisonButler
             if (!waitingSpotInit)
             {
                 var r = new Random(DateTime.Now.Second);
-                var randomX = (float)(r.NextDouble() - 0.5) * 5;
-                var randomY = (float)(r.NextDouble() - 0.5) * 5;
+                var randomX = (float) (r.NextDouble() - 0.5)*5;
+                var randomY = (float) (r.NextDouble() - 0.5)*5;
                 var toAdd = Me.IsAlliance ? TableAlliance : TableHorde;
                 toAdd.X = toAdd.X + randomX;
                 toAdd.Y = toAdd.Y + randomY;
@@ -56,9 +55,10 @@ namespace GarrisonButler
             }
 
             if ((await
-                    MoveTo(waitingSpot, "Moving to random waiting spot next to mission table.")).Status == ActionResult.Running)
+                MoveTo(waitingSpot, "Moving to random waiting spot next to mission table.")).Status ==
+                ActionResult.Running)
                 return new Result(ActionResult.Running);
-            
+
             GarrisonButler.Log("You Garrison has been taken care of! Waiting for orders...");
             return new Result(ActionResult.Done);
         }
@@ -107,12 +107,11 @@ namespace GarrisonButler
             return true;
         }
 
-        public async static void AnythingTodo()
+        public static async Task SomethingToDo()
         {
             if (!ReadyToSwitch)
             {
-                AnyTodo = false;
-                return;
+                AnyTodo =  false;
             }
             AnyTodo = await _mainSequence.AtLeastOneTrue();
         }

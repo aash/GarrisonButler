@@ -5,15 +5,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
-using Styx;
-using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
+using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -40,10 +37,10 @@ namespace GarrisonButler
         private String _buildTime;
         private String _buildingLevel;
         internal bool CanActivate;
-        public CanCompleteOrderD CanCompleteOrder = () =>
-        {
-                return new Task<Result>(() => new Result(ActionResult.Done, 0));
-        };
+
+        public CanCompleteOrderD CanCompleteOrder =
+            () => { return new Task<Result>(() => new Result(ActionResult.Done, 0)); };
+
         private String _canUpgrade;
         public String CreationTime;
         private int _currencyId;
@@ -98,10 +95,14 @@ namespace GarrisonButler
             _itemQuality = itemQuality;
             _itemId = itemId ?? "None";
             GetOrderInfo(meIsAlliance);
+            NumberShipmentLeftToStart = ShipmentCapacity - ShipmentsTotal;
+
             //GarrisonButler.Diagnostic(ToString());
         }
 
         public int workFrameWorkAroundTries { get; set; }
+
+        public int NumberShipmentLeftToStart { get; private set; }
 
         public override string ToString()
         {
@@ -114,10 +115,12 @@ namespace GarrisonButler
                     _itemName, _itemQuality, _itemId);
         }
 
-        public int NumberShipmentLeftToStart()
+        public void RefreshOrders(int running, int capacity)
         {
-            return ShipmentCapacity - ShipmentsTotal;
-            // return BuildingsLua.GetNumberShipmentLeftToStart(id);
+            GarrisonButler.Diagnostic("[Building] Refreshing {0}, running={1}, total={2}", Name, capacity - running,
+                running);
+            NumberShipmentLeftToStart = capacity - running;
+            ShipmentsTotal = running;
         }
 
         public void Refresh()
@@ -144,6 +147,8 @@ namespace GarrisonButler
             _duration = b._duration;
             _itemName = b._itemName;
             _itemQuality = b._itemQuality;
+
+            NumberShipmentLeftToStart = ShipmentCapacity - ShipmentsTotal;
         }
 
 
@@ -153,7 +158,7 @@ namespace GarrisonButler
             var count = HbApi.GetNumberItemInBags(ReagentId);
             // add number in reagent banks
             count += HbApi.GetNumberItemInReagentBank(ReagentId);
-            
+
             GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
                 count, NumberReagent, count >= NumberReagent);
 
@@ -217,26 +222,29 @@ namespace GarrisonButler
             var mortar = HbApi.GetItemInBags(114942).FirstOrDefault();
             var oreInBags = HbApi.GetNumberItemInBags(109118);
             var oreInBank = HbApi.GetNumberItemInReagentBank(109118);
-            if( (inscription == null ||  inscription.CurrentValue <= 0) 
+            if ((inscription == null || inscription.CurrentValue <= 0)
                 && (mortar == default(WoWItem) || mortar.StackCount <= 0)
                 && (oreInBags + oreInBank < 5))
                 return await CanCompleteOrderItem();
 
             // get number in bags
-            var count = HbApi.GetNumberItemInBags((uint)ReagentId);
+            var count = HbApi.GetNumberItemInBags(ReagentId);
 
             // add number in reagent banks
-            count += HbApi.GetNumberItemInReagentBank((uint)ReagentId);
+            count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
-            GarrisonButler.Diagnostic("[ShipmentStart] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
-                NumberReagent, count >= NumberReagent);
-            
-            count += HbApi.GetNumberItemByMillingBags((uint)ReagentId, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
-            
-            GarrisonButler.Diagnostic("[ShipmentStart] Total found with milling {0} - #{1} - needed #{2} - {3} ", ReagentId, count,
+            GarrisonButler.Diagnostic(
+                "[ShipmentStart] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ", ReagentId,
+                count,
                 NumberReagent, count >= NumberReagent);
 
-            return new Result(ActionResult.Done,(int)count/NumberReagent);
+            count += HbApi.GetNumberItemByMillingBags(ReagentId, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+
+            GarrisonButler.Diagnostic("[ShipmentStart] Total found with milling {0} - #{1} - needed #{2} - {3} ",
+                ReagentId, count,
+                NumberReagent, count >= NumberReagent);
+
+            return new Result(ActionResult.Done, (int) count/NumberReagent);
         }
 
 
@@ -244,13 +252,13 @@ namespace GarrisonButler
         {
             // Do we need to mill
             // get number in bags
-            var count = HbApi.GetNumberItemInBags((uint) ReagentId);
+            var count = HbApi.GetNumberItemInBags(ReagentId);
             // add number in reagent banks
-            count += HbApi.GetNumberItemInReagentBank((uint) ReagentId);
+            count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
             if (count/NumberReagent >= numberToStart)
                 return new Result(ActionResult.Done);
-                
+
             // We need to mill
             // If we don't have inscription check if we have mortar in bags
             var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
@@ -277,7 +285,7 @@ namespace GarrisonButler
                     // Moving to vendor
                     // Alliance - Eric Broadoak, ID: 77372
                     // Horde - ID: http://www.wowhead.com/npc=79829/urgra
-                    
+
                     var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
                         .FirstOrDefault(u => u.Entry == (StyxWoW.Me.IsAlliance ? 77372 : 79829));
 
@@ -285,7 +293,8 @@ namespace GarrisonButler
                     {
                         await
                             Coroutine.MoveTo(Pnj,
-                                String.Format("[MillBeforeOrder,{0}] Could not find unit ({1}), moving to default location.",
+                                String.Format(
+                                    "[MillBeforeOrder,{0}] Could not find unit ({1}), moving to default location.",
                                     Id, PnjId));
                         return new Result(ActionResult.Running);
                     }
@@ -294,10 +303,10 @@ namespace GarrisonButler
                         return new Result(ActionResult.Running);
 
                     unit.Interact();
-                    
+
                     // Crafting
                     if (!(await ButlerLua.IsTradeSkillFrameOpen()))
-                    {    
+                    {
                         GarrisonButler.Diagnostic("[MillBeforeOrder] TradeSkillFrame not open.");
                         return new Result(ActionResult.Running);
                     }
@@ -327,10 +336,9 @@ namespace GarrisonButler
                 }
             }
 
-            
 
             // Mill until we don't need anymore
-            var millable = HbApi.GetAllItemsToMillFrom((uint) ReagentId, GaBSettings.Get().Pigments).ToArray();
+            var millable = HbApi.GetAllItemsToMillFrom(ReagentId, GaBSettings.Get().Pigments).ToArray();
             if (millable.Any() && count/NumberReagent < numberToStart)
             {
                 await millable.First().Mill();
@@ -380,7 +388,7 @@ namespace GarrisonButler
                 case (int) Buildings.BarnLvl2:
                 case (int) Buildings.BarnLvl3:
                     PnjId = alliance ? 84524 : 85048;
-                    ReagentIds = new List<uint> { 119810, 119813, 119814, 119815, 119817, 119819 };
+                    ReagentIds = new List<uint> {119810, 119813, 119814, 119815, 119817, 119819};
                     NumberReagent = 1;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
@@ -671,7 +679,7 @@ namespace GarrisonButler
                     {
                         CanCompleteOrder = CanCompleteOrderItem;
                     }
-                        // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
+                    // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     Displayids = new List<uint>
                     {
                         15388, // Garrison Building  Inscription V1
@@ -775,35 +783,35 @@ namespace GarrisonButler
                         ? new WoWPoint(1872.647, 310.0204, 82.61102)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     CanCompleteOrder = CanCompleteOrderTradingPost;
-                    PnjIds = alliance 
-                        ? new List<int>()
-                            {
-                                87207,
-                                87211,
-                                87208,
-                                87213,
-                                87214,
-                                87217,
-                                87215,
-                                87212,
-                                87209,
-                                87216,
-                                87210
-                            }
-                        : new List<int>()
-                            {
-                                86803,
-                                87112,
-                                87113,
-                                87114,
-                                87115,
-                                87116,
-                                87117,
-                                87118,
-                                87119,
-                                87120,
-                                87121
-                            };
+                    PnjIds = alliance
+                        ? new List<int>
+                        {
+                            87207,
+                            87211,
+                            87208,
+                            87213,
+                            87214,
+                            87217,
+                            87215,
+                            87212,
+                            87209,
+                            87216,
+                            87210
+                        }
+                        : new List<int>
+                        {
+                            86803,
+                            87112,
+                            87113,
+                            87114,
+                            87115,
+                            87116,
+                            87117,
+                            87118,
+                            87119,
+                            87120,
+                            87121
+                        };
                     Displayids = new List<uint>
                     {
                         18574, // Garrison Building  Trading Post V1
@@ -813,7 +821,7 @@ namespace GarrisonButler
                         15404, // Garrison Building Horde Trading Post V2
                         20150 // Garrison Building Horde Trading Post V3
                     };
-                    break; 
+                    break;
             }
         }
 
@@ -825,7 +833,7 @@ namespace GarrisonButler
             var secBeforeReset = TimeSpan.FromSeconds(await ButlerLua.GetTimeBeforeResetInSec());
             var nextReset = serverTimeLua + secBeforeReset;
             var lastReset = nextReset - TimeSpan.FromHours(24);
-            
+
             if (GaBSettings.Get().LastCheckTradingPost == default(DateTime)
                 || GaBSettings.Get().LastCheckTradingPost < lastReset)
             {
@@ -844,26 +852,31 @@ namespace GarrisonButler
                     return new Result(ActionResult.Failed);
                 }
 
-                GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1, reagent.Item2, serverTimeLua);
+                GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1,
+                    reagent.Item2, serverTimeLua);
                 // Override value
-                GaBSettings.Get().itemIdTradingPost = reagent.Item1;
-                GaBSettings.Get().numberReagentTradingPost = reagent.Item2;
+                GaBSettings.Get().ItemIdTradingPost = (uint)reagent.Item1;
+                GaBSettings.Get().NumberReagentTradingPost = reagent.Item2;
                 GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
                 GaBSettings.Save();
             }
-            ReagentId = (uint)GaBSettings.Get().itemIdTradingPost;
-            NumberReagent = GaBSettings.Get().numberReagentTradingPost;
+            ReagentId = GaBSettings.Get().ItemIdTradingPost;
+            NumberReagent = GaBSettings.Get().NumberReagentTradingPost;
 
+            CanCompleteOrder = CanCompleteOrderItem;
             var rea =
                 GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
             if (rea == null)
             {
-                GarrisonButler.Diagnostic("[TradingPost] Couldn't find matching reagent activated in settings, reagentId={0}, #={1}", ReagentId, NumberReagent);
+                GarrisonButler.Diagnostic(
+                    "[TradingPost] Couldn't find matching reagent activated in settings, reagentId={0}, #={1}",
+                    ReagentId, NumberReagent);
                 ObjectDumper.WriteToHb(GaBSettings.Get().TradingPostReagentsSettings, 3);
                 return new Result(ActionResult.Failed);
             }
             // Done with the check of reagent, so we switch to simple routine.
-            GarrisonButler.Diagnostic("[TradingPost] Calling CanCompleteOrder with reagentId={0}, #={1}", ReagentId, NumberReagent);
+            GarrisonButler.Diagnostic("[TradingPost] Calling CanCompleteOrder with reagentId={0}, #={1}", ReagentId,
+                NumberReagent);
             return await CanCompleteOrderItem();
         }
 
@@ -953,62 +966,38 @@ namespace GarrisonButler
 
     public enum TradingPostReagents
     {
-        [Description("Draenic Dust")]
-        DraenicDust = 109693,
-        [Description("Sumptuous Fur")]
-        SumptuousFur = 111557,
-        [Description("Raw Beast Hide")]
-        RawBeastHide = 110609,
+        [Description("Draenic Dust")] DraenicDust = 109693,
+        [Description("Sumptuous Fur")] SumptuousFur = 111557,
+        [Description("Raw Beast Hide")] RawBeastHide = 110609,
 
         // Herb
-        [Description("Talador Orchid")]
-        TaladorOrchid = 109129,
-        [Description("Nagrand Arrow Bloom")]
-        NagrandArrowbloom = 109128,
-        [Description("Starflower")]
-        Starflower = 109127,
-        [Description("Gorgrond FlyTrap")]
-        GorgrondFlytrap = 109126,
-        [Description("Fireweed")]
-        Fireweed = 109125,
-        [Description("Frostweed")]
-        Frostweed = 109124,
+        [Description("Talador Orchid")] TaladorOrchid = 109129,
+        [Description("Nagrand Arrow Bloom")] NagrandArrowbloom = 109128,
+        [Description("Starflower")] Starflower = 109127,
+        [Description("Gorgrond FlyTrap")] GorgrondFlytrap = 109126,
+        [Description("Fireweed")] Fireweed = 109125,
+        [Description("Frostweed")] Frostweed = 109124,
 
         // Ore
-        [Description("True Iron Ore")]
-        TrueIronOre = 109119,
-        [Description("Blackrock Ore")]
-        BlackrockOre = 109118,
+        [Description("True Iron Ore")] TrueIronOre = 109119,
+        [Description("Blackrock Ore")] BlackrockOre = 109118,
 
         // Meat
-        [Description("Raw Clefthoof Meat")]
-        RawClefthoofMeat = 109131,
-        [Description("Raw Talbuk Meat")]
-        RawTalbukMeat = 109132,
-        [Description("Rylak Egg")]
-        RylakEgg = 109133,
-        [Description("Raw Elekk Meat")]
-        RawElekkMeat = 109134,
-        [Description("Raw Riverbeast Meat")]
-        RawRiverbeastMeat = 109135,
-        [Description("Raw Boar Meat")]
-        RawBoarMeat = 109136,
+        [Description("Raw Clefthoof Meat")] RawClefthoofMeat = 109131,
+        [Description("Raw Talbuk Meat")] RawTalbukMeat = 109132,
+        [Description("Rylak Egg")] RylakEgg = 109133,
+        [Description("Raw Elekk Meat")] RawElekkMeat = 109134,
+        [Description("Raw Riverbeast Meat")] RawRiverbeastMeat = 109135,
+        [Description("Raw Boar Meat")] RawBoarMeat = 109136,
 
         // Fish
-        [Description("Crescent Saberfish Flesh")]
-        CrescentSaberfishFlesh = 109137,
-        [Description("Jawless Skulker Flesh")]
-        JawlessSkulkerFlesh = 109138,
-        [Description("Fat Sleeper Flesh")]
-        FatSleeperFlesh = 109139,
-        [Description("Blind Lake Sturgeon Flesh")]
-        BlindLakeSturgeonFlesh = 109140,
-        [Description("Fire Ammonite Tentacle")]
-        FireAmmoniteTentacle = 109141,
-        [Description("Sea Scorpion Segment")]
-        SeaScorpionSegment = 109142,
-        [Description("Abyssal Gulper Eel Flesh")]
-        AbyssalGulperEelFlesh = 109143,
+        [Description("Crescent Saberfish Flesh")] CrescentSaberfishFlesh = 109137,
+        [Description("Jawless Skulker Flesh")] JawlessSkulkerFlesh = 109138,
+        [Description("Fat Sleeper Flesh")] FatSleeperFlesh = 109139,
+        [Description("Blind Lake Sturgeon Flesh")] BlindLakeSturgeonFlesh = 109140,
+        [Description("Fire Ammonite Tentacle")] FireAmmoniteTentacle = 109141,
+        [Description("Sea Scorpion Segment")] SeaScorpionSegment = 109142,
+        [Description("Abyssal Gulper Eel Flesh")] AbyssalGulperEelFlesh = 109143
     }
 
     public enum Buildings

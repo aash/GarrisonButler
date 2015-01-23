@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Objects;
 using Styx;
-using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -62,7 +60,7 @@ namespace GarrisonButler
             }
         }
 
-        private async static Task<Result> CanRunDailies()
+        private static async Task<Result> CanRunDailies()
         {
             // Check
             InitializeDailies();

@@ -89,7 +89,7 @@ namespace GarrisonButler
                 PathGenerationStopwatch.Start();
 
                 GarrisonButler.Diagnostic("Starting path generation.");
-                var starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(@from);
 
                 var ending = ClosestToNodes(to);
 
@@ -121,7 +121,7 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("Starting path generation.");
 
-                var starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(@from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
 
@@ -146,7 +146,7 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("Starting path generation.");
 
-                var starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(@from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
 
@@ -158,7 +158,7 @@ namespace GarrisonButler
                     var endingPoint = ClosestToNodes(t);
                     if (_movementGraph.Nodes.All(n => n.Key != endingPoint))
                         throw new ArgumentException("Ending node must be in graph.");
-                    pathsList.Add(ExtractPathWoW(_movementGraph, endingPoint,t));
+                    pathsList.Add(ExtractPathWoW(_movementGraph, endingPoint, t));
                 }
 
                 PathGenerationStopwatch.Stop();
@@ -175,12 +175,12 @@ namespace GarrisonButler
 
                 GarrisonButler.Diagnostic("Starting path generation.");
 
-                var starting = ClosestToNodes(from);
+                var starting = ClosestToNodes(@from);
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
 
                 ProcessGraph(_movementGraph, starting);
-                var minDistance = double.MaxValue;
+                var minDistance = Double.MaxValue;
                 var temp = objectsTo.First();
 
                 foreach (var gameObject in objectsTo)
@@ -207,7 +207,7 @@ namespace GarrisonButler
                 var priorityQueue = new HeapPriorityQueue<Node>(graph.Nodes.Count);
                 foreach (var node in graph.Nodes.Values)
                 {
-                    node.DistanceFromStart = double.PositiveInfinity;
+                    node.DistanceFromStart = Double.PositiveInfinity;
                     node.Previous = null;
                     node.Visited = false;
                 }
@@ -269,7 +269,7 @@ namespace GarrisonButler
 
                 while (u.Previous != null)
                 {
-                    if (Math.Abs(distance - double.MaxValue) < 1)
+                    if (Math.Abs(distance - Double.MaxValue) < 1)
                         distance = u.DistanceFromStart;
                     else distance += u.DistanceFromStart;
                     u = u.Previous;

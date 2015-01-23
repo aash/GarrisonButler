@@ -53,15 +53,15 @@ namespace GarrisonButler
 
             var mine = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl1) ||
-                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl2) ||
-                    (b.Id == (int)global::GarrisonButler.Buildings.MineLvl3));
+                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl1) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl2) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.MineLvl3));
 
             var garden = _buildings.GetEmptyIfNull().FirstOrDefault(
                 b =>
-                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl1) ||
-                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl2) ||
-                    (b.Id == (int)global::GarrisonButler.Buildings.GardenLvl3));
+                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl1) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl2) ||
+                    (b.Id == (int) global::GarrisonButler.Buildings.GardenLvl3));
 
             if (mine != default(Building))
             {
@@ -72,7 +72,7 @@ namespace GarrisonButler
                         CanRunMine,
                         5000,
                         100,
-                    // Drink coffee
+                        // Drink coffee
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
                             async () =>
@@ -80,9 +80,10 @@ namespace GarrisonButler
                                 var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 1)();
                                 return
                                     new Result(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee
-                                        ? ActionResult.Running : ActionResult.Failed, canUse.Item2);
+                                        ? ActionResult.Running
+                                        : ActionResult.Failed, canUse.Item2);
                             }, 10000, 3000),
-                    // Use Mining Pick 
+                        // Use Mining Pick 
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
                             async () =>
@@ -92,9 +93,10 @@ namespace GarrisonButler
                                 return
                                     new Result(
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick
-                                        ? ActionResult.Running : ActionResult.Failed, canUse.Item2);
+                                            ? ActionResult.Running
+                                            : ActionResult.Failed, canUse.Item2);
                             }, 10000, 3000),
-                    // Delete Coffee 
+                        // Delete Coffee 
                         new ActionHelpers.ActionOnTimer(
                             DeleteItemInbags,
                             async () =>
@@ -104,9 +106,10 @@ namespace GarrisonButler
                                 return
                                     new Result(
                                         tooMany.Item1 && GaBSettings.Get().DeleteCoffee
-                                        ? ActionResult.Running : ActionResult.Failed, tooMany.Item2);
+                                            ? ActionResult.Running
+                                            : ActionResult.Failed, tooMany.Item2);
                             }, 10000, 3000),
-                    // Delete Mining Pick 
+                        // Delete Mining Pick 
                         new ActionHelpers.ActionOnTimer(
                             DeleteItemInbags,
                             async () =>
@@ -116,7 +119,8 @@ namespace GarrisonButler
                                 return
                                     new Result(
                                         tooMany.Item1 && GaBSettings.Get().DeleteMiningPick
-                                        ? ActionResult.Running : ActionResult.Failed, tooMany.Item2);
+                                            ? ActionResult.Running
+                                            : ActionResult.Failed, tooMany.Item2);
                             }, 10000, 30000)));
 
                 // Take care of mine shipments

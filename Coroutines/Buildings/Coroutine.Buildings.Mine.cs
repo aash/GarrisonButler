@@ -44,7 +44,7 @@ namespace GarrisonButler
         };
 
 
-        private async static Task<Result> CanRunMine()
+        private static async Task<Result> CanRunMine()
         {
             // Settings
             if (!GaBSettings.Get().HarvestMine)
@@ -97,9 +97,8 @@ namespace GarrisonButler
             {
                 var item = HbApi.GetItemInBags(entry).FirstOrDefault();
                 if (item == null || !item.IsValid || !item.Usable)
-                    return new Tuple<bool,
-                        WoWItem>(false,
-                            null);
+                    return new Tuple<bool, WoWItem>(false,
+                        null);
                 var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
                 var pairs = auras as KeyValuePair<string, WoWAura>[] ?? auras.ToArray();
                 if (auraId != 0 && maxStack != 0 && pairs.Any())
@@ -109,9 +108,8 @@ namespace GarrisonButler
                     if (aura == null)
                     {
                         GarrisonButler.Diagnostic("[Item] Aura null skipping.");
-                        return new Tuple<bool,
-                            WoWItem>(false,
-                                null);
+                        return new Tuple<bool, WoWItem>(false,
+                            null);
                     }
                     // ReSharper disable once InvertIf
                     if (aura.StackCount >= maxStack || maxStack == 1)
@@ -133,7 +131,7 @@ namespace GarrisonButler
 
         public static async Task<Result> UseItemInbags(object obj)
         {
-            var item = obj as WoWItem; 
+            var item = obj as WoWItem;
             if (item == null)
                 return new Result(ActionResult.Failed);
 
@@ -160,7 +158,7 @@ namespace GarrisonButler
             return (async delegate(object item)
             {
                 var wowItem = item as WoWItem;
-                if(wowItem == null)
+                if (wowItem == null)
                     return new Result(ActionResult.Failed);
 
                 var res = await UseItemInbags(wowItem);
@@ -168,8 +166,8 @@ namespace GarrisonButler
                     await Buddy.Coroutines.Coroutine.Wait(waitTimeCondition, conditionExit);
 
                 return res;
-                }
-            );
+            }
+                );
         }
 
 
@@ -181,9 +179,9 @@ namespace GarrisonButler
 
             GarrisonButler.Log("[Item] Deleting one of: {0}", item.Name);
             Lua.DoString(
-                string.Format(
+                String.Format(
                     "local amount = {0}; ", 1) +
-                string.Format(
+                String.Format(
                     "local item = {0}; ", item.Entry) +
                 "local ItemBagNr = 0; " +
                 "local ItemSlotNr = 1; " +
@@ -214,9 +212,8 @@ namespace GarrisonButler
             {
                 var item = HbApi.GetItemInBags(entry).FirstOrDefault();
                 if (item == null || !item.IsValid || !item.Usable)
-                    return new Tuple<bool,
-                        WoWItem>(false,
-                            null);
+                    return new Tuple<bool, WoWItem>(false,
+                        null);
 
                 return item.StackCount >= max
                     ? new Tuple<bool, WoWItem>(true, item)

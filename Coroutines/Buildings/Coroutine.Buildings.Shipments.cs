@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
@@ -38,7 +37,7 @@ namespace GarrisonButler
                 62, // lvl 2
                 63 // lvl 3
             },
-            35154, 34192),
+                35154, 34192),
 
             // Garden
             new Shipment(new List<int>
@@ -47,7 +46,7 @@ namespace GarrisonButler
                 136, // lvl 2
                 137 // lvl 3
             },
-            34193, 36404),
+                34193, 36404),
 
             #region large
 
@@ -58,7 +57,7 @@ namespace GarrisonButler
                 27, // lvl 2
                 28 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Dwarven Bunker
             new Shipment(new List<int>
@@ -67,7 +66,7 @@ namespace GarrisonButler
                 9, // lvl 2
                 10 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Gnomish Gearworks
             new Shipment(new List<int>
@@ -76,7 +75,7 @@ namespace GarrisonButler
                 163, // lvl 2
                 164 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Mage Tower
             new Shipment(new List<int>
@@ -85,7 +84,7 @@ namespace GarrisonButler
                 38, // lvl 2
                 39 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Stables
             new Shipment(new List<int>
@@ -94,7 +93,7 @@ namespace GarrisonButler
                 66, // lvl 2
                 67 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             #endregion
             #region medium
@@ -115,7 +114,7 @@ namespace GarrisonButler
                 160, // lvl 2
                 161 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Lumber Mill
             new Shipment(new List<int>
@@ -124,7 +123,7 @@ namespace GarrisonButler
                 41, // lvl 2
                 138 // lvl 3
             },
-            36138, 36192),
+                36138, 36192),
 
             // Trading Post
             new Shipment(new List<int>
@@ -133,7 +132,7 @@ namespace GarrisonButler
                 144, // lvl 2
                 145 // lvl 3
             },
-            37062, 37088),
+                37062, 37088),
 
             // Inn / Tavern
             new Shipment(new List<int>
@@ -142,7 +141,7 @@ namespace GarrisonButler
                 35, // lvl 2
                 36 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             #endregion
             #region small
@@ -154,7 +153,7 @@ namespace GarrisonButler
                 119, // lvl 2
                 120 // lvl 3
             },
-            37568, 36641),
+                37568, 36641),
 
             // Enchanter's Study
             new Shipment(new List<int>
@@ -163,7 +162,7 @@ namespace GarrisonButler
                 125, // lvl 2
                 126 // lvl 3
             },
-            37570, 36645),
+                37570, 36645),
 
             // Gem Boutique
             new Shipment(new List<int>
@@ -172,7 +171,7 @@ namespace GarrisonButler
                 131, // lvl 2
                 132 // lvl 3
             },
-            37573, 36644),
+                37573, 36644),
 
             // Salvage Yard
             new Shipment(new List<int>
@@ -181,7 +180,7 @@ namespace GarrisonButler
                 140, // lvl 2
                 141 // lvl 3
             },
-            BiggerIsBetterHorde, BiggerIsBetterAlliance),
+                BiggerIsBetterHorde, BiggerIsBetterAlliance),
 
             // Scribe's Quarters
             new Shipment(new List<int>
@@ -190,7 +189,7 @@ namespace GarrisonButler
                 129, // lvl 2
                 130 // lvl 3
             },
-            37572, 36647),
+                37572, 36647),
 
             // Storehouse
             new Shipment(new List<int>
@@ -208,7 +207,7 @@ namespace GarrisonButler
                 127, // lvl 2
                 128 // lvl 3
             },
-            37575, 36643),
+                37575, 36643),
 
             // The Forge
             new Shipment(new List<int>
@@ -217,7 +216,7 @@ namespace GarrisonButler
                 117, // lvl 2
                 118 // lvl 3
             },
-            37569, 35168),
+                37569, 35168),
 
             // The Tannery
             new Shipment(new List<int>
@@ -226,7 +225,7 @@ namespace GarrisonButler
                 121, // lvl 2
                 122 // lvl 3
             },
-            37574, 36642),
+                37574, 36642),
 
             // Engineering Works
             new Shipment(new List<int>
@@ -303,7 +302,7 @@ namespace GarrisonButler
             }
             return new Result(ActionResult.Failed);
         }
-        
+
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
             var sequence = new ActionHelpers.ActionsSequence();
@@ -328,7 +327,7 @@ namespace GarrisonButler
 
             return sequence;
         }
-        
+
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Task<Result>> CanStartShipmentGeneration(Building building)
         {
@@ -341,7 +340,7 @@ namespace GarrisonButler
                     return new Result(ActionResult.Failed);
                 }
 
-                building.Refresh();
+                //building.Refresh();
                 var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.Id);
                 if (buildingsettings == null)
                     return new Result(ActionResult.Failed);
@@ -363,7 +362,7 @@ namespace GarrisonButler
                 }
 
                 // No Shipment left to start
-                if (building.NumberShipmentLeftToStart() <= 0)
+                if (building.NumberShipmentLeftToStart <= 0)
                 {
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] No shipment left to start: {1}", building.Id,
                         building.Name);
@@ -395,7 +394,7 @@ namespace GarrisonButler
                 // max start by user ?
                 var maxToStartCheck = await GetMaxShipmentToStart(building);
                 if (maxToStartCheck.Status == ActionResult.Running)
-                    return maxToStartCheck;
+                    return new Result(ActionResult.Refresh);
 
                 var maxToStart = maxToStartCheck.Status == ActionResult.Done
                     ? (int) maxToStartCheck.Result1
@@ -403,7 +402,8 @@ namespace GarrisonButler
 
                 if (maxToStart <= 0)
                 {
-                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Can't start more work orders. {1} - ShipmentsTotal={2}, MaxCanStartOrder={3}",
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart,{0}] Can't start more work orders. {1} - ShipmentsTotal={2}, MaxCanStartOrder={3}",
                         building.Id,
                         building.Name,
                         building.ShipmentsTotal,
@@ -416,7 +416,7 @@ namespace GarrisonButler
                 return new Result(ActionResult.Running, building);
             };
         }
-        
+
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Task<Result>> CanPickUpShipmentGeneration(Building building)
         {
@@ -429,7 +429,7 @@ namespace GarrisonButler
                     return new Result(ActionResult.Failed);
                 }
 
-                building.Refresh();
+                //building.Refresh();
 
                 // No Shipment ready
                 if (building.ShipmentsReady <= 0)
@@ -475,7 +475,8 @@ namespace GarrisonButler
         internal static async Task<Result> MoveToAndOpenCapacitiveFrame(Building building)
         {
             var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
-                .FirstOrDefault(u => building.PnjIds != null ? building.PnjIds.Contains((int)u.Entry) : u.Entry == building.PnjId);
+                .FirstOrDefault(
+                    u => building.PnjIds != null ? building.PnjIds.Contains((int) u.Entry) : u.Entry == building.PnjId);
 
             if (unit == null)
             {
@@ -495,11 +496,12 @@ namespace GarrisonButler
             {
                 if (CapacitiveDisplayFrame.Instance == null)
                 {
-                    Navigator.PlayerMover.MoveTowards(unit.Location); 
+                    Navigator.PlayerMover.MoveTowards(unit.Location);
                 }
                 else
                 {
-                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.",
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentStart,{0}] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.",
                         building.Id);
                 }
                 return CapacitiveDisplayFrame.Instance == null;
@@ -512,7 +514,7 @@ namespace GarrisonButler
                 var gossipFrame = GossipFrame.Instance;
                 // Will try workaround if GossipFrame isn't valid/visible & GarrisonFrame isn't valid
                 var shouldTryWorkAround = CapacitiveDisplayFrame.Instance == null
-                    && (gossipFrame == null || !gossipFrame.IsVisible);
+                                          && (gossipFrame == null || !gossipFrame.IsVisible);
                 if (shouldTryWorkAround)
                 {
                     unit.Interact();
@@ -553,7 +555,8 @@ namespace GarrisonButler
                     building.workFrameWorkAroundTries++;
                 else
                 {
-                    GarrisonButler.Warning("[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
+                    GarrisonButler.Warning(
+                        "[ShipmentStart,{0}] ERROR - NOW BLACKLISTING BUILDING {1} REACHED MAX TRIES FOR WORKFRAME WORKAROUND ({2})",
                         building.Id, building.Name, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
                     //await ButlerLua.CloseLandingPage();
                     return new Result(ActionResult.Done);
@@ -569,10 +572,11 @@ namespace GarrisonButler
             GarrisonButler.Log("[ShipmentStart] Work order frame opened.");
             return new Result(ActionResult.Done);
         }
+
         private static async Task<Result> StartShipment(object obj)
         {
             var building = obj as Building;
-            
+
             if (building == null)
             {
                 GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
@@ -580,10 +584,10 @@ namespace GarrisonButler
             }
 
             int maxToStart = 0;
-            var ResCheckMax = await GetMaxShipmentToStart(building);
+            var resCheckMax = await GetMaxShipmentToStart(building);
 
-            if (ResCheckMax.Status == ActionResult.Done)
-                maxToStart = (int)ResCheckMax.Result1;
+            if (resCheckMax.Status == ActionResult.Done)
+                maxToStart = (int) resCheckMax.Result1;
 
             if (building.PrepOrder != null)
                 if ((await building.PrepOrder(maxToStart)).Status == ActionResult.Running)
@@ -591,31 +595,33 @@ namespace GarrisonButler
 
             if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
                 return new Result(ActionResult.Running);
-            
+
 
             // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
             // bag update delayed is the last fired event when adding a work order.  
 
-
-            for (var i = 0; i < maxToStart; i++)
+            using (var myLock = StyxWoW.Memory.AcquireFrame())
             {
-                CapacitiveDisplayFrame.ClickStartOrderButton();
-                building.Refresh();
-                await CommonCoroutines.SleepForRandomUiInteractionTime();
-                await Buddy.Coroutines.Coroutine.Yield();
+                for (var i = 0; i < maxToStart; i++)
+                {
+                    await CapacitiveDisplayFrame.ClickStartOrderButton(building);
+                    //building.Refresh();
+                    //await CommonCoroutines.SleepForLagDuration();
+                    //await Buddy.Coroutines.Coroutine.Yield();
+                }
             }
 
             var timeout = new WaitTimer(TimeSpan.FromMilliseconds(10000));
-            while(!timeout.IsFinished)
+            while (!timeout.IsFinished)
             {
                 var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
                 if (buildingShipment != null)
                 {
                     //await ButlerLua.OpenLandingPage();
-                    buildingShipment.Refresh();
+                    //buildingShipment.Refresh();
                     var resCheck = await GetMaxShipmentToStart(building);
                     var max = resCheck.Status == ActionResult.Done
-                        ? (int)resCheck.Result1
+                        ? (int) resCheck.Result1
                         : 0;
                     if (max == 0)
                     {
@@ -632,14 +638,14 @@ namespace GarrisonButler
             return new Result(ActionResult.Refresh);
         }
 
-        private async static Task<Result> GetMaxShipmentToStart(Building building)
+        private static async Task<Result> GetMaxShipmentToStart(Building building)
         {
-            var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder; 
+            var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder;
             var maxInProgress = maxSettings == 0
                 ? building.ShipmentCapacity
                 : Math.Min(building.ShipmentCapacity, maxSettings);
             var maxToStart = maxInProgress - building.ShipmentsTotal;
-            
+
             var canCompleteOrder = await building.CanCompleteOrder();
             if (canCompleteOrder.Status == ActionResult.Running)
                 return canCompleteOrder;
@@ -649,9 +655,10 @@ namespace GarrisonButler
                 maxCanComplete = (int) canCompleteOrder.Result1;
 
             maxToStart = Math.Min(maxCanComplete, maxToStart);
-            GarrisonButler.Diagnostic("GetMaxShipmentToStart: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
+            GarrisonButler.Diagnostic(
+                "GetMaxShipmentToStart: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
                 maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart);
-            return new Result(ActionResult.Done,maxToStart);
+            return new Result(ActionResult.Done, maxToStart);
         }
 
         private static async Task WorkAroundBugFrame()
@@ -659,14 +666,15 @@ namespace GarrisonButler
             var keepGoing = true;
             var workaroundTimer = new Stopwatch();
             workaroundTimer.Start();
-            
+
             // Total time to try workaround is 5s
             // Need to do it this way because MoveToTable is a Task which returns true
             // when it needs to do more work (such as between MoveTo pulses)
             while (keepGoing && (workaroundTimer.ElapsedMilliseconds < 6000))
             {
                 //var task = MoveToTable();
-                var result = await Buddy.Coroutines.Coroutine.ExternalTask(Task.Run(new System.Func<Task<bool>>(MoveToTable)), 6000);
+                var result =
+                    await Buddy.Coroutines.Coroutine.ExternalTask(Task.Run(new Func<Task<bool>>(MoveToTable)), 6000);
                 keepGoing = result.Completed && result.Result;
                 await Buddy.Coroutines.Coroutine.Yield();
             }
@@ -678,12 +686,13 @@ namespace GarrisonButler
         /// </summary>
         /// <param name="pnj"></param>
         /// <returns>Only returns ActionResult.Done or ActionResult.Failed.  ActionResult.Done is returned when GarrisonFrame found.</returns>
-        private async static Task<ActionResult> IfGossip(WoWUnit pnj)
+        private static async Task<ActionResult> IfGossip(WoWUnit pnj)
         {
             // STEP 0 - Return if GarrisonFrame detected
             if (CapacitiveDisplayFrame.Instance != null)
             {
-                GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Done due to IsGarrisonCapacitiveDisplayFrame()");
+                GarrisonButler.Diagnostic(
+                    "[Gossip] Returning ActionResult.Done due to IsGarrisonCapacitiveDisplayFrame()");
                 return ActionResult.Done;
             }
 
@@ -709,7 +718,7 @@ namespace GarrisonButler
                 return ActionResult.Failed;
             }
 
-            if(frame.IsVisible == false)
+            if (frame.IsVisible == false)
             {
                 GarrisonButler.Diagnostic("[Gossip] Returning ActionResult.Failed due to gossip frame not visible");
                 return ActionResult.Failed;
@@ -722,7 +731,7 @@ namespace GarrisonButler
                 cachedEntryIndexes[i] = frame.GossipOptionEntries[i].Index;
             }
             GarrisonButler.Diagnostic("[Gossip,{0}] Found {1} possible options.", pnj.Entry, cachedEntryIndexes.Length);
-            
+
             // STEP 4 - Go through all of the CACHED gossip entries and find the right one.
             //          Each entry has a 10s timeout to complete a loop in the foreach
             foreach (var cachedIndex in cachedEntryIndexes)
@@ -737,8 +746,8 @@ namespace GarrisonButler
                 //           b) Tries to interact with unit
                 timeoutTimer.Reset();
                 while (((frame.GossipOptionEntries == null ||
-                    frame.GossipOptionEntries.Count <= 0) 
-                    && !timeoutTimer.IsFinished) || atLeastOne)
+                         frame.GossipOptionEntries.Count <= 0)
+                        && !timeoutTimer.IsFinished) || atLeastOne)
                 {
                     if ((await MoveToInteract(pnj)).Status == ActionResult.Running)
                     {
@@ -760,7 +769,7 @@ namespace GarrisonButler
                 }
 
                 // STEP 4b - Check that this index is still valid
-                if(frame == null || frame.GossipOptionEntries.GetEmptyIfNull().All(o => o.Index != cachedIndex))
+                if (frame == null || frame.GossipOptionEntries.GetEmptyIfNull().All(o => o.Index != cachedIndex))
                     continue;
 
                 // STEP 4c - Attempt to select the gossip option
@@ -782,7 +791,7 @@ namespace GarrisonButler
                         newFrame.Close();
                         newFrame = GossipFrame.Instance;
                         return (newFrame.GossipOptionEntries == null ||
-                    newFrame.GossipOptionEntries.Count <= 0);
+                                newFrame.GossipOptionEntries.Count <= 0);
                     });
                     await CommonCoroutines.SleepForLagDuration();
                     await CommonCoroutines.SleepForRandomUiInteractionTime();
@@ -838,40 +847,40 @@ namespace GarrisonButler
             }
             else
             {
+                var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
                 var resultHarvesting = await HarvestWoWGameObjectCachedLocation(shipmentToCollect);
                 if (resultHarvesting.Status == ActionResult.Running)
+                {
+                    if (buildingShipment != null) buildingShipment.Refresh();
                     return new Result(ActionResult.Running);
+                }
 
                 //await ButlerLua.OpenLandingPage();
 
                 if (resultHarvesting.Status == ActionResult.Refresh)
                 {
                     //await ButlerLua.CloseLandingPage(); 
+                    if (buildingShipment != null) buildingShipment.Refresh();
                     return new Result(ActionResult.Refresh);
                 }
 
 
-                for (var i = 0; i < 10; i++)
+                await Buddy.Coroutines.Coroutine.Wait(10000, () =>
                 {
-                    var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
-                    if (buildingShipment != null)
+                    buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
+                    if (buildingShipment == null) return false;
+
+                    buildingShipment.Refresh();
+                    if (buildingShipment.ShipmentsReady == 0)
                     {
-                        //await ButlerLua.OpenLandingPage();
-                        buildingShipment.Refresh();
-                        if (buildingShipment.ShipmentsReady == 0)
-                        {
-                            GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
-                            //await ButlerLua.CloseLandingPage();
-                            return new Result(ActionResult.Done);
-                        }
-                        GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
+                        GarrisonButler.Log("[ShipmentCollect] Finished collecting.");
+                        return true;
                     }
-                    await Buddy.Coroutines.Coroutine.Yield();
-                }
-                //await ButlerLua.CloseLandingPage();
+                    GarrisonButler.Diagnostic("[ShipmentCollect] Waiting for shipment to update.");
+                    return false;
+                });
                 return new Result(ActionResult.Refresh);
             }
-            //await ButlerLua.CloseLandingPage();
             return new Result(ActionResult.Done); // should never reach that point!
         }
 

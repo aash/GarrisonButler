@@ -56,11 +56,6 @@ namespace GarrisonButler.API
 //            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
 //        }
         
-        public static void ClickStartOrderButtonCapacitiveFrame()
-        {
-            Lua.DoString("GarrisonCapacitiveDisplayFrame.StartWorkOrderButton:Click()");
-        }
-
         public static void ToggleLandingPage()
         {
             Lua.DoString("GarrisonLandingPage_Toggle()");

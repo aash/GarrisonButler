@@ -57,7 +57,8 @@ namespace GarrisonButler
                     break;
 
                 default:
-                    GarrisonButler.Diagnostic("[Navigation] MoveResult: " + Enum.GetName(typeof(MoveResult), _lastMoveResult));
+                    GarrisonButler.Diagnostic("[Navigation] MoveResult: " +
+                                              Enum.GetName(typeof (MoveResult), _lastMoveResult));
                     break;
             }
             return new Result(ActionResult.Running);
@@ -84,13 +85,16 @@ namespace GarrisonButler
 
             GameWorld.TraceLine(new WoWPoint(p.X, p.Y, (p.Z + 0.5)), new WoWPoint(p.X, p.Y, (p.Z - 5)),
                 TraceLineHitFlags.Collision, out ground);
-            return ground != WoWPoint.Empty ? ground.Z : float.MinValue;
+            return ground != WoWPoint.Empty ? ground.Z : Single.MinValue;
         }
 
-        private async static Task<Result> MoveToInteract(WoWPoint cachedToHarvestLocation, float cachedInteractRangeSqr)
+        private static async Task<Result> MoveToInteract(WoWPoint cachedToHarvestLocation, float cachedInteractRangeSqr)
         {
             if (Me.Location.Distance(cachedToHarvestLocation) > cachedInteractRangeSqr)
-                return await MoveTo(cachedToHarvestLocation, "[Navigation] Moving to interact at cached location " + cachedToHarvestLocation);
+                return
+                    await
+                        MoveTo(cachedToHarvestLocation,
+                            "[Navigation] Moving to interact at cached location " + cachedToHarvestLocation);
 
             GarrisonButler.Diagnostic("[Navigation] MoveResult: ReachedDestination to interact at cached location " +
                                       cachedToHarvestLocation);

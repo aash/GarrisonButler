@@ -1,5 +1,7 @@
-﻿using Styx.CommonBot.Profiles.Quest.Order;
+﻿#region
+
 using Bots.DungeonBuddy.Helpers;
+using Buddy.Coroutines;
 using GarrisonButler.API;
 using Styx.CommonBot.Profiles;
 
@@ -14,18 +16,18 @@ using Bots.Grind;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
-using GarrisonButler.Objects;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
-using Styx.CommonBot.Frames;
 using Styx.CommonBot.POI;
 using Styx.CommonBot.Routines;
 using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
+
+#endregion
 
 #endregion
 
@@ -116,6 +118,27 @@ namespace GarrisonButler
 
         #endregion
 
+        public static void SHIPMENT_CRAFTER_INFO(object sender, LuaEventArgs args)
+        {
+            int plotId;
+            Int32.TryParse(args.Args[3].ToString(), out plotId);
+
+            var building = _buildings.FirstOrDefault(b => b.PlotId == plotId);
+            if (building == default(Building))
+            {
+                GarrisonButler.Diagnostic(
+                    "LuaEvent: SHIPMENT_CRAFTER_INFO - Failed to update building, building not found.");
+                ObjectDumper.WriteToHb(args, 5);
+                return;
+            }
+
+            int running;
+            Int32.TryParse(args.Args[1].ToString(), out running);
+            int capacity;
+            Int32.TryParse(args.Args[2].ToString(), out capacity);
+            building.RefreshOrders(running, capacity);
+        }
+
         private static LocalPlayer Me
         {
             get { return StyxWoW.Me; }
@@ -141,11 +164,7 @@ namespace GarrisonButler
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
         }
 
-        public static bool AutoLootDefaultValue
-        {
-            get { return _autoLootDefaultValue; }
-            set { _autoLootDefaultValue = value; }
-        }
+        public static bool AutoLootDefaultValue { get; set; }
 
         internal static void OnStart()
         {
@@ -159,8 +178,10 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
-                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()), ShouldTpToGarrison,
-                    10000, 1000));
+                _mainSequence.AddAction(
+                    new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()),
+                        ShouldTpToGarrison,
+                        10000, 1000));
                 if (GarrisonButler.IsIceVersion())
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails));
                 _mainSequence.AddAction(InitializeMineAndGarden());
@@ -186,7 +207,7 @@ namespace GarrisonButler
             }
             catch (Exception e)
             {
-                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                if (e is CoroutineStoppedException)
                     throw;
 
                 GarrisonButler.Warning(e.ToString());
@@ -293,7 +314,7 @@ namespace GarrisonButler
         internal static void OnStop()
         {
             // Record and set auto loot
-            if (_autoLootinit == true)
+            if (_autoLootinit)
             {
                 ButlerLua.SetAutoLootValue(AutoLootDefaultValue);
                 _autoLootinit = false;
@@ -355,7 +376,7 @@ namespace GarrisonButler
             // Record and set auto loot
             if (_autoLootinit == false)
             {
-                _autoLootDefaultValue = await ButlerLua.GetAutoLootValue();
+                AutoLootDefaultValue = await ButlerLua.GetAutoLootValue();
                 ButlerLua.SetAutoLootValue(true);
                 _autoLootinit = true;
             }
@@ -370,11 +391,11 @@ namespace GarrisonButler
 
             if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
                 return true;
-            
+
 
             if ((await VendorCoroutineWorkaround()).Status == ActionResult.Running)
                 return true;
-            
+
             if (await LootBehavior.ExecuteCoroutine())
                 return true;
 
@@ -445,7 +466,7 @@ namespace GarrisonButler
 
         private static async Task<Result> SellJunkCoroutine()
         {
-            if (HbApi.GetItemsInBags( i => 
+            if (HbApi.GetItemsInBags(i =>
             {
                 var res = false;
                 try
@@ -455,7 +476,7 @@ namespace GarrisonButler
                     // ReSharper disable once EmptyGeneralCatchClause
                 catch (Exception e)
                 {
-                    if (e is Buddy.Coroutines.CoroutineStoppedException)
+                    if (e is CoroutineStoppedException)
                         throw;
                 }
                 return res;
@@ -472,7 +493,6 @@ namespace GarrisonButler
 
         private static DateTime _mountVendorTimeStart = default(DateTime);
         private static bool _autoLootinit;
-        private static bool _autoLootDefaultValue;
 
         private static async Task<Result> VendorCoroutineWorkaround()
         {
@@ -492,7 +512,9 @@ namespace GarrisonButler
 
             _mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
 
-            var resultCoroutine = await VendorBehavior.ExecuteCoroutine() ? new Result(ActionResult.Running) : new Result(ActionResult.Done);
+            var resultCoroutine = await VendorBehavior.ExecuteCoroutine()
+                ? new Result(ActionResult.Running)
+                : new Result(ActionResult.Done);
             return resultCoroutine;
         }
 

@@ -4,9 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Navigation;
-using Bots.Quest.Actions;
 using Styx.Common.Helpers;
 
 #endregion
@@ -98,7 +97,7 @@ namespace GarrisonButler.Coroutines
                 CustomAction = customAction;
                 Condition = condition;
                 ResCondition = default(Result);
-                WaitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(5000));
+                WaitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(20000));
                 WaitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(10000));
                 WaitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(1.0/15.0));
                 LastResult = new Result(ActionResult.Init);
@@ -109,7 +108,7 @@ namespace GarrisonButler.Coroutines
             {
                 // Check time between a recheck once done
                 if ((LastResult.Status == ActionResult.Done || LastResult.Status == ActionResult.Failed)
-                        && !WaitTimerAction.IsFinished)
+                    && !WaitTimerAction.IsFinished)
                     return new Result(ActionResult.Done);
 
                 // Check time while running to not overload
@@ -124,6 +123,8 @@ namespace GarrisonButler.Coroutines
                     || WaitTimerCondition.IsFinished)
                 {
                     ResCondition = await Condition();
+                    if (ResCondition.Status == ActionResult.Refresh)
+                        return new Result(ActionResult.Running);
                     WaitTimerCondition.Reset();
                 }
 
@@ -162,7 +163,7 @@ namespace GarrisonButler.Coroutines
             {
                 // Check time between a recheck once done
                 if ((LastResult.Status == ActionResult.Done || LastResult.Status == ActionResult.Failed)
-                        && !WaitTimerAction.IsFinished)
+                    && !WaitTimerAction.IsFinished)
                     return new Result(ActionResult.Done);
 
                 // Check time while running to not overload
@@ -241,7 +242,7 @@ namespace GarrisonButler.Coroutines
 
             public async Task<bool> AtLeastOneTrue()
             {
-                foreach(var action in _actions)
+                foreach (var action in _actions)
                 {
                     // Check if it is a sequence
                     var seq = action as ActionsSequence;
@@ -288,32 +289,23 @@ namespace GarrisonButler.Coroutines
 
     public class Result
     {
-        private ActionResult _status;
-        private object _result;
-
         public Result(ActionResult status, object result = null)
         {
-            _status = status;
-            _result = result;
+            Status = status;
+            Result1 = result;
         }
+
         public Result(Result result)
         {
-            _status = result.Status;
-            _result = result.Result1;
+            Status = result.Status;
+            Result1 = result.Result1;
         }
 
-        public ActionResult Status
-        {
-            get { return _status; }
-            set { _status = value; }
-        }
+        public ActionResult Status { get; set; }
 
-        public object Result1
-        {
-            get { return _result; }
-            set { _result = value; }
-        }
+        public object Result1 { get; set; }
     }
+
     public enum ActionResult
     {
         Refresh,

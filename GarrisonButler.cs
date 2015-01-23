@@ -3,17 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
+using Buddy.Coroutines;
 using CommonBehaviors.Actions;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.LuaObjects;
-using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Frames;
@@ -49,9 +48,9 @@ namespace GarrisonButler
 
         internal static bool IsIceVersion()
         {
-            return GarrisonButler.NameStatic.ToLower().Contains("ice");
-
+            return NameStatic.ToLower().Contains("ice");
         }
+
         private static void GARRISON_MISSION_BONUS_ROLL_COMPLETE(object sender, LuaEventArgs args)
         {
             Diagnostic("LuaEvent: GARRISON_MISSION_BONUS_ROLL_COMPLETE ");
@@ -182,11 +181,11 @@ namespace GarrisonButler
             {
                 for (int i = 0; i < lootFrame.LootItems; i++)
                 {
-                    GarrisonButler.Diagnostic("[Loot] Found LootName {0}.", lootFrame.LootInfo(i).LootName);
-                    GarrisonButler.Diagnostic("[Loot] Found LootIcon {0}.", lootFrame.LootInfo(i).LootIcon);
-                    GarrisonButler.Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
-                    GarrisonButler.Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
-                    GarrisonButler.Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
+                    Diagnostic("[Loot] Found LootName {0}.", lootFrame.LootInfo(i).LootName);
+                    Diagnostic("[Loot] Found LootIcon {0}.", lootFrame.LootInfo(i).LootIcon);
+                    Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
+                    Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
+                    Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
                 }
             }
             LootIsOpen = true;
@@ -232,13 +231,13 @@ namespace GarrisonButler
                     if (!(timeElapsed.TotalSeconds > GaBSettings.Get().TimeMinBetweenRun)) return false;
                     _lastRunTime = DateTime.Now;
                     int timeBetweenRuns = GaBSettings.Get().TimeMinBetweenRun;
-                    uint remainingTime = GarrisonButler.Instance._lastRunTime == DateTime.MinValue
-                        ? (uint)timeBetweenRuns
-                        : (uint)(timeBetweenRuns - (DateTime.Now - GarrisonButler.Instance._lastRunTime).TotalSeconds);
+                    uint remainingTime = Instance._lastRunTime == DateTime.MinValue
+                        ? (uint) timeBetweenRuns
+                        : (uint) (timeBetweenRuns - (DateTime.Now - Instance._lastRunTime).TotalSeconds);
 
-                    GarrisonButler.Log("One more check and then taking a break for {0}s", timeBetweenRuns);
+                    Log("One more check and then taking a break for {0}s", timeBetweenRuns);
                 }
-                Coroutine.AnythingTodo();
+                Coroutine.SomethingToDo();
                 if (!Coroutine.AnyTodo) return false;
                 Coroutine.ReadyToSwitch = false;
                 return true;
@@ -264,28 +263,19 @@ namespace GarrisonButler
 
             Diagnostic("Attaching to GARRISON_MISSION_STARTED");
             Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
-            
+
             Diagnostic("Attaching to LOOT_OPENED");
             Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
 
             Diagnostic("Attaching to LOOT_CLOSED");
             Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
 
+            Diagnostic("Attaching to SHIPMENT_CRAFTER_INFO");
+            Lua.Events.AttachEvent("SHIPMENT_CRAFTER_INFO", Coroutine.SHIPMENT_CRAFTER_INFO);
+
             CapacitiveDisplayFrame.Initialize();
         }
 
-        public static void GARRISON_LANDINGPAGE_SHIPMENTS(object sender, LuaEventArgs args)
-        {
-            GarrisonButler.Diagnostic("LuaEvent: GARRISON_LANDINGPAGE_SHIPMENTS");
-            //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
-            //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
-        }
-        public static void SHIPMENT_UPDATE(object sender, LuaEventArgs args)
-        {
-            GarrisonButler.Diagnostic("LuaEvent: SHIPMENT_UPDATE");
-            //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
-            //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
-        }
         public override void OnDeselected()
         {
             Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
@@ -313,7 +303,7 @@ namespace GarrisonButler
             }
             catch (Exception e)
             {
-                if (e is Buddy.Coroutines.CoroutineStoppedException)
+                if (e is CoroutineStoppedException)
                     throw;
 
                 Diagnostic(e.ToString());
