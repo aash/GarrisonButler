@@ -17,7 +17,7 @@ namespace GarrisonButler.API
 
         public static List<Follower> GetAllFollowers()
         {
-            return GetListFollowersId().GetEmptyIfNull().Select(GetFollowerById).SkipWhile(f => f == null).ToList();
+            return API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
         }
 
         public static string GetFollowerName(string follower)
