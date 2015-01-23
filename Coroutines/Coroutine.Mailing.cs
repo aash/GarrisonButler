@@ -267,7 +267,7 @@ namespace GarrisonButler
                 return new Tuple<bool, List<MailItem>>(false, null);
             }
 
-            var items = Me.BagItems.Where(d => d != null && d.IsValid).ToList();
+            var items = HbApi.GetItemsInBags(i => i != null && i.IsValid).ToList();
             //TODO remove later as this list is just used for diagnostic
             var greenItems = new List<WoWItem>();
             var skippedNonGreens = 0;

@@ -251,7 +251,7 @@ namespace GarrisonButler.Objects
         /// <returns></returns>
         private static bool IsNumberInBagsSuperiorTo(uint itemId, int x)
         {
-            var numInBags = GetNumberItemInBags(itemId);
+            var numInBags = HbApi.GetNumberItemInBags(itemId);
             return numInBags > x;
         }
 
@@ -263,7 +263,7 @@ namespace GarrisonButler.Objects
         /// <returns></returns>
         private static IEnumerable<WoWItem> GetNumberInBagsSuperiorTo(uint itemId)
         {
-            return GetAllItems(itemId);
+            return HbApi.GetItemInBags(itemId);
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace GarrisonButler.Objects
         /// <returns></returns>
         private static bool IsNumberInBagsSuperiorOrEqualTo(uint itemId, int x)
         {
-            var numInBags = GetNumberItemInBags(itemId);
+            var numInBags = HbApi.GetNumberItemInBags(itemId);
             return numInBags != 0 && numInBags >= x;
         }
 
@@ -286,7 +286,7 @@ namespace GarrisonButler.Objects
         /// <returns></returns>
         private static IEnumerable<WoWItem> GetNumberInBagsSuperiorOrEqualTo(uint itemId)
         {
-            return GetAllItems(itemId);
+            return HbApi.GetItemInBags(itemId);
         }
 
         /// <summary>
@@ -309,7 +309,7 @@ namespace GarrisonButler.Objects
         /// <returns></returns>
         private static async Task<IEnumerable<WoWItem>> GetNumberKeepNumberInBags(uint itemId, int x)
         {
-            var items = StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemId).ToList();
+            var items = HbApi.GetItemInBags(itemId).ToArray();
 
             // No items corresponding in bags
             if (!items.Any())
@@ -375,7 +375,7 @@ namespace GarrisonButler.Objects
                 stacksToKeep.Add(splitedFull.First());
             }
             stacksToKeep.AddRange(fullStacks);
-            return StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemId && !stacksToKeep.Contains(i));
+            return HbApi.GetItemsInBags(i => i.Entry == itemId && !stacksToKeep.Contains(i));
         }
 
 
@@ -416,9 +416,7 @@ namespace GarrisonButler.Objects
                 return new List<WoWItem>();
 
             var stacks =
-                StyxWoW.Me.BagItems.GetEmptyIfNull()
-                    .Where(i => i.Entry == itemId && i.StackCount == sizeStacks)
-                    .ToList();
+                HbApi.GetItemsInBags(i => i.Entry == itemId && i.StackCount == sizeStacks).ToList();
 
             if (stacks.Count() >= number)
                 return stacks.Take(number);
@@ -432,26 +430,26 @@ namespace GarrisonButler.Objects
 
         #region Helpers
 
-        /// <summary>
-        ///     Returns all the stacks of the specified itemId in bags which can be mailed (isMailable extension).
-        /// </summary>
-        /// <param name="itemId"></param>
-        /// <returns></returns>
-        private static IEnumerable<WoWItem> GetAllItems(uint itemId)
-        {
-            return StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.IsMailable() && i.Entry == itemId);
-        }
+        ///// <summary>
+        /////     Returns all the stacks of the specified itemId in bags which can be mailed (isMailable extension).
+        ///// </summary>
+        ///// <param name="itemId"></param>
+        ///// <returns></returns>
+        //private static IEnumerable<WoWItem> GetAllItems(uint itemId)
+        //{
+        //    return StyxWoW.Me.BagItems.GetEmptyIfNull().Where(i => i.IsMailable() && i.Entry == itemId);
+        //}
 
-        /// <summary>
-        ///     Returns number of specified itemId in bags which can be mailed (isMailable extension).
-        /// </summary>
-        /// <param name="itemId"></param>
-        /// <returns></returns>
-        private static long GetNumberItemInBags(uint itemId)
-        {
-            return
-                StyxWoW.Me.BagItems.GetEmptyIfNull().Sum(i => i.IsMailable() && i.Entry == itemId ? i.StackCount : 0);
-        }
+        ///// <summary>
+        /////     Returns number of specified itemId in bags which can be mailed (isMailable extension).
+        ///// </summary>
+        ///// <param name="itemId"></param>
+        ///// <returns></returns>
+        //private static long GetNumberItemInBags(uint itemId)
+        //{
+        //    return
+        //        StyxWoW.Me.BagItems.GetEmptyIfNull().Sum(i => i.IsMailable() && i.Entry == itemId ? i.StackCount : 0);
+        //}
 
         ///// <summary>
         ///// Split a stack of itemId in a stack of amount and the rest. 
@@ -469,7 +467,7 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         private static async Task SplitOneStack(int amount, uint itemId)
         {
-            var item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == itemId && i.StackCount > amount);
+            var item = HbApi.GetItemsInBags(i => i.Entry == itemId && i.StackCount > amount).FirstOrDefault();
 
             if (item != default(WoWItem))
             {

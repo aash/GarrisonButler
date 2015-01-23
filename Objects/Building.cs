@@ -35,8 +35,8 @@ namespace GarrisonButler
         public int PnjId;
         public List<int> PnjIds;
         public PrepOrderD PrepOrder;
-        public int ReagentId;
-        public List<int> ReagentIds;
+        public uint ReagentId;
+        public List<uint> ReagentIds;
         private String _buildTime;
         private String _buildingLevel;
         internal bool CanActivate;
@@ -149,27 +149,15 @@ namespace GarrisonButler
 
         private async Task<Result> CanCompleteOrderItem()
         {
-            long count = 0;
-            var itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == ReagentId);
-            if (itemInBags != null)
-            {
-                    GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
-                        itemInBags.StackCount);
-                count += itemInBags.StackCount;
-            }
+            // add number in bags
+            var count = HbApi.GetNumberItemInBags(ReagentId);
+            // add number in reagent banks
+            count += HbApi.GetNumberItemInReagentBank(ReagentId);
+            
+            GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
+                count, NumberReagent, count >= NumberReagent);
 
-            var itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == ReagentId);
-            if (itemInReagentBank != null)
-            {
-                GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
-                    itemInReagentBank.StackCount);
-                count += itemInReagentBank.StackCount;
-            }
-
-                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
-                    count,
-                NumberReagent, count >= NumberReagent);
-                return new Result(ActionResult.Done, (int) count/NumberReagent);
+            return new Result(ActionResult.Done, (int) count/NumberReagent);
         }
 
         private async Task<Result> CanCompleteOrderItems()
@@ -178,22 +166,10 @@ namespace GarrisonButler
 
             foreach (var reagentId in ReagentIds)
             {
-                long count = 0;
-                var itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == reagentId);
-                if (itemInBags != null)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
-                        itemInBags.StackCount);
-                    count += itemInBags.StackCount;
-                }
-
-                var itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == reagentId);
-                if (itemInReagentBank != null)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
-                        itemInReagentBank.StackCount);
-                    count += itemInReagentBank.StackCount;
-                }
+                // add number in bags
+                var count = HbApi.GetNumberItemInBags(ReagentId);
+                // add number in reagent banks
+                count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
                 GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", reagentId, count,
                     NumberReagent);
@@ -217,24 +193,12 @@ namespace GarrisonButler
             var maxCanStart = 0;
             foreach (var reagentId in ReagentIds)
             {
-                long count = 0;
-                var itemInBags = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == reagentId);
-                if (itemInBags != null)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentStart] In Bags {0} - #{1}", itemInBags.Name,
-                        itemInBags.StackCount);
-                    count += itemInBags.StackCount;
-                }
+                // add number in bags
+                var count = HbApi.GetNumberItemInBags(reagentId);
+                // add number in reagent banks
+                count += HbApi.GetNumberItemInReagentBank(reagentId);
 
-                var itemInReagentBank = StyxWoW.Me.ReagentBankItems.FirstOrDefault(i => i.Entry == reagentId);
-                if (itemInReagentBank != null)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentStart] In Bank {0} - #{1}", itemInReagentBank.Name,
-                        itemInReagentBank.StackCount);
-                    count += itemInReagentBank.StackCount;
-                }
-
-                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", ReagentId, count,
+                GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", reagentId, count,
                     NumberReagent);
                 if (count >= NumberReagent)
                     maxCanStart = Math.Max((int) count/NumberReagent, maxCanStart);
@@ -416,7 +380,7 @@ namespace GarrisonButler
                 case (int) Buildings.BarnLvl2:
                 case (int) Buildings.BarnLvl3:
                     PnjId = alliance ? 84524 : 85048;
-                    ReagentIds = new List<int> { 119810, 119813, 119814, 119815, 119817, 119819 };
+                    ReagentIds = new List<uint> { 119810, 119813, 119814, 119815, 119817, 119819 };
                     NumberReagent = 1;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
@@ -517,7 +481,7 @@ namespace GarrisonButler
                 case (int) Buildings.EngineeringWorksLvl2:
                 case (int) Buildings.EngineeringWorksLvl3:
                     PnjId = alliance ? 77831 : 86696;
-                    ReagentIds = new List<int>
+                    ReagentIds = new List<uint>
                     {
                         109118, // Blackrock Ore
                         109119 // True Iron Ore
@@ -887,7 +851,7 @@ namespace GarrisonButler
                 GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
                 GaBSettings.Save();
             }
-            ReagentId = GaBSettings.Get().itemIdTradingPost;
+            ReagentId = (uint)GaBSettings.Get().itemIdTradingPost;
             NumberReagent = GaBSettings.Get().numberReagentTradingPost;
 
             var rea =

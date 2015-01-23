@@ -115,6 +115,20 @@ namespace GarrisonButler.API
             GarrisonButler.Diagnostic("[HBApi] Get item in bags: item={0}, #Found={1}", itemId, inBags.Count());
             return inBags;
         }
+        public static IEnumerable<WoWItem> GetItemsInBags(List<uint> ids)
+        {
+            var inBags = Me.BagItems.GetEmptyIfNull().Where(i => ids.Contains(i.Entry)).GetEmptyIfNull().ToList();
+            GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={1}, from list:", inBags.Count());
+            ObjectDumper.WriteToHb(ids, 3);
+            return inBags;
+        }
+        public static IEnumerable<WoWItem> GetItemsInBags(Func<WoWItem, bool> predicate)
+        {
+            var inBags = Me.BagItems.GetEmptyIfNull().Where(predicate).GetEmptyIfNull().ToList();
+            GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from predicate.", inBags.Count());
+            return inBags;
+        }
+
         /// <summary>
         /// Stacks all items in bags.
         /// </summary>
@@ -360,5 +374,6 @@ namespace GarrisonButler.API
             GarrisonButler.Log("[Milling] Succesfully milled {0}.", itemName);
             return ActionResult.Done;
         }
+
     }
 }

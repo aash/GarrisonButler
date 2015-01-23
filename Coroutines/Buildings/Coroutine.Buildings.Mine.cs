@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
@@ -94,7 +95,7 @@ namespace GarrisonButler
         {
             return () =>
             {
-                var item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
+                var item = HbApi.GetItemInBags(entry).FirstOrDefault();
                 if (item == null || !item.IsValid || !item.Usable)
                     return new Tuple<bool,
                         WoWItem>(false,
@@ -211,7 +212,7 @@ namespace GarrisonButler
         {
             return () =>
             {
-                var item = Me.BagItems.FirstOrDefault(o => o.Entry == entry);
+                var item = HbApi.GetItemInBags(entry).FirstOrDefault();
                 if (item == null || !item.IsValid || !item.Usable)
                     return new Tuple<bool,
                         WoWItem>(false,

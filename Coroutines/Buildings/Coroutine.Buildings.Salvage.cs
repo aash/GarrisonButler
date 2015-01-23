@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using Styx.CommonBot.Coroutines;
@@ -15,12 +16,20 @@ namespace GarrisonButler
 {
     partial class Coroutine
     {
-        private static readonly List<int> SalvageCratesIds = new List<int>
+        private static List<uint> _salvageCratesIds;
+
+        public static List<uint> SalvageCratesIds
         {
-            114120, // Big Crate of Salvage lvl 3
-            114119, // Crate of Salvage lvl 2
-            114116 // Bag of Salvaged Goods lvl 1
-        };
+            get
+            {
+                return _salvageCratesIds ?? (_salvageCratesIds = new List<uint>
+                {
+                    114120, // Big Crate of Salvage lvl 3
+                    114119, // Crate of Salvage lvl 2
+                    114116 // Bag of Salvaged Goods lvl 1
+                });
+            }
+        }
 
         private static bool ShouldRunSalvage()
         {
@@ -48,7 +57,7 @@ namespace GarrisonButler
             }
             building = buildings.First();
 
-            salvageCratesFound = Me.BagItems.Where(i => SalvageCratesIds.Contains((int) i.Entry));
+            salvageCratesFound = HbApi.GetItemsInBags(SalvageCratesIds);
             var numSalvageCrates = salvageCratesFound.Count();
             if (numSalvageCrates == 0)
             {

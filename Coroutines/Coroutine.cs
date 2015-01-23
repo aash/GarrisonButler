@@ -445,7 +445,7 @@ namespace GarrisonButler
 
         private static async Task<Result> SellJunkCoroutine()
         {
-            if (Me.BagItems.Any(i =>
+            if (HbApi.GetItemsInBags( i => 
             {
                 var res = false;
                 try
@@ -459,7 +459,7 @@ namespace GarrisonButler
                         throw;
                 }
                 return res;
-            }))
+            }).Any())
             {
                 GarrisonButler.Log("[Vendor] Selling Junk.");
                 Vendors.ForceSell = true;
@@ -507,7 +507,7 @@ namespace GarrisonButler
                 //    "Not in garrison and Hearthstone not activated. Please move the toon to the garrison or modify the settings.");
                 return new Result(ActionResult.Failed);
             }
-            var stone = Me.BagItems.FirstOrDefault(i => i.Entry == GarrisonHearthstone);
+            var stone = HbApi.GetItemInBags(GarrisonHearthstone).FirstOrDefault();
             return (stone == null || stone.CooldownTimeLeft.TotalSeconds > 1)
                 ? new Result(ActionResult.Failed)
                 : new Result(ActionResult.Running, stone);
