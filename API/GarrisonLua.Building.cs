@@ -98,7 +98,7 @@ namespace GarrisonButler.API
 
         public static List<Building> GetAllBuildings()
         {
-            return GetListBuildingsId().GetEmptyIfNull().Select(GetBuildingById).SkipWhile(b => b == null).ToList();
+            return API.ButlerLua.GetAllFromLua<Building>(GetListBuildingsId, GetBuildingById);
         }
 
         public static int GetTownHallLevel()

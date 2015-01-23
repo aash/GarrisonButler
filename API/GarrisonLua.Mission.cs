@@ -85,18 +85,13 @@ namespace GarrisonButler.API
 
         public static List<Mission> GetAllCompletedMissions()
         {
-            return
-                GetListCompletedMissionsId()
-                    .GetEmptyIfNull()
-                    .Select(GetCompletedMissionById)
-                    .SkipWhile(m => m == null)
-                    .ToList();
+            return API.ButlerLua.GetAllFromLua<Mission>(GetListCompletedMissionsId, GetCompletedMissionById);
         }
 
         // Return list of all available missions
         public static List<Mission> GetAllAvailableMissions()
         {
-            return GetListMissionsId().GetEmptyIfNull().Select(GetMissionById).SkipWhile(m => m == null).ToList();
+            return API.ButlerLua.GetAllFromLua<Mission>(GetListMissionsId, GetMissionById);
         }
 
         private static List<string> GetEnemies(String missionId)
@@ -317,37 +312,43 @@ namespace GarrisonButler.API
 
         public static void TurnInAllCompletedMissions()
         {
-            // ReSharper disable once UnusedVariable
-            foreach (var completedMission in GetAllCompletedMissions())
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
             {
-                //Mark as complete and call for bonus rolls
-                Lua.DoString(
-                    "local cm = C_Garrison.GetCompleteMissions();" +
-                    "for idx = 1, #cm do " +
-                    " if cm[idx] and cm[idx].state and (cm[idx].state < 0) then " +
-                    "C_Garrison.MarkMissionComplete(cm[idx].missionID)" +
-                    " elseif cm[idx] and cm[idx].state then " +
-                    "C_Garrison.MissionBonusRoll(cm[idx].missionID)" +
-                    " end;" +
-                    " end;");
-            }
-        }
-
-        public static void TurnInCompletedMissions(List<Mission> missions)
-        {
-            foreach (var completedMission in missions)
-            {
-                //Mark as complete and call for bonus rolls
-                Lua.DoString(
-                    "local cm = C_Garrison.GetCompleteMissions();" +
-                    String.Format(
-                        "for idx = 1, #cm do if cm[idx].missionID == {0} then" +
+                // ReSharper disable once UnusedVariable
+                foreach (var completedMission in GetAllCompletedMissions())
+                {
+                    //Mark as complete and call for bonus rolls
+                    Lua.DoString(
+                        "local cm = C_Garrison.GetCompleteMissions();" +
+                        "for idx = 1, #cm do " +
                         " if cm[idx] and cm[idx].state and (cm[idx].state < 0) then " +
                         "C_Garrison.MarkMissionComplete(cm[idx].missionID)" +
                         " elseif cm[idx] and cm[idx].state then " +
                         "C_Garrison.MissionBonusRoll(cm[idx].missionID)" +
                         " end;" +
-                        " end;end;", completedMission.MissionId));
+                        " end;");
+                }
+            }
+        }
+
+        public static void TurnInCompletedMissions(List<Mission> missions)
+        {
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            {
+                foreach (var completedMission in missions)
+                {
+                    //Mark as complete and call for bonus rolls
+                    Lua.DoString(
+                        "local cm = C_Garrison.GetCompleteMissions();" +
+                        String.Format(
+                            "for idx = 1, #cm do if cm[idx].missionID == {0} then" +
+                            " if cm[idx] and cm[idx].state and (cm[idx].state < 0) then " +
+                            "C_Garrison.MarkMissionComplete(cm[idx].missionID)" +
+                            " elseif cm[idx] and cm[idx].state then " +
+                            "C_Garrison.MissionBonusRoll(cm[idx].missionID)" +
+                            " end;" +
+                            " end;end;", completedMission.MissionId));
+                }
             }
         }
     }

@@ -278,5 +278,18 @@ namespace GarrisonButler.API
             var lua = string.Format("SetCVar(\"autoLootDefault\",{0});", value ? 1 : 0);
             Lua.DoString(lua);
         }
+
+        public static List<T> GetAllFromLua<T>(Func<List<string>> getAllFunc, Func<string, T> converterFunc)
+        {
+            DateTime startedAt = DateTime.Now;
+            List<T> returnList;
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            {
+                List<string> getList = getAllFunc();
+                returnList = getList.Select(converterFunc).SkipWhile(m => m == null).ToList();
+            }
+            GarrisonButler.DiagnosticLogTimeTaken("GetAllFromLua (" + typeof(T).Name + ")", startedAt);
+            return returnList;
+        }
     }
 }

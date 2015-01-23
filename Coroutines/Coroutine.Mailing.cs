@@ -172,7 +172,10 @@ namespace GarrisonButler
             // This turns the mail "grey" to get rid of the mail icon
             // OpenAllMailCoroutine() from the Honorbuddy base does NOT turn the mail
             // to "grey" when checking mail with ONLY text in it.
-            mailFrame.GetAllMails().GetEmptyIfNull().ForEach(m => InterfaceLua.MarkMailAsRead(m.Index));
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            {
+                mailFrame.GetAllMails().GetEmptyIfNull().ForEach(m => InterfaceLua.MarkMailAsRead(m.Index));
+            }
 
             // Allow for a 2nd check if the server returned more mails than were shown in the inbox
             // AND
