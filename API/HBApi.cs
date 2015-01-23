@@ -111,20 +111,20 @@ namespace GarrisonButler.API
         /// <returns></returns>
         public static IEnumerable<WoWItem> GetItemInBags(uint itemId)
         {
-            var inBags = Me.BagItems.GetEmptyIfNull().Where(i => i.Entry == itemId).GetEmptyIfNull().ToList();
+            var inBags = Me.BagItems.GetEmptyIfNull().Where(i => i != null && i.IsValid  && i.Entry == itemId).GetEmptyIfNull().ToList();
             GarrisonButler.Diagnostic("[HBApi] Get item in bags: item={0}, #Found={1}", itemId, inBags.Count());
             return inBags;
         }
         public static IEnumerable<WoWItem> GetItemsInBags(List<uint> ids)
         {
-            var inBags = Me.BagItems.GetEmptyIfNull().Where(i => ids.Contains(i.Entry)).GetEmptyIfNull().ToList();
+            var inBags = Me.BagItems.GetEmptyIfNull().Where(i => i != null && i.IsValid && ids.Contains(i.Entry)).GetEmptyIfNull().ToList();
             GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={1}, from list:", inBags.Count());
             ObjectDumper.WriteToHb(ids, 3);
             return inBags;
         }
         public static IEnumerable<WoWItem> GetItemsInBags(Func<WoWItem, bool> predicate)
         {
-            var inBags = Me.BagItems.GetEmptyIfNull().Where(predicate).GetEmptyIfNull().ToList();
+            var inBags = Me.BagItems.GetEmptyIfNull().Where(i => i != null && i.IsValid && predicate(i)).GetEmptyIfNull().ToList();
             GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from predicate.", inBags.Count());
             return inBags;
         }
