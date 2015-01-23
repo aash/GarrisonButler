@@ -286,7 +286,7 @@ namespace GarrisonButler.API
             using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
             {
                 List<string> getList = getAllFunc();
-                returnList = getList.Select(converter).SkipWhile(m => m == null).ToList();
+                returnList = getList.Select(converterFunc).SkipWhile(m => m == null).ToList();
             }
             GarrisonButler.DiagnosticLogTimeTaken("GetAllFromLua (" + typeof(T).Name + ")", startedAt);
             return returnList;
