@@ -236,6 +236,10 @@ namespace GarrisonButler
 
                 if ((await SellJunkCoroutine()).Status == ActionResult.Running)
                     return true;
+                var shouldMail = await CanMailItem();
+                if(shouldMail.Status == ActionResult.Running)
+                    if ((await MailItem(shouldMail.Result1)).Status == ActionResult.Running)
+                        return true;
 
                 // Without a timer it will spam Alert messages over and over
                 // Should probably have a way to hook in to the "ok" button
