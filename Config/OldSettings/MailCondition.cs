@@ -282,12 +282,8 @@ namespace GarrisonButler.Config.OldSettings
         /// <returns></returns>
         private static async Task<IEnumerable<WoWItem>> GetNumberKeepNumberInBags(uint itemId, int x)
         {
-            for (var i = 0; i < 15; i++)
-            {
-                HbApi.StackItems();
-                await CommonCoroutines.SleepForLagDuration();
-            }
-            await Buddy.Coroutines.Coroutine.Yield();
+            await HbApi.StackItemsIfPossible(itemId);
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
             SplitItemStack(x, itemId);
             await CommonCoroutines.SleepForRandomUiInteractionTime();
 

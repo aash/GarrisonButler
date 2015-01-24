@@ -286,7 +286,7 @@ namespace GarrisonButler
 
         private static void InitializeShipments()
         {
-            RefreshBuildings();
+            RefreshBuildings(true);
         }
 
         private static async Task<Result> ShouldRunPickUpOrStartShipment()

@@ -67,6 +67,7 @@ namespace GarrisonButler
         public const int WorkFrameWorkAroundMaxTriesUntilBlacklist = 10;
         // Settings
 
+        public List<uint> buildingIDs { get; set; }
 
         public Building(bool meIsAlliance, int id, int plotId, string buildingLevel, string name, int rank,
             bool isBuilding,
@@ -359,6 +360,7 @@ namespace GarrisonButler
             _currencyId = 0;
             Pnj = new WoWPoint();
             Displayids = new List<uint>();
+            buildingIDs = new List<uint>();
             switch (Id)
             {
                 //<Vendor Name="Keyana Tone" Entry="79814" Type="Repair" X="5662.159" Y="4551.546" Z="119.9567" />
@@ -382,7 +384,17 @@ namespace GarrisonButler
                         22951, // Garrison Building Horde Alchemy V2
                         22952 // Garrison Building Horde Alchemy V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230443,
+                        227179,
+                        230444,
+                        227590,
+                        230445,
+                        227591
+                    };
                     break;
+
                 // horde   <Vendor Name="Farmer Lok'lub" Entry="85048" Type="Repair" X="5541.159" Y="4516.299" Z="131.7173" />
                 case (int) Buildings.BarnLvl1:
                 case (int) Buildings.BarnLvl2:
@@ -403,6 +415,15 @@ namespace GarrisonButler
                         18557, // Garrison Building Horde Barn V2
                         18573 // Garrison Building Horde Barn V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230410,
+                        224795,
+                        230411,
+                        224796,
+                        233188,
+                        233186
+                    };
                     break;
 
                 case (int) Buildings.BarracksLvl1:
@@ -416,6 +437,15 @@ namespace GarrisonButler
                         18558, // Garrison Building Horde Barracks V1
                         18559, // Garrison Building Horde Barracks V2
                         18560 // Garrison Building Horde Barracks V3
+                    };
+                    buildingIDs = new List<uint>
+                    {
+                        230412,
+                        224797,
+                        230413,
+                        224798,
+                        230414,
+                        224799
                     };
                     break;
 
@@ -441,6 +471,15 @@ namespace GarrisonButler
                         18554, // Garrison Building Horde Armory V2
                         18555 // Garrison Building Horde Armory V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230406,
+                        224548,
+                        230407,
+                        224549,
+                        230409,
+                        224550
+                    };
                     break;
 
                 case (int) Buildings.InnTavernLvl1:
@@ -456,6 +495,15 @@ namespace GarrisonButler
                     //    18554, // Garrison Building Horde Armory V2
                     //    18555, // Garrison Building Horde Armory V3
                     //};
+                    buildingIDs = new List<uint>
+                    {
+                        230416,
+                        224805,
+                        230417,
+                        224806,
+                        230418,
+                        224807
+                    };
                     break;
 
 
@@ -479,6 +527,15 @@ namespace GarrisonButler
                         22966, // Garrison Building Horde Enchanting V1
                         22967, // Garrison Building Horde Enchanting V2
                         22968 // Garrison Building Horde Enchanting V3
+                    };
+                    buildingIDs = new List<uint>
+                    {
+                        230451,
+                        227073,
+                        230452,
+                        227596,
+                        230453,
+                        227597
                     };
                     break;
 
@@ -508,6 +565,15 @@ namespace GarrisonButler
                         22970, // Garrison Building Horde Engineering V2
                         22971 // Garrison Building Horde Engineering V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230454,
+                        227072,
+                        230455,
+                        227594,
+                        230456,
+                        227595
+                    };
                     break;
 
                 //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
@@ -528,6 +594,15 @@ namespace GarrisonButler
                         21880, // Garrison Building Farm V3 H
                         21879, // Garrison Building Farm V2H
                         21878 // Garrison Building Farm V1H
+                    };
+                    buildingIDs = new List<uint>
+                    {
+                        230415,
+                        224800,
+                        236448,
+                        235990,
+                        236449,
+                        235991
                     };
                     break;
 
@@ -550,6 +625,15 @@ namespace GarrisonButler
                         22976, // Garrison Building Horde Jewelcrafting V2
                         22977 // Garrison Building Horde Jewelcrafting V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230460,
+                        227075,
+                        230461,
+                        227602,
+                        230462,
+                        227603
+                    };
                     break;
 
                 //ally 2 <WoWUnit Name="Altar of Bones" Entry="86639" X="1865.334" Y="313.169" Z="83.95637" />
@@ -570,6 +654,15 @@ namespace GarrisonButler
                         18578, // Garrison Building Horde Sparring Arena V2
                         18579 // Garrison Building Horde Sparring Arena V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230477,
+                        230480,
+                        230478,
+                        230486,
+                        230479,
+                        230487
+                    };
                     break;
 
                 case (int) Buildings.GnomishGearworksLvl1:
@@ -583,6 +676,15 @@ namespace GarrisonButler
                         16044, // Garrison Building  Workshop V1
                         16045, // Garrison Building  Workshop V2
                         16046 // Garrison Building  Workshop V3
+                    };
+                    buildingIDs = new List<uint>
+                    {
+                        230489,
+                        230492,
+                        230490,
+                        230493,
+                        230491,
+                        230494
                     };
                     break;
 
@@ -609,11 +711,29 @@ namespace GarrisonButler
                         20112, // Garrison Building Horde Mill V2
                         20113 // Garrison Building Horde Mill V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230422,
+                        224811,
+                        230423,
+                        224812,
+                        233266,
+                        233267
+                    };
                     break;
 
                 case (int) Buildings.MageTowerLvl1:
                 case (int) Buildings.MageTowerLvl2:
                 case (int) Buildings.MageTowerLvl3:
+                    buildingIDs = new List<uint>
+                    {
+                        230419,
+                        224808,
+                        230420,
+                        224809,
+                        230421,
+                        224810
+                    };
                     break;
 
                 //Ally 3 : <Vendor Name="Timothy Leens" Entry="77730" Type="Repair" X="1899.896" Y="101.2778" Z="83.52704" />
@@ -637,6 +757,15 @@ namespace GarrisonButler
                         18568, // Garrison Building Horde Mine V2
                         18569 // Garrison Building Horde Mine V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230466,
+                        225538,
+                        230467,
+                        225539,
+                        230468,
+                        225540
+                    };
                     break;
 
                 //ally <Vendor Name="Hennick Helmsley" Entry="77378" Type="Repair" X="1830.828" Y="199.172" Z="72.71624" />
@@ -655,6 +784,15 @@ namespace GarrisonButler
                         22981, // Garrison Building Horde Salvage Yard V1
                         22982, // Garrison Building Horde Salvage Yard V2
                         22983 // Garrison Building Horde Salvage Yard V3
+                    };
+                    buildingIDs = new List<uint>
+                    {
+                        230440,
+                        224853,
+                        230441,
+                        230475,
+                        230442,
+                        230476
                     };
                     break;
 
@@ -689,6 +827,15 @@ namespace GarrisonButler
                         22973, // Garrison Building Horde Inscription V2
                         22974 // Garrison Building Horde Inscription V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230427,
+                        227074,
+                        230430,
+                        227600,
+                        230432,
+                        227601
+                    };
                     break;
 
                 case (int) Buildings.StablesLvl1:
@@ -703,11 +850,29 @@ namespace GarrisonButler
                         18571, // Garrison Building Horde Stable V2
                         18572 // Garrison Building Horde Stable V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230469,
+                        225577,
+                        230470,
+                        225578,
+                        230471,
+                        225579
+                    };
                     break;
 
                 case (int) Buildings.StorehouseLvl1:
                 case (int) Buildings.StorehouseLvl2:
                 case (int) Buildings.StorehouseLvl3:
+                    buildingIDs = new List<uint>
+                    {
+                        230437,
+                        224854,
+                        230438,
+                        234678,
+                        230439,
+                        234679
+                    };
                     break;
 
                 // Horde : <Vendor Name="Turga" Entry="79863" Type="Repair" X="5643.418" Y="4507.895" Z="119.9948" />
@@ -730,6 +895,15 @@ namespace GarrisonButler
                         22988, // Garrison Building Horde Tailoring V2
                         22989 // Garrison Building Horde Tailoring V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230463,
+                        227180,
+                        230464,
+                        227598,
+                        230465,
+                        227599
+                    };
                     break;
                 // <Vendor Name="Kinja" Entry="79817" Type="Repair" X="5641.551" Y="4508.724" Z="119.9587" />
                 case (int) Buildings.TheForgeLvl1:
@@ -751,6 +925,15 @@ namespace GarrisonButler
                         22954, // Garrison Building Horde Blacksmith V2
                         22955 // Garrison Building Horde Blacksmith V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230448,
+                        225537,
+                        230449,
+                        227588,
+                        230450,
+                        227589
+                    };
                     break;
 
                 case (int) Buildings.TheTanneryLvl1:
@@ -771,6 +954,15 @@ namespace GarrisonButler
                         22978, // Garrison Building Horde Leatherworking V1
                         22979, // Garrison Building Horde Leatherworking V2
                         22980 // Garrison Building Horde Leatherworking V3
+                    };
+                    buildingIDs = new List<uint>
+                    {
+                        230457,
+                        227070,
+                        230458,
+                        227592,
+                        230459,
+                        227593
                     };
                     break;
 
@@ -821,9 +1013,19 @@ namespace GarrisonButler
                         15404, // Garrison Building Horde Trading Post V2
                         20150 // Garrison Building Horde Trading Post V3
                     };
+                    buildingIDs = new List<uint>
+                    {
+                        230472,
+                        227673,
+                        230473,
+                        227674,
+                        230474,
+                        233189
+                    };
                     break;
             }
         }
+
 
         private async Task<Result> CanCompleteOrderTradingPost()
         {
@@ -855,7 +1057,7 @@ namespace GarrisonButler
                 GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1,
                     reagent.Item2, serverTimeLua);
                 // Override value
-                GaBSettings.Get().ItemIdTradingPost = (uint)reagent.Item1;
+                GaBSettings.Get().ItemIdTradingPost = (uint) reagent.Item1;
                 GaBSettings.Get().NumberReagentTradingPost = reagent.Item2;
                 GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
                 GaBSettings.Save();

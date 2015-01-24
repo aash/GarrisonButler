@@ -87,8 +87,12 @@ namespace GarrisonButler
 
             public static WoWPoint ClosestToNodes(WoWPoint point)
             {
-                var items = _movementGraph.Nodes.Keys.Select(p => new {Point = p, dist = p.Distance(point)});
-                return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
+                if (_movementGraph != null)
+                {
+                    var items = _movementGraph.Nodes.Keys.Select(p => new {Point = p, dist = p.Distance(point)});
+                    return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
+                }
+                return default(WoWPoint);
             }
 
             public static Vector3[] GetPath2(WoWPoint from, WoWPoint to)

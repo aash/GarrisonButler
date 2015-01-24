@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
+using MainDev.RemoteASM.Handlers;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
@@ -159,10 +160,10 @@ namespace GarrisonButler.API
         /// <summary>
         /// Stacks all items in bags.
         /// </summary>
-        internal static void StackItems()
-        {
-            Lua.DoString("SortBags()");
-        }
+        //internal static void StackItems()
+        //{
+        //    Lua.DoString("SortBags()");
+        //}
 
         /// <summary>
         /// Stacks all items in bags.
@@ -171,14 +172,21 @@ namespace GarrisonButler.API
         {
             if (!AnyItemsStackable())
                 return false;
-
-            await Buddy.Coroutines.Coroutine.Wait(5000, () =>
+    
+            var stackable =
+                Me.BagItems
+                    .Where(i => i.StackCount < ApiLua.GetMaxStackItem(i.Entry))
+                    .GetEmptyIfNull()
+                    .ToList().Select(i=> i.Entry).Distinct();
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
             {
-                if (!AnyItemsStackable()) return true;
-                StackItems();
-                return false;
-            });
-            return true;
+                foreach (var entry in stackable)
+                {
+                    await StackItemsIfPossible(entry);
+                }
+            }
+            return false;
+           
         }
 
         /// <summary>
@@ -264,147 +272,220 @@ namespace GarrisonButler.API
         {
             // Conditions to check
 
-            // Search for a stack in bags
-            var stackToMill = Me.BagItems.GetEmptyIfNull().FirstOrDefault(i => i.Entry == itemId);
-            if (stackToMill == default(WoWItem))
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
             {
-                GarrisonButler.Diagnostic("[Milling] No item found in bags, id={0}", itemId);
-                return ActionResult.Failed;
-            }
-
-            // Must have inscription or item
-            var inscription = Me.GetSkill(SkillLine.Inscription);
-            if (inscription == null)
-            {
-                GarrisonButler.Diagnostic("[Milling] Inscription == null. operation failed.");
-                return ActionResult.Failed;
-            }
-
-            if (!inscription.IsValid)
-            {
-                GarrisonButler.Diagnostic("[Milling] Inscription is not valid. operation failed.");
-                return ActionResult.Failed;
-            }
-
-            WoWSpell millingSpell = default(WoWSpell);
-            var millingItem = default(WoWItem);
-            if (inscription.CurrentValue <= 0)
-            {
-                millingItem = GetItemInBags(114942).FirstOrDefault();
-                if (millingItem == default(WoWItem) || millingItem.StackCount <= 0)
+                // Search for a stack in bags
+                var stackToMill = Me.BagItems.GetEmptyIfNull().FirstOrDefault(i => i.Entry == itemId);
+                if (stackToMill == default(WoWItem))
                 {
-                    GarrisonButler.Diagnostic(
-                        "[Milling] Inscription value <= 0 and no milling item in bags found. operation failed.");
-                    return ActionResult.Failed;
-                }
-                if (!millingItem.Usable)
-                {
-                    GarrisonButler.Diagnostic(
-                        "[Milling] Milling item unusable. operation failed.");
-                    return ActionResult.Failed;
-                }
-            }
-            else
-            {
-                // We use spell to mill
-                // Search for milling spell
-                millingSpell = WoWSpell.FromId(51005);
-
-                if (millingSpell == null)
-                {
-                    GarrisonButler.Diagnostic("[Milling] Milling spell not found(==null).");
+                    GarrisonButler.Diagnostic("[Milling] No item found in bags, id={0}", itemId);
                     return ActionResult.Failed;
                 }
 
-                if (!millingSpell.IsValid)
+                // Must have inscription or item
+                var inscription = Me.GetSkill(SkillLine.Inscription);
+                if (inscription == null)
                 {
-                    GarrisonButler.Diagnostic("[Milling] Milling spell not valid.");
+                    GarrisonButler.Diagnostic("[Milling] Inscription == null. operation failed.");
                     return ActionResult.Failed;
                 }
 
-                if (!millingSpell.CanCast)
+                if (!inscription.IsValid)
                 {
-                    GarrisonButler.Diagnostic("[Milling] Can't cast milling spell.");
+                    GarrisonButler.Diagnostic("[Milling] Inscription is not valid. operation failed.");
                     return ActionResult.Failed;
                 }
-            }
 
-
-            var bagIndex = stackToMill.BagIndex;
-            var bagSlot = stackToMill.BagSlot;
-            var stackSize = stackToMill.StackCount;
-            var itemName = stackToMill.SafeName;
-
-            GarrisonButler.Diagnostic(
-                "[Milling] In bags before milling at (bagIndex={0},bagSlot={1}): stackSize={2}, itemName={3}", bagIndex,
-                bagSlot, stackSize, itemName);
-
-            // Mill once using spell
-            if (millingSpell != default(WoWSpell))
-                await CastSpell(millingSpell);
-            else
-            {
-                millingItem.Use();
-                await CommonCoroutines.SleepForLagDuration();
-            }
-
-            stackToMill.UseContainerItem();
-            await CommonCoroutines.SleepForLagDuration();
-
-            //// Wait for Cast
-            //await Buddy.Coroutines.Coroutine.Wait(10000, () => !Me.IsCasting);
-
-            // Verification process
-            // Refresh of the current state
-            var bagWithMilledItem = default(WoWContainer);
-            var itemMilled = default(WoWItem);
-            var waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(1500)); // cast time supposed to be 1000s
-
-            waitTimer.Reset();
-
-            while (!waitTimer.IsFinished)
-            {
-                await Buddy.Coroutines.Coroutine.Yield();
-
-                //If casting
-                if (Me.IsCasting)
-                    continue;
-
-                ObjectManager.Update();
-                bagWithMilledItem = Me.GetBagAtIndex((uint) bagIndex);
-                if (bagWithMilledItem != null)
+                WoWSpell millingSpell = default(WoWSpell);
+                var millingItem = default(WoWItem);
+                if (inscription.CurrentValue <= 0)
                 {
-                    itemMilled = bagWithMilledItem.GetItemBySlot((uint) bagSlot);
-                    if (itemMilled != null)
-                        GarrisonButler.Diagnostic(
-                            "[Milling] In bags after milling at (bagIndex={0},bagSlot={1}): stackSize={2}, itemName={3}",
-                            bagIndex, bagSlot, itemMilled.StackCount, itemMilled.Name);
-                    if (itemMilled == null || itemMilled.Entry != itemId || itemMilled.StackCount < stackSize)
+                    millingItem = GetItemInBags(114942).FirstOrDefault();
+                    if (millingItem == default(WoWItem) || millingItem.StackCount <= 0)
                     {
-                        GarrisonButler.Diagnostic("[Milling] Confirmed milled, break.");
+                        GarrisonButler.Diagnostic(
+                            "[Milling] Inscription value <= 0 and no milling item in bags found. operation failed.");
+                        return ActionResult.Failed;
+                    }
+                    if (!millingItem.Usable)
+                    {
+                        GarrisonButler.Diagnostic(
+                            "[Milling] Milling item unusable. operation failed.");
+                        return ActionResult.Failed;
+                    }
+                }
+                else
+                {
+                    // We use spell to mill
+                    // Search for milling spell
+                    millingSpell = WoWSpell.FromId(51005);
+
+                    if (millingSpell == null)
+                    {
+                        GarrisonButler.Diagnostic("[Milling] Milling spell not found(==null).");
+                        return ActionResult.Failed;
+                    }
+
+                    if (!millingSpell.IsValid)
+                    {
+                        GarrisonButler.Diagnostic("[Milling] Milling spell not valid.");
+                        return ActionResult.Failed;
+                    }
+
+                    if (!millingSpell.CanCast)
+                    {
+                        GarrisonButler.Diagnostic("[Milling] Can't cast milling spell.");
+                        return ActionResult.Failed;
+                    }
+                }
+
+
+                var bagIndex = stackToMill.BagIndex;
+                var bagSlot = stackToMill.BagSlot;
+                var stackSize = stackToMill.StackCount;
+                var itemName = stackToMill.SafeName;
+
+                GarrisonButler.Diagnostic(
+                    "[Milling] In bags before milling at (bagIndex={0},bagSlot={1}): stackSize={2}, itemName={3}",
+                    bagIndex,
+                    bagSlot, stackSize, itemName);
+
+                // Mill once using spell
+                if (millingSpell != default(WoWSpell))
+                    await CastSpell(millingSpell);
+                else
+                {
+                    millingItem.Use();
+                    await CommonCoroutines.SleepForLagDuration();
+                }
+
+                stackToMill.UseContainerItem();
+                await CommonCoroutines.SleepForLagDuration();
+
+                //// Wait for Cast
+                //await Buddy.Coroutines.Coroutine.Wait(10000, () => !Me.IsCasting);
+
+                // Verification process
+                // Refresh of the current state
+                var bagWithMilledItem = default(WoWContainer);
+                var itemMilled = default(WoWItem);
+                var waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(1500)); // cast time supposed to be 1000s
+
+                waitTimer.Reset();
+
+                while (!waitTimer.IsFinished)
+                {
+                    await Buddy.Coroutines.Coroutine.Yield();
+
+                    //If casting
+                    if (Me.IsCasting)
+                        continue;
+
+                    ObjectManager.Update();
+                    try
+                    {
+                        bagWithMilledItem = Me.GetBagAtIndex((uint) bagIndex);
+                        if (bagWithMilledItem != null)
+                        {
+                            itemMilled = bagWithMilledItem.GetItemBySlot((uint) bagSlot);
+                            if (itemMilled != null)
+                                GarrisonButler.Diagnostic(
+                                    "[Milling] In bags after milling at (bagIndex={0},bagSlot={1}): stackSize={2}, itemName={3}",
+                                    bagIndex, bagSlot, itemMilled.StackCount, itemMilled.Name);
+                            if (itemMilled == null || itemMilled.Entry != itemId || itemMilled.StackCount < stackSize)
+                            {
+                                GarrisonButler.Diagnostic("[Milling] Confirmed milled, break.");
+                                break;
+                            }
+                        }
+
+                    }
+                    catch (Exception)
+                    {
+
                         break;
                     }
                 }
-            }
-            await CommonCoroutines.SleepForLagDuration();
+                await CommonCoroutines.SleepForLagDuration();
 
-            if (bagWithMilledItem == null)
-            {
-                GarrisonButler.Diagnostic("[Milling] wrong bag index. index={0}, slot={1}, itemId={2}", bagIndex,
-                    bagSlot, itemId);
-                return ActionResult.Failed;
-            }
+                if (bagWithMilledItem == null)
+                {
+                    GarrisonButler.Diagnostic("[Milling] wrong bag index. index={0}, slot={1}, itemId={2}", bagIndex,
+                        bagSlot, itemId);
+                    return ActionResult.Failed;
+                }
 
-            if (itemMilled != null && itemMilled.Entry == itemId && itemMilled.StackCount >= stackSize)
-            {
-                GarrisonButler.Diagnostic(
-                    "[Milling] itemMilled not null, and stackCount didn't change. index={0}, slot={1}, itemId={2}, oldSize={3}, newSize={4}",
-                    bagIndex, bagSlot, itemId, stackSize, itemMilled.StackCount);
-                return ActionResult.Failed;
+                if (itemMilled != null && itemMilled.Entry == itemId && itemMilled.StackCount >= stackSize)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[Milling] itemMilled not null, and stackCount didn't change. index={0}, slot={1}, itemId={2}, oldSize={3}, newSize={4}",
+                        bagIndex, bagSlot, itemId, stackSize, itemMilled.StackCount);
+                    return ActionResult.Failed;
+                }
+                GarrisonButler.Log("[Milling] Succesfully milled {0}.", itemName);
             }
-
-            GarrisonButler.Log("[Milling] Succesfully milled {0}.", itemName);
             return ActionResult.Done;
+        }
+
+        public static async Task StackItemsIfPossible(uint itemId)
+        {
+
+            var maxStackSize = ApiLua.GetMaxStackItem(itemId);
+            if (maxStackSize == 0)
+                return;
+
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            {
+                var allNotFull = GetItemInBags(itemId).Where(i => i.StackCount < maxStackSize).ToList();
+                if (allNotFull.Any())
+                {
+                    foreach (var item in allNotFull)
+                    {
+                        // Add this item to all the other
+                        foreach (var subItem in allNotFull)
+                        {
+                            if (subItem == item)
+                                continue;
+
+                            var availableSpace = maxStackSize - subItem.StackCount;
+                            var sizeToMove = Math.Min(availableSpace, item.StackCount);
+
+                            if (sizeToMove == item.StackCount)
+                            {
+                                if (sizeToMove == availableSpace)
+                                {
+                                    allNotFull.Remove(subItem);
+                                }
+                                allNotFull.Remove(item);
+                                // move sizeToMove
+                                int bag;
+                                int slot;
+                                var res = item.GetLuaContainerPosition(out bag, out slot);
+                                await ButlerLua.DoString(String.Format("SplitContainerItem({0}, {1}, {2})", bag, slot,
+                                    sizeToMove));
+                                await CommonCoroutines.SleepForLagDuration();
+                                subItem.UseContainerItem();
+                                break;
+                            }
+                            else
+                            {
+                                if (sizeToMove == availableSpace)
+                                {
+                                    allNotFull.Remove(subItem);
+                                }
+                                // move
+                                int bag;
+                                int slot;
+                                var res = item.GetLuaContainerPosition(out bag, out slot);
+                                await ButlerLua.DoString(String.Format("SplitContainerItem({0}, {1}, {2})", bag, slot,
+                                    sizeToMove));
+                                await CommonCoroutines.SleepForLagDuration();
+                                subItem.UseContainerItem();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

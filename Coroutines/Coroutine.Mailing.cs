@@ -148,8 +148,8 @@ namespace GarrisonButler
             GarrisonButler.CurrentHonorbuddyLog.LogFileLevel = LogLevel.None;
             GarrisonButler.CurrentHonorbuddyLog.FileLogging = false;
 
-            var openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
-            var timeout = new WaitTimer(TimeSpan.FromMilliseconds(60000));
+            bool openAllMailCoroutineResult = false;
+            var timeout = new WaitTimer(TimeSpan.FromMilliseconds(90000));
             
             while (mailFrame.GetAllMails().Any(m=> !m.WasRead || (m.ItemCount > 0 && m.CODAmount <= 0)) && !timeout.IsFinished)
             {
@@ -370,10 +370,6 @@ namespace GarrisonButler
                 await CommonCoroutines.SleepForLagDuration();
             }
 
-            // Stacking all items
-            await HbApi.StackAllItemsIfPossible();
-            await CommonCoroutines.SleepForLagDuration();
-            await Buddy.Coroutines.Coroutine.Yield();
 
             //Splitting list based on recipients
             var mailsPerRecipient = mailItems

@@ -326,6 +326,11 @@ namespace GarrisonButler.Objects
             var rest = (x%maxStackSize);
             var numberOfStacks = x/maxStackSize;
 
+            // Stacking item
+
+            // Stacking all items
+            await HbApi.StackItemsIfPossible(itemId);
+
             if (x > maxStackSize)
             {
                 // everything is supposed to be stacked, we just need to split one stack for the rest.

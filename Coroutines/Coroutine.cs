@@ -174,8 +174,6 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("InitializeShipments");
                 InitializeMissions();
                 GarrisonButler.Diagnostic("InitializeMissions");
-                InitializationMove();
-                GarrisonButler.Diagnostic("InitializationMove");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
                 _mainSequence.AddAction(
@@ -450,6 +448,8 @@ namespace GarrisonButler
             if (Me.IsInGarrison() && !CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = _customNavigation;
+                InitializationMove();
+                GarrisonButler.Diagnostic("InitializationMove");
             }
             else if (!Me.IsInGarrison() && CustomNavigationLoaded)
             {

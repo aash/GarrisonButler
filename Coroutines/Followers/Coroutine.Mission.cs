@@ -30,8 +30,8 @@ namespace GarrisonButler
 
         private static void InitializeMissions()
         {
-            RefreshMissions();
-            RefreshFollowers();
+            RefreshMissions(true);
+            RefreshFollowers(true);
         }
 
         private static void RefreshMissions(bool forced = false)
