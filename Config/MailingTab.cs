@@ -356,6 +356,7 @@ namespace GarrisonButler.Config
                 VerticalContentAlignment = VerticalAlignment.Center,
                 ItemsSource = MailCondition.GetAllPossibleConditions()
             };
+            _addRuleListBox.SelectionChanged += OnAddRuleListBoxOnSelectionChanged;
             stackpanelTextBox2.Children.Add(_addRuleListBox);
 
 
@@ -415,6 +416,7 @@ namespace GarrisonButler.Config
             return barPanel;
         }
 
+        private static MailItem CurrentBinding = null;
         private void myListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var listview = sender as ListView;
@@ -422,26 +424,28 @@ namespace GarrisonButler.Config
             var item = listview.SelectedItem as MailItem;
             if (item != null)
             {
-                var bindingId = new Binding("ItemId") {Source = item};
+                CurrentBinding = item;
+                var bindingId = new Binding("ItemId") { Source = CurrentBinding };
                 bindingId.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addItemIdTextBox.SetBinding(TextBox.TextProperty, bindingId);
 
-                var bindingRecipient = new Binding("Value") {Source = item.Recipient};
+                var bindingRecipient = new Binding("Value") { Source = CurrentBinding.Recipient };
                 bindingRecipient.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addRecipientTextBox.SetBinding(TextBox.TextProperty, bindingRecipient);
 
-                var bindingComment = new Binding("Comment") {Source = item};
+                var bindingComment = new Binding("Comment") { Source = CurrentBinding };
                 bindingComment.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addCommentTextBox.SetBinding(TextBox.TextProperty, bindingComment);
 
-                var bindingCheckValue = new Binding("CheckValue") {Source = item};
+                var bindingCheckValue = new Binding("CheckValue") { Source = CurrentBinding };
                 bindingCheckValue.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 _addRuleValueTextBox.SetBinding(TextBox.TextProperty, bindingCheckValue);
 
                 var toSelect =
                     MailCondition.GetAllPossibleConditions()
                         .GetEmptyIfNull()
-                        .FirstOrDefault(c => c.Name == item.Condition.Name);
+                        .FirstOrDefault(c => c.Name == CurrentBinding.Condition.Name);
+                toSelect.CheckValue = _addRuleValueTextBox.Text.ToInt32();
                 _addRuleListBox.SelectedItem = toSelect;
 
 
@@ -450,6 +454,7 @@ namespace GarrisonButler.Config
             }
             else
             {
+                CurrentBinding = null;
                 BindingOperations.ClearBinding(_addItemIdTextBox, TextBox.TextProperty);
                 _addItemIdTextBox.Text = "";
                 BindingOperations.ClearBinding(_addRecipientTextBox, TextBox.TextProperty);
@@ -462,6 +467,18 @@ namespace GarrisonButler.Config
             }
         }
 
+        private void OnAddRuleListBoxOnSelectionChanged(object o, SelectionChangedEventArgs e)
+        {
+            if (CurrentBinding != null)
+            {
+                var selected = _addRuleListBox.SelectedItem as MailCondition;
+                if (selected != null)
+                {
+                    selected.CheckValue = _addRuleValueTextBox.Text.ToInt32();
+                    CurrentBinding.Condition = selected;
+                }
+            }
+        }
 
         private void MailColumnHeader_Click(object sender, RoutedEventArgs e)
         {

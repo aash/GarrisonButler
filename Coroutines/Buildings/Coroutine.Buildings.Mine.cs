@@ -80,7 +80,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Result(ActionResult.Failed);
             }
-            var closest = Dijkstra.GetClosestObject(Me.Location, gameObjects.ToArray());
+            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, gameObjects.ToArray());
 
             GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + closest.Location);
             return new Result(ActionResult.Running, closest);

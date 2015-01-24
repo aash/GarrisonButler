@@ -54,6 +54,7 @@
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
+    <Compile Include="Libraries\Salesman.cs" />
     <Compile Include="LuaObjects\CapacitiveDisplayFrame.cs" />
     <Compile Include="Objects\BItem.cs" />
     <Compile Include="Objects\Pigment.cs" />
