@@ -101,17 +101,19 @@ namespace GarrisonButler.API
         {
             var waitTimer = new WaitTimer(TimeSpan.FromMilliseconds(maxTime));
             var done = await condition();
-            while (!done)
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
             {
-                if (waitTimer.IsFinished)
+                while (!done)
                 {
-                    GarrisonButler.Diagnostic("[ButlerLua] Lua call condition termination timed out.");
-                    return ActionResult.Failed;
+                    if (waitTimer.IsFinished)
+                    {
+                        GarrisonButler.Diagnostic("[ButlerLua] Lua call condition termination timed out.");
+                        return ActionResult.Failed;
+                    }
+                    await AntiSpamProtection();
+                    Lua.DoString(luaString);
+                    done = await condition();
                 }
-                await AntiSpamProtection();
-                Lua.DoString(luaString);
-                await Buddy.Coroutines.Coroutine.Yield();
-                done = await condition();
             }
             return ActionResult.Done;
         }
