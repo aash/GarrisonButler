@@ -105,8 +105,8 @@ namespace GarrisonButler.Config
                     Width = double.NaN,
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Top
-                };
-
+                    
+                }; 
                 var name = new Label();
                 var dailyProfession = dailies.GetEmptyIfNull().FirstOrDefault();
                 name.Content = dailyProfession != null ? dailyProfession.TradeskillId.ToString() : "Error";
