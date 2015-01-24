@@ -34,7 +34,7 @@ namespace GarrisonButler
 
         public GarrisonButler()
         {
-            Instance = this;
+            Instance = this ;
             CurrentHonorbuddyLog = StyxLog.GetLogs().GetEmptyIfNull().FirstOrDefault();
         }
 
