@@ -351,6 +351,7 @@ namespace GarrisonButler.Config
                 }
                 CurrentSettings.PopulateMissingSettings();
                 GarrisonButler.Log("Configuration successfully loaded.");
+                ObjectDumper.WriteToHb(CurrentSettings, 5);
             }
             catch (Exception e)
             {
