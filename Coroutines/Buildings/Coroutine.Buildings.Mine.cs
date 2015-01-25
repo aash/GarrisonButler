@@ -33,6 +33,14 @@ namespace GarrisonButler
             232545 // Rich True iron deposit
         };
 
+        private static readonly List<uint> OresMine = new List<uint>
+        {
+            232542, // Blackrock Deposit 
+            232543, // Rich Blackrock Deposit 
+            232544, // True iron deposit
+            232545 // Rich True iron deposit
+        };
+
         internal static readonly List<uint> MinesId = new List<uint>
         {
             7324, //ally 1
@@ -72,7 +80,7 @@ namespace GarrisonButler
             var nodes =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
-                    .Where(o => MineItems.Contains(o.Entry)).GetEmptyIfNull();
+                    .Where(o => OresMine.Contains(o.Entry)).GetEmptyIfNull();
 
             var gameObjects = nodes as WoWGameObject[] ?? nodes.ToArray();
             if (gameObjects.IsNullOrEmpty())
