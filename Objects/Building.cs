@@ -1065,7 +1065,12 @@ namespace GarrisonButler
             ReagentId = GaBSettings.Get().ItemIdTradingPost;
             NumberReagent = GaBSettings.Get().NumberReagentTradingPost;
 
-            CanCompleteOrder = CanCompleteOrderItem;
+            CanCompleteOrder = CanCompleteOrderTradingPostSimple;
+            return await CanCompleteOrderTradingPostSimple();
+        }
+
+        private async Task<Result> CanCompleteOrderTradingPostSimple()
+        {
             var rea =
                 GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
             if (rea == null)
@@ -1081,7 +1086,6 @@ namespace GarrisonButler
                 NumberReagent);
             return await CanCompleteOrderItem();
         }
-
 
         public static bool HasOrder(Buildings b)
         {

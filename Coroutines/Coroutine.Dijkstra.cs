@@ -69,14 +69,14 @@ namespace GarrisonButler
                             totalCount++;
                             var point2 = graphPoints[j];
                             var dist = point1.Distance(point2);
-                            if (!(dist < 5)) continue;
+                            if (dist > 3.5) continue;
                             graph.AddConnection(point1, point2, dist, true);
                             count++;
                         }
                     }
                 }
                 GarrisonButler.DiagnosticLogTimeTaken("Matching all with distance less than "
-                                                      + 5
+                                                      + 3.5
                                                       + " returned "
                                                       + count
                                                       + " connections, after " +
