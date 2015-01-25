@@ -426,7 +426,7 @@ namespace GarrisonButler.Objects
             if (stacks.Count() >= number)
                 return stacks.Take(number);
 
-            GarrisonButler.Diagnostic("Error getting {0}x(Size:{3}) stacks of {1} in bags. Returning {2} stacks", itemId,
+            GarrisonButler.Diagnostic("Error getting from bags {1}x stack(s) of itemId:{0} and stackSize:{3}. Returning {2} stacks", itemId,
                 number, stacks.Count, sizeStacks);
             return stacks;
         }

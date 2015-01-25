@@ -150,8 +150,9 @@ namespace GarrisonButler
 
             bool openAllMailCoroutineResult = false;
             var timeout = new WaitTimer(TimeSpan.FromMilliseconds(90000));
-            
-            while (mailFrame.GetAllMails().Any(m=> !m.WasRead || (m.ItemCount > 0 && m.CODAmount <= 0)) && !timeout.IsFinished)
+
+            openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
+            while (mailFrame.GetAllMails().Any(m=> !m.WasRead || ((m.ItemCount > 0 || m.Copper > 0) && m.CODAmount <= 0)) && !timeout.IsFinished)
             {
                 openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
                 await Buddy.Coroutines.Coroutine.Yield();
