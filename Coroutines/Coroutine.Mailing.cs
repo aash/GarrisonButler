@@ -283,8 +283,13 @@ namespace GarrisonButler
 
             foreach (var curItem in items)
             {
-                var itemid = curItem == null ? "" : curItem.Entry.ToString();
-                var name = curItem == null ? "" : curItem.Name;
+                if (curItem == null)
+                {
+                    continue;
+                }
+                var itemid = curItem.Entry.ToString();
+                var name = curItem.Name;
+
 
                 if (curItem.Quality != WoWItemQuality.Uncommon)
                 {

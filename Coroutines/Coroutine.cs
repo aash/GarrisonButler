@@ -237,6 +237,7 @@ namespace GarrisonButler
                 if ((await SellJunkCoroutine()).Status == ActionResult.Running)
                     return true;
                 var shouldMail = await CanMailItem();
+                
                 if(shouldMail.Status == ActionResult.Running)
                     if ((await MailItem(shouldMail.Result1)).Status == ActionResult.Running)
                         return true;

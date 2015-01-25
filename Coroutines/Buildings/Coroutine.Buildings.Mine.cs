@@ -88,9 +88,14 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Result(ActionResult.Failed);
             }
-            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, gameObjects.ToArray());
+            var allObjects =
+                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                    .GetEmptyIfNull()
+                    .Where(o => MineItems.Contains(o.Entry)).GetEmptyIfNull();
+            var objects = allObjects as WoWGameObject[] ?? allObjects.ToArray();
+            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, objects.ToArray());
 
-            GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + closest.Location);
+            GarrisonButler.Diagnostic("[Mine] Found {0} to gather at {1}.", closest.Name, closest.Location);
             return new Result(ActionResult.Running, closest);
         }
 
