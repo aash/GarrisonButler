@@ -10,6 +10,7 @@ using GarrisonButler.Config;
 using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.LuaObjects;
+using GarrisonButler.Objects;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
@@ -286,7 +287,7 @@ namespace GarrisonButler
 
         private static void InitializeShipments()
         {
-            RefreshBuildings(true);
+            RefreshBuildings();
         }
 
         private static async Task<Result> ShouldRunPickUpOrStartShipment()
@@ -326,6 +327,88 @@ namespace GarrisonButler
                 CanStartShipmentGeneration(building)));
 
             return sequence;
+        }
+
+        internal static Func<Task<Result>> CanStartShipmentQuest(List<Buildings> buildings)
+        {
+
+            return async () =>
+            {
+                var buildingObj = _buildings.FirstOrDefault(b => buildings.Contains((Buildings) b.Id));
+                
+                
+                    if (buildingObj == null)
+                    {
+                        GarrisonButler.Diagnostic(
+                            "[ShipmentStart] Building is null, either not built or not properly scanned.");
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    //building.Refresh();
+                    var buildingsettings = GaBSettings.Get().GetBuildingSettings(buildingObj.Id);
+                    if (buildingsettings == null)
+                        return new Result(ActionResult.Failed);
+
+                    // Activated by user ?
+                    if (!buildingsettings.CanStartOrder)
+                    {
+                        GarrisonButler.Diagnostic("[ShipmentStart,{0}] Deactivated in user settings: {1}", buildingObj.Id,
+                            buildingObj.Name);
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    if (buildingObj.WorkFrameWorkAroundTries >= Building.WorkFrameWorkAroundMaxTriesUntilBlacklist)
+                    {
+                        GarrisonButler.Warning(
+                            "[ShipmentStart,{0}] Building has been blacklisted due to reaching maximum Blizzard Workframe Bug workaround tries ({1})",
+                            buildingObj.Id, Building.WorkFrameWorkAroundMaxTriesUntilBlacklist);
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    // No Shipment left to start
+                    if (buildingObj.NumberShipmentLeftToStart <= 0)
+                    {
+                        GarrisonButler.Diagnostic("[ShipmentStart,{0}] No shipment left to start: {1}", buildingObj.Id,
+                            buildingObj.Name);
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    // Under construction
+                    if (buildingObj.IsBuilding || buildingObj.CanActivate)
+                    {
+                        GarrisonButler.Diagnostic(
+                            "[ShipmentStart,{0}] Building under construction, can't start work order: {1}",
+                            buildingObj.Id, buildingObj.Name);
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    // Structs cannot be null
+                    var shipmentObjectFound = ShipmentsMap.FirstOrDefault(s => s.BuildingIds.Contains(buildingObj.Id));
+
+                    // max start by user ?
+                    var maxToStartCheck = await GetMaxShipmentToStart(buildingObj);
+                    if (maxToStartCheck.Status == ActionResult.Running)
+                        return new Result(ActionResult.Refresh);
+
+                    var maxToStart = maxToStartCheck.Status == ActionResult.Done
+                        ? (int)maxToStartCheck.Result1
+                        : 0;
+
+                    if (maxToStart <= 0)
+                    {
+                        GarrisonButler.Diagnostic(
+                            "[ShipmentStart,{0}] Can't start more work orders. {1} - ShipmentsTotal={2}, MaxCanStartOrder={3}",
+                            buildingObj.Id,
+                            buildingObj.Name,
+                            buildingObj.ShipmentsTotal,
+                            buildingsettings.MaxCanStartOrder);
+                        return new Result(ActionResult.Failed);
+                    }
+
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Found {1} new work orders to start: {2}",
+                        buildingObj.Id, maxToStart, buildingObj.Name);
+                    return new Result(ActionResult.Running, buildingObj);
+                };
         }
 
         [SuppressMessage("ReSharper", "InvertIf")]
@@ -388,6 +471,20 @@ namespace GarrisonButler
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] preQuest not completed A={2} H={3}: {1}",
                         building.Id, building.Name, shipmentObjectFound.ShipmentPreQuestIdAlliance,
                         shipmentObjectFound.ShipmentPreQuestIdHorde);
+                    var quest = ButlerQuestDb.Instance.Db.FirstOrDefault(q => q.Entry ==
+                                                                              (Me.IsAlliance
+                                                                                  ? (uint)
+                                                                                      shipmentObjectFound
+                                                                                          .ShipmentPreQuestIdAlliance
+                                                                                  : (uint)
+                                                                                      shipmentObjectFound
+                                                                                          .ShipmentPreQuestIdHorde));
+                    if (quest != default(ButlerQuest) && await quest.CanTryToComplete())
+                    {
+                        var complete = await quest.Complete();
+                        if(complete.Status == ActionResult.Running)
+                            return new Result(ActionResult.Refresh);
+                    }
                     return new Result(ActionResult.Failed);
                 }
 
@@ -417,6 +514,42 @@ namespace GarrisonButler
             };
         }
 
+        public static Func<Task<Result>> CanPickUpShipmentQuest(List<Buildings> buildings)
+        {
+
+            return async () =>
+            {
+                var building = _buildings.FirstOrDefault(b => buildings.Contains((Buildings)b.Id));
+                if (building == null)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[CanPickUpShipmentQuest] Building is null, either not built or not properly scanned.");
+                    return new Result(ActionResult.Failed);
+                }
+
+                // Get the list of the building objects
+                var buildingAsObject =
+                    ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                        .Where(o => building.Displayids.Contains(o.DisplayId))
+                        .OrderBy(o => o.DistanceSqr)
+                        .FirstOrDefault();
+                if (buildingAsObject == default(WoWGameObject))
+                {
+                    GarrisonButler.Diagnostic("[CanPickUpShipmentQuest] Building could not be found in the area: {0}",
+                        building.Name);
+                    foreach (var id in building.Displayids)
+                    {
+                        GarrisonButler.Diagnostic("[CanPickUpShipmentQuest]     ID {0}", id);
+                    }
+                    return new Result(ActionResult.Failed);
+                }
+
+                GarrisonButler.Diagnostic("[CanPickUpShipmentQuest] Found {0} shipments to collect: {1}",
+                    building.ShipmentsReady,
+                    building.Name);
+                return new Result(ActionResult.Running, buildingAsObject);
+            };
+        }
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Task<Result>> CanPickUpShipmentGeneration(Building building)
         {
@@ -573,6 +706,63 @@ namespace GarrisonButler
             return new Result(ActionResult.Done);
         }
 
+        internal static Func<object, Task<Result>> StartOneShipment()
+        {
+            return async (object obj) =>
+            {
+                var building = obj as Building;
+
+                if (building == null)
+                {
+                    GarrisonButler.Diagnostic("[StartOneShipment] ERROR - Building passed in to StartOneShipment() was null");
+                    return new Result(ActionResult.Failed);
+                }
+
+                int maxToStart = 1;
+
+                if (building.PrepOrder != null)
+                    if ((await building.PrepOrder(maxToStart)).Status == ActionResult.Running)
+                        return new Result(ActionResult.Running);
+
+                if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
+                    return new Result(ActionResult.Running);
+
+                using (var myLock = StyxWoW.Memory.AcquireFrame())
+                {
+                    for (var i = 0; i < maxToStart; i++)
+                    {
+                        await CapacitiveDisplayFrame.ClickStartOrderButton(building);
+                    }
+                }
+
+                var timeout = new WaitTimer(TimeSpan.FromMilliseconds(10000));
+                while (!timeout.IsFinished)
+                {
+                    var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
+                    if (buildingShipment != null)
+                    {
+                        //await ButlerLua.OpenLandingPage();
+                        //buildingShipment.Refresh();
+                        var resCheck = await GetMaxShipmentToStart(building);
+                        var max = resCheck.Status == ActionResult.Done
+                            ? (int) resCheck.Result1
+                            : 0;
+                        if (max == 0)
+                        {
+                            GarrisonButler.Log("[StartOneShipment] Finished starting work orders at {0}.",
+                                buildingShipment.Name);
+                            //await ButlerLua.CloseLandingPage();
+                            return new Result(ActionResult.Done);
+                        }
+                        GarrisonButler.Diagnostic("[StartOneShipment] Waiting for shipment to update.");
+                    }
+                    await Buddy.Coroutines.Coroutine.Yield();
+                }
+                //await ButlerLua.CloseLandingPage();
+                return new Result(ActionResult.Refresh);
+            };
+        }
+
         private static async Task<Result> StartShipment(object obj)
         {
             var building = obj as Building;
@@ -587,7 +777,7 @@ namespace GarrisonButler
             var resCheckMax = await GetMaxShipmentToStart(building);
 
             if (resCheckMax.Status == ActionResult.Done)
-                maxToStart = (int) resCheckMax.Result1;
+                maxToStart = (int)resCheckMax.Result1;
 
             if (building.PrepOrder != null)
                 if ((await building.PrepOrder(maxToStart)).Status == ActionResult.Running)
@@ -621,7 +811,7 @@ namespace GarrisonButler
                     //buildingShipment.Refresh();
                     var resCheck = await GetMaxShipmentToStart(building);
                     var max = resCheck.Status == ActionResult.Done
-                        ? (int) resCheck.Result1
+                        ? (int)resCheck.Result1
                         : 0;
                     if (max == 0)
                     {
@@ -637,7 +827,6 @@ namespace GarrisonButler
             //await ButlerLua.CloseLandingPage();
             return new Result(ActionResult.Refresh);
         }
-
         private static async Task<Result> GetMaxShipmentToStart(Building building)
         {
             var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder;
@@ -804,7 +993,7 @@ namespace GarrisonButler
         }
 
 
-        private static async Task<Result> PickUpShipment(object obj)
+        internal static async Task<Result> PickUpShipment(object obj)
         {
             WoWPoint locationToLookAt;
             var building = obj as WoWGameObject;
@@ -928,5 +1117,6 @@ namespace GarrisonButler
                 ShipmentPreQuestIdAlliance = shipmentPreQuestIdAlliance;
             }
         }
+
     }
 }

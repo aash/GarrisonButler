@@ -57,6 +57,7 @@
     <Compile Include="Libraries\Salesman.cs" />
     <Compile Include="LuaObjects\CapacitiveDisplayFrame.cs" />
     <Compile Include="Objects\BItem.cs" />
+    <Compile Include="Objects\ButlerQuest.cs" />
     <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />

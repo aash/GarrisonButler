@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,9 +13,9 @@ using Styx.Common.Helpers;
 
 namespace GarrisonButler.Coroutines
 {
-    internal class ActionHelpers
+    public class ActionHelpers
     {
-        internal abstract class Action
+        public abstract class Action
         {
             public abstract Task<Result> ExecuteAction();
             internal Func<Task<Result>> Condition;
@@ -216,7 +217,7 @@ namespace GarrisonButler.Coroutines
             }
         }
 
-        internal class ActionsSequence : Action
+        internal class ActionsSequence : Action, IEnumerable
         {
             private readonly List<Action> _actions;
 
@@ -283,6 +284,16 @@ namespace GarrisonButler.Coroutines
                     }
                 }
                 return new Result(ActionResult.Done);
+            }
+
+            public void Add(Action action)
+            {
+                _actions.Add(action);
+            }
+
+            public IEnumerator GetEnumerator()
+            {
+                return _actions.GetEnumerator();
             }
         }
     }

@@ -122,11 +122,11 @@ namespace GarrisonButler.Libraries
             if (freeBagIndex == int.MinValue
                 || freeBagSlot == int.MinValue)
             {
-                GarrisonButler.Diagnostic("[Items] Split - No free bag slot found.");
+                GarrisonButler.Diagnostic("[Items] Split - No free bag slot found. item={0}, amount={1}", item.Entry, amount);
                 return ActionResult.Failed;
             }
 
-            GarrisonButler.Diagnostic("[Items] Split - freeBag={0}, freeSlot={1}", freeBagIndex, freeBagSlot);
+            GarrisonButler.Diagnostic("[Items] Split - item={0}, amount={1}, freeBag={2}, freeSlot={3}", item.Entry, amount, freeBagIndex, freeBagSlot);
 
             return await ButlerLua.SplitItem(item.BagIndex, item.BagSlot, amount, freeBagIndex, freeBagSlot);
         }
