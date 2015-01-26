@@ -48,7 +48,7 @@ namespace GarrisonButler
             public static Graph GraphFromList(List<WoWPoint> points)
             {
 
-                const float pathPrecision = 2.5;
+                const float pathPrecision = 2.5f;
                 var graph = new Graph();
                 foreach (var t in points)
                 {
