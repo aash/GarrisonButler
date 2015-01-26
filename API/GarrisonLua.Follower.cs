@@ -23,26 +23,30 @@ namespace GarrisonButler.API
         public static string GetFollowerName(string follower)
         {
             var lua = String.Format("return C_Garrison.GetFollowerName(\"{0}\");", follower);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerNameById(string followerId)
         {
             var lua = String.Format("return C_Garrison.GetFollowerNameByID(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerClassSpecName(string follower)
         {
             var lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", follower);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
 
         public static string GetFollowerDisplayIdbyId(string followerId)
         {
             var lua = String.Format("return C_Garrison.GetFollowerDisplayIDByID(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerStatus(string followerId)
@@ -65,7 +69,8 @@ namespace GarrisonButler.API
         public static string GetFollowerInfo(string followerId)
         {
             var lua = String.Format("return {0} and C_Garrison.GetFollowerInfo(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         // Return the follower corresponding to the id
