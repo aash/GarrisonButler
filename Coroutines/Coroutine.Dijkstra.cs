@@ -48,7 +48,7 @@ namespace GarrisonButler
             public static Graph GraphFromList(List<WoWPoint> points)
             {
 
-                const float pathPrecision = 2.5f;
+                const float pathPrecision = 3f;
                 var graph = new Graph();
                 foreach (var t in points)
                 {
@@ -93,6 +93,7 @@ namespace GarrisonButler
                     var items = _movementGraph.Nodes.Keys.Select(p => new {Point = p, dist = p.Distance(point)});
                     return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
                 }
+                GarrisonButler.Diagnostic("[Dijkstra] Error Movement Graph null.");
                 return default(WoWPoint);
             }
 
@@ -124,6 +125,7 @@ namespace GarrisonButler
                 GarrisonButler.DiagnosticLogTimeTaken("Path generation",
                     (int) PathGenerationStopwatch.ElapsedMilliseconds);
                 PathGenerationStopwatch.Stop();
+                GarrisonButler.Diagnostic("Contains {0} waypoints.", tempPath.Count());
                 return res;
             }
 

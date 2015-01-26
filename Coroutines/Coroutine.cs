@@ -501,21 +501,21 @@ namespace GarrisonButler
 
         private static async Task<Result> VendorCoroutineWorkaround()
         {
-            if (!Vendors.ForceSell &&
-                (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
-                 StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
-                return new Result(ActionResult.Done);
+            //if (!Vendors.ForceSell &&
+            //    (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
+            //     StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
+            //    return new Result(ActionResult.Done);
 
-            if (_mountVendorTimeStart == default(DateTime))
-                _mountVendorTimeStart = DateTime.Now;
+            //if (_mountVendorTimeStart == default(DateTime))
+            //    _mountVendorTimeStart = DateTime.Now;
 
-            while ((DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5)
-            {
-                if (!await MoveToTable())
-                    break;
-            }
+            //while ((DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5)
+            //{
+            //    if (!await MoveToTable())
+            //        break;
+            //}
 
-            _mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
+            //_mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
 
             var resultCoroutine = await VendorBehavior.ExecuteCoroutine()
                 ? new Result(ActionResult.Running)
