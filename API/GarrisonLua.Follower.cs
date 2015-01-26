@@ -18,6 +18,25 @@ namespace GarrisonButler.API
         public static List<Follower> GetAllFollowers()
         {
             return API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
+            //List<MissionFollowersCombo> sortedByExperience = missionList
+            //    .SelectMany<Mission, MissionFollowersCombo, MissionFollowersCombo>(
+            //        (mission, index) =>
+            //        {
+            //            int remainingFollowers = followerList.Count;
+            //            List<MissionFollowersCombo> mfComboList = new List<MissionFollowersCombo>();
+
+            //            while (remainingFollowers > mission.NumFollowers)
+            //            {
+            //                List<Follower> followers = followerList.GetRange(followerList.Count - remainingFollowers, mission.NumFollowers);
+            //                remainingFollowers -= mission.NumFollowers;
+            //                mfComboList.Add(new MissionFollowersCombo(mission, followers));
+            //            }
+            //            return mfComboList;
+            //        },
+            //        (origMission, combo) =>
+            //        {
+            //            return .GetExperience();
+            //        });
         }
 
         public static string GetFollowerName(string follower)
