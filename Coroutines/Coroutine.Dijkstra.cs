@@ -48,6 +48,7 @@ namespace GarrisonButler
             public static Graph GraphFromList(List<WoWPoint> points)
             {
 
+                const float pathPrecision = 2.5;
                 var graph = new Graph();
                 foreach (var t in points)
                 {
@@ -69,14 +70,14 @@ namespace GarrisonButler
                             totalCount++;
                             var point2 = graphPoints[j];
                             var dist = point1.Distance(point2);
-                            if (dist > 3.5) continue;
+                            if (dist > pathPrecision) continue;
                             graph.AddConnection(point1, point2, dist, true);
                             count++;
                         }
                     }
                 }
                 GarrisonButler.DiagnosticLogTimeTaken("Matching all with distance less than "
-                                                      + 3.5
+                                                      + pathPrecision
                                                       + " returned "
                                                       + count
                                                       + " connections, after " +

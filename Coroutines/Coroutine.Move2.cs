@@ -253,10 +253,8 @@ namespace GarrisonButler
             }
             PathFindResult toReturn = new PathFindResult();
             var startedAt = DateTime.Now;
-            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
-            {
-                toReturn = FindPathInner(obj);
-            }
+            toReturn = FindPathInner(obj);
+            
             GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
 
             return toReturn;
