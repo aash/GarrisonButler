@@ -437,7 +437,7 @@ namespace GarrisonButler
                 //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
             }
-
+            
             ReadyToSwitch = true;
             return false;
         }
@@ -453,13 +453,15 @@ namespace GarrisonButler
             if (Me.IsInGarrison() && !CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = _customNavigation;
-                InitializationMove();
                 GarrisonButler.Diagnostic("InitializationMove");
             }
             else if (!Me.IsInGarrison() && CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = NativeNavigation;
             }
+
+            if(CustomNavigationLoaded)
+                InitializationMove();
         }
 
         private static async Task<Result> SellJunk()

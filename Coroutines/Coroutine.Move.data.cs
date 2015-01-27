@@ -14759,7 +14759,7 @@ namespace GarrisonButler
                 case (int)Buildings.BarnLvl2:
                 case (int)Buildings.BarnLvl3:
                     // HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEERE
-                    return Me.IsAlliance ? GetBarnHorde() : GetBarnHorde();
+                    return Me.IsAlliance ? GetBarnAlly() : GetBarnHorde();
 
                 case (int)Buildings.BarracksLvl1:
                 case (int)Buildings.BarracksLvl2:
@@ -14868,67 +14868,87 @@ namespace GarrisonButler
         }
 
 
-        internal static List<WoWPoint> GetGarrisonPoints()
+        internal static void GetGarrisonPoints(ref List<WoWPoint> garrisonPoints, ref List<Buildings> buildingsLoaded)
         {
-            var garrisonPoints = new List<WoWPoint>();
+            if (garrisonPoints == null || buildingsLoaded == null)
+            {
+                garrisonPoints = new List<WoWPoint>();
+                buildingsLoaded = new List<Buildings>();
+
+
+                // Adding Town Hall
+                var townHallLvl = BuildingsLua.GetTownHallLevel();
+                GarrisonButler.Diagnostic("Generating Custom points: Town Hall level " + townHallLvl + " detected.");
+                garrisonPoints.AddRange(Me.IsAlliance ? AllianceTownHall[townHallLvl - 1]() : HordeTownHall[townHallLvl - 1]());
+                GarrisonButler.Diagnostic("Generating Custom points: Town Hall level " + townHallLvl + " DONE.");
+                GarrisonButler.Diagnostic("Generating Custom points: " + garrisonPoints.Count + " points.");
+
+
+                // Adding Mine
+                var mine = _buildings.FirstOrDefault(b => ShipmentsMap[0].BuildingIds.Contains(b.Id));
+                if (mine != default(Building))
+                {
+                    GarrisonButler.Diagnostic("Generating Custom points: Mine level " + mine.Rank + " detected.");
+                    garrisonPoints.AddRange(Me.IsAlliance
+                        ? AllianceBuildings[townHallLvl - 1][(int)MineGarden.Mine][mine.Rank - 1]()
+                        : HordeBuildings[townHallLvl - 1][(int)MineGarden.Mine][mine.Rank - 1]());
+                    GarrisonButler.Diagnostic("Generating Custom points: Mine level " + mine.Rank + " DONE.");
+                }
+                GarrisonButler.Diagnostic("Generating Custom points: " + garrisonPoints.Count + " points.");
+
+                // Adding Garden
+                var garden = _buildings.FirstOrDefault(b => ShipmentsMap[1].BuildingIds.Contains(b.Id));
+                if (garden != default(Building))
+                {
+                    GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.Rank + " detected.");
+                    garrisonPoints.AddRange(Me.IsAlliance
+                        ? AllianceBuildings[townHallLvl - 1][(int)MineGarden.Garden][garden.Rank - 1]()
+                        : HordeBuildings[townHallLvl - 1][(int)MineGarden.Garden][garden.Rank - 1]());
+                    GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.Rank + " DONE.");
+                }
+                GarrisonButler.Diagnostic("Generating Custom points: " + garrisonPoints.Count + " points.");
+
+                //// Adding Bunker
+                //var bunker =
+                //    _buildings.FirstOrDefault(b => b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl1 ||
+                //                                   b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl2 ||
+                //                                   b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl3);
+                //if (bunker != default(Building))
+                //{
+                //    GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " detected.");
+                //    garrisonPoints.AddRange(DwarvenBunkerPaths(Me.IsAlliance, bunker.PlotId, townHallLvl));
+                //    GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " DONE.");
+                //}
+                //GarrisonButler.Diagnostic("Generating Custom points: Done with " + garrisonPoints.Count + " points.");
+            }
+            
             GarrisonButler.Diagnostic("Generating Custom points for movement in Garrison.");
 
-            // Adding Town Hall
-            var townHallLvl = BuildingsLua.GetTownHallLevel();
-            GarrisonButler.Diagnostic("Generating Custom points: Town Hall level " + townHallLvl + " detected.");
-            garrisonPoints.AddRange(Me.IsAlliance ? AllianceTownHall[townHallLvl - 1]() : HordeTownHall[townHallLvl - 1]());
-            GarrisonButler.Diagnostic("Generating Custom points: Town Hall level " + townHallLvl + " DONE.");
-            GarrisonButler.Diagnostic("Generating Custom points: " + garrisonPoints.Count + " points.");
-
-
+            var copy = buildingsLoaded;
             // Points generation
-            // Loop on all buildings of the character
-            foreach (var building in Coroutine._buildings)
+            // Loop on all buildings of the character not loaded
+            var buildingsNotLoaded = _buildings.GetEmptyIfNull().Where(b => copy.All(loaded => loaded != (Buildings)b.Id));
+            foreach (var building in buildingsNotLoaded)
             {
-                // If the building is detected in the area, loading points
+                // If a building from our list of buildings is detected in the area, loading points
                 var buildingAsObject = ObjectManager.GetObjectsOfTypeFast<WoWGameObject>().GetEmptyIfNull().FirstOrDefault(o => building.buildingIDs.Contains(o.Entry));
                 if (buildingAsObject != default(WoWGameObject))
                 {
+                    // Save count for later use
                     var count = garrisonPoints.Count;
                     // Calculate transformations
                     var matrix = buildingAsObject.GetWorldMatrix();
                     GarrisonButler.Diagnostic("[NavigationData] World Matrix: " + matrix);
-
                     var buildingPoints = GetPointsByBuildingId(building.Id);
                     foreach (var point in buildingPoints)
                     {
                         var modifiedHotspot = Vector3.Transform(point, matrix);
                         garrisonPoints.Add(modifiedHotspot);
                     }
+                    buildingsLoaded.Add((Buildings)building.Id);
                     GarrisonButler.Log("[NavigationData] Dynamic loading of: {0}, #Points={1}", buildingAsObject.Name, garrisonPoints.Count - count);
                 }
             }
-
-            // Adding Garden
-            var garden = _buildings.FirstOrDefault(b => ShipmentsMap[1].BuildingIds.Contains(b.Id));
-            if (garden != default(Building))
-            {
-                GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.Rank + " detected.");
-                garrisonPoints.AddRange(Me.IsAlliance
-                    ? AllianceBuildings[townHallLvl - 1][(int)MineGarden.Garden][garden.Rank - 1]()
-                    : HordeBuildings[townHallLvl - 1][(int)MineGarden.Garden][garden.Rank - 1]());
-                GarrisonButler.Diagnostic("Generating Custom points: Garden level " + garden.Rank + " DONE.");
-            }
-            GarrisonButler.Diagnostic("Generating Custom points: " + garrisonPoints.Count + " points.");
-
-            // Adding Bunker
-            var bunker =
-                _buildings.FirstOrDefault(b => b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl1 ||
-                                               b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl2 ||
-                                               b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl3);
-            if (bunker != default(Building))
-            {
-                GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " detected.");
-                garrisonPoints.AddRange(DwarvenBunkerPaths(Me.IsAlliance, bunker.PlotId, townHallLvl));
-                GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " DONE.");
-            }
-            GarrisonButler.Diagnostic("Generating Custom points: Done with " + garrisonPoints.Count + " points.");
-            return garrisonPoints;
         }
 
         internal enum MineGarden
@@ -19300,6 +19320,444 @@ new WoWPoint(16.46043,2.610698,-0.06903076),
 new WoWPoint(17.36738,2.670334,-0.1091461),
 new WoWPoint(18.27431,2.730458,-0.1482086),
 new WoWPoint(19.17686,2.79039,-0.1882935),
+
+            };
+        }
+
+        private static List<WoWPoint> GetBarnAlly()
+        {
+            return new List<WoWPoint>()
+            {
+                // Building: Garrison Building Barn V2 - ID: 224796
+new WoWPoint(29.15926,-0.2707271,-0.001525879),
+new WoWPoint(28.4391,-0.3535383,0.001358032),
+new WoWPoint(27.72553,-0.3784765,0.004203796),
+new WoWPoint(27.01868,-0.3913814,-0.03113556),
+new WoWPoint(26.33271,-0.3985156,-0.02291107),
+new WoWPoint(25.64675,-0.4055281,-0.01468658),
+new WoWPoint(24.9468,-0.412787,-0.006362915),
+new WoWPoint(24.26083,-0.4199211,-0.001052856),
+new WoWPoint(23.51884,-0.4275464,-0.001052856),
+new WoWPoint(22.8469,-0.4344368,-0.001052856),
+new WoWPoint(22.15394,-0.4415725,-0.001052856),
+new WoWPoint(21.41897,-0.4491988,-0.001052856),
+new WoWPoint(20.74702,-0.4560892,-0.001052856),
+new WoWPoint(20.02604,-0.4634692,-0.001052856),
+new WoWPoint(19.31907,-0.4708486,-0.001052856),
+new WoWPoint(18.61909,-0.4779833,0.5284882),
+new WoWPoint(17.94015,-0.4849969,0.5961075),
+new WoWPoint(17.26116,-0.4911486,0.6125031),
+new WoWPoint(16.49817,-0.4933827,0.6125031),
+new WoWPoint(15.85417,-0.4948762,0.6125031),
+new WoWPoint(15.14019,-0.496864,0.6125031),
+new WoWPoint(14.46123,-0.5047342,0.6125031),
+new WoWPoint(13.71236,-0.5182513,0.6125031),
+new WoWPoint(13.01948,-0.531153,0.6125031),
+new WoWPoint(12.31964,-0.5466313,0.6125031),
+new WoWPoint(11.61283,-0.5622355,0.6125031),
+new WoWPoint(10.93398,-0.5772226,0.6110916),
+new WoWPoint(10.20638,-0.6011779,0.6110916),
+new WoWPoint(9.500009,-0.6306672,0.6110916),
+new WoWPoint(8.828589,-0.6588028,0.6110916),
+new WoWPoint(8.101222,-0.6891507,0.6110916),
+new WoWPoint(7.422807,-0.7174096,0.6110916),
+new WoWPoint(6.709421,-0.7472652,0.6110916),
+new WoWPoint(6.017044,-0.7761406,0.6110916),
+new WoWPoint(5.386158,-0.5993878,0.6110916),
+new WoWPoint(4.870961,-0.1255573,0.6110916),
+new WoWPoint(4.346672,0.348701,0.6110916),
+new WoWPoint(3.839777,0.8004837,0.6110916),
+new WoWPoint(3.317196,1.26626,0.6111832),
+new WoWPoint(2.799837,1.727291,0.6113358),
+new WoWPoint(2.266823,2.202312,0.6113815),
+new WoWPoint(1.732391,2.599157,0.6114273),
+new WoWPoint(1.522854,2.585508,0.6114502),
+new WoWPoint(1.510082,1.932525,0.6114731),
+new WoWPoint(1.768916,1.380766,0.6114731),
+new WoWPoint(2.315531,0.9218321,0.6114731),
+new WoWPoint(2.86104,0.4089562,0.6114731),
+new WoWPoint(3.332484,-0.0894748,0.6114731),
+new WoWPoint(3.48765,-0.7154883,0.6114731),
+new WoWPoint(3.399557,-1.363474,0.6114731),
+new WoWPoint(2.882733,-1.856071,0.6114731),
+new WoWPoint(2.456076,-2.379715,0.6114731),
+new WoWPoint(2.461485,-2.498559,0.6114731),
+new WoWPoint(2.916862,-2.4737,0.6114731),
+new WoWPoint(3.572327,-2.452501,0.6114731),
+new WoWPoint(4.138225,-2.800266,0.6114731),
+new WoWPoint(4.857369,-2.763072,0.6114731),
+new WoWPoint(5.412721,-2.313303,0.6114731),
+new WoWPoint(5.409417,-1.704007,0.6114731),
+new WoWPoint(5.374305,-1.447407,0.6114731),
+new WoWPoint(5.278267,-0.761132,0.6114731),
+new WoWPoint(5.184576,-0.09564846,0.6114731),
+new WoWPoint(5.085013,0.611276,0.6114731),
+new WoWPoint(4.984477,1.32527,0.6114731),
+new WoWPoint(4.88588,2.025371,0.6114731),
+new WoWPoint(4.790238,2.704626,0.6114731),
+new WoWPoint(4.762125,2.905718,0.6114731),
+new WoWPoint(4.871807,2.769296,0.6114731),
+new WoWPoint(5.374459,2.186035,0.6114731),
+new WoWPoint(5.819448,1.663941,0.6114731),
+new WoWPoint(6.254709,1.11574,0.6114731),
+new WoWPoint(6.654658,0.6110655,0.6114731),
+new WoWPoint(7.137776,0.0205685,0.6114731),
+new WoWPoint(7.611318,-0.4755953,0.6100616),
+new WoWPoint(8.111465,-0.9852377,0.6100616),
+new WoWPoint(8.582166,-1.464855,0.6100616),
+new WoWPoint(9.067616,-1.959365,0.6100616),
+new WoWPoint(9.575636,-2.403894,0.6100616),
+new WoWPoint(9.927219,-2.127332,0.6101303),
+new WoWPoint(10.36794,-1.648174,0.6101913),
+new WoWPoint(10.83238,-1.143275,0.6101913),
+new WoWPoint(11.32049,-0.6126313,0.6101913),
+new WoWPoint(11.82756,-0.06134462,0.6101913),
+new WoWPoint(12.30147,0.4537538,0.6109695),
+new WoWPoint(12.73746,0.9278126,0.6117554),
+new WoWPoint(13.22082,1.453235,0.6126251),
+new WoWPoint(13.71371,1.989098,0.6135025),
+new WoWPoint(13.86851,1.739181,0.6135025),
+new WoWPoint(14.23512,1.236197,0.6135025),
+new WoWPoint(14.85468,0.7692885,0.6135025),
+new WoWPoint(15.37674,0.4042834,0.6135025),
+new WoWPoint(15.99058,-0.02499705,0.6135025),
+new WoWPoint(16.52985,-0.4019239,0.6135025),
+new WoWPoint(17.10926,-0.807115,0.6135025),
+new WoWPoint(17.68296,-1.208253,0.6135025),
+new WoWPoint(18.04439,-1.460931,0.5856552),
+new WoWPoint(18.2862,-1.161408,0.5614014),
+new WoWPoint(18.7219,-0.7063182,0.52005),
+new WoWPoint(19.20976,-0.2044485,0.4523392),
+new WoWPoint(19.7025,0.3025078,0.2487335),
+new WoWPoint(20.20936,0.8240368,7.629395E-06),
+new WoWPoint(20.6875,1.315974,7.629395E-06),
+new WoWPoint(21.20466,1.84812,7.629395E-06),
+new WoWPoint(21.68278,2.339936,7.629395E-06),
+new WoWPoint(22.06821,2.736562,7.629395E-06),
+new WoWPoint(22.15702,2.680513,7.629395E-06),
+new WoWPoint(22.77262,2.291885,7.629395E-06),
+new WoWPoint(23.35867,1.922016,7.629395E-06),
+new WoWPoint(23.94469,1.552149,7.629395E-06),
+new WoWPoint(24.54255,1.174752,7.629395E-06),
+new WoWPoint(25.14042,0.7974771,7.629395E-06),
+new WoWPoint(25.75012,0.41255,-0.00377655),
+new WoWPoint(26.34798,0.03515325,-0.01656342),
+new WoWPoint(26.96362,-0.3533566,-0.02973175),
+new WoWPoint(27.52246,-0.671463,-0.04105377),
+new WoWPoint(27.95735,-0.7771517,0.004608154),
+new WoWPoint(27.50874,-0.6403629,-0.04031372),
+new WoWPoint(26.8667,-0.5497579,-0.03153992),
+new WoWPoint(26.20602,-0.7583495,-0.02268219),
+new WoWPoint(25.50755,-0.9871613,-0.009788513),
+new WoWPoint(24.87561,-1.194224,-0.0007019043),
+new WoWPoint(24.18177,-1.308134,-0.0007019043),
+new WoWPoint(23.59719,-0.936188,-0.0007019043),
+new WoWPoint(22.96567,-0.7396518,-0.0007019043),
+new WoWPoint(22.25826,-0.8364445,-0.0007019043),
+new WoWPoint(21.55087,-0.9332398,-0.0007019043),
+new WoWPoint(20.90567,-1.019914,-0.0007019043),
+new WoWPoint(20.18605,-1.061478,-0.0007019043),
+new WoWPoint(19.49335,-1.044006,-0.0007019043),
+new WoWPoint(18.72373,-1.018702,0.5196075),
+new WoWPoint(18.06484,-0.9970813,0.5834961),
+new WoWPoint(17.38601,-0.9829056,0.6123657),
+new WoWPoint(16.65102,-0.9806046,0.6123657),
+new WoWPoint(15.93805,-1.016501,0.6123657),
+new WoWPoint(15.19806,-1.070742,0.6123657),
+new WoWPoint(14.51387,-1.12092,0.6123657),
+new WoWPoint(13.78781,-1.174052,0.6123657),
+new WoWPoint(13.08969,-1.225216,0.6123657),
+new WoWPoint(12.39156,-1.27638,0.6123657),
+new WoWPoint(11.67826,-1.284676,0.6123657),
+new WoWPoint(10.96479,-1.257668,0.6123657),
+new WoWPoint(10.2796,-1.225414,0.6109543),
+new WoWPoint(9.554075,-1.165368,0.6109543),
+new WoWPoint(8.863985,-1.101929,0.6109543),
+new WoWPoint(8.139046,-1.035195,0.6109543),
+new WoWPoint(7.428061,-0.969682,0.6109543),
+new WoWPoint(6.724058,-0.9049025,0.6109543),
+new WoWPoint(6.061846,-0.8439019,0.6109543),
+new WoWPoint(5.343899,-0.7777799,0.6109543),
+new WoWPoint(4.639865,-0.7129978,0.6109543),
+new WoWPoint(3.92888,-0.6474849,0.6109543),
+new WoWPoint(3.245752,-0.5846543,0.6110687),
+new WoWPoint(2.541719,-0.5198722,0.6113281),
+new WoWPoint(3.357622,-0.5913785,0.6113586),
+new WoWPoint(4.0182,-0.7092156,0.6113586),
+new WoWPoint(4.462366,-1.231973,0.6113586),
+new WoWPoint(4.986505,-1.745062,0.6113586),
+new WoWPoint(5.60086,-2.09045,0.6113586),
+new WoWPoint(6.196252,-1.999908,0.6113586),
+new WoWPoint(6.336912,-1.30187,0.6113586),
+new WoWPoint(6.369224,-0.6377299,0.6113586),
+new WoWPoint(6.405946,0.1174364,0.6113586),
+new WoWPoint(6.439278,0.8026859,0.6113586),
+new WoWPoint(6.631701,1.4201,0.6113586),
+new WoWPoint(7.382882,1.502403,0.6113586),
+new WoWPoint(7.741693,0.9434906,0.6113586),
+new WoWPoint(8.043485,0.2899443,0.6113586),
+new WoWPoint(8.278578,-0.3990614,0.6113586),
+new WoWPoint(8.56867,-1.062735,0.6113586),
+new WoWPoint(9.114335,-1.412773,0.6113586),
+new WoWPoint(9.751831,-1.124955,0.6113586),
+new WoWPoint(10.30669,-0.7459698,0.6113586),
+new WoWPoint(10.95835,-0.7023816,0.6113586),
+new WoWPoint(11.67025,-0.7255769,0.6114044),
+new WoWPoint(12.22847,-0.3652657,0.6114044),
+new WoWPoint(12.97124,-0.2330896,0.6115799),
+new WoWPoint(13.52103,0.2020937,0.6120834),
+new WoWPoint(14.14474,0.424825,0.6126328),
+new WoWPoint(14.76397,0.2128216,0.6126328),
+new WoWPoint(15.24799,-0.3025174,0.6126328),
+new WoWPoint(15.70282,-0.7682472,0.6126328),
+new WoWPoint(16.34169,-1.099115,0.6126328),
+new WoWPoint(16.85307,-0.7038263,0.6126328),
+new WoWPoint(17.32231,-0.2739724,0.6126328),
+new WoWPoint(18.00961,-0.1854677,0.5894699),
+new WoWPoint(18.65002,-0.5422025,0.5266113),
+new WoWPoint(19.33581,-0.5088293,0.4491119),
+new WoWPoint(20.00926,-0.4220542,0.2535706),
+new WoWPoint(20.71737,-0.3457852,0.0005187988),
+new WoWPoint(21.43532,-0.282999,0.0005187988),
+new WoWPoint(22.05146,-0.4273372,0.0005187988),
+new WoWPoint(22.71054,-0.8255303,0.0005187988),
+new WoWPoint(23.3037,-1.18389,0.0005187988),
+new WoWPoint(23.88128,-1.527285,0.0005187988),
+new WoWPoint(24.53947,-1.883982,0.0005187988),
+new WoWPoint(25.19788,-1.607797,0.0005187988),
+new WoWPoint(25.85579,-1.330343,-0.008110046),
+new WoWPoint(26.45561,-1.077461,-0.02120209),
+new WoWPoint(27.15536,-1.287931,-0.02787018),
+new WoWPoint(27.8236,-1.353136,0.006233215),
+new WoWPoint(28.57896,-1.37854,0.00315094),
+new WoWPoint(29.23692,-1.375082,0.0001983643),
+new WoWPoint(29.97869,-1.356287,-0.003067017),
+new WoWPoint(30.67846,-1.338107,-0.006149292),
+new WoWPoint(31.38521,-1.319679,-0.008010864),
+new WoWPoint(32.05301,-1.265738,-0.01102448),
+new WoWPoint(32.64758,-0.811314,-0.01397705),
+new WoWPoint(32.78868,-0.1452967,-0.01397705),
+new WoWPoint(32.62165,0.5152079,-0.01397705),
+new WoWPoint(32.04335,0.9013081,-0.0118866),
+new WoWPoint(31.34308,0.9986008,-0.009140015),
+new WoWPoint(30.69394,1.029662,-0.006576538),
+new WoWPoint(29.96766,0.9798585,-0.003723145),
+new WoWPoint(29.26253,0.9282036,-0.001853943),
+new WoWPoint(28.54348,0.8755621,0.001014709),
+new WoWPoint(27.81045,0.8218149,0.003944397),
+new WoWPoint(27.16778,0.7812385,-0.01565552),
+new WoWPoint(26.47031,0.9619789,-0.004829407),
+new WoWPoint(25.95479,1.425177,-0.0003890991),
+new WoWPoint(25.28961,1.44073,-0.0003890991),
+new WoWPoint(24.54516,1.358696,-0.0003890991),
+new WoWPoint(23.89161,1.282311,-0.0003890991),
+new WoWPoint(23.17547,1.198535,-0.0003890991),
+new WoWPoint(22.43293,1.173314,-0.0003890991),
+new WoWPoint(22.04604,1.639594,-0.0003890991),
+new WoWPoint(21.91664,2.405741,-0.0003890991),
+new WoWPoint(21.81289,3.048332,-0.0003890991),
+new WoWPoint(21.75415,3.808297,0.0001296997),
+new WoWPoint(21.74469,4.473274,0.0001296997),
+new WoWPoint(21.73795,5.152226,0.0001296997),
+new WoWPoint(21.75525,5.894142,0.0001296997),
+new WoWPoint(21.77674,6.635814,0.0001296997),
+new WoWPoint(21.79619,7.307451,0.0001296997),
+new WoWPoint(21.81623,8.056111,0.0001296997),
+new WoWPoint(21.77155,8.746716,-0.001502991),
+new WoWPoint(21.5635,9.41951,-0.002410889),
+new WoWPoint(21.13693,9.958863,-0.001838684),
+new WoWPoint(20.53872,9.81649,-0.001594543),
+new WoWPoint(20.55072,9.182661,-0.001487732),
+new WoWPoint(20.63333,8.424161,-0.001487732),
+new WoWPoint(20.71212,7.700428,-0.001487732),
+new WoWPoint(21.0445,7.19125,-0.001487732),
+new WoWPoint(21.63368,6.740233,-0.001487732),
+new WoWPoint(22.22286,6.289216,-0.001487732),
+new WoWPoint(22.79536,5.850931,-0.001487732),
+new WoWPoint(23.3067,5.459415,-0.001487732),
+new WoWPoint(23.90145,5.004112,-0.001487732),
+new WoWPoint(24.43506,4.595699,-0.001487732),
+new WoWPoint(25.02818,4.13821,-0.001487732),
+new WoWPoint(25.57573,3.691326,-0.02092743),
+new WoWPoint(26.03098,3.131083,0.0798111),
+new WoWPoint(25.87115,2.561915,-0.002891541),
+new WoWPoint(25.55532,3.103097,0.05462646),
+new WoWPoint(25.5139,3.794519,-0.01794434),
+new WoWPoint(25.48324,4.528868,-0.009162903),
+new WoWPoint(25.45348,5.242306,-0.009162903),
+new WoWPoint(25.41867,5.969421,-0.009094238),
+new WoWPoint(25.13676,6.613508,-0.006065369),
+new WoWPoint(24.8022,7.220294,-0.00566864),
+new WoWPoint(24.41347,7.793956,-0.00566864),
+new WoWPoint(23.96634,8.358879,-0.00566864),
+new WoWPoint(23.36055,8.754126,-0.005661011),
+new WoWPoint(22.67051,8.736197,-0.004486084),
+new WoWPoint(22.05424,8.4687,-0.002716064),
+new WoWPoint(21.62662,7.927373,-0.001876831),
+new WoWPoint(21.51718,7.243023,-0.001365662),
+new WoWPoint(21.40887,6.565681,-0.001365662),
+new WoWPoint(21.29059,5.826106,-0.001365662),
+new WoWPoint(21.54233,5.174732,-0.001365662),
+new WoWPoint(21.91833,4.609905,-0.001365662),
+new WoWPoint(22.28049,3.970314,-0.001365662),
+new WoWPoint(22.61972,3.326236,0.0797348),
+new WoWPoint(22.91797,2.755467,0.0002746582),
+new WoWPoint(23.24866,2.122674,0.0002746582),
+new WoWPoint(23.58258,1.483718,0.0002746582),
+new WoWPoint(23.91004,0.8570895,0.0002746582),
+new WoWPoint(24.23747,0.2304638,0.0002746582),
+new WoWPoint(24.57137,-0.4086145,-0.001266479),
+new WoWPoint(24.91829,-1.072358,-0.001266479),
+new WoWPoint(25.23151,-1.721635,-0.001266479),
+new WoWPoint(25.48706,-2.395643,-0.001266479),
+new WoWPoint(25.60428,-3.08806,-0.001266479),
+new WoWPoint(25.442,-3.8032,-0.007080078),
+new WoWPoint(25.16127,-4.427471,-0.01420593),
+new WoWPoint(24.73936,-5.036571,-0.01044464),
+new WoWPoint(24.30548,-5.567914,-0.007652283),
+new WoWPoint(23.87598,-6.093884,-0.007118225),
+new WoWPoint(23.40223,-6.673941,-0.007118225),
+new WoWPoint(22.89354,-7.167493,-0.007118225),
+new WoWPoint(22.23886,-7.379551,-0.006309509),
+new WoWPoint(21.64442,-7.088474,-0.002929688),
+new WoWPoint(21.36803,-6.449159,-0.001419067),
+new WoWPoint(21.15875,-5.708496,-0.001419067),
+new WoWPoint(21.39137,-5.117635,-0.001419067),
+new WoWPoint(21.85094,-4.589641,-0.001419067),
+new WoWPoint(22.34219,-4.110982,-0.001419067),
+new WoWPoint(22.88585,-3.659333,0.08477783),
+new WoWPoint(23.48234,-3.294405,0.05834198),
+new WoWPoint(24.10508,-2.95959,0.0002441406),
+new WoWPoint(24.80674,-2.579479,0.0002441406),
+new WoWPoint(25.35747,-2.259563,0.0002441406),
+new WoWPoint(26.02218,-1.870827,-0.005271912),
+new WoWPoint(26.61744,-1.515963,-0.01819611),
+new WoWPoint(27.18288,-1.140354,-0.03076935),
+new WoWPoint(27.60986,-0.5629447,0.006011963),
+new WoWPoint(27.49771,0.1779213,-0.02848816),
+new WoWPoint(27.03178,0.7145908,-0.01527405),
+new WoWPoint(26.41581,1.073721,-0.002624512),
+new WoWPoint(25.75644,1.346829,-0.0002365112),
+new WoWPoint(25.09222,1.588992,-0.0002365112),
+new WoWPoint(24.39665,1.801303,-0.0002365112),
+new WoWPoint(23.70774,1.826775,-0.0002365112),
+new WoWPoint(23.08578,1.598867,-0.0002365112),
+new WoWPoint(22.40629,1.223556,-0.0002365112),
+new WoWPoint(21.87324,0.8378834,-0.0002365112),
+new WoWPoint(21.5567,0.191504,-0.0002365112),
+new WoWPoint(21.49565,-0.533963,-0.0002365112),
+new WoWPoint(21.8164,-1.112215,-0.0002365112),
+new WoWPoint(22.19397,-1.701076,-0.0002365112),
+new WoWPoint(22.45449,-2.365225,-0.0002365112),
+new WoWPoint(22.68488,-3.04855,-0.0002365112),
+new WoWPoint(22.82281,-3.691191,0.08387756),
+new WoWPoint(22.89013,-4.436099,1.525879E-05),
+new WoWPoint(22.88911,-5.142801,1.525879E-05),
+new WoWPoint(22.69639,-5.874271,1.525879E-05),
+new WoWPoint(22.27342,-6.419805,1.525879E-05),
+new WoWPoint(21.67254,-6.767437,-0.001426697),
+new WoWPoint(21.14398,-6.35775,-0.001426697),
+new WoWPoint(21.22513,-5.622033,-0.001426697),
+new WoWPoint(21.3989,-4.936695,-0.001426697),
+new WoWPoint(21.59225,-4.307965,-0.001426697),
+new WoWPoint(21.8363,-3.622159,0.08467102),
+new WoWPoint(22.09345,-2.911275,0.0002975464),
+new WoWPoint(22.31966,-2.285911,0.0002975464),
+new WoWPoint(22.57679,-1.574903,0.0002975464),
+new WoWPoint(22.80298,-0.9496599,0.0002975464),
+new WoWPoint(23.06014,-0.2386549,0.0002975464),
+new WoWPoint(23.30179,0.440623,0.0002975464),
+new WoWPoint(23.53509,1.130311,0.0002975464),
+new WoWPoint(23.75727,1.801488,0.0002975464),
+new WoWPoint(23.97372,2.467286,0.0002975464),
+new WoWPoint(24.16753,3.147195,0.1965332),
+new WoWPoint(24.29149,3.906124,0.0001296997),
+new WoWPoint(24.26206,4.597723,0.0001296997),
+new WoWPoint(24.09564,5.260379,0.0001296997),
+new WoWPoint(23.63816,5.832214,0.0001296997),
+new WoWPoint(22.95847,6.035538,0.0001296997),
+new WoWPoint(22.30449,5.845476,0.0001296997),
+new WoWPoint(22.09741,5.206184,0.0001296997),
+new WoWPoint(21.87991,4.504086,0.0001296997),
+new WoWPoint(22.09074,3.828722,0.0001296997),
+new WoWPoint(22.40638,3.207049,0.08103943),
+new WoWPoint(22.59044,2.563312,6.866455E-05),
+new WoWPoint(22.51251,1.864075,6.866455E-05),
+new WoWPoint(22.22696,1.13705,6.866455E-05),
+new WoWPoint(21.89779,0.5274335,6.866455E-05),
+new WoWPoint(21.557,-0.06793293,6.866455E-05),
+new WoWPoint(20.89566,-0.2974201,6.866455E-05),
+new WoWPoint(20.20188,-0.388544,6.866455E-05),
+new WoWPoint(19.49158,-0.4609441,6.866455E-05),
+new WoWPoint(18.73124,-0.5249239,0.5192642),
+new WoWPoint(18.03905,-0.5566334,0.5855942),
+new WoWPoint(17.3116,-0.584401,0.6127548),
+new WoWPoint(16.57225,-0.645928,0.6127548),
+new WoWPoint(15.89067,-0.7236599,0.6127548),
+new WoWPoint(15.22072,-0.5042774,0.6127548),
+new WoWPoint(14.56177,-0.2166239,0.6127548),
+new WoWPoint(13.85254,-0.08975109,0.6127548),
+new WoWPoint(13.15968,0.009956699,0.6127548),
+new WoWPoint(12.45967,0.1453348,0.6127548),
+new WoWPoint(11.80269,0.4569553,0.6127548),
+new WoWPoint(11.22159,0.7944097,0.6127548),
+new WoWPoint(10.51665,0.8247155,0.6127548),
+new WoWPoint(9.801884,0.6862906,0.6113434),
+new WoWPoint(9.141126,0.5639719,0.6113434),
+new WoWPoint(8.411184,0.4306733,0.6113434),
+new WoWPoint(7.707617,0.3089139,0.6113434),
+new WoWPoint(7.024103,0.1947128,0.6113434),
+new WoWPoint(6.310832,0.2687582,0.6113434),
+new WoWPoint(5.616669,0.2688352,0.6113434),
+new WoWPoint(4.891041,0.3676113,0.6113434),
+new WoWPoint(4.221926,0.5713583,0.6113434),
+new WoWPoint(3.554229,0.8606344,0.6113434),
+new WoWPoint(2.974065,1.198006,0.6113434),
+new WoWPoint(2.587066,1.811831,0.6113739),
+new WoWPoint(2.9567,2.20261,0.6113739),
+new WoWPoint(3.637758,1.932997,0.6113739),
+new WoWPoint(4.237853,1.499895,0.6113739),
+new WoWPoint(4.736514,1.111572,0.6113739),
+new WoWPoint(5.50505,0.9601495,0.6113739),
+new WoWPoint(6.166878,0.7547117,0.6113739),
+new WoWPoint(6.808105,0.5536497,0.6113739),
+new WoWPoint(7.484347,0.3476861,0.6113739),
+new WoWPoint(8.225205,0.2423085,0.6113739),
+new WoWPoint(8.943427,0.1789808,0.6113739),
+new WoWPoint(9.6965,0.1127266,0.6113739),
+new WoWPoint(10.38684,0.05183796,0.6113739),
+new WoWPoint(11.08425,-0.008197841,0.6113739),
+new WoWPoint(11.79012,-0.04569243,0.6114807),
+new WoWPoint(12.52505,-0.05178701,0.6115189),
+new WoWPoint(13.27407,-0.05580581,0.6115189),
+new WoWPoint(13.97404,-0.05957653,0.6117859),
+new WoWPoint(14.70204,-0.06359477,0.6119843),
+new WoWPoint(15.38802,-0.0672444,0.6120605),
+new WoWPoint(16.14401,-0.07138322,0.6120605),
+new WoWPoint(16.82999,-0.07503285,0.6120605),
+new WoWPoint(17.53699,-0.07892892,0.6120605),
+new WoWPoint(18.31397,-0.08306563,0.5595856),
+new WoWPoint(18.99999,-0.0824298,0.4959259),
+new WoWPoint(19.69295,-0.07529409,0.384201),
+new WoWPoint(20.42791,-0.06766775,0.05909729),
+new WoWPoint(21.18058,-0.05730132,0.0001831055),
+new WoWPoint(21.84553,-0.0478375,0.0001831055),
+new WoWPoint(22.59446,-0.03714391,0.0001831055),
+new WoWPoint(23.31538,-0.02694043,0.0001831055),
+new WoWPoint(23.99431,-0.01723023,0.0001831055),
+new WoWPoint(24.75722,-0.006411855,0.0001831055),
+new WoWPoint(25.47115,0.003668436,-0.00630188),
+new WoWPoint(26.15008,0.01337864,-0.01347351),
+new WoWPoint(26.93401,0.02456393,-0.02372742),
+new WoWPoint(27.61996,0.03427305,0.006202698),
+new WoWPoint(28.34787,0.04459973,0.00466156),
+new WoWPoint(29.06883,0.05492216,0.001075745),
+new WoWPoint(29.76175,0.06475714,-0.001968384),
+new WoWPoint(30.47567,0.07483743,-0.005111694),
+new WoWPoint(31.20358,0.08516411,-0.00831604),
+new WoWPoint(31.95951,0.09598089,-0.0100174),
+new WoWPoint(32.65246,0.1058132,-0.01309967),
+new WoWPoint(33.2614,0.11454,-0.01630402),
 
             };
         }

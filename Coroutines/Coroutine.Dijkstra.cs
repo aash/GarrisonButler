@@ -25,20 +25,19 @@ namespace GarrisonButler
         private static NavigationGaB _customNavigation;
         internal static bool CustomNavigationLoaded = false;
         internal static NavigationProvider NativeNavigation;
-
+        internal static List<Buildings> BuildingsLoaded; 
         public static void InitializationMove()
         {
             // Generate Garrison points based on garrison level and buildings level
-            if (_zonePoints == null)
+            var buildingNotLoaded = _buildings.GetEmptyIfNull().Any(b => BuildingsLoaded == null || BuildingsLoaded.All(bLoaded => b.Id != (int) bLoaded));
+            if (_zonePoints == null || buildingNotLoaded)
             {
-                _zonePoints = GetGarrisonPoints();
-
-                //navigation.UpdateMaps();
+                using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+                {
+                    GetGarrisonPoints(ref _zonePoints, ref BuildingsLoaded);
+                    _movementGraph = Dijkstra.GraphFromList(_zonePoints);
+                }
             }
-
-            // Generating graph from list of points
-            if (_movementGraph == null)
-                _movementGraph = Dijkstra.GraphFromList(_zonePoints);
         }
 
         public class Dijkstra

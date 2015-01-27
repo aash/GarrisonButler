@@ -235,6 +235,7 @@ namespace GarrisonButler
 
         private new static PathFindResult FindPath(WoWPoint start, WoWPoint end)
         {
+            GarrisonButler.Diagnostic("[Navigation] Find path from {0} to {1}", start, end);
             var obj = new PathFindResult {Start = start, End = end};
             if (TreeRoot.State == TreeRootState.Stopping)
             {
