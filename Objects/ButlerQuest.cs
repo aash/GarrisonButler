@@ -37,7 +37,14 @@ namespace GarrisonButler.Objects
                     QuestObjectType.GameObject, NavType.Run));
             }
         }
-
+        PlayerQuest quest = StyxWoW.Me.QuestLog.GetQuest(...);
+var objective = quest.GetObjectives()[0]; / or whatever to find the correct objective /
+WoWDescriptorQuest dynamicData;
+if (quest.GetData(out dynamicData))
+{
+  uint objectivesCompleted = dynamicData.ObjectivesCompleted[objective.Index];
+}
+    /// Code from hb team on quests, how to get the objective compelted or not. 
         public bool IsPickedUp
         {
             get
