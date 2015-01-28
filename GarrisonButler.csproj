@@ -93,6 +93,7 @@
     <Compile Include="Coroutines\Buildings\Coroutine.Buildings.cs" />
     <Compile Include="Coroutines\Followers\Coroutine.Mission.cs" />
     <Compile Include="Coroutines\Coroutine.Milling.cs" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coroutines\Coroutine.Move.cs" />

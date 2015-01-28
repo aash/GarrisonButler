@@ -14908,18 +14908,18 @@ namespace GarrisonButler
                 }
                 GarrisonButler.Diagnostic("Generating Custom points: " + garrisonPoints.Count + " points.");
 
-                //// Adding Bunker
-                //var bunker =
-                //    _buildings.FirstOrDefault(b => b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl1 ||
-                //                                   b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl2 ||
-                //                                   b.Id == (int) global::GarrisonButler.Buildings.DwarvenBunkerLvl3);
-                //if (bunker != default(Building))
-                //{
-                //    GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " detected.");
-                //    garrisonPoints.AddRange(DwarvenBunkerPaths(Me.IsAlliance, bunker.PlotId, townHallLvl));
-                //    GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " DONE.");
-                //}
-                //GarrisonButler.Diagnostic("Generating Custom points: Done with " + garrisonPoints.Count + " points.");
+                // Adding Bunker
+                var bunker =
+                    _buildings.FirstOrDefault(b => b.Id == (int)global::GarrisonButler.Buildings.DwarvenBunkerLvl1 ||
+                                                   b.Id == (int)global::GarrisonButler.Buildings.DwarvenBunkerLvl2 ||
+                                                   b.Id == (int)global::GarrisonButler.Buildings.DwarvenBunkerLvl3);
+                if (bunker != default(Building))
+                {
+                    GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " detected.");
+                    garrisonPoints.AddRange(DwarvenBunkerPaths(Me.IsAlliance, bunker.PlotId, townHallLvl));
+                    GarrisonButler.Diagnostic("Generating Custom points: bunker level " + bunker.Rank + " DONE.");
+                }
+                GarrisonButler.Diagnostic("Generating Custom points: Done with " + garrisonPoints.Count + " points.");
             }
             
             GarrisonButler.Diagnostic("Generating Custom points for movement in Garrison.");
@@ -14927,7 +14927,7 @@ namespace GarrisonButler
             var copy = buildingsLoaded;
             // Points generation
             // Loop on all buildings of the character not loaded
-            var buildingsNotLoaded = _buildings.GetEmptyIfNull().Where(b => copy.All(loaded => loaded != (Buildings)b.Id));
+            var buildingsNotLoaded = _buildings.GetEmptyIfNull().Where(b => !copy.Contains((Buildings)b.Id));
             foreach (var building in buildingsNotLoaded)
             {
                 // If a building from our list of buildings is detected in the area, loading points

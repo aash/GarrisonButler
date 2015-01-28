@@ -429,6 +429,22 @@ namespace GarrisonButler
             // Reset of mount vendor workaround
             _mountVendorTimeStart = default(DateTime);
 
+
+            //// DEBUG TESTS
+            //if (!testDone)
+            //{
+            //    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).Status == ActionResult.Running)
+            //        return true;
+            //    testDone = true;
+            //    return true;
+            //}
+            //else
+            //{
+            //    await MoveTo(new WoWPoint(1873.706, 83.12846, 79.72403));
+            //    return true;
+            //}
+
+
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
             var resultActions = await _mainSequence.ExecuteAction();
@@ -442,7 +458,7 @@ namespace GarrisonButler
             return false;
         }
 
-
+        private static bool testDone = false;
         private static void CheckNavigationSystem()
         {
             if (_customNavigation == null)
