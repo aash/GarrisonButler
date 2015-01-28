@@ -11,7 +11,7 @@ using GarrisonButler.API;
 
 namespace GarrisonButler
 {
-    public class Mission : IEquatable<Mission>
+    public class Mission : IEquatable<Mission>, IComparable<Mission>
     {
         public bool Equals(Mission other)
         {
@@ -26,7 +26,7 @@ namespace GarrisonButler
                    && ItemLevel == other.ItemLevel
                    && Level == other.Level
                    && string.Equals(Location, other.Location)
-                   && MaterialMultiplier == other.MaterialMultiplier
+                   //&& MaterialMultiplier == other.MaterialMultiplier
                    && string.Equals(MissionId, other.MissionId)
                    && string.Equals(Name, other.Name)
                    && NumFollowers == other.NumFollowers
@@ -60,7 +60,7 @@ namespace GarrisonButler
                 hashCode = (hashCode*397) ^ ItemLevel;
                 hashCode = (hashCode*397) ^ Level;
                 hashCode = (hashCode*397) ^ Location.GetHashCode();
-                hashCode = (hashCode*397) ^ MaterialMultiplier;
+                //hashCode = (hashCode*397) ^ MaterialMultiplier;
                 hashCode = (hashCode*397) ^ MissionId.GetHashCode();
                 hashCode = (hashCode*397) ^ Name.GetHashCode();
                 hashCode = (hashCode*397) ^ NumFollowers;
@@ -94,7 +94,7 @@ namespace GarrisonButler
         public readonly bool IsRare;
         public readonly int Level;
         public readonly String Location;
-        public readonly int MaterialMultiplier;
+        public int MaterialMultiplier;
         public readonly String MissionId;
         public readonly String Name;
         public readonly int NumFollowers;
@@ -107,6 +107,7 @@ namespace GarrisonButler
         public String Type;
         public string Xp;
         public int XpBonus;
+        public int TotalTime;
 
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level,
             int iItemLevel,
@@ -297,6 +298,16 @@ namespace GarrisonButler
                 mission += "  Succes: " + Succes + "\n";
                 return mission;
             }
+        }
+
+        bool IEquatable<Mission>.Equals(Mission other)
+        {
+            return Equals(other);
+        }
+
+        int IComparable<Mission>.CompareTo(Mission other)
+        {
+            return MissionId.CompareTo(other.MissionId);
         }
     }
 }

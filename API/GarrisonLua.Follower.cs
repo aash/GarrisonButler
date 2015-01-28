@@ -6,6 +6,8 @@ using System.Linq;
 using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using Facet.Combinatorics;
+using Styx.Common;
 
 #endregion
 
@@ -17,7 +19,113 @@ namespace GarrisonButler.API
 
         public static List<Follower> GetAllFollowers()
         {
-            return API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
+            var followers = API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
+            //var newMissionStubCodeResult = NewMissionStubCode(followers);
+            return followers;
+        }
+
+        public static List<Follower> NewMissionStubCode(List<Follower> followers )
+        {
+            var missions = MissionLua.GetAllAvailableMissions();
+            var slots = missions.Sum(m => m.NumFollowers);
+            var numFollowers = followers.Count;
+            var numMissions = missions.Count;
+
+            if (slots == 0)
+            {
+                GarrisonButler.Diagnostic("returning from GetAllFollowers(): # slots = 0");
+                return new List<Follower>();
+            }
+
+            if (numFollowers == 0)
+            {
+                GarrisonButler.Diagnostic("returning from GetAllFollowers(): # followers = 0");
+                return new List<Follower>();
+            }
+
+            if (numMissions == 0)
+            {
+                GarrisonButler.Diagnostic("returning from GetAllFollowers(): # missions = 0");
+                return new List<Follower>();
+            }
+
+            //CASE 1 - slots < # followers
+            if (slots < numFollowers)
+            {
+                missions = missions.OrderBy(m => m.NumFollowers).ToList();
+                //STEP 1 - Sort by "reward type"
+                GarrisonButler.Diagnostic("followers count=" + numFollowers);
+                GarrisonButler.Diagnostic("slots count=" + slots);
+                GarrisonButler.Diagnostic("missions count=" + missions.Count);
+                var followerCombinations = new Combinations<Follower>(followers, slots, GenerateOption.WithoutRepetition);
+                GarrisonButler.Diagnostic("Combinations Count=" + followerCombinations.Count);
+                int myCount = 0;
+                int iter = 0;
+                //Enumerable
+                DateTime startedAt = DateTime.Now;
+                var missionFollowerCombos = followerCombinations
+                    .Select(
+                        fc =>
+                        {
+                            // Loop all missions and all followers
+                            // to fill up missions slots with followers
+                            //var mfComboList = new List<MissionFollowersCombo>();
+                            var mfComboList = new Dictionary<Mission, List<Follower>>();
+                            var slotsRemaining = slots;
+                            List<Follower> followerCombo = fc.ToList();
+                            foreach (Mission m in missions)
+                            {
+                                var startIndex = slots - slotsRemaining;
+                                var slotsToFill = m.NumFollowers;
+                                var followersToAdd = followerCombo.GetRange(startIndex, slotsToFill);
+                                //mfComboList.Add(new MissionFollowersCombo(m, followersToAdd));
+                                mfComboList.Add(m, followersToAdd);
+                                slotsRemaining -= slotsToFill;
+                            }
+                            return mfComboList;
+                        });
+                using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+                {
+                    missionFollowerCombos.ForEach(mfc =>
+                    {
+                        myCount += mfc.Count;
+                        iter++;
+                        mfc.ForEach(
+                            kv =>
+                                InterfaceLua.AddFollowersToMission(kv.Key.MissionId,
+                                    kv.Value.Select(f => f.FollowerId).ToList()));
+                        //InterfaceLua.AddFollowersToMission(mfc.Keys)
+                        //GarrisonButler.Diagnostic("Configuration - count=" + mfc.Count);
+                        //foreach (MissionFollowersCombo combo in mfc)
+                        //{
+                        //    GarrisonButler.Diagnostic("  mission: " + combo._mission.Name);
+                        //    GarrisonButler.Diagnostic("  followers:");
+                        //    int count = 0;
+                        //    foreach (Follower f in combo._followers)
+                        //    {
+                        //        count++;
+                        //        GarrisonButler.Diagnostic("    " + count + ")" + f.Name);
+                        //    }
+                        //}
+                    });
+                }
+
+                GarrisonButler.Diagnostic("======");
+                GarrisonButler.Diagnostic("myCount=" + myCount);
+                GarrisonButler.Diagnostic("iter=" + iter);
+                GarrisonButler.DiagnosticLogTimeTaken("Follower LUA loop", startedAt);
+                GarrisonButler.Diagnostic("======");
+            }
+            //CASE 2 - slots = # followers
+            else if (slots == numFollowers)
+            {
+
+            }
+            //CASE 3 - slots > # followers
+            else
+            {
+
+            }
             //List<MissionFollowersCombo> sortedByExperience = missionList
             //    .SelectMany<Mission, MissionFollowersCombo, MissionFollowersCombo>(
             //        (mission, index) =>
@@ -37,6 +145,8 @@ namespace GarrisonButler.API
             //        {
             //            return .GetExperience();
             //        });
+
+            return followers;
         }
 
         public static string GetFollowerName(string follower)

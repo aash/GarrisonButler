@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace GarrisonButler
 {
-    public class Follower : IEquatable<Follower>
+    public class Follower : IEquatable<Follower>, IComparable<Follower>
     {
         public bool Equals(Follower other)
         {
@@ -108,6 +108,11 @@ namespace GarrisonButler
             follower += "  Xp: " + Xp + "\n";
             follower += "  LevelXp: " + LevelXp + "\n";
             return Counters.Aggregate(follower, (current, counter) => current + ("   Counter: " + counter + "\n"));
+        }
+
+        int IComparable<Follower>.CompareTo(Follower other)
+        {
+            return this.FollowerId.CompareTo(other.FollowerId);
         }
     }
 }

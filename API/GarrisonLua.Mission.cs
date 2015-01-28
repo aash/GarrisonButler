@@ -242,6 +242,63 @@ namespace GarrisonButler.API
                 state, type, xp, environment);
         }
 
+        public static Mission GetPartyMissionInfo(Mission m)
+        {
+            //local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus, materialMultiplier = C_Garrison.GetPartyMissionInfo(MISSION_PAGE_FRAME.missionInfo.missionID);
+            var lua =
+                "local b = {}; local RetInfo = {};" +
+                String.Format(//"for idx = 1, #am do " +
+                              "local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus, materialMultiplier =  = C_Garrison.GetPartyMissionInfo(\"{0}\");" +
+                              //"if am[idx].missionID == {0} then " +
+                              "b[0] = totalTimeString;" +
+                              "b[1] = totalTimeSeconds;" +
+                              "b[2] = isMissionTimeImproved;" +
+                              "b[3] = successChance;" +
+                              "b[4] = partyBuffs;" +
+                              "b[5] = isEnvMechanicCountered;" +
+                              "b[6] = xpBonus;" +
+                              "b[7] = materialMultiplier;" +
+                              //"b[8] = am[idx].iLevel;" +
+                              //"b[9] = am[idx].name;" +
+                              //"b[10] = am[idx].location;" +
+                              //"b[11] = am[idx].isRare;" +
+                              //"b[12] = am[idx].typeAtlas;" +
+                              //"b[13] = am[idx].missionID;" +
+                              //"b[14] = am[idx].numFollowers;" +
+                              //"b[15] = am[idx].numRewards;" +
+                              //"b[16] = xp;" +
+                              //"b[17] = am[idx].materialMultiplier;" +
+                              //"b[18] = am[idx].successChance;" +
+                              //"b[19] = am[idx].xpBonus;" +
+                              //"b[20] = am[idx].success;" +
+                              //"end;" + //if am[idex].missionID == {0} then 
+                              //"end;"
+                              ""
+                              , m.MissionId) +
+                "for j_=0,7 do table.insert(RetInfo,tostring(b[j_]));end; " +
+                "return unpack(RetInfo)";
+            var missionResult = Lua.GetReturnValues(lua);
+
+            if (missionResult.IsNullOrEmpty())
+                return null;
+
+            var totalTimeString = missionResult[0];
+            var totalTimeSeconds = missionResult[1].ToInt32();
+            var isMissionTimeImproved = missionResult[2].ToBoolean();
+            var successChance = missionResult[3];
+            var partyBuffs = missionResult[4];
+            var isEnvMechanicCountered = missionResult[5].ToBoolean();
+            var xpBonus = missionResult[6].ToInt32();
+            var materialMultiplier = missionResult[7].ToInt32();
+
+            m.SuccessChance = successChance;
+            m.XpBonus = xpBonus;
+            m.MaterialMultiplier = materialMultiplier;
+            m.TotalTime = totalTimeSeconds;
+
+            return m;
+        }
+
         public static Mission GetCompletedMissionById(String missionIdArg)
         {
             var lua =

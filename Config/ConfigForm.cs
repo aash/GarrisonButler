@@ -63,6 +63,9 @@ namespace GarrisonButler.Config
                 var workOrderTabItem = new TabItem {Header = "Work Orders", Content = ContentTabWorkOrder()};
                 tabControl.Items.Add(workOrderTabItem);
 
+                var missionTabItem = new TabItem { Header = "Missions", Content = ContentTabMissions() };
+                tabControl.Items.Add(missionTabItem);
+
                 var professionTabItem = new TabItem {Header = "Professions", Content = ContentTabProfession()};
                 tabControl.Items.Add(professionTabItem);
 
@@ -88,6 +91,8 @@ namespace GarrisonButler.Config
             }
 
             public List<CheckBox> AlldailiesCheckbox { get; set; }
+
+            private System.Windows.Controls.ComboBox _optimizeForListBox = new System.Windows.Controls.ComboBox();
 
             private UIElement ProfessionBox(List<DailyProfession> dailies)
             {
@@ -403,6 +408,72 @@ namespace GarrisonButler.Config
 
                 mainFrame.Content = mainWrapPanel;
                 return mainFrame;
+            }
+
+            protected object ContentTabMissions()
+            {
+                var mainFrame = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+
+                var stackPanel = new StackPanel { Orientation = Orientation.Vertical, Width = double.NaN };
+
+                var startMissions = CreateCheckBoxWithBinding("Start missions if possible", "StartMissions",
+                    GaBSettings.Get());
+                stackPanel.Children.Add(startMissions);
+
+                var completedMissions = CreateCheckBoxWithBinding("Turn in completed missions", "CompletedMissions",
+                    GaBSettings.Get());
+                stackPanel.Children.Add(completedMissions);
+
+                //var excludeEpicMaxLevel = CreateCheckBoxWithBinding("Exclude Epic Max Level followers from experience considerations", "ExcludeEpicMaxLevelFollowersForExperience",
+                //   GaBSettings.Get());
+                //stackPanel.Children.Add(excludeEpicMaxLevel);
+
+                //var optimizeFor = new Label
+                //{
+                //    VerticalAlignment = VerticalAlignment.Center,
+                //    Content = "Optimize For:",
+                //    Margin = new Thickness(5, 0, 5, 0)
+                //};
+                //stackPanel.Children.Add(optimizeFor);
+
+                //_optimizeForListBox = new System.Windows.Controls.ComboBox
+                //{
+                //    Width = double.NaN,
+                //    MinWidth = 40,
+                //    VerticalContentAlignment = VerticalAlignment.Center,
+                //    ItemsSource = new List<string>()
+                //    {
+                //        "Experience",
+                //        "Apexis Crystal",
+                //        "Seal of Tempered Fate",
+                //        "Garrison Resources",
+                //        "Uncommon (Green) Gear",
+                //        "Rare (Blue) Gear",
+                //        "Epic (Purple) Gear",
+                //        "Armor Enhancement Token",
+                //        "Weapon Enhancement Token",
+                //        "Balanced Weapon Enhancement",
+                //        ""
+                //    }
+                //};
+                //_optimizeForListBox.SelectionChanged += OnOptimizeForListBoxOnSelectionChanged;
+                //stackPanel.Children.Add(_optimizeForListBox);
+
+                mainFrame.Content = stackPanel;
+                return mainFrame;
+            }
+
+            private void OnOptimizeForListBoxOnSelectionChanged(object o, SelectionChangedEventArgs e)
+            {
+                //if (CurrentBinding != null)
+                //{
+                //    var selected = _addRuleListBox.SelectedItem as MailCondition;
+                //    if (selected != null)
+                //    {
+                //        selected.CheckValue = _addRuleValueTextBox.Text.ToInt32();
+                //        CurrentBinding.Condition = selected;
+                //    }
+                //}
             }
 
             protected object ContentTabGeneral()

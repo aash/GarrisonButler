@@ -76,6 +76,8 @@ namespace GarrisonButler.Config
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
+        public bool ExcludeEpicMaxLevelFollowersForExperience { get; set; }
+        public int DefaultMissionSuccessChance { get; set; }
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }

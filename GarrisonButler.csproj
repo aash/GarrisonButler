@@ -51,13 +51,21 @@
     <Compile Include="Config\OldSettings\MailItem.cs" />
     <Compile Include="Config\OldSettings\ModuleVersion.cs" />
     <Compile Include="Config\TradingPostTab.cs" />
+    <Compile Include="Libraries\Combinatorics\Combinations.cs" />
+    <Compile Include="Libraries\Combinatorics\GenerateOption.cs" />
+    <Compile Include="Libraries\Combinatorics\IMetaCollection.cs" />
+    <Compile Include="Libraries\Combinatorics\Permutations.cs" />
+    <Compile Include="Libraries\Combinatorics\SmallPrimeUtility.cs" />
+    <Compile Include="Libraries\Combinatorics\Variations.cs" />
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
     <Compile Include="LuaObjects\CapacitiveDisplayFrame.cs" />
     <Compile Include="Objects\BItem.cs" />
+    <Compile Include="Objects\MissionCondition.cs" />
     <Compile Include="Objects\MissionFollowerCombo.cs" />
+    <Compile Include="Objects\MissionReward.cs" />
     <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />
@@ -121,7 +129,7 @@
       <HintPath>References\Honorbuddy.exe</HintPath>
     </Reference>
     <Reference Include="Honorbuddy.Launcher">
-      <HintPath>..\..\Honorbuddy.Launcher.exe</HintPath>
+      <HintPath>References\Honorbuddy.Launcher.exe</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -133,12 +141,12 @@
       <HintPath>References\RemoteASM.dll</HintPath>
     </Reference>
     <Reference Include="RemoteASMNative">
-      <HintPath>..\..\RemoteASMNative.dll</HintPath>
+      <HintPath>References\RemoteASMNative.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\System.Data.SQLite.dll</HintPath>
+      <HintPath>References\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
