@@ -18,31 +18,54 @@ namespace GarrisonButler.API
         public static List<Follower> GetAllFollowers()
         {
             return API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
+            //List<MissionFollowersCombo> sortedByExperience = missionList
+            //    .SelectMany<Mission, MissionFollowersCombo, MissionFollowersCombo>(
+            //        (mission, index) =>
+            //        {
+            //            int remainingFollowers = followerList.Count;
+            //            List<MissionFollowersCombo> mfComboList = new List<MissionFollowersCombo>();
+
+            //            while (remainingFollowers > mission.NumFollowers)
+            //            {
+            //                List<Follower> followers = followerList.GetRange(followerList.Count - remainingFollowers, mission.NumFollowers);
+            //                remainingFollowers -= mission.NumFollowers;
+            //                mfComboList.Add(new MissionFollowersCombo(mission, followers));
+            //            }
+            //            return mfComboList;
+            //        },
+            //        (origMission, combo) =>
+            //        {
+            //            return .GetExperience();
+            //        });
         }
 
         public static string GetFollowerName(string follower)
         {
             var lua = String.Format("return C_Garrison.GetFollowerName(\"{0}\");", follower);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerNameById(string followerId)
         {
             var lua = String.Format("return C_Garrison.GetFollowerNameByID(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerClassSpecName(string follower)
         {
             var lua = String.Format("return C_Garrison.GetFollowerClassSpecName(\"{0}\");", follower);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
 
         public static string GetFollowerDisplayIdbyId(string followerId)
         {
             var lua = String.Format("return C_Garrison.GetFollowerDisplayIDByID(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         public static string GetFollowerStatus(string followerId)
@@ -65,7 +88,8 @@ namespace GarrisonButler.API
         public static string GetFollowerInfo(string followerId)
         {
             var lua = String.Format("return {0} and C_Garrison.GetFollowerInfo(\"{0}\");", followerId);
-            return Lua.GetReturnValues(lua).GetEmptyIfNull().FirstOrDefault();
+            List<string> ret = Lua.GetReturnValues(lua);
+            return ret.GetEmptyIfNull().FirstOrDefault();
         }
 
         // Return the follower corresponding to the id

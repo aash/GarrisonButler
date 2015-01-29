@@ -37,14 +37,7 @@ namespace GarrisonButler.Objects
                     QuestObjectType.GameObject, NavType.Run));
             }
         }
-        PlayerQuest quest = StyxWoW.Me.QuestLog.GetQuest(...);
-var objective = quest.GetObjectives()[0]; / or whatever to find the correct objective /
-WoWDescriptorQuest dynamicData;
-if (quest.GetData(out dynamicData))
-{
-  uint objectivesCompleted = dynamicData.ObjectivesCompleted[objective.Index];
-}
-    /// Code from hb team on quests, how to get the objective compelted or not. 
+        
         public bool IsPickedUp
         {
             get
@@ -71,35 +64,6 @@ if (quest.GetData(out dynamicData))
             }
         }
 
-        public bool IsCompleted
-        {
-            get
-            {
-                {
-                    if (StyxWoW.Me == null)
-                    {
-                        GarrisonButler.Diagnostic("Error in class ButlerQuest getting completedPreQuest - Me == null");
-                        return false;
-                    }
-
-                    if (!StyxWoW.Me.IsValid)
-                    {
-                        GarrisonButler.Diagnostic(
-                            "Error in class ButlerQuest getting completedPreQuest - Me.IsValid = false");
-                        return false;
-                    }
-
-                    if (Entry == 0)
-                        return false;
-
-                    var helper = new ProfileHelperFunctionsBase();
-                    var returnValue = helper.IsQuestCompleted(Entry);
-                    return returnValue;
-                }
-            }
-        }
-
-
         public ActionHelpers.Action[] ObjectivesActions { get; private set; }
         public ButlerQuest(uint entry, ButlerPnj pnjPickUp, ButlerPnj pnjTurnIn, ActionHelpers.Action[] objectivesActions)
         {
@@ -117,7 +81,7 @@ if (quest.GetData(out dynamicData))
             for (int i = 0; i < ObjectivesActions.Length; i++)
             {
                 var action = ObjectivesActions[i];
-                if (!isComplete(i) && (await action.Condition()).Status != ActionResult.Running)
+                if (!IsCompleted(i) && (await action.Condition()).Status != ActionResult.Running)
                 return false;
             }
             //if ((await Condition()).Status == ActionResult.Running)
@@ -176,35 +140,30 @@ if (quest.GetData(out dynamicData))
             var quest = StyxWoW.Me.QuestLog.GetQuestById(Entry);
             for (int i = 0; i < quest.GetObjectives().Count; i++)
             {
-                var questObjective = quest.GetObjectives()[i];
-                var helper = new ProfileHelperFunctionsBase();
-                var complete = isComplete(i);
-                if (complete)
-                {
-                    GarrisonButler.Diagnostic("[ButlerX] Objective completed {0}: {1}", i, questObjective.Objective);
+                var completed = IsCompleted(i);
+                if (completed)
                     continue;
-                }
-                GarrisonButler.Diagnostic("[ButlerX] Running Objective {0}: {1}", i, questObjective.Objective);
-                //return await ObjectivesActions[i].ExecuteAction();
                 return new Result(ActionResult.Running);
             }
             return new Result(ActionResult.Done);
         }
 
-        private bool isComplete(int i)
+        private bool IsCompleted(int index)
         {
-            var quest = StyxWoW.Me.QuestLog.GetQuestById(Entry);
-            GarrisonButler.Diagnostic("[ButlerX] quest: ");
-            ObjectDumper.WriteToHb(quest,3);
-            GarrisonButler.Diagnostic("[ButlerX] Objectives: ");
-            foreach (var objective in quest.GetObjectives())
+
+            PlayerQuest quest = StyxWoW.Me.QuestLog.GetQuestById(Entry);
+            var objectives = quest.GetObjectives();
+            if (objectives.Count >= index)
             {
-                GarrisonButler.Diagnostic("[ButlerX] Objective: " + objective.Objective);
+                GarrisonButler.Diagnostic("Error quest objective index out of bound for quest {0}.", Entry);
+                return false;
             }
-            var questObjective = quest.GetObjectives()[i];
-            var helper = new ProfileHelperFunctionsBase();
-            var complete = helper.IsObjectiveComplete((int)questObjective.ID, quest.Id);
-            return complete;
+
+            var objective = objectives[0];
+            WoWDescriptorQuest dynamicData;
+            var isCompleted = quest.GetData(out dynamicData) ? dynamicData.ObjectivesDone[objective.Index] : 0;
+            GarrisonButler.Diagnostic("[ButlerX] Quest {2} Objective completed {0}: {1}", index, isCompleted != 0, Entry);
+            return isCompleted != 0;
         }
 
         public override int GetHashCode()

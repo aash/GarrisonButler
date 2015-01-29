@@ -3,21 +3,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using Buddy.Coroutines;
 using CommonBehaviors.Actions;
 using GarrisonButler.API;
+using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.LuaObjects;
 using Styx.Common;
 using Styx.CommonBot;
-using Styx.CommonBot.Frames;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
+using LuaEvents = GarrisonButler.LuaObjects.LuaEvents;
 
 #endregion
 
@@ -25,7 +24,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(1, 10, 8, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(1, 10, 29, 0);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
@@ -169,31 +168,9 @@ namespace GarrisonButler
             Logging.WriteDiagnostic(Colors.Orange, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
-        private static void LootClosed(object sender, LuaEventArgs args)
-        {
-            LootIsOpen = false;
-        }
-
-        private static void LootOpened(object sender, LuaEventArgs args)
-        {
-            var lootFrame = LootFrame.Instance;
-            if (lootFrame != null)
-            {
-                for (int i = 0; i < lootFrame.LootItems; i++)
-                {
-                    Diagnostic("[Loot] Found LootName {0}.", lootFrame.LootInfo(i).LootName);
-                    Diagnostic("[Loot] Found LootIcon {0}.", lootFrame.LootInfo(i).LootIcon);
-                    Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
-                    Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
-                    Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
-                }
-            }
-            LootIsOpen = true;
-        }
+      
 
         #region overrides
-
-        internal static bool LootIsOpen;
         private Composite _root;
         public DateTime _lastRunTime = DateTime.MinValue;
 
@@ -210,7 +187,7 @@ namespace GarrisonButler
 
         public override Composite Root
         {
-            get { return _root ?? (_root = new ActionRunCoroutine(ctx => Coroutine.RootLogic())); }
+            get { return _root ?? (_root = new ActionRunCoroutine(ctx => ButlerCoroutine.RootLogic())); }
         }
 
         public override bool IsPrimaryType
@@ -225,7 +202,7 @@ namespace GarrisonButler
         {
             get
             {
-                if (Coroutine.ReadyToSwitch)
+                if (ButlerCoroutine.ReadyToSwitch)
                 {
                     var timeElapsed = DateTime.Now - _lastRunTime;
                     if (!(timeElapsed.TotalSeconds > GaBSettings.Get().TimeMinBetweenRun)) return false;
@@ -237,9 +214,9 @@ namespace GarrisonButler
 
                     Log("One more check and then taking a break for {0}s", timeBetweenRuns);
                 }
-                Coroutine.SomethingToDo();
-                if (!Coroutine.AnyTodo) return false;
-                Coroutine.ReadyToSwitch = false;
+                ButlerCoroutine.SomethingToDo();
+                if (!ButlerCoroutine.AnyTodo) return false;
+                ButlerCoroutine.ReadyToSwitch = false;
                 return true;
             }
         }
@@ -262,16 +239,16 @@ namespace GarrisonButler
             Lua.Events.AttachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
 
             Diagnostic("Attaching to GARRISON_MISSION_STARTED");
-            Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
+            Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", ButlerCoroutine.GARRISON_MISSION_STARTED);
 
             Diagnostic("Attaching to LOOT_OPENED");
-            Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
+            Lua.Events.AttachEvent("LOOT_OPENED", LuaEvents.LootOpened);
 
             Diagnostic("Attaching to LOOT_CLOSED");
-            Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
+            Lua.Events.AttachEvent("LOOT_CLOSED", LuaEvents.LootClosed);
 
             Diagnostic("Attaching to SHIPMENT_CRAFTER_INFO");
-            Lua.Events.AttachEvent("SHIPMENT_CRAFTER_INFO", Coroutine.SHIPMENT_CRAFTER_INFO);
+            Lua.Events.AttachEvent("SHIPMENT_CRAFTER_INFO", ButlerCoroutine.SHIPMENT_CRAFTER_INFO);
 
             CapacitiveDisplayFrame.Initialize();
         }
@@ -283,11 +260,11 @@ namespace GarrisonButler
             Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
             Lua.Events.DetachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
             Diagnostic("Detaching from GARRISON_MISSION_STARTED");
-            Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", Coroutine.GARRISON_MISSION_STARTED);
+            Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", ButlerCoroutine.GARRISON_MISSION_STARTED);
             Diagnostic("Detaching from LOOT_OPENED");
-            Lua.Events.DetachEvent("LOOT_OPENED", LootOpened);
+            Lua.Events.DetachEvent("LOOT_OPENED", LuaEvents.LootOpened);
             Diagnostic("Detaching from LOOT_CLOSED");
-            Lua.Events.DetachEvent("LOOT_CLOSED", LootClosed);
+            Lua.Events.DetachEvent("LOOT_CLOSED", LuaEvents.LootClosed);
 
             CapacitiveDisplayFrame.OnDeselected();
 
@@ -299,7 +276,7 @@ namespace GarrisonButler
             try
             {
                 Diagnostic("Coroutine OnStart");
-                Coroutine.OnStart();
+                ButlerCoroutine.OnStart();
             }
             catch (Exception e)
             {
@@ -312,7 +289,7 @@ namespace GarrisonButler
 
         public override void Stop()
         {
-            Coroutine.OnStop();
+            ButlerCoroutine.OnStop();
         }
 
         #endregion

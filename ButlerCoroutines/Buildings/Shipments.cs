@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.LuaObjects;
 using GarrisonButler.Objects;
@@ -22,9 +21,9 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private const int BiggerIsBetterAlliance = 36592;
         private const int BiggerIsBetterHorde = 36567;

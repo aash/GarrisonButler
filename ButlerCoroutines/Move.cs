@@ -2,7 +2,6 @@
 
 using System;
 using System.Threading.Tasks;
-using GarrisonButler.Coroutines;
 using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.Pathing;
@@ -11,9 +10,9 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static string _oldDestMessage;
         private static MoveResult _lastMoveResult;
