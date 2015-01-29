@@ -173,9 +173,9 @@ namespace GarrisonButler
             foreach (var reagentId in ReagentIds)
             {
                 // add number in bags
-                var count = HbApi.GetNumberItemInBags(ReagentId);
+                var count = HbApi.GetNumberItemInBags(reagentId);
                 // add number in reagent banks
-                count += HbApi.GetNumberItemInReagentBank(ReagentId);
+                count += HbApi.GetNumberItemInReagentBank(reagentId);
 
                 GarrisonButler.Diagnostic("[ShipmentStart] Total found {0} - #{1} - needed #{2}", reagentId, count,
                     NumberReagent);
