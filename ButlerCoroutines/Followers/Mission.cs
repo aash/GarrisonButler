@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Buddy.Coroutines;
 using GarrisonButler.API;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
@@ -16,9 +15,9 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         public static bool Check = true;
 

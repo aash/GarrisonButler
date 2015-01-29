@@ -5,16 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static List<uint> _salvageCratesIds;
 

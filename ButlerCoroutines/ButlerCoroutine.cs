@@ -14,7 +14,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common.Helpers;
@@ -26,20 +25,18 @@ using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-
 #endregion
 
 #endregion
 
 // ReSharper disable once CheckNamespace
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static Composite _deathBehavior;
         private static Composite _lootBehavior;
-        private static Composite _combatBehavior;
         private static Composite _vendorBehavior;
         private static readonly WaitTimer ResetAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
         private static List<Building> _buildings;
@@ -152,11 +149,6 @@ namespace GarrisonButler
         private static Composite DeathBehavior
         {
             get { return _deathBehavior ?? (_deathBehavior = LevelBot.CreateDeathBehavior()); }
-        }
-
-        private static Composite CombatBehavior
-        {
-            get { return _combatBehavior ?? (_combatBehavior = LevelBot.CreateCombatBehavior()); }
         }
 
         private static Composite VendorBehavior
@@ -392,7 +384,7 @@ namespace GarrisonButler
             if (await DeathBehavior.ExecuteCoroutine())
                 return true;
 
-            if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
+            if (await Combat.CombatRoutine())
                 return true;
 
 

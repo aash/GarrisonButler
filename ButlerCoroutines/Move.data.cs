@@ -12,9 +12,9 @@ using Tripper.Tools.Math;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         #region Horde
 

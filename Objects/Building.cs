@@ -6,9 +6,10 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Buddy.Coroutines;
 using GarrisonButler.API;
+using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.CommonBot.Coroutines;
@@ -293,14 +294,14 @@ namespace GarrisonButler
                     if (unit == null)
                     {
                         await
-                            Coroutine.MoveTo(Pnj,
+                            ButlerCoroutine.MoveTo(Pnj,
                                 String.Format(
                                     "[MillBeforeOrder,{0}] Could not find unit ({1}), moving to default location.",
                                     Id, PnjId));
                         return new Result(ActionResult.Running);
                     }
 
-                    if ((await Coroutine.MoveToInteract(unit)).Status == ActionResult.Running)
+                    if ((await ButlerCoroutine.MoveToInteract(unit)).Status == ActionResult.Running)
                         return new Result(ActionResult.Running);
 
                     unit.Interact();
@@ -1040,7 +1041,7 @@ namespace GarrisonButler
                 || GaBSettings.Get().LastCheckTradingPost < lastReset)
             {
                 // moving to pnj
-                var moveResult = (await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
+                var moveResult = (await ButlerCoroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
                 if (moveResult == ActionResult.Running)
                 {
                     return new Result(ActionResult.Running);
