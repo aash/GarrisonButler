@@ -76,23 +76,18 @@ namespace GarrisonButler.ButlerCoroutines
             //        .FirstOrDefault();
 
             // Is there something to mine?
-            var nodes =
+            var allObjects =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
-                    .Where(o => OresMine.Contains(o.Entry)).GetEmptyIfNull();
+                    .Where(o => MineItems.Contains(o.Entry) && !Objects.Blacklist.IsBlacklisted(o)).ToArray();
 
-            var gameObjects = nodes as WoWGameObject[] ?? nodes.ToArray();
-            if (gameObjects.IsNullOrEmpty())
+            if (!allObjects.Any(o => OresMine.Contains(o.Entry)))
             {
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Result(ActionResult.Failed);
             }
-            var allObjects =
-                ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                    .GetEmptyIfNull()
-                    .Where(o => MineItems.Contains(o.Entry)).GetEmptyIfNull();
-            var objects = allObjects as WoWGameObject[] ?? allObjects.ToArray();
-            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, objects.ToArray());
+
+            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, allObjects);
 
             GarrisonButler.Diagnostic("[Mine] Found {0} to gather at {1}.", closest.Name, closest.Location);
             return new Result(ActionResult.Running, closest);

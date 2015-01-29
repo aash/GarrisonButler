@@ -56,8 +56,10 @@
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
+    <Compile Include="LuaObjects\LuaEvents.cs" />
     <Compile Include="LuaObjects\CapacitiveDisplayFrame.cs" />
     <Compile Include="Objects\BItem.cs" />
+    <Compile Include="Objects\Blacklist.cs" />
     <Compile Include="Objects\MissionFollowerCombo.cs" />
     <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />

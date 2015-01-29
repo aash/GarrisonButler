@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using Buddy.Coroutines;
@@ -15,9 +14,9 @@ using GarrisonButler.Libraries;
 using GarrisonButler.LuaObjects;
 using Styx.Common;
 using Styx.CommonBot;
-using Styx.CommonBot.Frames;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
+using LuaEvents = GarrisonButler.LuaObjects.LuaEvents;
 
 #endregion
 
@@ -40,7 +39,7 @@ namespace GarrisonButler
 
         public static string NameStatic
         {
-            get { return "GarrisonButler Lite"; }
+            get { return "GarrisonButler ICE"; }
         }
 
         // internal AutoAnglerProfile Profile { get; private set; }
@@ -169,31 +168,9 @@ namespace GarrisonButler
             Logging.WriteDiagnostic(Colors.Orange, String.Format("[{0}] {1}: {2}", NameStatic, Version, message), args);
         }
 
-        private static void LootClosed(object sender, LuaEventArgs args)
-        {
-            LootIsOpen = false;
-        }
-
-        private static void LootOpened(object sender, LuaEventArgs args)
-        {
-            var lootFrame = LootFrame.Instance;
-            if (lootFrame != null)
-            {
-                for (int i = 0; i < lootFrame.LootItems; i++)
-                {
-                    Diagnostic("[Loot] Found LootName {0}.", lootFrame.LootInfo(i).LootName);
-                    Diagnostic("[Loot] Found LootIcon {0}.", lootFrame.LootInfo(i).LootIcon);
-                    Diagnostic("[Loot] Found LootQuantity {0}.", lootFrame.LootInfo(i).LootQuantity);
-                    Diagnostic("[Loot] Found LootRarity {0}.", lootFrame.LootInfo(i).LootRarity);
-                    Diagnostic("[Loot] Found Locked {0}.", lootFrame.LootInfo(i).Locked);
-                }
-            }
-            LootIsOpen = true;
-        }
+      
 
         #region overrides
-
-        internal static bool LootIsOpen;
         private Composite _root;
         public DateTime _lastRunTime = DateTime.MinValue;
 
@@ -265,10 +242,10 @@ namespace GarrisonButler
             Lua.Events.AttachEvent("GARRISON_MISSION_STARTED", ButlerCoroutine.GARRISON_MISSION_STARTED);
 
             Diagnostic("Attaching to LOOT_OPENED");
-            Lua.Events.AttachEvent("LOOT_OPENED", LootOpened);
+            Lua.Events.AttachEvent("LOOT_OPENED", LuaEvents.LootOpened);
 
             Diagnostic("Attaching to LOOT_CLOSED");
-            Lua.Events.AttachEvent("LOOT_CLOSED", LootClosed);
+            Lua.Events.AttachEvent("LOOT_CLOSED", LuaEvents.LootClosed);
 
             Diagnostic("Attaching to SHIPMENT_CRAFTER_INFO");
             Lua.Events.AttachEvent("SHIPMENT_CRAFTER_INFO", ButlerCoroutine.SHIPMENT_CRAFTER_INFO);
@@ -285,9 +262,9 @@ namespace GarrisonButler
             Diagnostic("Detaching from GARRISON_MISSION_STARTED");
             Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", ButlerCoroutine.GARRISON_MISSION_STARTED);
             Diagnostic("Detaching from LOOT_OPENED");
-            Lua.Events.DetachEvent("LOOT_OPENED", LootOpened);
+            Lua.Events.DetachEvent("LOOT_OPENED", LuaEvents.LootOpened);
             Diagnostic("Detaching from LOOT_CLOSED");
-            Lua.Events.DetachEvent("LOOT_CLOSED", LootClosed);
+            Lua.Events.DetachEvent("LOOT_CLOSED", LuaEvents.LootClosed);
 
             CapacitiveDisplayFrame.OnDeselected();
 
