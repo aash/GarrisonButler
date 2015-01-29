@@ -1,7 +1,6 @@
 ﻿#region
 
 using GarrisonButler.API;
-using GarrisonButler.Coroutines;
 
 #region
 
@@ -19,9 +18,9 @@ using Styx.CommonBot;
 
 // ReSharper disable once CheckNamespace
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static bool _hbRelogSkipped;
         private static int _hbRelogSkippedCounter;

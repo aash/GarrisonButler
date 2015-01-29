@@ -4,14 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using Styx;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static DateTime _lastRoundCheckTime = DateTime.MinValue;
         private static int _lastRoundTemp;

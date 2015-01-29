@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Buddy.Coroutines;
 using GarrisonButler.API;
-using GarrisonButler.Coroutines;
+using GarrisonButler.ButlerCoroutines;
 using Styx;
 using Styx.CommonBot.Profiles;
 using Styx.WoWInternals;
