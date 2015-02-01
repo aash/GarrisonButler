@@ -225,12 +225,19 @@ app.controller('buildingController', function ($scope) {
 
 app.controller('professionsListController', function ($scope) {
     $scope.items = $scope.butlerSettings.Professions;
-    
-    $scope.gridOptions = {
-        data: $scope.items,
-        enableSorting: true,
-        enableCellEditOnFocus: true
-    };
+
+    $scope.gridOptions = {};
+
+    $scope.gridOptions.data = $scope.items;
+    $scope.gridOptions.enableSorting = true;
+    $scope.gridOptions.enableCellEditOnFocus = true;
+    //$scope.gridOptions.columnDefs = [
+    //    { name: 'itemId', type: 'number', displayName: "Item ID"},
+    //    { name: 'spellId', type: 'number', displayName: "Spell ID"},
+    //    { name: 'Name', type: 'string', displayName: "Name" },
+    //    { name: 'Profession', type: 'string', displayName: 'Profession'},
+    //    { name: 'Activated', type: 'bool', displayName: 'Activated', editableCellTemplate: 'ui-grid/dropdownEditor' }
+    //    ];
     $scope.gridOptions.onRegisterApi = function(gridApi){
         $scope.gridApi = gridApi;
     };
