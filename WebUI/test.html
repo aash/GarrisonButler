@@ -1,363 +1,153 @@
 ﻿<!DOCTYPE html>
-
 <html>
 <head>
-    <!--<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.js"></script>
-    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"></script>
-    <script src="https://code.jquery.com/jquery-2.1.3.js"></script>
-
-    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet"/>
-
-    <link href="./Config/Libraries/BootstrapSwitch/css/bootstrap-switch.css" rel="stylesheet">-->
-
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>GarrisonButler</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
-
     <script src="./Libraries/Angular/angular.min.js"></script>
     <script src="./Libraries/Angular/angular-route.min.js"></script>
-    <script src="./Libraries/UIgrid/ui-grid.min.js"></script>
     <script src="./Libraries/MobileAngularUI/js/mobile-angular-ui.min.js"></script>
-
     <script src="http://cdn.jsdelivr.net/hammerjs/2.0.4/hammer.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-aria.min.js"></script>
-
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-touch.js"></script>
-    <script src="http://ui-grid.info/docs/grunt-scripts/csv.js"></script>
-    <script src="http://ui-grid.info/docs/grunt-scripts/pdfmake.js"></script>
-    <script src="http://ui-grid.info/docs/grunt-scripts/vfs_fonts.js"></script>
-
-
-
     <link rel="stylesheet" href="./test.css" />
     <link rel="stylesheet" href="./Libraries/MobileAngularUI/css/mobile-angular-ui-hover.min.css" />
     <link rel="stylesheet" href="./Libraries/MobileAngularUI/css/mobile-angular-ui-base.min.css" />
     <link rel="stylesheet" href="./Libraries/MobileAngularUI/css/mobile-angular-ui-desktop.min.css" />
-    <link rel="stylesheet" href="./Libraries/UIgrid/ui-grid.min.css" />
-
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/0.7.0/angular-material.min.css">
     <script src="http://ajax.googleapis.com/ajax/libs/angular_material/0.7.0/angular-material.min.js"></script>
-
     <script src="./test.js"></script>
-    <style>
-        /*.switch {
-            background-color: #C70000;
-            border: 2px solid #812020;
-        }
-
-            .switch .switch-handle {
-                /*background-color: #bfbfbf;*/
-                /*border: 1px solid #808080;*/
-            /*}*/
-
-            /*.switch.active {*/
-                /*background-color: #00ff21;*/
-                /*border: 2px solid #0a7032;*/
-            /*}*/
-
-                /*.switch.active .switch-handle {*/
-                    /*border-color: #0a7032;*/
-                    /*background-color: #c7efbe;*/
-                /*}*/
-
-        /*.md-tile-left {
-            border-radius: 30px;
-            border: 1px solid #ddd;
-            width: 48px;
-            margin: 16px;
-        }*/
-        /*.switch-label {
-            position: relative;
-            top: 50%;
-            transform: translatey(-50%);
-        }*/
-    </style>
 </head>
-
 <body ng-app="GarrisonButlerApp">
-
     <div class="app" ng-controller="mainController">
-
-
-        <!-- Sidebars -->
-        <!--<div class="sidebar sidebar-left"></div>-->
-        <!--<div class="sidebar sidebar-right"></div>-->
-        <!--<div class="navbar navbar-app navbar-absolute-top">
-            <!-- Top Navbar -->
-        <!--TABS-->
-        <!--<ul class="nav nav-tabs" ui-state="activeTab" ui-default='1'>
-                <li ui-class="{'active': activeTab == 1}">
-                    <a ui-set="{'activeTab': 1}">General</a>
-                </li>
-                <li ui-class="{'active': activeTab == 2}">
-                    <a ui-set="{'activeTab': 2}">Work Orders</a>
-                </li>
-                <li ui-class="{'active': activeTab == 3}">
-                    <a ui-set="{'activeTab': 3}">Professions</a>
-                </li>
-            </ul>
-        </div>-->
-        <!--<div class="navbar navbar-app navbar-absolute-bottom"></div>-->
-        <!-- App body -->
-
         <div class='app-body'>
             <div class='app-content'>
                 <!--TABS-->
-
-
-
                 <div class="scrollable">
-                        <div ng-controller="AppCtrl" class="tabsdemoStaticTabs">
-                            <md-tabs class="md-accent" md-selected="data.selectedIndex">
-                                <md-tab id="tab1" aria-controls="tab1-content">
-                                    General
-                                </md-tab>
-                                <md-tab id="tab2" aria-controls="tab2-content">
-                                    Work Orders
-                                </md-tab>
-                                <md-tab id="tab3" aria-controls="tab3-content">
-                                    Professions
-                                </md-tab>
-                                <md-tab id="tab4" aria-controls="tab4-content"
-                                        ng-disabled="data.mailingLocked">
-                                    Mailing
-                                </md-tab>
-                            </md-tabs>
-
-                            <!--Tab 1-->
-                                <ng-switch on="data.selectedIndex" class="tabpanel-container">
-                                    <div role="tabpanel"
-                                         id="tab1-content"
-                                         aria-labelledby="tab1"
-                                         ng-switch-when="0"
-                                         md-swipe-left="next()"
-                                         md-swipe-right="previous()">
-                                        <!-- List of switches -->
-                                        <div class="scrollable-content">
-                                            <div ng-controller=switchListController>
-                                                <md-content>
-                                                    <md-list>
-                                                        <md-item ng-repeat="item in items">
-                                                            <md-item-content>
-                                                                <div class="" ng-controller="switchController" ng-init="init(item)">
-                                                                    <!-- <ui-switch ng-model="value" ng-change="save()"></ui-switch>-->
-                                                                    <md-switch ng-model="value" aria-label="Switch 1" class="md-custom-green" ng-change="save()"></md-switch>
-                                                                </div>
-                                                                <div class="md-tile-content">
-                                                                    <h3>
-                                                                        <b>{{item.label}}</b>
-                                                                    </h3>
-                                                                    <p>
-                                                                        {{item.description}}
-                                                                    </p>
-                                                                </div>
-                                                            </md-item-content>
-                                                        </md-item>
-                                                    </md-list>
-                                                </md-content>
-                                            </div>
-                                        </div>
-                                        </div>
-
-
-
-
-                                    <div role="tabpanel"
-                                         id="tab2-content"
-                                         aria-labelledby="tab2"
-                                         ng-switch-when="1"
-                                         md-swipe-left="next()"
-                                         md-swipe-right="previous()">
-                                        <div ng-controller=buildingsListController>
-
-
-
-
-                                            <div layout="column">
-                                                <div ng-repeat="building in items">
-                                                    <div layout="row" ng-controller="buildingController" ng-init="init(building)" layout-align="start center" layout-wrap>
-                                                        <div class="building-name" flex="20">
-                                                            <h3>{{name}}</h3>
+                    <div ng-controller="AppCtrl" class="tabsdemoStaticTabs">
+                        <md-tabs class="md-accent" md-selected="data.selectedIndex">
+                            <md-tab id="tab-general" aria-controls="tab1-content">
+                                General
+                            </md-tab>
+                            <md-tab id="tab-work" aria-controls="tab2-content">
+                                Work Orders
+                            </md-tab>
+                            <md-tab id="tab-profession" aria-controls="tab3-content">
+                                Professions
+                            </md-tab>
+                            <md-tab id="tab-mailing" aria-controls="tab4-content"
+                                    ng-disabled="data.mailingLocked">
+                                Mailing
+                            </md-tab>
+                        </md-tabs>
+                        <!--Tab 1-->
+                        <ng-switch on="data.selectedIndex" class="tabpanel-container">
+                            <div role="tabpanel"
+                                 id="tab1-content"
+                                 aria-labelledby="tab1"
+                                 ng-switch-when="0"
+                                 md-swipe-left="next()"
+                                 md-swipe-right="previous()">
+                                <!-- List of switches -->
+                                <div class="scrollable-content">
+                                    <div ng-controller=switchListController>
+                                        <md-content>
+                                            <md-list>
+                                                <md-item ng-repeat="item in items">
+                                                    <md-item-content>
+                                                        <div class="" ng-controller="switchController" ng-init="init(item)">
+                                                            <!-- <ui-switch ng-model="value" ng-change="save()"></ui-switch>-->
+                                                            <md-switch ng-model="value" aria-label="Switch 1" class="md-custom-green" ng-change="save()"></md-switch>
                                                         </div>
-                                                        <div layout="column" class="building-options">
-                                                            <div class="building-options-option">
-                                                                <md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                                                                    <div>CanStartOrder</div>
-                                                                </md-switch>
-                                                            </div>
-                                                            <div class="building-options-option">
-                                                                <md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">
-                                                                    <div>CanCollectOrder</div>
-                                                                </md-switch>
-                                                            </div>
+                                                        <div class="md-tile-content">
+                                                            <h3>
+                                                                <b>{{item.label}}</b>
+                                                            </h3>
+                                                            <p>
+                                                                {{item.description}}
+                                                            </p>
                                                         </div>
-                                                        <div class="slider-building" flex="60">
-                                                            <h3>Max running: {{maxCanStartOrder}}</h3>
-                                                            <md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">
-                                                            </md-slider>
-                                                        </div>
+                                                    </md-item-content>
+                                                </md-item>
+                                            </md-list>
+                                        </md-content>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel"
+                                 id="tab2-content"
+                                 aria-labelledby="tab2"
+                                 ng-switch-when="1"
+                                 md-swipe-left="next()"
+                                 md-swipe-right="previous()">
+                                <div ng-controller=buildingsListController>
+                                    <div layout="column">
+                                        <div ng-repeat="building in items">
+                                            <div layout="row" ng-controller="buildingController" ng-init="init(building)" layout-align="start center" layout-wrap>
+                                                <div class="building-name" flex="20">
+                                                    <h3>{{name}}</h3>
+                                                </div>
+                                                <div layout="column" class="building-options">
+                                                    <div class="building-options-option">
+                                                        <md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">
+                                                            <div>CanStartOrder</div>
+                                                        </md-switch>
+                                                    </div>
+                                                    <div class="building-options-option">
+                                                        <md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">
+                                                            <div>CanCollectOrder</div>
+                                                        </md-switch>
                                                     </div>
                                                 </div>
-                                            </div>
-
-
-                                            <!--<md-content>
-                    <md-list>
-                    <md-item ng-repeat="item in items">
-                    <md-item-content>
-                    <div class="md-tile-left">
-                        <h3>
-                            <b>{{item.name}}</b>
-                        </h3>
-                    </div>
-                    <div class="md-tile-content" ng-controller="buildingController" ng-init="init(item)">
-                    <md-list>
-
-                    <md-item>
-                    <md-item-content>-->
-                                            <!--<ui-switch class="md-tile-left" ng-model="CanStartOrder" ng-change="save()"></ui-switch>-->
-                                            <!--<md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                        <div style="min-width: 50px">CanStartOrder</div>
-                    </md-switch>
-                    <div class="slider-building">
-                        <md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">
-                        </md-slider>
-                        <h3>Max order to start: {{maxCanStartOrder}}</h3>
-                    </div>
-                    </md-item-content>
-
-                    </md-item>
-
-                    <md-item>
-                    <md-item-content>-->
-                                            <!--<ui-switch class="md-tile-left" ng-model="CanCollectOrder" ng-change="save()"></ui-switch>-->
-                                            <!--<div class="md-tile-content">
-                        <b>CanCollectOrder</b>
-                    </div>-->
-                                            <!--<md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">
-                        <div style="min-width: 50px">CanCollectOrder</div>
-                    </md-switch>
-                    </md-item-content>
-                    </md-item>
-
-                    </md-list>
-                    </div>
-                    </md-item-content>
-                    </md-item>
-                    </md-list>
-                    </md-content>-->
-                                            <!-- Switch -->
-                                        </div>
-                                    </div>
-
-
-
-
-                                    <div role="tabpanel"
-                                         id="tab3-content"
-                                         aria-labelledby="tab3"
-                                         ng-switch-when="2"
-                                         md-swipe-left="next()"
-                                         md-swipe-right="previous()">
-                                        <div ng-controller="professionsListController">
-
-                                            <!--<div ui-grid="{ data: items }" class="myGrid"></div>-->
-
-                                            <div layout="column">
-                                                <div layout="row" ng-repeat="daily in items">
-                                                    <div class="daily-profession-name">
-                                                        <h3>{{daily.professionName}}</h3>
-                                                    </div>
-                                                    <div class="daily-name">
-                                                        <h3>{{daily.name}}</h3>
-                                                    </div>
-                                                    <md-switch ng-controller="dailyController" ng-model="activated" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                                                    </md-switch>
+                                                <div class="slider-building" flex="60">
+                                                    <h3>Max running: {{maxCanStartOrder}}</h3>
+                                                    <md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">
+                                                    </md-slider>
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
-                                    <!--<div class="scrollable">
-                <div class="scrollable-content" ng-controller=professionsListController>
-
-                    <table ng-table>
-                        <tr ng-repeat="daily in items">
-                            <td><h4>{{ daily.professionName }}</h4></td>
-                            <td><h4>{{ daily.name }}</h4></td>
-                            <td>
-                                <md-switch ng-model="activated" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                                    CanStartOrder
-                                </md-switch>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            </div>-->
-
-                                    <div role="tabpanel"
-                                         id="tab4-content"
-                                         aria-labelledby="tab4"
-                                         ng-switch-when="3"
-                                         md-swipe-left="next()"
-                                         md-swipe-right="previous()">
-                                        View for Item #4<br />
-                                        data.selectedIndex = 3
+                                </div>
+                            </div>
+                            <div role="tabpanel"
+                                 id="tab3-content"
+                                 aria-labelledby="tab3"
+                                 ng-switch-when="2"
+                                 md-swipe-left="next()"
+                                 md-swipe-right="previous()">
+                                <div ng-controller="professionsListController">
+                                    <div layout="column">
+                                        <div layout="row" ng-repeat="daily in items">
+                                            <div class="daily-profession-name">
+                                                <h3>{{daily.professionName}}</h3>
+                                            </div>
+                                            <div class="daily-name">
+                                                <h3>{{daily.name}}</h3>
+                                            </div>
+                                            <md-switch ng-controller="dailyController" ng-model="activated" aria-label="Switch 1" class="md-warn" ng-change="save()">
+                                            </md-switch>
+                                        </div>
                                     </div>
-
-                                </ng-switch>
-
+                                </div>
                             </div>
-                                <!--<div class="after-tabs-area" layout="row" layout-sm="column" layout-margin layout-align="left center">
-            <md-input-container>
-                <label for="selectedIndex">Selected Index</label>
-                <input type="number" id="selectedIndex" ng-model="data.selectedIndex">
-            </md-input-container>
-            <div flex></div>
-            <span>Item Two: </span>
-            <md-checkbox ng-model="data.secondLocked" aria-label="Disabled">
-                Disabled
-            </md-checkbox>
-        </div>-->
+                            <div role="tabpanel"
+                                 id="tab4-content"
+                                 aria-labelledby="tab4"
+                                 ng-switch-when="3"
+                                 md-swipe-left="next()"
+                                 md-swipe-right="previous()">
+                                View for Item #4<br />
+                                data.selectedIndex = 3
                             </div>
-
+                        </ng-switch>
                     </div>
                 </div>
+
             </div>
-    <!-- Modals and Overlays -->
-    <div ui-yield-to="modals"></div>
-
-</body>
-
-
-
-
-
-
-<!--<body>
-    <div ng-controller="ButtonsCtrl">
-        <h4>Checkbox</h4>
-        <pre>{{checkModel}}</pre>
-        <div class="btn-group">
-            <!--<div class="animate-switch-container" ng-switch on="selected">
-                <button class="animate-switch" ng-switch-when='true' ng-click='button1()'>OFF</button>
-                <button class="animate-switch" ng-switch-when='false' ng-click='button2()'>ON</button>
-            </div>
-
-            <label class="btn btn-primary btn-toggle" ng-model="checkModel.activated" btn-checkbox>On/Off</label>
-            <label class="btn btn-primary btn-toggle" ng-class="myCssVar" ng-model="checkModel.activated" btn-checkbox ng-click='button()'>On/Off</label>-->
-<!--<button type="button" class="btn" ng-class="{true: 'btn-primary', false: 'btn-default'}[isActive]" ng-click="toggleActive()">Upload</button>-->
-<!--<input type="checkbox" name="my-checkbox" unchecked>
-            <input type="checkbox" name="my-checkbox2" unchecked>
-
         </div>
     </div>
-</body>-->
-
+    <!-- Modals and Overlays -->
+    <div ui-yield-to="modals"></div>
+</body>
 </html>

@@ -1,4 +1,4 @@
-var app = angular.module('GarrisonButlerApp', ['mobile-angular-ui', 'ngMaterial', 'ui.grid', 'ngTouch']);
+var app = angular.module('GarrisonButlerApp', ['ngMaterial']);
 
 app.controller('mainController', function($scope) {
     // Save boolean from js value in c# code
@@ -21,7 +21,7 @@ app.controller('mainController', function($scope) {
 
 
     $scope.butlerSettings = {};
-    $scope.butlerSettings.general = [ // variable name in c#, Title, Description
+    $scope.butlerSettings.general = [
 
         new $scope.Entry(
         'UseGarrisonHearthstone',
