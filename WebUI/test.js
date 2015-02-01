@@ -1,4 +1,4 @@
-var app = angular.module('GarrisonButlerApp', ['mobile-angular-ui', 'ngMaterial', 'ui.grid', 'ngTouch']);
+var app = angular.module('GarrisonButlerApp', ['mobile-angular-ui', 'ngMaterial', 'ui.grid', 'ui.grid.edit', 'ui.grid.cellNav', 'ngTouch']);
 
 app.controller('mainController', function($scope) {
     // Save boolean from js value in c# code
@@ -102,32 +102,49 @@ app.controller('mainController', function($scope) {
 
 
     // Represents a building
-    $scope.Building = function Building(id, name, canStartOrder, maxCanStartOrder, canCollectOrder) {
+    $scope.Building = function Building(id, name, buildingIcon, canStartOrder, maxCanStartOrder, canCollectOrder) {
         this.id = id;
         this.name = name;
+        this.buildingIcon = buildingIcon;
         this.canStartOrder = canStartOrder;
         this.maxCanStartOrder = maxCanStartOrder;
         this.canCollectOrder = canCollectOrder;
     };
 
     $scope.butlerSettings.Buildings = [
-        new $scope.Building("Building id", "Test Name", "CanStartOrder", 0, "CanCollectOrder"),
-        new $scope.Building("Building id", "Dwarven Bunker", "CanStartOrder", 10, "CanCollectOrder"),
-        new $scope.Building("Building id", "Trading Post", "CanStartOrder", 23, "CanCollectOrder"),
-        new $scope.Building("Building id", "Test Name2", "CanStartOrder", 0, "CanCollectOrder")
+        // Mine / Garden
+        new $scope.Building("Building id", "Mine", "http://wow.zamimg.com/images/wow/icons/medium/trade_mining.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Garden", "http://wow.zamimg.com/images/wow/icons/medium/inv_misc_herb_sansamroot.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        // Small Buildings
+        new $scope.Building("Building id", "Alchemy Lab", "http://wow.zamimg.com/images/wow/icons/medium/trade_alchemy.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Enchanter's Study", "http://wow.zamimg.com/images/wow/icons/medium/trade_engraving.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Engineering Works", "http://wow.zamimg.com/images/wow/icons/medium/trade_engineering.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Gem Boutique", "http://wow.zamimg.com/images/wow/icons/medium/inv_misc_gem_01.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Salvage Yard", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_salvageyard.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Scribe's Quarter", "http://wow.zamimg.com/images/wow/icons/medium/inv_inscription_tradeskill01.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Storehouse", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_storehouse.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Tailoring Emporium", "http://wow.zamimg.com/images/wow/icons/medium/trade_tailoring.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        // Medium Buildings
+        new $scope.Building("Building id", "Barn", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_barn.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Gladiator's Sanctum", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_sparringarena.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Lumber Mill", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_lumbermill.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        new $scope.Building("Building id", "Trading Post", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_tradingpost.jpg", "CanStartOrder", 0, "CanCollectOrder"),
+        // Large Buildings
+        new $scope.Building("Building id", "Dwarven Bunker / War Mill", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_armory.jpg", "CanStartOrder", 0, "CanCollectOrder")
     ];
 
     // Represents a dailyCD
-    $scope.Daily = function Daily(itemId, professionName, name, activated) {
+    $scope.Daily = function Daily(itemId, spellId, name, profession, activated) {
         this.itemId = itemId;
-        this.professionName = professionName;
+        this.spellId = spellId;
         this.name = name;
+        this.profession = profession;
         this.activated = activated;
     };
 
     $scope.butlerSettings.Professions = [
-        new $scope.Daily("itemId", "Profession Name", "Daily Name", "Activated"),
-        new $scope.Daily("itemId", "Profession Name", "Daily Name", "Activated")
+        new $scope.Daily(108996, 156587, "Alchemical Catalyst", "Alchemy", 0),
+        new $scope.Daily(118700, 175880, "Secrets of Draenor Alchemy", "Alchemy", 0)
     ];
 
 
@@ -175,6 +192,8 @@ app.controller('buildingsListController', function ($scope) {
 app.controller('buildingController', function ($scope) {
     $scope.init = function (item) {
         $scope.name = item.name;
+        $scope.nameNoSpaces = item.name.replace(/\s+/g, '');
+        $scope.buildingIcon = item.buildingIcon;
         $scope.CanStartOrder = item.CanStartOrder;
         $scope.CanCollectOrder = item.CanCollectOrder;
         $scope.maxCanStartOrder = item.maxCanStartOrder;
@@ -193,7 +212,11 @@ app.controller('professionsListController', function ($scope) {
     
     $scope.gridOptions = {
         data: $scope.items,
-        enableSorting: true
+        enableSorting: true,
+        enableCellEditOnFocus: true
+    };
+    $scope.gridOptions.onRegisterApi = function(gridApi){
+        $scope.gridApi = gridApi;
     };
 });
 
@@ -201,7 +224,7 @@ app.controller('professionsListController', function ($scope) {
 app.controller('dailyController', function ($scope) {
     $scope.init = function (item) {
         $scope.itemId = item.itemId;
-        $scope.professionName = item.professionName;
+        $scope.profession = item.profession;
         $scope.name = item.name;
         $scope.activated = item.activated;
     };

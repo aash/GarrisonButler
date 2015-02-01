@@ -142,10 +142,10 @@
                                                 <md-content>
                                                     <md-list>
                                                         <md-item ng-repeat="item in items">
-                                                            <md-item-content>
+                                                            <md-item-content class="sectionBackground">
                                                                 <div class="" ng-controller="switchController" ng-init="init(item)">
-                                                                    <!-- <ui-switch ng-model="value" ng-change="save()"></ui-switch>-->
-                                                                    <md-switch ng-model="value" aria-label="Switch 1" class="md-custom-green" ng-change="save()"></md-switch>
+                                                                    <ui-switch ng-model="value" ng-change="save()"></ui-switch>
+                                                                    <!--<md-switch ng-model="value" aria-label="Switch 1" class="switch md-custom-green" ng-change="save()"></md-switch>-->
                                                                 </div>
                                                                 <div class="md-tile-content">
                                                                     <h3>
@@ -161,101 +161,71 @@
                                                 </md-content>
                                             </div>
                                         </div>
-                                        </div>
+                                    </div>
 
 
 
-
+                            <!-- Tab 2 -->
                                     <div role="tabpanel"
                                          id="tab2-content"
                                          aria-labelledby="tab2"
                                          ng-switch-when="1"
                                          md-swipe-left="next()"
                                          md-swipe-right="previous()">
-                                        <div ng-controller=buildingsListController>
-
-
-
-
-                                            <div layout="column">
-                                                <div ng-repeat="building in items">
-                                                    <div layout="row" ng-controller="buildingController" ng-init="init(building)" layout-align="start center" layout-wrap>
-                                                        <div class="building-name" flex="20">
-                                                            <h3>{{name}}</h3>
-                                                        </div>
-                                                        <div layout="column" class="building-options">
-                                                            <div class="building-options-option">
-                                                                <md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                                                                    <div>CanStartOrder</div>
-                                                                </md-switch>
-                                                            </div>
-                                                            <div class="building-options-option">
-                                                                <md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">
-                                                                    <div>CanCollectOrder</div>
-                                                                </md-switch>
-                                                            </div>
-                                                        </div>
-                                                        <div class="slider-building" flex="60">
-                                                            <h3>Max running: {{maxCanStartOrder}}</h3>
-                                                            <md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">
-                                                            </md-slider>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <!-- List of switches -->
+                                        <div class="scrollable-content">
+                                            <div ng-controller=buildingsListController>
+                                                <md-content>
+                                                    <md-list layout="row" layout-wrap>
+                                                        <md-item ng-repeat="building in items">
+                                                            <md-item-content>
+                                                                <section class="sectionBackground" layout="row" ng-controller="buildingController" ng-init="init(building)" layout-align="start center" layout-wrap>
+                                                                    <div class="md-tile-content">
+                                                                        <div layout="column">
+                                                                            <div layout="row" layout-align="start center">
+                                                                                <div class="building-icon-medium">
+                                                                                    <ins ng-style="'{{buildingIcon}}' != '' && {'background-image':'url({{buildingIcon}})'}"></ins>
+                                                                                    <del></del>
+                                                                                    <a href="javascript:;"></a>
+                                                                                </div>
+                                                                                <div class="md-title-content">
+                                                                                    <h3 style="vertical-align: middle;"><b>{{name}}</b></h3>
+                                                                                </div>
+                                                                            </div>
+                                                                            <!--<div layout="row">-->
+                                                                            <div layout="column" style="margin-left: 4px; margin-top: 4px;">
+                                                                                <md-checkbox ng-model="CanStartOrder" class="md-checkbox-no-margin" ng-change="save()">
+                                                                                    Start Orders
+                                                                                </md-checkbox>
+                                                                                <md-checkbox ng-model="CanCollectOrder" class="md-checkbox-no-margin" ng-change="save()">
+                                                                                    Collect Orders
+                                                                                </md-checkbox>
+                                                                            </div>
+                                                                            <div layout="row" layout-align="start ceneter">
+                                                                                <div layout layout-align="start center" style="margin-left: 4px;">
+                                                                                    <h3>Max: </h3>
+                                                                                </div>
+                                                                                <md-slider ng-model="maxCanStartOrder" id="{{nameNoSpaces}}-slider" style="width: 200px; margin-left: 20px; margin-right: 20px;" step="1" min="0" max="50" aria-label="red">
+                                                                                </md-slider>
+                                                                                <div layout layout-align="start center">
+                                                                                    <input type="number" style="width: 40px; margin-left: 8px" ng-model="maxCanStartOrder" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="50">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </md-item-content>
+                                                        </md-item>
+                                                    </md-list>
+                                                </md-content>
                                             </div>
-
-
-                                            <!--<md-content>
-                    <md-list>
-                    <md-item ng-repeat="item in items">
-                    <md-item-content>
-                    <div class="md-tile-left">
-                        <h3>
-                            <b>{{item.name}}</b>
-                        </h3>
-                    </div>
-                    <div class="md-tile-content" ng-controller="buildingController" ng-init="init(item)">
-                    <md-list>
-
-                    <md-item>
-                    <md-item-content>-->
-                                            <!--<ui-switch class="md-tile-left" ng-model="CanStartOrder" ng-change="save()"></ui-switch>-->
-                                            <!--<md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                        <div style="min-width: 50px">CanStartOrder</div>
-                    </md-switch>
-                    <div class="slider-building">
-                        <md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">
-                        </md-slider>
-                        <h3>Max order to start: {{maxCanStartOrder}}</h3>
-                    </div>
-                    </md-item-content>
-
-                    </md-item>
-
-                    <md-item>
-                    <md-item-content>-->
-                                            <!--<ui-switch class="md-tile-left" ng-model="CanCollectOrder" ng-change="save()"></ui-switch>-->
-                                            <!--<div class="md-tile-content">
-                        <b>CanCollectOrder</b>
-                    </div>-->
-                                            <!--<md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">
-                        <div style="min-width: 50px">CanCollectOrder</div>
-                    </md-switch>
-                    </md-item-content>
-                    </md-item>
-
-                    </md-list>
-                    </div>
-                    </md-item-content>
-                    </md-item>
-                    </md-list>
-                    </md-content>-->
-                                            <!-- Switch -->
                                         </div>
                                     </div>
 
 
 
+
+                            <!-- Tab 3 -->
 
                                     <div role="tabpanel"
                                          id="tab3-content"
@@ -265,23 +235,123 @@
                                          md-swipe-right="previous()">
                                         <div ng-controller="professionsListController">
 
-                                            <!--<div ui-grid="{ data: items }" class="myGrid"></div>-->
+                                            <div ui-grid="{ data: items }" ui-grid-edit ui-grid-cellnav class="myGrid"></div>
 
-                                            <div layout="column">
-                                                <div layout="row" ng-repeat="daily in items">
-                                                    <div class="daily-profession-name">
-                                                        <h3>{{daily.professionName}}</h3>
-                                                    </div>
-                                                    <div class="daily-name">
-                                                        <h3>{{daily.name}}</h3>
-                                                    </div>
-                                                    <md-switch ng-controller="dailyController" ng-model="activated" aria-label="Switch 1" class="md-warn" ng-change="save()">
-                                                    </md-switch>
-                                                </div>
-                                            </div>
+                                            <!--<div layout="column">-->
+                                                <!--<div layout="row" ng-repeat="daily in items">-->
+                                                    <!--<div class="daily-profession-name">-->
+                                                        <!--<h3>{{daily.professionName}}</h3>-->
+                                                    <!--</div>-->
+                                                    <!--<div class="daily-name">-->
+                                                        <!--<h3>{{daily.name}}</h3>-->
+                                                    <!--</div>-->
+                                                    <!--<md-switch ng-controller="dailyController" ng-model="activated" aria-label="Switch 1" class="md-warn" ng-change="save()">-->
+                                                    <!--</md-switch>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
                                         </div>
 
                                     </div>
+
+
+
+                                    <!--<div role="tabpanel"-->
+                                         <!--id="tab2-content"-->
+                                         <!--aria-labelledby="tab2"-->
+                                         <!--ng-switch-when="1"-->
+                                         <!--md-swipe-left="next()"-->
+                                         <!--md-swipe-right="previous()">-->
+                                       <!--<div class="scrollable-content">-->
+                                          <!--<div ng-controller=buildingsListController>-->
+                                             <!--<div layout="column">-->
+                                                <!--<div ng-repeat="building in items">-->
+                                                   <!--<div layout="row" ng-controller="buildingController" ng-init="init(building)" layout-align="start center" layout-wrap>-->
+                                                      <!--<div class="building-icon-medium">-->
+                                                          <!--<ins ng-style="'{{buildingIcon}}' != '' && {'background-image':'url({{buildingIcon}})'}"></ins>-->
+                                                          <!--<del></del>-->
+                                                          <!--<a href="javascript:;"></a>-->
+                                                      <!--</div>-->
+                                                      <!--<div class="building-name" flex="20">-->
+                                                         <!--<h3>{{name}}</h3>-->
+                                                      <!--</div>-->
+                                                      <!--<div layout="column" class="building-options">-->
+                                                         <!--<div class="building-options-option">-->
+                                                             <!--<ui-switch ng-model="CanStartOder" ng-change="save()"></ui-switch>-->
+                                                                     <!--<div><b>CanStartOrder</b></div>-->
+                                                            <!--&lt;!&ndash;<md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">&ndash;&gt;-->
+                                                               <!--&lt;!&ndash;<div>CanStartOrder</div>&ndash;&gt;-->
+                                                            <!--&lt;!&ndash;</md-switch>&ndash;&gt;-->
+                                                         <!--</div>-->
+                                                         <!--<div class="building-options-option">-->
+                                                            <!--<md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">-->
+                                                               <!--<div>CanCollectOrder</div>-->
+                                                            <!--</md-switch>-->
+                                                         <!--</div>-->
+                                                      <!--</div>-->
+                                                      <!--<div class="slider-building" flex="60">-->
+                                                         <!--<h3>Max running: {{maxCanStartOrder}}</h3>-->
+                                                         <!--<md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">-->
+                                                         <!--</md-slider>-->
+                                                      <!--</div>-->
+                                                   <!--</div>-->
+                                                <!--</div>-->
+                                             <!--</div>-->
+
+
+                                             <!--&lt;!&ndash;<md-content>-->
+         <!--<md-list>-->
+         <!--<md-item ng-repeat="item in items">-->
+         <!--<md-item-content>-->
+         <!--<div class="md-tile-left">-->
+             <!--<h3>-->
+                 <!--<b>{{item.name}}</b>-->
+             <!--</h3>-->
+         <!--</div>-->
+         <!--<div class="md-tile-content" ng-controller="buildingController" ng-init="init(item)">-->
+         <!--<md-list>-->
+
+         <!--<md-item>-->
+         <!--<md-item-content>&ndash;&gt;-->
+                                             <!--&lt;!&ndash;<ui-switch class="md-tile-left" ng-model="CanStartOrder" ng-change="save()"></ui-switch>&ndash;&gt;-->
+                                             <!--&lt;!&ndash;<md-switch ng-model="CanStartOrder" aria-label="Switch 1" class="md-warn" ng-change="save()">-->
+             <!--<div style="min-width: 50px">CanStartOrder</div>-->
+         <!--</md-switch>-->
+         <!--<div class="slider-building">-->
+             <!--<md-slider md-discrete ng-model="maxCanStartOrder" step="1" min="0" max="50" aria-label="rating">-->
+             <!--</md-slider>-->
+             <!--<h3>Max order to start: {{maxCanStartOrder}}</h3>-->
+         <!--</div>-->
+         <!--</md-item-content>-->
+
+         <!--</md-item>-->
+
+         <!--<md-item>-->
+         <!--<md-item-content>&ndash;&gt;-->
+                                             <!--&lt;!&ndash;<ui-switch class="md-tile-left" ng-model="CanCollectOrder" ng-change="save()"></ui-switch>&ndash;&gt;-->
+                                             <!--&lt;!&ndash;<div class="md-tile-content">-->
+             <!--<b>CanCollectOrder</b>-->
+         <!--</div>&ndash;&gt;-->
+                                             <!--&lt;!&ndash;<md-switch ng-model="CanCollectOrder" aria-label="Switch 2" class="md-warn" ng-change="save()">-->
+             <!--<div style="min-width: 50px">CanCollectOrder</div>-->
+         <!--</md-switch>-->
+         <!--</md-item-content>-->
+         <!--</md-item>-->
+
+         <!--</md-list>-->
+         <!--</div>-->
+         <!--</md-item-content>-->
+         <!--</md-item>-->
+         <!--</md-list>-->
+         <!--</md-content>&ndash;&gt;-->
+                                             <!--&lt;!&ndash; Switch &ndash;&gt;-->
+                                          <!--</div>-->
+                                       <!--</div>-->
+                                    <!--</div>-->
+
+
+
+
+
                                     <!--<div class="scrollable">
                 <div class="scrollable-content" ng-controller=professionsListController>
 
