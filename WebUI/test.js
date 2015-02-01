@@ -22,7 +22,6 @@ app.controller('mainController', function($scope) {
 
     $scope.butlerSettings = {};
     $scope.butlerSettings.general = [ // variable name in c#, Title, Description
-    $scope.butlerSettings.general = [
 
         new $scope.Entry(
         'UseGarrisonHearthstone',
