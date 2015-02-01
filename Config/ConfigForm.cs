@@ -62,7 +62,9 @@ namespace GarrisonButler.Config
         {
             var html = ResourcesWebUI.test;
             html = ReplaceFromFilesToResources(html);
+            webBrowser1.ScriptErrorsSuppressed = true;
             webBrowser1.AllowWebBrowserDrop = false;
+            
             webBrowser1.IsWebBrowserContextMenuEnabled = false;
             webBrowser1.WebBrowserShortcutsEnabled = false;
             webBrowser1.ObjectForScripting = GaBSettings.Get();
@@ -80,6 +82,7 @@ namespace GarrisonButler.Config
                 {"<script src=\"./test.js\"></script>", ResourcesWebUI.test1},
 
                 {"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourcesWebUI.angular_min},
+                
 
                 {"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourcesWebUI.angular_route_min},
 
@@ -89,6 +92,7 @@ namespace GarrisonButler.Config
             Dictionary<string, string> dictCss = new Dictionary<string, string>()
             {
                 {"<link rel=\"stylesheet\" href=\"./test.css\" />", ResourcesWebUI.test2},
+
                 {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-hover.min.css\" />", ResourcesWebUI.mobile_angular_ui_hover_min},
 
                 {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-base.min.css\" />", ResourcesWebUI.mobile_angular_ui_base_min},
