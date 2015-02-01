@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
@@ -14,9 +13,9 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private const int PreserverdMiningPickItemId = 118903;
         private const int PreserverdMiningPickAura = 176061;
@@ -27,6 +26,14 @@ namespace GarrisonButler
         private static readonly List<uint> MineItems = new List<uint>
         {
             232541, // Mine cart
+            232542, // Blackrock Deposit 
+            232543, // Rich Blackrock Deposit 
+            232544, // True iron deposit
+            232545 // Rich True iron deposit
+        };
+
+        private static readonly List<uint> OresMine = new List<uint>
+        {
             232542, // Blackrock Deposit 
             232543, // Rich Blackrock Deposit 
             232544, // True iron deposit
@@ -69,20 +76,20 @@ namespace GarrisonButler
             //        .FirstOrDefault();
 
             // Is there something to mine?
-            var nodes =
+            var allObjects =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
-                    .Where(o => MineItems.Contains(o.Entry)).GetEmptyIfNull();
+                    .Where(o => MineItems.Contains(o.Entry) && !Objects.Blacklist.IsBlacklisted(o)).ToArray();
 
-            var gameObjects = nodes as WoWGameObject[] ?? nodes.ToArray();
-            if (gameObjects.IsNullOrEmpty())
+            if (!allObjects.Any(o => OresMine.Contains(o.Entry)))
             {
                 GarrisonButler.Diagnostic("[Mine] No ore found to harvest.");
                 return new Result(ActionResult.Failed);
             }
-            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, gameObjects.ToArray());
 
-            GarrisonButler.Diagnostic("[Mine] Found ore to gather at:" + closest.Location);
+            var closest = Dijkstra.GetClosestObjectSalesman(Me.Location, allObjects);
+
+            GarrisonButler.Diagnostic("[Mine] Found {0} to gather at {1}.", closest.Name, closest.Location);
             return new Result(ActionResult.Running, closest);
         }
 

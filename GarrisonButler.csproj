@@ -51,15 +51,16 @@
     <Compile Include="Config\OldSettings\MailItem.cs" />
     <Compile Include="Config\OldSettings\ModuleVersion.cs" />
     <Compile Include="Config\TradingPostTab.cs" />
-    <Compile Include="GarrisonButler.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="ButlerCoroutines\Combat.cs" />
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
+    <Compile Include="LuaObjects\LuaEvents.cs" />
     <Compile Include="LuaObjects\CapacitiveDisplayFrame.cs" />
     <Compile Include="Objects\BItem.cs" />
+    <Compile Include="Objects\Blacklist.cs" />
+    <Compile Include="Objects\MissionFollowerCombo.cs" />
     <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />
     <None Include="App.config" />
@@ -78,26 +79,26 @@
     <Compile Include="Config\GaBSettings.Building.cs" />
     <Compile Include="Config\GaBSettings.cs" />
     <Compile Include="Config\MailingTab.cs" />
-    <Compile Include="Coroutines\ActionHelpers.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Shipments.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Cache.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Salvage.cs" />
-    <Compile Include="Coroutines\Coroutine.LastRound.cs" />
-    <Compile Include="Coroutines\Coroutine.Dijkstra.cs" />
-    <Compile Include="Coroutines\Coroutine.Move2.cs" />
-    <Compile Include="Coroutines\Coroutine.Mailing.cs" />
-    <Compile Include="Coroutines\Coroutine.Waiting.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Harvest.cs" />
-    <Compile Include="Coroutines\Coroutine.Professions.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Garden.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.Mine.cs" />
-    <Compile Include="Coroutines\Coroutine.Move.data.cs" />
-    <Compile Include="Coroutines\Buildings\Coroutine.Buildings.cs" />
-    <Compile Include="Coroutines\Followers\Coroutine.Mission.cs" />
-    <Compile Include="Coroutines\Coroutine.Milling.cs" />
+    <Compile Include="ButlerCoroutines\ActionHelpers.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Shipments.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Cache.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Salvage.cs" />
+    <Compile Include="ButlerCoroutines\LastRound.cs" />
+    <Compile Include="ButlerCoroutines\Dijkstra.cs" />
+    <Compile Include="ButlerCoroutines\Move2.cs" />
+    <Compile Include="ButlerCoroutines\Mailing.cs" />
+    <Compile Include="ButlerCoroutines\Waiting.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Harvest.cs" />
+    <Compile Include="ButlerCoroutines\Professions.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Garden.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Mine.cs" />
+    <Compile Include="ButlerCoroutines\Move.data.cs" />
+    <Compile Include="ButlerCoroutines\Buildings\Buildings.cs" />
+    <Compile Include="ButlerCoroutines\Followers\Mission.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Coroutines\Coroutine.Move.cs" />
+    <Compile Include="ButlerCoroutines\Move.cs" />
+    <Compile Include="GarrisonButler.cs" />
     <Compile Include="Libraries\FreshDesk.cs" />
     <Compile Include="Libraries\HeapPriorityQueue.cs" />
     <Compile Include="Libraries\IPriorityQueue.cs" />
@@ -107,7 +108,7 @@
     <Compile Include="Libraries\PriorityQueueNode.cs" />
     <Compile Include="Libraries\ToHashSetExtension.cs" />
     <Compile Include="Objects\Building.cs" />
-    <Compile Include="Coroutines\Coroutine.cs" />
+    <Compile Include="ButlerCoroutines\ButlerCoroutine.cs" />
     <Compile Include="Objects\DailyProfession.cs" />
     <Compile Include="Objects\Follower.cs" />
     <Compile Include="Objects\MailCondition.cs" />

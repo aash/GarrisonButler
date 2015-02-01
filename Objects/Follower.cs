@@ -8,19 +8,73 @@ using System.Linq;
 
 namespace GarrisonButler
 {
-    public class Follower
+    public class Follower : IEquatable<Follower>
     {
-        public String Class;
-        public List<String> Counters;
-        public String FollowerId;
-        public int ItemLevel;
-        public bool IsCollected;
-        public int Level;
-        public int LevelXp;
-        public String Name;
-        public String Quality;
-        public String Status;
-        public int Xp;
+        public bool Equals(Follower other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Class, other.Class)
+                && Counters.Equals(other.Counters)
+                && string.Equals(FollowerId, other.FollowerId)
+                && ItemLevel == other.ItemLevel
+                //&& IsCollected.Equals(other.IsCollected)
+                && Level == other.Level
+                && LevelXp == other.LevelXp
+                && string.Equals(Name, other.Name)
+                && string.Equals(Quality, other.Quality)
+                && string.Equals(Status, other.Status)
+                && Xp == other.Xp;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Follower) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Class.GetHashCode();
+                hashCode = (hashCode*397) ^ Counters.GetHashCode();
+                hashCode = (hashCode*397) ^ FollowerId.GetHashCode();
+                hashCode = (hashCode*397) ^ ItemLevel;
+                //hashCode = (hashCode*397) ^ IsCollected.GetHashCode();
+                hashCode = (hashCode*397) ^ Level;
+                hashCode = (hashCode*397) ^ LevelXp;
+                hashCode = (hashCode*397) ^ Name.GetHashCode();
+                hashCode = (hashCode*397) ^ Quality.GetHashCode();
+                hashCode = (hashCode*397) ^ Status.GetHashCode();
+                hashCode = (hashCode*397) ^ Xp;
+                return hashCode;
+            }
+        }
+
+        public static bool operator ==(Follower left, Follower right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Follower left, Follower right)
+        {
+            return !Equals(left, right);
+        }
+
+        public readonly String Class;
+        public readonly List<String> Counters;
+        public readonly String FollowerId;
+        public readonly int ItemLevel;
+        public readonly bool IsCollected;
+        public readonly int Level;
+        public readonly int LevelXp;
+        public readonly String Name;
+        public readonly String Quality;
+        public readonly String Status;
+        public readonly int Xp;
 
         public Follower(string followerId, string name, string status,
             string Class_, String quality, int level, bool isCollected,

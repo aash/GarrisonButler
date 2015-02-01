@@ -14,7 +14,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bots.Grind;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common.Helpers;
@@ -26,20 +25,18 @@ using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-
 #endregion
 
 #endregion
 
 // ReSharper disable once CheckNamespace
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static Composite _deathBehavior;
         private static Composite _lootBehavior;
-        private static Composite _combatBehavior;
         private static Composite _vendorBehavior;
         private static readonly WaitTimer ResetAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
         private static List<Building> _buildings;
@@ -154,11 +151,6 @@ namespace GarrisonButler
             get { return _deathBehavior ?? (_deathBehavior = LevelBot.CreateDeathBehavior()); }
         }
 
-        private static Composite CombatBehavior
-        {
-            get { return _combatBehavior ?? (_combatBehavior = LevelBot.CreateCombatBehavior()); }
-        }
-
         private static Composite VendorBehavior
         {
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
@@ -237,6 +229,7 @@ namespace GarrisonButler
                 if ((await SellJunkCoroutine()).Status == ActionResult.Running)
                     return true;
                 var shouldMail = await CanMailItem();
+                
                 if(shouldMail.Status == ActionResult.Running)
                     if ((await MailItem(shouldMail.Result1)).Status == ActionResult.Running)
                         return true;
@@ -391,7 +384,7 @@ namespace GarrisonButler
             if (await DeathBehavior.ExecuteCoroutine())
                 return true;
 
-            if (StyxWoW.Me.Combat && await CombatBehavior.ExecuteCoroutine())
+            if (await Combat.CombatRoutine())
                 return true;
 
 
@@ -428,6 +421,22 @@ namespace GarrisonButler
             // Reset of mount vendor workaround
             _mountVendorTimeStart = default(DateTime);
 
+
+            //// DEBUG TESTS
+            //if (!testDone)
+            //{
+            //    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).Status == ActionResult.Running)
+            //        return true;
+            //    testDone = true;
+            //    return true;
+            //}
+            //else
+            //{
+            //    await MoveTo(new WoWPoint(1873.706, 83.12846, 79.72403));
+            //    return true;
+            //}
+
+
             // Heavier coroutines on timer
             //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
             var resultActions = await _mainSequence.ExecuteAction();
@@ -436,12 +445,12 @@ namespace GarrisonButler
                 //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
                 return true;
             }
-
+            
             ReadyToSwitch = true;
             return false;
         }
 
-
+        private static bool testDone = false;
         private static void CheckNavigationSystem()
         {
             if (_customNavigation == null)
@@ -452,13 +461,15 @@ namespace GarrisonButler
             if (Me.IsInGarrison() && !CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = _customNavigation;
-                InitializationMove();
                 GarrisonButler.Diagnostic("InitializationMove");
             }
             else if (!Me.IsInGarrison() && CustomNavigationLoaded)
             {
                 Navigator.NavigationProvider = NativeNavigation;
             }
+
+            if(CustomNavigationLoaded)
+                InitializationMove();
         }
 
         private static async Task<Result> SellJunk()
@@ -500,21 +511,21 @@ namespace GarrisonButler
 
         private static async Task<Result> VendorCoroutineWorkaround()
         {
-            if (!Vendors.ForceSell &&
-                (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
-                 StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
-                return new Result(ActionResult.Done);
+            //if (!Vendors.ForceSell &&
+            //    (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
+            //     StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
+            //    return new Result(ActionResult.Done);
 
-            if (_mountVendorTimeStart == default(DateTime))
-                _mountVendorTimeStart = DateTime.Now;
+            //if (_mountVendorTimeStart == default(DateTime))
+            //    _mountVendorTimeStart = DateTime.Now;
 
-            while ((DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5)
-            {
-                if (!await MoveToTable())
-                    break;
-            }
+            //while ((DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5)
+            //{
+            //    if (!await MoveToTable())
+            //        break;
+            //}
 
-            _mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
+            //_mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
 
             var resultCoroutine = await VendorBehavior.ExecuteCoroutine()
                 ? new Result(ActionResult.Running)

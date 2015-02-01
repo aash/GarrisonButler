@@ -8,14 +8,15 @@ using GarrisonButler.Libraries;
 using Priority_Queue;
 using Styx;
 using Styx.Pathing;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using Tripper.Tools.Math;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         #region Dijkstra
 
@@ -25,20 +26,30 @@ namespace GarrisonButler
         private static NavigationGaB _customNavigation;
         internal static bool CustomNavigationLoaded = false;
         internal static NavigationProvider NativeNavigation;
-
+        internal static List<Buildings> BuildingsLoaded; 
         public static void InitializationMove()
-        {
+        {            
             // Generate Garrison points based on garrison level and buildings level
-            if (_zonePoints == null)
+
+            if (_zonePoints != null && !IsNewBuildingsToLoad()) return;
+
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
             {
-                _zonePoints = GetGarrisonPoints();
-
-                //navigation.UpdateMaps();
-            }
-
-            // Generating graph from list of points
-            if (_movementGraph == null)
+                GetGarrisonPoints(ref _zonePoints, ref BuildingsLoaded);
                 _movementGraph = Dijkstra.GraphFromList(_zonePoints);
+            }
+        }
+
+        public static bool IsNewBuildingsToLoad()
+        {
+            
+            var buildingNotLoaded = _buildings.GetEmptyIfNull().Where(b => !BuildingsLoaded.Contains((Buildings)b.Id));
+
+            // Return if there is any in range
+            return buildingNotLoaded.Any(building => ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                .GetEmptyIfNull()
+                .FirstOrDefault(o => building.buildingIDs.Contains(o.Entry)) != default(WoWGameObject));
+            
         }
 
         public class Dijkstra
@@ -48,6 +59,7 @@ namespace GarrisonButler
             public static Graph GraphFromList(List<WoWPoint> points)
             {
 
+                const float pathPrecision = 3f;
                 var graph = new Graph();
                 foreach (var t in points)
                 {
@@ -69,14 +81,14 @@ namespace GarrisonButler
                             totalCount++;
                             var point2 = graphPoints[j];
                             var dist = point1.Distance(point2);
-                            if (!(dist < 5)) continue;
+                            if (dist > pathPrecision) continue;
                             graph.AddConnection(point1, point2, dist, true);
                             count++;
                         }
                     }
                 }
                 GarrisonButler.DiagnosticLogTimeTaken("Matching all with distance less than "
-                                                      + 5
+                                                      + pathPrecision
                                                       + " returned "
                                                       + count
                                                       + " connections, after " +
@@ -89,22 +101,34 @@ namespace GarrisonButler
             {
                 if (_movementGraph != null)
                 {
-                    var items = _movementGraph.Nodes.Keys.Select(p => new {Point = p, dist = p.Distance(point)});
+                    var items = _movementGraph.Nodes.Keys.Select(p => new { Point = p, dist = p.Distance(point) });
                     return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
                 }
+                GarrisonButler.Diagnostic("[Dijkstra] Error Movement Graph null.");
+                return default(WoWPoint);
+            }
+            public static WoWPoint ClosestToNodes(WoWPoint point, List<WoWPoint> blacklisted)
+            {
+                if (_movementGraph != null)
+                {
+                    var items = _movementGraph.Nodes.Keys.Where(p=> !blacklisted.Contains(p)).Select(p => new { Point = p, dist = p.Distance(point) });
+                    return items.Aggregate((a, b) => a.dist < b.dist ? a : b).Point;
+                }
+                GarrisonButler.Diagnostic("[Dijkstra] Error Movement Graph null.");
                 return default(WoWPoint);
             }
 
-            public static Vector3[] GetPath2(WoWPoint from, WoWPoint to)
+            public static Vector3[] GetPath2(WoWPoint from, WoWPoint to, int currentChild = 0, List<WoWPoint> blacklisted = null)
             {
                 InitializationMove();
                 PathGenerationStopwatch.Reset();
                 PathGenerationStopwatch.Start();
+                if (blacklisted == null)
+                    blacklisted = new List<WoWPoint>();
 
-                GarrisonButler.Diagnostic("Starting path generation.");
-                var starting = ClosestToNodes(@from);
-
-                var ending = ClosestToNodes(to);
+                var starting = ClosestToNodes(@from, blacklisted);
+                var ending = ClosestToNodes(to, blacklisted);
+                GarrisonButler.Diagnostic("Starting path generation. Closest start:{0}, Closest end:{1}", starting, ending);
 
                 if (_movementGraph.Nodes.All(n => n.Key != starting))
                     throw new ArgumentException("Starting node must be in graph.");
@@ -115,6 +139,16 @@ namespace GarrisonButler
                 ProcessGraph(_movementGraph, starting);
 
                 var tempPath = ExtractPath(_movementGraph, ending);
+
+                if (tempPath.Count() <= 0 && currentChild <= 50) // max 50 tries, might be too much in memory or not. 
+                {
+                    // let's try again with another node.
+                    GarrisonButler.Diagnostic("Failed to generate path, blacklisting closest points used and trying again. attempt: {2}, start:{0}, end:{1}", starting, ending, currentChild);
+
+                    blacklisted.Add(starting);
+                    blacklisted.Add(ending);
+                    return GetPath2(@from, to, currentChild + 1, blacklisted);
+                }
                 var res = new Vector3[tempPath.Count()];
                 for (var index = 0; index < tempPath.Length; index++)
                 {
@@ -123,6 +157,8 @@ namespace GarrisonButler
                 GarrisonButler.DiagnosticLogTimeTaken("Path generation",
                     (int) PathGenerationStopwatch.ElapsedMilliseconds);
                 PathGenerationStopwatch.Stop();
+                GarrisonButler.Diagnostic("Contains {0} waypoints.", tempPath.Count());
+
                 return res;
             }
 

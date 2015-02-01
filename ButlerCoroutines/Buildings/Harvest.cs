@@ -2,7 +2,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonButler.Coroutines;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.POI;
@@ -11,9 +10,9 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
         private static WoWPoint _cachedToHarvestLocation = WoWPoint.Empty;
         private static float _cachedInteractRangeSqr;

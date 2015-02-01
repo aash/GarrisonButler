@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonButler.Coroutines;
+using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.Common.Helpers;

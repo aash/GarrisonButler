@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using Styx;
@@ -20,9 +19,9 @@ using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
-    partial class Coroutine
+    partial class ButlerCoroutine
     {
 
         private const int CheckIntervalWhileStillWaiting = 65;
@@ -150,8 +149,9 @@ namespace GarrisonButler
 
             bool openAllMailCoroutineResult = false;
             var timeout = new WaitTimer(TimeSpan.FromMilliseconds(90000));
-            
-            while (mailFrame.GetAllMails().Any(m=> !m.WasRead || (m.ItemCount > 0 && m.CODAmount <= 0)) && !timeout.IsFinished)
+
+            openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
+            while (mailFrame.GetAllMails().Any(m=> !m.WasRead || ((m.ItemCount > 0 || m.Copper > 0) && m.CODAmount <= 0)) && !timeout.IsFinished)
             {
                 openAllMailCoroutineResult = await mailFrame.OpenAllMailCoroutine();
                 await Buddy.Coroutines.Coroutine.Yield();
@@ -282,8 +282,13 @@ namespace GarrisonButler
 
             foreach (var curItem in items)
             {
-                var itemid = curItem == null ? "" : curItem.Entry.ToString();
-                var name = curItem == null ? "" : curItem.Name;
+                if (curItem == null)
+                {
+                    continue;
+                }
+                var itemid = curItem.Entry.ToString();
+                var name = curItem.Name;
+
 
                 if (curItem.Quality != WoWItemQuality.Uncommon)
                 {

@@ -10,7 +10,7 @@ using Styx.Common.Helpers;
 
 #endregion
 
-namespace GarrisonButler.Coroutines
+namespace GarrisonButler.ButlerCoroutines
 {
     internal class ActionHelpers
     {

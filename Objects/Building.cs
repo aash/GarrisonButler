@@ -6,9 +6,10 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Buddy.Coroutines;
 using GarrisonButler.API;
+using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Config;
-using GarrisonButler.Coroutines;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.CommonBot.Coroutines;
@@ -173,9 +174,9 @@ namespace GarrisonButler
             foreach (var reagentId in ReagentIds)
             {
                 // add number in bags
-                var count = HbApi.GetNumberItemInBags(ReagentId);
+                var count = HbApi.GetNumberItemInBags(reagentId);
                 // add number in reagent banks
-                count += HbApi.GetNumberItemInReagentBank(ReagentId);
+                count += HbApi.GetNumberItemInReagentBank(reagentId);
 
                 GarrisonButler.Diagnostic("[CanCompleteOrderItems] Total found {0} - #{1} - needed #{2}", reagentId, count,
                     NumberReagent);
@@ -293,14 +294,14 @@ namespace GarrisonButler
                     if (unit == null)
                     {
                         await
-                            Coroutine.MoveTo(Pnj,
+                            ButlerCoroutine.MoveTo(Pnj,
                                 String.Format(
                                     "[MillBeforeOrder,{0}] Could not find unit ({1}), moving to default location.",
                                     Id, PnjId));
                         return new Result(ActionResult.Running);
                     }
 
-                    if ((await Coroutine.MoveToInteract(unit)).Status == ActionResult.Running)
+                    if ((await ButlerCoroutine.MoveToInteract(unit)).Status == ActionResult.Running)
                         return new Result(ActionResult.Running);
 
                     unit.Interact();
@@ -1040,7 +1041,7 @@ namespace GarrisonButler
                 || GaBSettings.Get().LastCheckTradingPost < lastReset)
             {
                 // moving to pnj
-                var moveResult = (await Coroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
+                var moveResult = (await ButlerCoroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
                 if (moveResult == ActionResult.Running)
                 {
                     return new Result(ActionResult.Running);
@@ -1065,7 +1066,12 @@ namespace GarrisonButler
             ReagentId = GaBSettings.Get().ItemIdTradingPost;
             NumberReagent = GaBSettings.Get().NumberReagentTradingPost;
 
-            CanCompleteOrder = CanCompleteOrderItem;
+            CanCompleteOrder = CanCompleteOrderTradingPostSimple;
+            return await CanCompleteOrderTradingPostSimple();
+        }
+
+        private async Task<Result> CanCompleteOrderTradingPostSimple()
+        {
             var rea =
                 GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
             if (rea == null)
@@ -1081,7 +1087,6 @@ namespace GarrisonButler
                 NumberReagent);
             return await CanCompleteOrderItem();
         }
-
 
         public static bool HasOrder(Buildings b)
         {

@@ -11,22 +11,94 @@ using GarrisonButler.API;
 
 namespace GarrisonButler
 {
-    public class Mission
+    public class Mission : IEquatable<Mission>
     {
-        public int Cost;
-        public String Description;
-        public int DurationSeconds;
-        public List<String> Enemies;
-        public string Environment;
-        public int ItemLevel;
-        public bool IsRare;
-        public int Level;
-        public String Location;
-        public int MaterialMultiplier;
-        public String MissionId;
-        public String Name;
-        public int NumFollowers;
-        public int NumRewards;
+        public bool Equals(Mission other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Cost == other.Cost
+                   && string.Equals(Description, other.Description)
+                   && DurationSeconds == other.DurationSeconds
+                   && Enemies.Equals(other.Enemies)
+                   && string.Equals(Environment, other.Environment)
+                   && IsRare.Equals(other.IsRare)
+                   && ItemLevel == other.ItemLevel
+                   && Level == other.Level
+                   && string.Equals(Location, other.Location)
+                   && MaterialMultiplier == other.MaterialMultiplier
+                   && string.Equals(MissionId, other.MissionId)
+                   && string.Equals(Name, other.Name)
+                   && NumFollowers == other.NumFollowers
+                   && NumRewards == other.NumRewards
+                //&& State == other.State
+                //&& Success.Equals(other.Success)
+                //&& string.Equals(SuccessChance, other.SuccessChance)
+                   && string.Equals(Type, other.Type)
+                   && string.Equals(Xp, other.Xp);
+            //&& XpBonus == other.XpBonus;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Mission) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Cost;
+                hashCode = (hashCode*397) ^ Description.GetHashCode();
+                hashCode = (hashCode*397) ^ DurationSeconds;
+                hashCode = (hashCode*397) ^ Enemies.GetHashCode();
+                hashCode = (hashCode*397) ^ Environment.GetHashCode();
+                hashCode = (hashCode*397) ^ IsRare.GetHashCode();
+                hashCode = (hashCode*397) ^ ItemLevel;
+                hashCode = (hashCode*397) ^ Level;
+                hashCode = (hashCode*397) ^ Location.GetHashCode();
+                hashCode = (hashCode*397) ^ MaterialMultiplier;
+                hashCode = (hashCode*397) ^ MissionId.GetHashCode();
+                hashCode = (hashCode*397) ^ Name.GetHashCode();
+                hashCode = (hashCode*397) ^ NumFollowers;
+                hashCode = (hashCode*397) ^ NumRewards;
+                //hashCode = (hashCode*397) ^ State;
+                //hashCode = (hashCode*397) ^ Success.GetHashCode();
+                //hashCode = (hashCode*397) ^ SuccessChance.GetHashCode();
+                hashCode = (hashCode*397) ^ Type.GetHashCode();
+                hashCode = (hashCode*397) ^ Xp.GetHashCode();
+                //hashCode = (hashCode*397) ^ XpBonus;
+                return hashCode;
+            }
+        }
+
+        public static bool operator ==(Mission left, Mission right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Mission left, Mission right)
+        {
+            return !Equals(left, right);
+        }
+
+        public readonly int Cost;
+        public readonly String Description;
+        public readonly int DurationSeconds;
+        public readonly List<String> Enemies;
+        public readonly string Environment;
+        public readonly int ItemLevel;
+        public readonly bool IsRare;
+        public readonly int Level;
+        public readonly String Location;
+        public readonly int MaterialMultiplier;
+        public readonly String MissionId;
+        public readonly String Name;
+        public readonly int NumFollowers;
+        public readonly int NumRewards;
         public int State;
         public bool Success;
 

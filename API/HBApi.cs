@@ -4,10 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GarrisonButler.Coroutines;
+using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
-using MainDev.RemoteASM.Handlers;
 using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
@@ -439,11 +438,13 @@ namespace GarrisonButler.API
                 var allNotFull = GetItemInBags(itemId).Where(i => i.StackCount < maxStackSize).ToList();
                 if (allNotFull.Any())
                 {
-                    foreach (var item in allNotFull)
+                    for (int index = allNotFull.Count-1; index >= 0; index--)
                     {
-                        // Add this item to all the other
-                        foreach (var subItem in allNotFull)
+                        var item = allNotFull[index];
+// Add this item to all the other
+                        for (int i = allNotFull.Count-1; i >= 0; i--)
                         {
+                            var subItem = allNotFull[i];
                             if (subItem == item)
                                 continue;
 
@@ -454,15 +455,26 @@ namespace GarrisonButler.API
                             {
                                 if (sizeToMove == availableSpace)
                                 {
-                                    allNotFull.Remove(subItem);
+                                    allNotFull.RemoveAt(i);
+                                    index--;
+                                    GarrisonButler.Diagnostic("[StackItemsIfPossible] SizeToMove == available space, removing bag={0}, slot={1}, size={2}", subItem.BagIndex, subItem.BagSlot, sizeToMove);
                                 }
-                                allNotFull.Remove(item);
+                                allNotFull.RemoveAt(index);
+                                GarrisonButler.Diagnostic("[StackItemsIfPossible] SizeToMove == SizeItemToMove, removing bag={0}, slot={1}, size={2}", item.BagIndex, item.BagSlot, sizeToMove);
                                 // move sizeToMove
-                                int bag;
-                                int slot;
-                                var res = item.GetLuaContainerPosition(out bag, out slot);
-                                await ButlerLua.DoString(String.Format("SplitContainerItem({0}, {1}, {2})", bag, slot,
+                                int bagSource;
+                                int slotSource;
+                                var resSource = item.GetLuaContainerPosition(out bagSource, out slotSource);
+                                int bagTarget;
+                                int slotTarget;
+                                var resTarget = subItem.GetLuaContainerPosition(out bagTarget, out slotTarget);
+                                GarrisonButler.Diagnostic("[StackItemsIfPossible] Split bag={0}, slot={1}, size={2}", bagSource, slotSource, sizeToMove);
+                                await ButlerLua.DoString(String.Format("SplitContainerItem({0}, {1}, {2})", bagSource, slotSource,
                                     sizeToMove));
+                                await CommonCoroutines.SleepForLagDuration();
+                                await
+                                    ButlerLua.DoString(
+                                        (String.Format("PickupContainerItem({0}, {1})", bagTarget, slotTarget)));
                                 await CommonCoroutines.SleepForLagDuration();
                                 subItem.UseContainerItem();
                                 break;
@@ -471,20 +483,30 @@ namespace GarrisonButler.API
                             {
                                 if (sizeToMove == availableSpace)
                                 {
-                                    allNotFull.Remove(subItem);
+                                    allNotFull.RemoveAt(i); 
+                                    GarrisonButler.Diagnostic("[StackItemsIfPossible] SizeToMove == available space, removing bag={0}, slot={1}, size={2}", subItem.BagIndex, subItem.BagSlot, sizeToMove);
                                 }
                                 // move
-                                int bag;
-                                int slot;
-                                var res = item.GetLuaContainerPosition(out bag, out slot);
-                                await ButlerLua.DoString(String.Format("SplitContainerItem({0}, {1}, {2})", bag, slot,
+                                int bagSource;
+                                int slotSource;
+                                var resSource = item.GetLuaContainerPosition(out bagSource, out slotSource);
+                                int bagTarget;
+                                int slotTarget;
+                                var resTarget = subItem.GetLuaContainerPosition(out bagTarget, out slotTarget);
+                                GarrisonButler.Diagnostic("[StackItemsIfPossible] Split bag={0}, slot={1}, size={2}", bagSource, slotSource, sizeToMove);
+                                await ButlerLua.DoString(String.Format("SplitContainerItem({0}, {1}, {2})", bagSource, slotSource,
                                     sizeToMove));
+                                await CommonCoroutines.SleepForLagDuration();
+                                await
+                                    ButlerLua.DoString(
+                                        (String.Format("PickupContainerItem({0}, {1})", bagTarget, slotTarget)));
                                 await CommonCoroutines.SleepForLagDuration();
                                 subItem.UseContainerItem();
                             }
                         }
                     }
                 }
+                ObjectManager.Update();
             }
         }
     }

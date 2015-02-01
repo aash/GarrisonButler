@@ -15,7 +15,7 @@ using Tripper.Tools.Math;
 
 #endregion
 
-namespace GarrisonButler
+namespace GarrisonButler.ButlerCoroutines
 {
     public class NavigationGaB : MeshNavigator
     {
@@ -34,7 +34,7 @@ namespace GarrisonButler
         public override void OnRemoveAsCurrent()
         {
             GarrisonButler.Log("Custom navigation System removed!");
-            Coroutine.CustomNavigationLoaded = false;
+            ButlerCoroutine.CustomNavigationLoaded = false;
             base.OnRemoveAsCurrent();
         }
 
@@ -70,9 +70,9 @@ namespace GarrisonButler
         public override void OnSetAsCurrent()
         {
             base.OnSetAsCurrent();
-            _stuckHandlerGaB = new StuckHandlerGaB(Coroutine.NativeNavigation.StuckHandler);
+            _stuckHandlerGaB = new StuckHandlerGaB(ButlerCoroutine.NativeNavigation.StuckHandler);
             StuckHandler = new StuckHandlerDummy();
-            Coroutine.CustomNavigationLoaded = true;
+            ButlerCoroutine.CustomNavigationLoaded = true;
             GarrisonButler.Log("Custom navigation System activated!");
         }
 
@@ -134,7 +134,7 @@ namespace GarrisonButler
                 _lastMoveResult = MoveResult.UnstuckAttempt;
                 return MoveResult.UnstuckAttempt;
             }
-            if (moverLocation.Distance(Coroutine.Dijkstra.ClosestToNodes(location)) < 5f)
+            if (moverLocation.Distance(ButlerCoroutine.Dijkstra.ClosestToNodes(location)) < 5f)
             {
                 Navigator.PlayerMover.MoveTowards(location);
                 _lastMoveResult = MoveResult.Moved;
@@ -200,7 +200,7 @@ namespace GarrisonButler
         private static PathFindResult FindPathInner(PathFindResult pathFindResult)
         {
             var startedAt = DateTime.Now;
-            var points = Coroutine.Dijkstra.GetPath2(pathFindResult.Start, pathFindResult.End);
+            var points = ButlerCoroutine.Dijkstra.GetPath2(pathFindResult.Start, pathFindResult.End);
             GarrisonButler.DiagnosticLogTimeTaken("GetPath2 inside FindPathInner", startedAt);
             var abilities = new AbilityFlags[points.Count()];
             var polygonReferences = new PolygonReference[points.Count()];
@@ -235,6 +235,7 @@ namespace GarrisonButler
 
         private new static PathFindResult FindPath(WoWPoint start, WoWPoint end)
         {
+            GarrisonButler.Diagnostic("[Navigation] Find path from {0} to {1}", start, end);
             var obj = new PathFindResult {Start = start, End = end};
             if (TreeRoot.State == TreeRootState.Stopping)
             {
@@ -253,10 +254,8 @@ namespace GarrisonButler
             }
             PathFindResult toReturn = new PathFindResult();
             var startedAt = DateTime.Now;
-            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
-            {
-                toReturn = FindPathInner(obj);
-            }
+            toReturn = FindPathInner(obj);
+            
             GarrisonButler.DiagnosticLogTimeTaken("Fully creating path", startedAt);
 
             return toReturn;
@@ -264,12 +263,12 @@ namespace GarrisonButler
 
         public override WoWPoint[] GeneratePath(WoWPoint @from, WoWPoint to)
         {
-            return Coroutine.Dijkstra.GetPathWoW(@from, to);
+            return ButlerCoroutine.Dijkstra.GetPathWoW(@from, to);
         }
 
         public override bool AtLocation(WoWPoint point1, WoWPoint point2)
         {
-            return Coroutine.Dijkstra.ClosestToNodes(point1).Distance(Coroutine.Dijkstra.ClosestToNodes(point2)) < 3;
+            return ButlerCoroutine.Dijkstra.ClosestToNodes(point1).Distance(ButlerCoroutine.Dijkstra.ClosestToNodes(point2)) < 3;
         }
 
         public class StuckHandlerDummy : StuckHandler
