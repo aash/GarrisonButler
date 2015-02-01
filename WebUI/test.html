@@ -72,9 +72,16 @@
                                                     <md-list>
                                                         <md-item ng-repeat="item in items">
                                                             <md-item-content class="sectionBackground">
-                                                                <div class="" ng-controller="switchController" ng-init="init(item)">
-                                                                    <ui-switch ng-model="value" ng-change="save()"></ui-switch>
-                                                                    <!--<md-switch ng-model="value" aria-label="Switch 1" class="switch md-custom-green" ng-change="save()"></md-switch>-->
+                                                                <div layout="row" layout-align="start center">
+                                                                    <div class="building-icon-medium">
+                                                                        <ins ng-style="'{{item.displayicon}}' != '' && {'background-image':'url({{item.displayicon}})'}"></ins>
+                                                                        <del></del>
+                                                                        <a href="javascript:;"></a>
+                                                                    </div>
+                                                                    <div class="ng-scope-slider-with-icon" ng-controller="switchController" ng-init="init(item)">
+                                                                        <ui-switch ng-model="value" ng-change="save()"></ui-switch>
+                                                                        <!--<md-switch ng-model="value" aria-label="Switch 1" class="switch md-custom-green" ng-change="save()"></md-switch>-->
+                                                                    </div>
                                                                 </div>
                                                                 <div class="md-tile-content">
                                                                     <h3>
@@ -113,7 +120,7 @@
                                                                         <div layout="column">
                                                                             <div layout="row" layout-align="start center">
                                                                                 <div class="building-icon-medium">
-                                                                                    <ins ng-style="'{{buildingIcon}}' != '' && {'background-image':'url({{buildingIcon}})'}"></ins>
+                                                                                    <ins ng-style="'{{displayicon}}' != '' && {'background-image':'url({{displayicon}})'}"></ins>
                                                                                     <del></del>
                                                                                     <a href="javascript:;"></a>
                                                                                 </div>

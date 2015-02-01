@@ -97,6 +97,10 @@
     height: 100%;
   }
 
+  .ng-scope-slider-with-icon {
+      margin-left: -10px !important;
+  }
+
   .gridHeaderCell {
       background-color: red !important;
   }

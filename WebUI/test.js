@@ -13,10 +13,11 @@ app.controller('mainController', function($scope) {
     };
 
     // Represents a variable name, a title and a description
-    $scope.Entry = function Entry(variableName, label, description) {
+    $scope.Entry = function Entry(variableName, label, description, displayicon) {
         this.variableName = variableName;
         this.label = label;
         this.description = description;
+        this.displayicon = displayicon;
     };
 
 
@@ -26,86 +27,101 @@ app.controller('mainController', function($scope) {
         new $scope.Entry(
         'UseGarrisonHearthstone',
         'Garrison Hearthstone',
-        'Enable to use the garrison hearthstone if the toon is outside.'),
+        'Enable to use the garrison hearthstone if the toon is outside.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_rune_01.jpg'),
 
         new $scope.Entry(
         'ForceJunkSell',
         'Sell Junk',
-        'Enable to sell grey items in bags to the vendor.'),
+        'Enable to sell grey items in bags to the vendor.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_bag_10_red.jpg'),
 
         new $scope.Entry(
         'GarrisonCache',
         'Garrison Cache',
-        'Enable to harvest the garrison cache.'),
+        'Enable to harvest the garrison cache.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_garrison_resource.jpg'),
 
         new $scope.Entry(
         'HbRelogMode',
         'HB Relog compatibility',
         'This will auto skip to the next task at the end of the run and close honorbuddy. ' +
-        'Can be used without HBRelog to close honorbuddy at the end of the run.'),
+        'Can be used without HBRelog to close honorbuddy at the end of the run.',
+        'http://i.imgur.com/rgDmRIo.png'),
 
         new $scope.Entry(
         'HarvestGarden',
         'Garden',
-        'Enable to clean your garden.'),
+        'Enable to clean your garden.',
+        'http://wow.zamimg.com/images/wow/icons/medium/spell_nature_naturetouchgrow.jpg'),
 
         new $scope.Entry(
         'HarvestMine',
         'Mine',
-        'Enable to clean your mine.'),
+        'Enable to clean your mine.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_pick_02.jpg'),
 
         new $scope.Entry(
         'UseCoffee',
-        'Miner\'s coffe',
-        'Enable to use as a speed boost when in the mine.'),
+        'Use Miner\'s Coffe',
+        'Enable to use as a speed boost when in the mine.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_drink_15.jpg'),
 
         new $scope.Entry(
         'DeleteCoffee',
-        'Miner\'s coffe',
-        'Enable to delete a unit of coffee if at max stack.'),
+        'Delete Miner\'s Coffee',
+        'Enable to delete a unit of coffee if at max stack.',
+        'http://i.imgur.com/as5xNIF.png'),
 
         new $scope.Entry(
         'UseMiningPick',
-        'Mining Pick',
-        'Enable to use as a speed boost when harvesting in the mine.'),
+        'Use Preserved Mining Pick',
+        'Enable to use as a speed boost when harvesting in the mine.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_axe_1h_6miningpick.jpg'),
 
         new $scope.Entry(
         'DeleteMiningPick',
-        'Mining Pick',
-        'Enable to delete a unit of mining pick if at max stack.'),
+        'Delete Preserved Mining Pick',
+        'Enable to delete a unit of mining pick if at max stack.',
+        'http://i.imgur.com/j1eM0FF.png'),
 
         new $scope.Entry(
         'ActivateBuildings',
         'Activate Buildings',
-        'Enable to activate finished buildings.'),
+        'Enable to activate finished buildings.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_wrench_01.jpg'),
 
         new $scope.Entry(
         'SalvageCrates',
         'Salvage',
-        'Enable to salvage crates.'),
+        'Enable to salvage crates.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_crate_01.jpg'),
 
         new $scope.Entry(
         'StartMissions',
-        'Missions',
-        'Enable to start missions.'),
+        'Start Missions',
+        'Enable to start missions.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_map07.jpg'),
 
         new $scope.Entry(
         'CompletedMissions',
-        'Missions',
-        'Enable to pick up rewards from missions.'),
+        'Complete Missions',
+        'Enable to pick up rewards from missions.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_map_01.jpg'),
 
         new $scope.Entry(
         'DisableLastRoundCheck',
         'Disable Last Round',
-        'Check to disable the last round check.')
+        'Check to disable the last round check.',
+        'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_17.jpg')
     ];
 
 
     // Represents a building
-    $scope.Building = function Building(id, name, buildingIcon, canStartOrder, maxCanStartOrder, canCollectOrder) {
+    $scope.Building = function Building(id, name, displayicon, canStartOrder, maxCanStartOrder, canCollectOrder) {
         this.id = id;
         this.name = name;
-        this.buildingIcon = buildingIcon;
+        this.displayicon = displayicon;
         this.canStartOrder = canStartOrder;
         this.maxCanStartOrder = maxCanStartOrder;
         this.canCollectOrder = canCollectOrder;
@@ -193,7 +209,7 @@ app.controller('buildingController', function ($scope) {
     $scope.init = function (item) {
         $scope.name = item.name;
         $scope.nameNoSpaces = item.name.replace(/\s+/g, '');
-        $scope.buildingIcon = item.buildingIcon;
+        $scope.displayicon = item.displayicon;
         $scope.CanStartOrder = item.CanStartOrder;
         $scope.CanCollectOrder = item.CanCollectOrder;
         $scope.maxCanStartOrder = item.maxCanStartOrder;
