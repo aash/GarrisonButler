@@ -205,10 +205,19 @@ namespace GarrisonButler.API
                     "b[16] = am[idx].numRewards;" +
                     "b[17] = environment;" +
                     "cpt = 17;" +
-                    "end;" +
-                    "end;"
+                    //"for id, reward in pairs(am[idx].rewards) do" +
+                    //"if(reward.title) then cpt = cpt + 1; b[cpt] = reward.title; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
+                    //"if(reward.quantity) then cpt = cpt + 1; b[cpt] = reward.quantity; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
+                    //"if(reward.currencyID) then cpt = cpt + 1; b[cpt] = reward.currencyID; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
+                    //"if(reward.itemID) then cpt = cpt + 1; b[cpt] = reward.itemID; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
+                    //"if(reward.followerXP) then cpt = cpt + 1; b[cpt] = reward.followerXP; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
+                    //"if(reward.name) then cpt = cpt + 1; b[cpt] = reward.name; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
+                    //"end;" + // for id,reward in pairs(am[idx].rewards) do
+                    "end;" + // if am[idx].missionId == {0}
+                    "end;" // for idx = 1, #m do
                     , missionIdArg) +
                 "for j_=0,cpt do table.insert(RetInfo,tostring(b[j_]));end; " +
+                //"table.insert(RetInfo,am[idx].rewards);" +
                 "return unpack(RetInfo)";
             var mission = Lua.GetReturnValues(lua);
 
@@ -234,6 +243,19 @@ namespace GarrisonButler.API
             var xp = mission[15];
             var numRewards = mission[16].ToInt32();
             var environment = mission[17];
+            
+            //TEST
+            //for (int i = 0; i < numRewards; i++)
+            //{
+            //    var rewardTitle = mission[18 + i + 0];
+            //    var rewardQuantity = mission[18 + i + 1].ToInt32();
+            //    var rewardCurrencyID = mission[18 + i + 2].ToInt32();
+            //    var rewardItemID = mission[18 + i + 3].ToInt32();
+            //    var rewardFollowerXP = mission[18 + i + 4].ToInt32();
+            //    var rewardName = mission[18 + i + 5];
+            //    GarrisonButler.Diagnostic("Loop");
+            //}
+            //TEST
 
             return new Mission(cost, description,
                 durationSeconds, enemies, level, ilevel,

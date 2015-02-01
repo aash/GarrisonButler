@@ -533,13 +533,13 @@ namespace GarrisonButler.Config
                 mainWrapPanel.Children.Add(salvageCrates);
 
 
-                var startMissions = CreateCheckBoxWithBinding("Start missions if possible", "StartMissions",
-                    GaBSettings.Get());
-                mainWrapPanel.Children.Add(startMissions);
+                //var startMissions = CreateCheckBoxWithBinding("Start missions if possible", "StartMissions",
+                //    GaBSettings.Get());
+                //mainWrapPanel.Children.Add(startMissions);
 
-                var completedMissions = CreateCheckBoxWithBinding("Turn in completed missions", "CompletedMissions",
-                    GaBSettings.Get());
-                mainWrapPanel.Children.Add(completedMissions);
+                //var completedMissions = CreateCheckBoxWithBinding("Turn in completed missions", "CompletedMissions",
+                //    GaBSettings.Get());
+                //mainWrapPanel.Children.Add(completedMissions);
 
                 var forceJunkSell = CreateCheckBoxWithBinding("Force auto sell grey items", "ForceJunkSell",
                     GaBSettings.Get());
