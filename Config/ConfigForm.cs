@@ -1,10 +1,12 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -21,29 +23,134 @@ using Label = System.Windows.Controls.Label;
 using Orientation = System.Windows.Controls.Orientation;
 using TabControl = System.Windows.Controls.TabControl;
 using TextBox = System.Windows.Controls.TextBox;
+using WebBrowser = System.Windows.Forms.WebBrowser;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 #endregion
 
 namespace GarrisonButler.Config
 {
+    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class ConfigForm : Form
     {
         private static MyWindow _myWindow;
         private static List<CheckBox> _collectCheckBoxes;
         private static List<CheckBox> _startCheckBoxes;
-
+        public string firstName = "Manas";
         public ConfigForm()
         {
-            Close();
+            InitializeComponent();
+
+            //Close();
             if (_myWindow == null)
                 _myWindow = new MyWindow();
 
             _myWindow.Activate();
             _myWindow.Show();
         }
+        public void Test(String message)
+        {
+            MessageBox.Show(message, "client code");
+        }
+        public string Test2()
+        {
+            return "my Message";
+        }
+        private void ConfigForm_Load_1(object sender, EventArgs e)
+        {
+            var html = ResourcesWebUI.test;
+            html = ReplaceFromFilesToResources(html);
+            webBrowser1.AllowWebBrowserDrop = false;
+            webBrowser1.IsWebBrowserContextMenuEnabled = false;
+            webBrowser1.WebBrowserShortcutsEnabled = false;
+            webBrowser1.ObjectForScripting = GaBSettings.Get();
+            webBrowser1.DocumentText = html;
+
+            //var window = webBrowser1.Document.Window;
+            //return window.GetType().InvokeMember(propertyName, BindingFlags.GetProperty, null, window, null);
+
+        }
+
+        private string ReplaceFromFilesToResources(string html)
+        {
+            Dictionary<string, string> dictJs = new Dictionary<string, string>()
+            {
+                {"<script src=\"./test.js\"></script>", ResourcesWebUI.test1},
+
+                {"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourcesWebUI.angular_min},
+
+                {"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourcesWebUI.angular_route_min},
+
+                {"<script src=\"./Libraries/MobileAngularUI/js/mobile-angular-ui.min.js\"></script>", ResourcesWebUI.mobile_angular_ui_min},
+     
+            };
+            Dictionary<string, string> dictCss = new Dictionary<string, string>()
+            {
+                {"<link rel=\"stylesheet\" href=\"./test.css\" />", ResourcesWebUI.test2},
+                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-hover.min.css\" />", ResourcesWebUI.mobile_angular_ui_hover_min},
+
+                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-base.min.css\" />", ResourcesWebUI.mobile_angular_ui_base_min},
+
+                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-desktop.min.css\" />", ResourcesWebUI.mobile_angular_ui_desktop_min},
+
+            };
+            foreach (var file in dictJs)
+            {
+                if (file.Key == null)
+                {
+                    MessageBox.Show("Key null");
+
+                }
+                else if (file.Value == null)
+                {
+                    MessageBox.Show("value null for key: " + file.Key);
+                }
+                else
+                {
+                    html = html.Replace(file.Key, "<script>" + file.Value + "</script>");
+                }
+            }
+            foreach (var file in dictCss)
+            {
+                if (file.Key == null)
+                {
+                    MessageBox.Show("css Key null");
+
+                }
+                else if (file.Value == null)
+                {
+                    MessageBox.Show("css value null for key: " + file.Key);
+                }
+                else
+                {
+                    html = html.Replace(file.Key, "<style>" + file.Value + "</style>");
+                }
+            }
+            return html;
+        }
+
+        [System.Runtime.InteropServices.ComVisibleAttribute(true)]
+        public class ScriptInterface
+        {
+            [ComVisibleAttribute(true)]
+            public string firstName = "Manas";
+
+            [ComVisibleAttribute(true)]
+            public bool option1 = false;
+
+            [ComVisibleAttribute(true)]
+            public void Test()
+            {
+                MessageBox.Show(option1.ToString(), "client code");
+            }
+        }
 
         public class MyWindow : Window
         {
+            private static WebBrowser webBrowser1;
+
             public MyWindow()
             {
                 Width = 600;
@@ -368,15 +475,119 @@ namespace GarrisonButler.Config
             {
                 var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
+                //var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
 
-                var submit = new Button {Content = "Submit"};
-                submit.Click += SendBugReport;
-                mainWrapPanel.Children.Add(submit);
+                //var submit = new Button {Content = "Submit"};
+                //submit.Click += SendBugReport;
+                //mainWrapPanel.Children.Add(submit);
 
-                mainFrame.Content = mainWrapPanel;
+                //mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
+            // Displays the Save dialog box. 
+            private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+            {
+                webBrowser1.ShowSaveAsDialog();
+            }
+
+            // Displays the Page Setup dialog box. 
+            private void pageSetupToolStripMenuItem_Click(object sender, EventArgs e)
+            {
+                webBrowser1.ShowPageSetupDialog();
+            }
+
+            // Displays the Print dialog box. 
+            private void printToolStripMenuItem_Click(object sender, EventArgs e)
+            {
+                webBrowser1.ShowPrintDialog();
+            }
+
+            // Displays the Print Preview dialog box. 
+            private void printPreviewToolStripMenuItem_Click(
+                object sender, EventArgs e)
+            {
+                webBrowser1.ShowPrintPreviewDialog();
+            }
+
+            // Displays the Properties dialog box. 
+            private void propertiesToolStripMenuItem_Click(
+                object sender, EventArgs e)
+            {
+                webBrowser1.ShowPropertiesDialog();
+            }
+
+            
+
+            // Navigates to the given URL if it is valid. 
+            private void Navigate(String address)
+            {
+                if (String.IsNullOrEmpty(address)) return;
+                if (address.Equals("about:blank")) return;
+                if (!address.StartsWith("http://") &&
+                    !address.StartsWith("https://"))
+                {
+                    address = "http://" + address;
+                }
+                try
+                {
+                    webBrowser1.Navigate(new Uri(address));
+                }
+                catch (System.UriFormatException)
+                {
+                    return;
+                }
+            }
+
+
+            // Navigates webBrowser1 to the previous page in the history. 
+            private void backButton_Click(object sender, EventArgs e)
+            {
+                webBrowser1.GoBack();
+            }
+
+
+            // Navigates webBrowser1 to the next page in history. 
+            private void forwardButton_Click(object sender, EventArgs e)
+            {
+                webBrowser1.GoForward();
+            }
+
+            // Halts the current navigation and any sounds or animations on  
+            // the page. 
+            private void stopButton_Click(object sender, EventArgs e)
+            {
+                webBrowser1.Stop();
+            }
+
+            // Reloads the current page. 
+            private void refreshButton_Click(object sender, EventArgs e)
+            {
+                // Skip refresh if about:blank is loaded to avoid removing 
+                // content specified by the DocumentText property. 
+                if (!webBrowser1.Url.Equals("about:blank"))
+                {
+                    webBrowser1.Refresh();
+                }
+            }
+
+            // Navigates webBrowser1 to the home page of the current user. 
+            private void homeButton_Click(object sender, EventArgs e)
+            {
+                webBrowser1.GoHome();
+            }
+
+            // Navigates webBrowser1 to the search page of the current user. 
+            private void searchButton_Click(object sender, EventArgs e)
+            {
+                webBrowser1.GoSearch();
+            }
+
+            // Prints the current document using the current print settings. 
+            private void printButton_Click(object sender, EventArgs e)
+            {
+                webBrowser1.Print();
+            }
+
 
             private static object ContentTabSplash()
             {
@@ -601,5 +812,6 @@ namespace GarrisonButler.Config
                 }
             }
         }
+
     }
 }

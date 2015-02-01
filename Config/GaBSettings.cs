@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using GarrisonButler.Libraries;
@@ -17,6 +18,7 @@ using Styx.Helpers;
 
 namespace GarrisonButler.Config
 {
+    [ComVisible(true)]
     [XmlRoot("GarrisonButlerSettings")]
     public class GaBSettings:INotifyPropertyChanged
     {
@@ -85,7 +87,22 @@ namespace GarrisonButler.Config
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
-
+        
+        [ComVisible(true)]
+        public void UpdateBooleanValue(string propertyName, bool value)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            prop.SetValue(this, value);
+        }
+        
+        [ComVisible(true)]
+        public bool GetBooleanValue(string propertyName)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            return (bool)prop.GetValue(this);
+        }
 
         private static GaBSettings DefaultConfig()
         {
@@ -231,7 +248,6 @@ namespace GarrisonButler.Config
             return true;
         }
 
-       
 
         public static void Save()
         {
