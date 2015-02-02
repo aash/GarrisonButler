@@ -63,7 +63,11 @@
     <Compile Include="Objects\MissionFollowerCombo.cs" />
     <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />
-    <Compile Include="ResourcesWebUI.Designer.cs" />
+    <Compile Include="ResourceWebUI.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceWebUI.resx</DependentUpon>
+    </Compile>
     <None Include="App.config" />
     <Compile Include="API\GarrisonLua.Building.cs" />
     <Compile Include="API\GarrisonLua.Follower.cs" />
@@ -2633,7 +2637,10 @@
     <Folder Include="WebUI\Libraries\Angular\i18n\ngLocale\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ResourcesWebUI.resx" />
+    <EmbeddedResource Include="ResourceWebUI.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceWebUI.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="WebUI\test.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

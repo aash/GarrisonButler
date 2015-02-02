@@ -118,31 +118,37 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="angular_min" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="angular_min_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\angular\angular.min.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="angular_route_min" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="angular_route_min_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\angular\angular-route.min.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="mobile_angular_ui_base_min" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="mobile_angular_ui_base_min_css" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\mobileangularui\css\mobile-angular-ui-base.min.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="mobile_angular_ui_desktop_min" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="mobile_angular_ui_desktop_min_css" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\mobileangularui\css\mobile-angular-ui-desktop.min.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="mobile_angular_ui_hover_min" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="mobile_angular_ui_hover_min_css" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\mobileangularui\css\mobile-angular-ui-hover.min.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="mobile_angular_ui_min" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="mobile_angular_ui_min_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\mobileangularui\js\mobile-angular-ui.min.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="test" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>webui\test.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  <data name="test_css" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>webui\test.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="test1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="test_html" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>webui\test.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="test_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\test.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="test2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>webui\test.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  <data name="ui_grid_min_css" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>webui\libraries\uigrid\ui-grid.min.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="ui_grid_min_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>webui\libraries\uigrid\ui-grid.min.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

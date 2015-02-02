@@ -60,12 +60,12 @@ namespace GarrisonButler.Config
         }
         private void ConfigForm_Load_1(object sender, EventArgs e)
         {
-            var html = ResourcesWebUI.test;
+            var html = ResourceWebUI.test_html;
             html = ReplaceFromFilesToResources(html);
-            webBrowser1.ScriptErrorsSuppressed = true;
+            webBrowser1.ScriptErrorsSuppressed = false;
             webBrowser1.AllowWebBrowserDrop = false;
             
-            webBrowser1.IsWebBrowserContextMenuEnabled = false;
+            webBrowser1.IsWebBrowserContextMenuEnabled = true;
             webBrowser1.WebBrowserShortcutsEnabled = false;
             webBrowser1.ObjectForScripting = GaBSettings.Get();
             webBrowser1.DocumentText = html;
@@ -79,25 +79,28 @@ namespace GarrisonButler.Config
         {
             Dictionary<string, string> dictJs = new Dictionary<string, string>()
             {
-                {"<script src=\"./test.js\"></script>", ResourcesWebUI.test1},
+                {"<script src=\"./test.js\"></script>", ResourceWebUI.test_js},
 
-                {"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourcesWebUI.angular_min},
+                {"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourceWebUI.angular_min_js},
                 
+                {"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourceWebUI.angular_route_min_js},
 
-                {"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourcesWebUI.angular_route_min},
+                {"<script src=\"./Libraries/MobileAngularUI/js/mobile-angular-ui.min.js\"></script>", ResourceWebUI.mobile_angular_ui_min_js},
 
-                {"<script src=\"./Libraries/MobileAngularUI/js/mobile-angular-ui.min.js\"></script>", ResourcesWebUI.mobile_angular_ui_min},
+                {"<script src=\"./Libraries/UIgrid/ui-grid.min.js\"></script>", ResourceWebUI.ui_grid_min_js},
      
             };
             Dictionary<string, string> dictCss = new Dictionary<string, string>()
             {
-                {"<link rel=\"stylesheet\" href=\"./test.css\" />", ResourcesWebUI.test2},
+                {"<link rel=\"stylesheet\" href=\"./test.css\" />", ResourceWebUI.test_css},
 
-                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-hover.min.css\" />", ResourcesWebUI.mobile_angular_ui_hover_min},
+                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-hover.min.css\" />", ResourceWebUI.mobile_angular_ui_hover_min_css},
 
-                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-base.min.css\" />", ResourcesWebUI.mobile_angular_ui_base_min},
+                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-base.min.css\" />", ResourceWebUI.mobile_angular_ui_base_min_css},
 
-                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-desktop.min.css\" />", ResourcesWebUI.mobile_angular_ui_desktop_min},
+                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-desktop.min.css\" />", ResourceWebUI.mobile_angular_ui_desktop_min_css},
+
+                {"<link rel=\"stylesheet\" href=\"./Libraries/UIgrid/ui-grid.min.css\" />", ResourceWebUI.ui_grid_min_css},
 
             };
             foreach (var file in dictJs)
