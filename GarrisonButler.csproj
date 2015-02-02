@@ -394,6 +394,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="WebUI\general-tab\general-tab.module.js" />
+    <Content Include="WebUI\general-tab\Mailing-tab.module.js" />
+    <Content Include="WebUI\general-tab\milling-tab.module.js" />
+    <Content Include="WebUI\general-tab\profession-tab.module.js" />
+    <Content Include="WebUI\general-tab\work-order-tab.module.js" />
     <Content Include="WebUI\Libraries\Angular\angular-animate.js" />
     <Content Include="WebUI\Libraries\Angular\angular-animate.min.js" />
     <Content Include="WebUI\Libraries\Angular\angular-aria.js" />
@@ -2635,6 +2640,7 @@
   <ItemGroup>
     <Folder Include="Properties\" />
     <Folder Include="WebUI\Libraries\Angular\i18n\ngLocale\" />
+    <Folder Include="WebUI\profession-tab\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ResourceWebUI.resx">
