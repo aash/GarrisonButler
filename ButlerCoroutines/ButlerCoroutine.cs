@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Runtime.CompilerServices;
 using Bots.DungeonBuddy.Helpers;
 using Buddy.Coroutines;
 using GarrisonButler.API;
@@ -378,6 +379,7 @@ namespace GarrisonButler.ButlerCoroutines
 
             CheckForVendors();
 
+            TreeRoot.Stop();
             if (await RestoreUiIfNeeded())
                 return true;
 
