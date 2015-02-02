@@ -307,3 +307,48 @@ CalcChance: function(b, a, c) {
    }
    return d
 }
+
+//==================================================================
+GetMissionTimes: function(g) {
+   var e = this.mission.missiontime;
+   var h = this.mission.traveltime;
+   for (var c = 0; c < g.length; ++c) {
+      var d = g[c];
+      for (var b = 0; b < d.abilities.length; ++b) {
+         var a = g_garrison_abilities[d.abilities[b]];
+         var f = a.type.length;
+         for (var k = 0; k < f; ++k) {
+            if (a.type[k] == 3) {
+               h *= a.amount4[k]
+            }
+            if (a.type[k] == 17) {
+               e *= a.amount4[k]
+            }
+         }
+      }
+   }
+   return {
+      missiontime: Math.floor(e),
+      traveltime: Math.floor(h)
+   }
+}
+
+//===========================================================
+CheckEffectRace: function(c, a, d) {
+   if (this.mission.followers > 0) {
+      for (var e = 0; e < c.length; ++e) {
+         if (e == d) {
+            continue
+         }
+         var f = c[e];
+         var b = g_garrison_followers && g_garrison_followers[f.follower] && g_garrison_followers[f.follower][this.side] ? g_garrison_followers[f.follower][this.side] : null;
+         if (b == null) {
+            continue
+         }
+         if (b.race == a) {
+            return true
+         }
+      }
+   }
+   return false
+}
