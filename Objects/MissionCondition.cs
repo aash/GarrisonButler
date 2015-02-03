@@ -10,6 +10,7 @@ using GarrisonButler.Libraries;
 using JetBrains.Annotations;
 using Styx;
 using Styx.CommonBot.Coroutines;
+using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonButler.Objects
@@ -19,6 +20,7 @@ namespace GarrisonButler.Objects
     /// </summary>
     public class MissionCondition : INotifyPropertyChanged, IComparable
     {
+        [XmlType(TypeName = "MissionConditions")]
         public enum Conditions
         {
             // Inventory Conditions
@@ -38,17 +40,15 @@ namespace GarrisonButler.Objects
         private int _checkValue;
         private Conditions _condition;
         private string _name;
-        private string _missionId;
-        private Mission _mission;
 
         public MissionCondition(Conditions condition, int checkValue, Mission mission = null)
         {
             _condition = condition;
             _checkValue = checkValue;
             _name = GetName(_condition);
-            _mission = mission;
-            if (_mission != null)
-                _missionId = _mission.MissionId;
+            //_mission = mission;
+            //if (_mission != null)
+            //    _missionId = _mission.MissionId;
         }
 
         public MissionCondition()
@@ -56,7 +56,7 @@ namespace GarrisonButler.Objects
             _condition = Conditions.None;
             _checkValue = 0;
             _name = GetName(_condition);
-            _mission = null;
+            //_mission = null;
         }
 
         public int CompareTo(object obj)
@@ -159,39 +159,39 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public bool GetCondition(uint itemId)
+        public bool GetCondition(MissionReward reward)
         {
             switch (_condition)
             {
                 case Conditions.NumberPlayerHasSuperiorTo:
-                    return IsNumberPlayerHasSuperiorTo(itemId, _checkValue);
+                    return IsNumberPlayerHasSuperiorTo(reward, _checkValue);
 
                 case Conditions.NumberPlayerHasSuperiorOrEqualTo:
-                    return IsNumberPlayerHasSuperiorOrEqualTo(itemId, _checkValue);
+                    return IsNumberPlayerHasSuperiorOrEqualTo(reward, _checkValue);
 
                 case Conditions.NumberPlayerHasInferiorTo:
-                    return IsNumberPlayerHasInferiorTo(itemId, _checkValue);
+                    return IsNumberPlayerHasInferiorTo(reward, _checkValue);
 
                 case Conditions.NumberPlayerHasInferiorOrEqualTo:
-                    return IsNumberPlayerHasInferiorOrEqualTo(itemId, _checkValue);
+                    return IsNumberPlayerHasInferiorOrEqualTo(reward, _checkValue);
 
                 case Conditions.NumberRewardSuperiorTo:
-                    return IsNumberRewardSuperiorTo(itemId, _checkValue);
+                    return IsNumberRewardSuperiorTo(reward, _checkValue);
 
                 case Conditions.NumberRewardSuperiorOrEqualTo:
-                    return IsNumberRewardSuperiorOrEqualTo(itemId, _checkValue);
+                    return IsNumberRewardSuperiorOrEqualTo(reward, _checkValue);
 
                 case Conditions.NumberRewardInferiorTo:
-                    return IsNumberRewardInferiorTo(itemId, _checkValue);
+                    return IsNumberRewardInferiorTo(reward, _checkValue);
 
                 case Conditions.NumberRewardInferiorOrEqualTo:
-                    return IsNumberRewardInferiorOrEqualTo(itemId, _checkValue);
+                    return IsNumberRewardInferiorOrEqualTo(reward, _checkValue);
 
                 case Conditions.None:
                     return false;
 
                 default:
-                    GarrisonButler.Diagnostic("This mission rule has not been implemented!");
+                    GarrisonButler.Diagnostic("GetCondition: This mission rule has not been implemented! Id: " + reward.Id + " Name: " + reward.Name);
                     break;
             }
             return false;
@@ -217,33 +217,33 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<WoWItem>> GetItemsOrNull(uint itemId)
+        public async Task<IEnumerable<object>> GetItemsOrNull(MissionReward reward)
         {
             switch (_condition)
             {
                 case Conditions.NumberPlayerHasSuperiorTo:
-                    return GetNumberPlayerHasSuperiorTo(itemId);
+                    return GetNumberPlayerHasSuperiorTo(reward);
 
                 case Conditions.NumberPlayerHasSuperiorOrEqualTo:
-                    return GetNumberPlayerHasSuperiorOrEqualTo(itemId);
+                    return GetNumberPlayerHasSuperiorOrEqualTo(reward);
 
                 case Conditions.NumberPlayerHasInferiorTo:
-                    return GetNumberPlayerHasInferiorTo(itemId);
+                    return GetNumberPlayerHasInferiorTo(reward);
 
                 case Conditions.NumberPlayerHasInferiorOrEqualTo:
-                    return GetNumberPlayerHasInferiorOrEqualTo(itemId);
+                    return GetNumberPlayerHasInferiorOrEqualTo(reward);
 
                 case Conditions.NumberRewardSuperiorTo:
-                    return GetNumberRewardSuperiorTo(itemId);
+                    return (IEnumerable<object>)GetNumberRewardSuperiorTo(reward);
 
                 case Conditions.NumberRewardSuperiorOrEqualTo:
-                    return GetNumberRewardSuperiorOrEqualTo(itemId);
+                    return GetNumberRewardSuperiorOrEqualTo(reward);
 
                 case Conditions.NumberRewardInferiorTo:
-                    return GetNumberRewardInferiorTo(itemId);
+                    return GetNumberRewardInferiorTo(reward);
 
                 case Conditions.NumberRewardInferiorOrEqualTo:
-                    return GetNumberRewardInferiorOrEqualTo(itemId);
+                    return GetNumberRewardInferiorOrEqualTo(reward);
 
                 //case Conditions.NumberInBagsSuperiorTo:
                 //    return GetNumberInBagsSuperiorTo(itemId);
@@ -258,7 +258,7 @@ namespace GarrisonButler.Objects
                     return null;
 
                 default:
-                    GarrisonButler.Diagnostic("This mission rule has not been implemented!");
+                    GarrisonButler.Diagnostic("GetItemsOrNull: This mission rule has not been implemented! Id: " + reward.Id + " Name: " + reward.Name);
                     break;
             }
             return null;
@@ -319,21 +319,6 @@ namespace GarrisonButler.Objects
             }
         }
 
-        /// <summary>
-        ///     Mission this condition is associated with
-        /// </summary>
-        [XmlAttribute("MissionId")]
-        public string MissionId
-        {
-            get { return _missionId; }
-            set
-            {
-                if (value == _missionId) return;
-                _missionId = value;
-                OnPropertyChanged1();
-            }
-        }
-
         #endregion
 
         #region Rules
@@ -346,9 +331,26 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberPlayerHasSuperiorTo(uint itemId, int x)
+        private static bool IsNumberPlayerHasSuperiorTo(MissionReward reward, int x)
         {
-            var numCarried = HbApi.GetNumberItemCarried(itemId);
+            uint numCarried = 0;
+
+            if (reward.IsItemReward)
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                numCarried = reward._CurrencyInfo.Amount;
+            }
+            else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+            //else if (reward.IsFollowerXP)
+            //{
+            //    numCarried = x;
+            //}
             return numCarried > x;
         }
 
@@ -358,9 +360,26 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberPlayerHasSuperiorTo(uint itemId)
+        private static IEnumerable<object> GetNumberPlayerHasSuperiorTo(MissionReward reward)
         {
-            return HbApi.GetItemCarried(itemId);
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward)
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                var currency = WoWCurrency.GetCurrencyById((uint)reward.Id);
+                numCarried = new List<WoWCurrency>();
+                ((List<WoWCurrency>) numCarried).Add(currency);
+            }
+            else if (reward.IsGold)
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
         }
 
         /// <summary>
@@ -369,10 +388,24 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberPlayerHasSuperiorOrEqualTo(uint itemId, int x)
+        private static bool IsNumberPlayerHasSuperiorOrEqualTo(MissionReward reward, int x)
         {
-            var numInBags = HbApi.GetNumberItemCarried(itemId);
-            return numInBags != 0 && numInBags >= x;
+            uint numCarried = 0;
+
+            if (reward.IsItemReward)
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                numCarried = reward._CurrencyInfo.Amount;
+            }
+            else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+
+            return numCarried != 0 && numCarried >= x;
         }
 
         /// <summary>
@@ -381,9 +414,26 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberPlayerHasSuperiorOrEqualTo(uint itemId)
+        private static IEnumerable<object> GetNumberPlayerHasSuperiorOrEqualTo(MissionReward reward)
         {
-            return HbApi.GetItemCarried(itemId);
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward)
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                var currency = WoWCurrency.GetCurrencyById((uint)reward.Id);
+                numCarried = new List<WoWCurrency>();
+                ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold)
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
         }
 
         /// <summary>
@@ -392,9 +442,22 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberPlayerHasInferiorTo(uint itemId, int x)
+        private static bool IsNumberPlayerHasInferiorTo(MissionReward reward, int x)
         {
-            var numCarried = HbApi.GetNumberItemCarried(itemId);
+            uint numCarried = 0;
+
+            if (reward.IsItemReward)
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                numCarried = reward._CurrencyInfo.Amount;
+            }
+            else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
             return numCarried < x;
         }
 
@@ -404,9 +467,26 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberPlayerHasInferiorTo(uint itemId)
+        private static IEnumerable<object> GetNumberPlayerHasInferiorTo(MissionReward reward)
         {
-            return HbApi.GetItemCarried(itemId);
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward)
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                var currency = WoWCurrency.GetCurrencyById((uint)reward.Id);
+                numCarried = new List<WoWCurrency>();
+                ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold)
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
         }
 
         /// <summary>
@@ -415,10 +495,23 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberPlayerHasInferiorOrEqualTo(uint itemId, int x)
+        private static bool IsNumberPlayerHasInferiorOrEqualTo(MissionReward reward, int x)
         {
-            var numInBags = HbApi.GetNumberItemCarried(itemId);
-            return numInBags != 0 && numInBags <= x;
+            uint numCarried = 0;
+
+            if (reward.IsItemReward)
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                numCarried = reward._CurrencyInfo.Amount;
+            }
+            else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+            return numCarried != 0 && numCarried <= x;
         }
 
         /// <summary>
@@ -427,9 +520,26 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberPlayerHasInferiorOrEqualTo(uint itemId)
+        private static IEnumerable<object> GetNumberPlayerHasInferiorOrEqualTo(MissionReward reward)
         {
-            return HbApi.GetItemCarried(itemId);
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward)
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.Id);
+            }
+            else if (reward.IsCurrencyReward)
+            {
+                var currency = WoWCurrency.GetCurrencyById((uint)reward.Id);
+                numCarried = new List<WoWCurrency>();
+                ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold)
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
         }
 
         //*****************************
@@ -441,12 +551,9 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberRewardSuperiorTo(uint itemId, int x)
+        private static bool IsNumberRewardSuperiorTo(MissionReward reward, int x)
         {
-            //TODO - Implement this function
-            //var numCarried = HbApi.GetNumberItemCarried(itemId);
-            //return numCarried > x;
-            return false;
+            return reward.Quantity > x;
         }
 
         /// <summary>
@@ -455,11 +562,11 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberRewardSuperiorTo(uint itemId)
+        private static IEnumerable<object> GetNumberRewardSuperiorTo(MissionReward reward)
         {
-            //TODO - Implement this function
-            //return HbApi.GetItemCarried(itemId);
-            return new List<WoWItem>();
+            var retval = new List<object>();
+            retval.Add(reward.Quantity);
+            return retval;
         }
 
         /// <summary>
@@ -468,12 +575,9 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberRewardSuperiorOrEqualTo(uint itemId, int x)
+        private static bool IsNumberRewardSuperiorOrEqualTo(MissionReward reward, int x)
         {
-            //TODO - Implement this function
-            //var numInBags = HbApi.GetNumberItemCarried(itemId);
-            //return numInBags != 0 && numInBags >= x;
-            return false;
+            return reward.Quantity >= x;
         }
 
         /// <summary>
@@ -482,11 +586,11 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberRewardSuperiorOrEqualTo(uint itemId)
+        private static IEnumerable<object> GetNumberRewardSuperiorOrEqualTo(MissionReward reward)
         {
-            //TODO - Implement this function
-            //return HbApi.GetItemCarried(itemId);
-            return new List<WoWItem>();
+            var retval = new List<object>();
+            retval.Add(reward.Quantity);
+            return retval;
         }
 
         /// <summary>
@@ -495,12 +599,9 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberRewardInferiorTo(uint itemId, int x)
+        private static bool IsNumberRewardInferiorTo(MissionReward reward, int x)
         {
-            //TODO - Implement this function
-            //var numCarried = HbApi.GetNumberItemCarried(itemId);
-            //return numCarried < x;
-            return false;
+            return reward.Quantity < x;
         }
 
         /// <summary>
@@ -509,11 +610,11 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberRewardInferiorTo(uint itemId)
+        private static IEnumerable<object> GetNumberRewardInferiorTo(MissionReward reward)
         {
-            //TODO - Implement this function
-            //return HbApi.GetItemCarried(itemId);
-            return new List<WoWItem>();
+            var retval = new List<object>();
+            retval.Add(reward.Quantity);
+            return retval;
         }
 
         /// <summary>
@@ -522,12 +623,9 @@ namespace GarrisonButler.Objects
         /// <param name="itemId"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool IsNumberRewardInferiorOrEqualTo(uint itemId, int x)
+        private static bool IsNumberRewardInferiorOrEqualTo(MissionReward reward, int x)
         {
-            //TODO - Implement this function
-            //var numInBags = HbApi.GetNumberItemCarried(itemId);
-            //return numInBags != 0 && numInBags <= x;
-            return false;
+            return reward.Quantity <= x;
         }
 
         /// <summary>
@@ -536,20 +634,20 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static IEnumerable<WoWItem> GetNumberRewardInferiorOrEqualTo(uint itemId)
+        private static IEnumerable<object> GetNumberRewardInferiorOrEqualTo(MissionReward reward)
         {
-            //TODO - Implement this function
-            //return HbApi.GetItemCarried(itemId);
-            return new List<WoWItem>();
+            var retval = new List<object>();
+            retval.Add(reward.Quantity);
+            return retval;
         }
 
         /// <summary>
-        ///     Cut a stack and get returns the part of the size asked if found otherwise default WoWItem.
+        ///     Cut a stack and get returns the part of the size asked if found otherwise default object.
         /// </summary>
         /// <param name="sizeToCut"></param>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        private static async Task<WoWItem> CutAndGetStack(int sizeToCut, uint itemId)
+        private static async Task<object> CutAndGetStack(int sizeToCut, uint itemId)
         {
             // TO DO check for the action to be done before returning
             await SplitOneStack(sizeToCut, itemId);
@@ -561,7 +659,7 @@ namespace GarrisonButler.Objects
             var stacksCutSize = GetStacks(itemId, 1, sizeToCut).ToList();
             if (!stacksCutSize.Any())
             {
-                return default(WoWItem); // Error finding correct stack size
+                return default(object); // Error finding correct stack size
             }
             return stacksCutSize.First();
         }

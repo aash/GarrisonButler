@@ -23,6 +23,7 @@ namespace GarrisonButler.Config
     public class GaBSettings:INotifyPropertyChanged
     {
         private List<Pigment> _pigments;
+        private List<MissionReward> _rewards; 
 
         private GaBSettings()
         {
@@ -59,7 +60,7 @@ namespace GarrisonButler.Config
 
         [XmlArrayItem("Item", typeof(BItem))]
         [XmlArray("TradePostReagents")]
-        public List<BItem> TradingPostReagentsSettings { get; set; } 
+        public List<BItem> TradingPostReagentsSettings { get; set; }
         public bool UseGarrisonHearthstone { get; set; }
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
@@ -89,6 +90,19 @@ namespace GarrisonButler.Config
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
+
+        [XmlArrayItem("Reward", typeof(MissionReward))]
+        [XmlArray("MissionRewardSettings")]
+        public List<MissionReward> MissionRewardSettings
+        {
+            get { return _rewards; }
+            set
+            {
+                if (Equals(value, _rewards)) return;
+                _rewards = value;
+                OnPropertyChanged();
+            }
+        }
         
         [ComVisible(true)]
         public void UpdateBooleanValue(string propertyName, bool value)
@@ -167,6 +181,17 @@ namespace GarrisonButler.Config
                 GarrisonButler.Diagnostic("Updating pigments settings with values:");
                 ObjectDumper.WriteToHb(newPigmentsValues, 3);
                 _pigments.AddRange(newPigmentsValues);
+            }
+
+            if (_rewards == null)
+                _rewards = new List<MissionReward>();
+
+            var newRewardValues = MissionReward.AllRewards.Where(r => _rewards.All(rew => rew.Id != r.Id)).ToArray();
+            if (newRewardValues.Any())
+            {
+                GarrisonButler.Diagnostic("Updating reward settings with values:");
+                ObjectDumper.WriteToHb(newRewardValues, 1);
+                _rewards.AddRange(newRewardValues);
             }
         }
 

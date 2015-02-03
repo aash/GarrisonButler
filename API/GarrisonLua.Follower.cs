@@ -31,6 +31,12 @@ namespace GarrisonButler.API
             var numFollowers = followers.Count;
             var numMissions = missions.Count;
 
+            missions.ForEach(f =>
+            {
+                GarrisonButler.Diagnostic(">> Mission: " + f.Name);
+                f.Rewards.ForEach(r => GarrisonButler.Diagnostic("  >> Reward: " + r.Name));
+            });
+
             if (slots == 0)
             {
                 GarrisonButler.Diagnostic("returning from GetAllFollowers(): # slots = 0");
@@ -50,7 +56,8 @@ namespace GarrisonButler.API
             }
 
             //CASE 1 - slots < # followers
-            if (slots < numFollowers)
+            //if (slots < numFollowers)
+            if(false)
             {
                 missions = missions.OrderBy(m => m.NumFollowers).ToList();
                 //STEP 1 - Sort by "reward type"

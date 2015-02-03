@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Net.Cache;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
+using JetBrains.Annotations;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using System.Xml.Serialization;
+using GarrisonButler.Config;
 
 namespace GarrisonButler.Objects
 {
-    class MissionReward
+    public class MissionReward : INotifyPropertyChanged
     {
         [XmlAttribute("Id")]
         public int Id { get; set; }
-        [XmlAttribute("Name")]
         public string Name { get; set; }
         [XmlAttribute("Category")]
         public MissionRewardCategory Category { get; set; }
@@ -23,30 +28,314 @@ namespace GarrisonButler.Objects
         // Set by the user with the slider for this reward
         [XmlAttribute("RequiredSuccessChance")]
         public int RequiredSuccessChance { get; set; }
+        [XmlIgnore]
         public ItemInfo _ItemInfo { get; set; }
+        [XmlIgnore]
         public WoWCurrency _CurrencyInfo { get; set; }
+        [XmlIgnore]
+        public int Quantity { get; set; }
+        [XmlIgnore]
+        public string Icon { get; set; }
+
+        private MissionCondition _condition;
+        private string _comment;
+
+        [XmlElement("MissionCondition")]
+        public MissionCondition Condition
+        {
+            get { return _condition; }
+            set
+            {
+                if (value == _condition) return;
+                _condition = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Comment
+        {
+            get { return _comment; }
+            set
+            {
+                if (value == _comment) return;
+                _comment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        //(string title, int quantity, int currencyID, int itemID, int followerXP, string name, string icon)
 
         public enum MissionRewardCategory
         {
-            Currency = 0,
-            PlayerExperience = 1,
-            PlayerGear = 2,
-            FollowerExperience = 3,
-            FollowerGear = 4,
-            FollowerItem = 5,
-            FollowerContract = 6,
-            LegendaryQuestItem = 7,
-            ReputationToken = 8,
-            VanityItem = 9,
-            MiscItem = 10,
-            Profession = 11
+            Currency = 0,           // currency
+            PlayerExperience = 1,   // item
+            PlayerGear = 2,         // item
+            FollowerExperience = 3, // NONE
+            FollowerGear = 4,       // item
+            FollowerItem = 5,       // item
+            FollowerContract = 6,   // item
+            LegendaryQuestItem = 7, // item
+            ReputationToken = 8,    // item
+            VanityItem = 9,         // item
+            MiscItem = 10,          // item
+            Profession = 11,        // item
+            UnknownItem = 12,       // item
+            Unknown = 13,           // NONE
+            Gold = 14               // NONE
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void SetCondition(string name)
+        {
+            _condition.Name = name;
+            OnPropertyChanged("Condition");
+        }
+
+        public bool CanConsiderReward()
+        {
+            return _condition.GetCondition(this);
+        }
+
+        public async Task<IEnumerable<object>> GetRewardObjectList()
+        {
+            return await _condition.GetItemsOrNull(this);
+        }
+
+
+        /*
+        var currentIndex = cpt + 7 * i;
+                var rewardTitle = mission[currentIndex + 1] == "nil" ? "" : mission[currentIndex + 1];
+                var rewardQuantity = mission[currentIndex + 2].ToInt32();
+                var rewardCurrencyID = mission[currentIndex + 3].ToInt32();
+                var rewardItemID = mission[currentIndex + 4].ToInt32();
+                var rewardFollowerXP = mission[currentIndex + 5].ToInt32();
+                var rewardName = mission[currentIndex + 6] == "nil" ? "" : mission[currentIndex + 6];
+                var rewardIcon = mission[currentIndex + 7] == "nil" ? "" : mission[currentIndex + 7];
+        */
+
+        public MissionReward()
+        {
+            this.Name = string.Empty;
+            this.Category = MissionRewardCategory.Unknown;
+        }
+
+        public MissionReward(MissionReward other)
+        {
+            this.Category = other.Category;
+            this.Name = other.Name;
+            this.Id = other.Id;
+            this.RequiredLevel = other.RequiredLevel;
+            this.RequiredSuccessChance = other.RequiredSuccessChance;
+            this._ItemInfo = other._ItemInfo;
+            this._CurrencyInfo = other._CurrencyInfo;
+        }
+
+        public void CopyFrom(MissionReward other)
+        {
+            this.Category = other.Category;
+            this.Name = other.Name;
+            this.Id = other.Id;
+            this.RequiredLevel = other.RequiredLevel;
+            this.RequiredSuccessChance = other.RequiredSuccessChance;
+            this._ItemInfo = other._ItemInfo;
+            this._CurrencyInfo = other._CurrencyInfo;
+        }
+
+        /// <summary>
+        /// Create object from LUA values returned in mission rewards
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="quantity"></param>
+        /// <param name="currencyID"></param>
+        /// <param name="itemID"></param>
+        /// <param name="followerXP"></param>
+        /// <param name="name"></param>
+        /// <param name="icon"></param>
+        public MissionReward(string title, int quantity, int currencyID, int itemID, int followerXP, string name, string icon)
+        {
+            Icon = icon;
+
+            if(itemID > 0)
+            {
+                // Item Reward
+                // 120205 item ID = player experience
+                var reward = GaBSettings.Get().MissionRewardSettings.FirstOrDefault(r => r.Id == itemID);
+                if(reward != null)
+                    this.CopyFrom(reward);
+                else
+                {
+                    this.Category = MissionRewardCategory.UnknownItem;
+                    PopulateItemInfo(itemID);
+                }
+                this.Quantity = quantity;
+            }
+            else if(quantity > 0)
+            {
+                // Gold Reward
+                if(currencyID == 0)
+                {
+                    var reward = GaBSettings.Get().MissionRewardSettings.FirstOrDefault(r => r.Id == (int)MissionRewardCategory.Gold);
+                    if (reward != null)
+                    {
+                        this.CopyFrom(reward);
+                    }
+                    else
+                    {
+                        this.Category = MissionRewardCategory.Gold;
+                        this.Id = (int) MissionRewardCategory.Gold;
+                    }
+                    this.Quantity = quantity;
+                    this.Name = "Gold";
+                }
+                // Currency Reward
+                else
+                {
+                    var reward = GaBSettings.Get().MissionRewardSettings.FirstOrDefault(r => r.Id == currencyID);
+                    if (reward != null)
+                    {
+                        this.CopyFrom(reward);
+                        PopulateCurrencyInfo(currencyID);
+                    }
+                    else
+                    {
+                        this.Category = MissionRewardCategory.Currency;
+                        PopulateCurrencyInfo(currencyID);
+                        this.Id = currencyID;
+                    }
+                    this.Quantity = quantity;
+                }
+            }
+            else
+            {
+                // Follower XP Reward
+                if(followerXP > 0)
+                {
+                    var reward =
+                        GaBSettings.Get()
+                            .MissionRewardSettings.FirstOrDefault(r => r.Id == (int)MissionRewardCategory.FollowerExperience);
+                    if (reward != null)
+                    {
+                        this.CopyFrom(reward);
+                    }
+                    else
+                    {
+                        this.Category = MissionRewardCategory.FollowerExperience;
+                        this.Id = (int)MissionRewardCategory.FollowerExperience;
+                    }
+                    this.Quantity = quantity;
+                    this.Name = "FollowerXP";
+                }
+                // ???
+                else
+                {
+                    this.Category = MissionRewardCategory.Unknown;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public bool IsItemReward
+        {
+            get
+            {
+                return Category == MissionRewardCategory.PlayerGear
+                       || Category == MissionRewardCategory.FollowerGear
+                       || Category == MissionRewardCategory.FollowerItem
+                       || Category == MissionRewardCategory.MiscItem
+                       || Category == MissionRewardCategory.LegendaryQuestItem
+                       || Category == MissionRewardCategory.ReputationToken
+                       || Category == MissionRewardCategory.Profession
+                       || Category == MissionRewardCategory.FollowerContract
+                       || Category == MissionRewardCategory.VanityItem
+                       || Category == MissionRewardCategory.UnknownItem;
+            }
+        }
+
+        [XmlIgnore]
+        public bool IsCurrencyReward
+        {
+            get { return Category == MissionRewardCategory.Currency; }
+        }
+
+        [XmlIgnore]
+        public bool IsFollowerXP
+        {
+            get { return Category == MissionRewardCategory.FollowerExperience; }
+        }
+
+        [XmlIgnore]
+        public bool IsGold
+        {
+            get { return Category == MissionRewardCategory.Gold; }
+        }
+
+        /// <summary>
+        /// Populate an object from known values at compile time for use in AllRewards list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="category"></param>
+        /// <param name="reqLevel"></param>
+        public MissionReward(int id, MissionRewardCategory category, int reqLevel = 0)
+        {
+            Category = category;
+            RequiredLevel = reqLevel;
+            Id = id;
+
+            if (IsCurrencyReward)
+            {
+                PopulateCurrencyInfo(id);
+            }
+
+            if (IsItemReward)
+            {
+                PopulateItemInfo(Id);
+            }
+
+            if (reqLevel != 0)
+                RequiredLevel = reqLevel;
+        }
+
+        public void PopulateItemInfo(int itemID)
+        {
+            Id = itemID;
+            _ItemInfo = ItemInfo.FromId((uint)itemID);
+            if (_ItemInfo != null)
+            {
+                Name = _ItemInfo.Name;
+                RequiredLevel = _ItemInfo.RequiredLevel;
+            }
+        }
+
+        public void PopulateCurrencyInfo(int currencyID)
+        {
+            _CurrencyInfo = WoWCurrency.GetCurrencyById((uint)Id);
+
+            if(_CurrencyInfo != null)
+                Name = _CurrencyInfo.Name;
+
+            if (Name == null || Name.Length == 0)
+            {
+                var currencyItemLink = API.ApiLua.GetCurrencyItemLink(currencyID);
+                var name = API.ApiLua.GetNameFromItemLink(currencyItemLink);
+                Name = name;
+            }
+        }
+
+        [XmlIgnore]
         public static readonly List<MissionReward> AllRewards =
             new List<MissionReward>
             {
                 // Currency - http://www.wowhead.com/guides/garrisons/warlords-of-draenor-garrison-missions-guide#rewards
                 new MissionReward(823, MissionRewardCategory.Currency),             // Currency - Apexis Crystal - http://www.wowhead.com/currency=823/apexis-crystal
+                new MissionReward(824, MissionRewardCategory.Currency),             // Currency - Garrison Resources - http://www.wowhead.com/currency=824/garrison-resources
                 new MissionReward(390, MissionRewardCategory.Currency),             // Currency - Conquest Points - http://www.wowhead.com/currency=390/conquest-points
                 new MissionReward(994, MissionRewardCategory.Currency),             // Currency - Seal of Tempered Fate - http://www.wowhead.com/currency=994/seal-of-tempered-fate
                 new MissionReward(392, MissionRewardCategory.Currency),             // Currency - Honor Points - http://www.wowhead.com/currency=392/honor-points
@@ -187,27 +476,10 @@ namespace GarrisonButler.Objects
                 new MissionReward(118728, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Shadowmoon Valley Treasure Map - Blue - http://ptr.wowhead.com/item=118728/shadowmoon-valley-treasure-map
                 new MissionReward(118730, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Talador Treasure Map - Blue - http://ptr.wowhead.com/item=118730/talador-treasure-map
                 new MissionReward(118731, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Spires of Arak Treasure Map - Blue - http://ptr.wowhead.com/item=118731/spires-of-arak-treasure-map
+                // Special Items
+                new MissionReward((int)MissionRewardCategory.FollowerExperience, MissionRewardCategory.FollowerExperience),
+                new MissionReward((int)MissionRewardCategory.Gold, MissionRewardCategory.Gold)
             };
-
-        public MissionReward(int id, MissionRewardCategory category, int reqLevel = 0)
-        {
-            Id = id;
-            Category = category;
-            RequiredLevel = reqLevel;
-
-            if (Category == MissionRewardCategory.Currency)
-            {
-                _CurrencyInfo = WoWCurrency.GetCurrencyById((uint) Id);
-                Name = _CurrencyInfo.Name;
-            }
-
-            if (Category == MissionRewardCategory.PlayerGear)
-            {
-                _ItemInfo = ItemInfo.FromId((uint) Id);
-                Name = _ItemInfo.Name;
-                RequiredLevel = reqLevel == 0 ? _ItemInfo.RequiredLevel : reqLevel;
-            }
-        }
 
         public override string ToString()
         {

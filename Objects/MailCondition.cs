@@ -19,6 +19,7 @@ namespace GarrisonButler.Objects
     /// </summary>
     public class MailCondition : INotifyPropertyChanged, IComparable
     {
+        [XmlType(TypeName = "MailConditions")]
         public enum Conditions
         {
             NumberInBagsSuperiorTo = 0,

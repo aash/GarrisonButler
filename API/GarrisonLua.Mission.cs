@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler.Libraries;
+using GarrisonButler.Objects;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -175,11 +176,12 @@ namespace GarrisonButler.API
                 durationSeconds, enemies, level, ilevel,
                 isRare, location, missionId,
                 name, numFollowers, numRewards,
-                state, type, xp, environment);
+                state, type, xp, environment, new List<MissionReward>());
         }
 
         public static Mission GetMissionById(String missionIdArg)
         {
+            var cpt = 17;
             var lua =
                 "local b = {}; local am = {}; local RetInfo = {}; local cpt = 0; C_Garrison.GetAvailableMissions(am);" +
                 String.Format(
@@ -204,15 +206,19 @@ namespace GarrisonButler.API
                     "b[15] = xp;" +
                     "b[16] = am[idx].numRewards;" +
                     "b[17] = environment;" +
-                    "cpt = 17;" +
-                    //"for id, reward in pairs(am[idx].rewards) do" +
-                    //"if(reward.title) then cpt = cpt + 1; b[cpt] = reward.title; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
-                    //"if(reward.quantity) then cpt = cpt + 1; b[cpt] = reward.quantity; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
-                    //"if(reward.currencyID) then cpt = cpt + 1; b[cpt] = reward.currencyID; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
-                    //"if(reward.itemID) then cpt = cpt + 1; b[cpt] = reward.itemID; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
-                    //"if(reward.followerXP) then cpt = cpt + 1; b[cpt] = reward.followerXP; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
-                    //"if(reward.name) then cpt = cpt + 1; b[cpt] = reward.name; else cpt = cpt + 1; b[cpt] = \"empty\"); end;" +
-                    //"end;" + // for id,reward in pairs(am[idx].rewards) do
+                    "cpt = " + cpt + ";" +  // count of values inserted into b up to this point
+                    @"
+                    for id, reward in pairs(am[idx].rewards) do
+		                b[cpt + 1] = reward.title;
+		                b[cpt + 2] = reward.quantity;
+		                b[cpt + 3] = reward.currencyID;
+		                b[cpt + 4] = reward.itemID;
+		                b[cpt + 5] = reward.followerXP;
+		                b[cpt + 6] = reward.name;
+		                b[cpt + 7] = reward.icon;
+		                cpt = cpt + 7;
+	                end
+                    " + 
                     "end;" + // if am[idx].missionId == {0}
                     "end;" // for idx = 1, #m do
                     , missionIdArg) +
@@ -243,25 +249,41 @@ namespace GarrisonButler.API
             var xp = mission[15];
             var numRewards = mission[16].ToInt32();
             var environment = mission[17];
-            
+
+            if(numRewards > 0)
+            {
+
+            }
+
+            List<MissionReward> rewards = new List<MissionReward>();
             //TEST
-            //for (int i = 0; i < numRewards; i++)
-            //{
-            //    var rewardTitle = mission[18 + i + 0];
-            //    var rewardQuantity = mission[18 + i + 1].ToInt32();
-            //    var rewardCurrencyID = mission[18 + i + 2].ToInt32();
-            //    var rewardItemID = mission[18 + i + 3].ToInt32();
-            //    var rewardFollowerXP = mission[18 + i + 4].ToInt32();
-            //    var rewardName = mission[18 + i + 5];
-            //    GarrisonButler.Diagnostic("Loop");
-            //}
+            for (int i = 0; i < numRewards; i++)
+            {
+                var currentIndex = cpt + 7 * i;
+                var rewardTitle = mission[currentIndex + 1] == "nil" ? "" : mission[currentIndex + 1];
+                var rewardQuantity = mission[currentIndex + 2].ToInt32();
+                var rewardCurrencyId = mission[currentIndex + 3].ToInt32();
+                var rewardItemId = mission[currentIndex + 4].ToInt32();
+                var rewardFollowerXp = mission[currentIndex + 5].ToInt32();
+                var rewardName = mission[currentIndex + 6] == "nil" ? "" : mission[currentIndex + 6];
+                var rewardIcon = mission[currentIndex + 7] == "nil" ? "" : mission[currentIndex + 7];
+                rewards.Add(new MissionReward(rewardTitle, rewardQuantity, rewardCurrencyId, rewardItemId, rewardFollowerXp, rewardName, rewardIcon));
+                //GarrisonButler.Diagnostic("Loop (" + i.ToString() + ")");
+                //GarrisonButler.Diagnostic("rewardTitle: " + rewardTitle);
+                //GarrisonButler.Diagnostic("rewardQuantity: " + rewardQuantity);
+                //GarrisonButler.Diagnostic("rewardCurrencyID: " + rewardCurrencyID);
+                //GarrisonButler.Diagnostic("rewardItemID: " + rewardItemID);
+                //GarrisonButler.Diagnostic("rewardFollowerXP: " + rewardFollowerXP);
+                //GarrisonButler.Diagnostic("rewardName: " + rewardName);
+                //GarrisonButler.Diagnostic("rewardIcon: " + rewardIcon);
+            }
             //TEST
 
             return new Mission(cost, description,
                 durationSeconds, enemies, level, ilevel,
                 isRare, location, missionId,
                 name, numFollowers, numRewards,
-                state, type, xp, environment);
+                state, type, xp, environment, rewards);
         }
 
         public static Mission GetPartyMissionInfo(Mission m)
