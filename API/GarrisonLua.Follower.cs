@@ -55,6 +55,12 @@ namespace GarrisonButler.API
                 return new List<Follower>();
             }
 
+            //IEnumerable<> missions
+            //    .OrderBy(m => m.Rewards[0].Id)
+            //    .ThenBy(m => m.Rewards[1].Id)
+            //    .ThenBy(m => m.Rewards[2])
+
+
             //CASE 1 - slots < # followers
             //if (slots < numFollowers)
             if(false)
