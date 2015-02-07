@@ -23,6 +23,10 @@ namespace GarrisonButler.Objects
         public string Name { get; set; }
         [XmlAttribute("Category")]
         public MissionRewardCategory Category { get; set; }
+        [XmlAttribute("IndividualSuccessChanceEnabled")]
+        public bool IndividualSuccessChanceEnabled { get; set; }
+        [XmlAttribute("DisallowMissionsWithThisReward")]
+        public bool DisallowMissionsWithThisReward { get; set; }
         [XmlAttribute("RequiredLevel")]
         public int RequiredLevel { get; set; }
         // Set by the user with the slider for this reward

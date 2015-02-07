@@ -55,6 +55,22 @@ namespace GarrisonButler.API
                 return new List<Follower>();
             }
 
+            // Get the current top of the list reward
+            // Sort missions by highest quantity
+            // Pick the missions off the list matching the current reward
+            // Discard any missions where the reward is set to "disallowed"
+            // Discard any missions that don't meet user requirements (quantity > X for example)
+            // Calculate # of slots for the remaining misssions in this batch
+
+            // If reward type is FollowerXP, discard all level 100 epic followers
+            // Find all combinations of X followers to Y mission slots for this batch
+            // Calculate success chance (via LUA call) for each follower combination
+
+            // STEP 1 - Take missions off the list where they match the highest
+            //          priority in the user settings
+
+            // STEP 2 - Sort missions by highest quantity
+
             //IEnumerable<> missions
             //    .OrderBy(m => m.Rewards[0].Id)
             //    .ThenBy(m => m.Rewards[1].Id)
