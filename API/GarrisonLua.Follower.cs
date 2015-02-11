@@ -7,6 +7,8 @@ using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Facet.Combinatorics;
+using GarrisonButler.Config;
+using GarrisonButler.Objects;
 using Styx.Common;
 
 #endregion
@@ -28,8 +30,10 @@ namespace GarrisonButler.API
         {
             var missions = MissionLua.GetAllAvailableMissions();
             var slots = missions.Sum(m => m.NumFollowers);
-            var numFollowers = followers.Count;
+            var rewards = GaBSettings.Get().MissionRewardSettings;
             var numMissions = missions.Count;
+            var numFollowers = followers.Count;
+            var numRewards = rewards.Count;
 
             missions.ForEach(f =>
             {
@@ -56,6 +60,26 @@ namespace GarrisonButler.API
             }
 
             // Get the current top of the list reward
+            foreach (var reward in rewards)
+            {
+                // Sort missions by highest quantity of reward
+                //missions.Where(m => m.Rewards.Any(mr => mr.Id == reward.Id))
+                missions.Sort((a, b) =>
+                {
+                    var afound = a.Rewards.FirstOrDefault(mreward => mreward.Id == reward.Id);
+                    var avalue = 0;
+                    var bfound = b.Rewards.FirstOrDefault(mreward => mreward.Id == reward.Id);
+                    var bvalue = 0;
+
+                    if (afound != null)
+                        avalue = afound.Quantity;
+
+                    if (bfound != null)
+                        bvalue = bfound.Quantity;
+
+                    return avalue.CompareTo(bvalue);
+                });
+            }
             // Sort missions by highest quantity
             // Pick the missions off the list matching the current reward
             // Discard any missions where the reward is set to "disallowed"
