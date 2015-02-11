@@ -379,7 +379,7 @@ namespace GarrisonButler.ButlerCoroutines
 
             CheckForVendors();
 
-            TreeRoot.Stop();
+            //TreeRoot.Stop();
             if (await RestoreUiIfNeeded())
                 return true;
 

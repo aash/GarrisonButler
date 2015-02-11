@@ -188,13 +188,13 @@ namespace GarrisonButler.Objects
                     return IsNumberRewardInferiorOrEqualTo(reward, _checkValue);
 
                 case Conditions.None:
-                    return false;
+                    return true;
 
                 default:
                     GarrisonButler.Diagnostic("GetCondition: This mission rule has not been implemented! Id: " + reward.Id + " Name: " + reward.Name);
                     break;
             }
-            return false;
+            return true;
         }
 
         /// <summary>

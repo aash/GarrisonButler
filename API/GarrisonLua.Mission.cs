@@ -256,6 +256,7 @@ namespace GarrisonButler.API
             }
 
             List<MissionReward> rewards = new List<MissionReward>();
+            bool needToAddFollowerXpReward = true;
             //TEST
             for (int i = 0; i < numRewards; i++)
             {
@@ -267,6 +268,13 @@ namespace GarrisonButler.API
                 var rewardFollowerXp = mission[currentIndex + 5].ToInt32();
                 var rewardName = mission[currentIndex + 6] == "nil" ? "" : mission[currentIndex + 6];
                 var rewardIcon = mission[currentIndex + 7] == "nil" ? "" : mission[currentIndex + 7];
+                if (needToAddFollowerXpReward
+                    && rewardFollowerXp > 0
+                    && xp.ToInt32() > 0)
+                {
+                    rewardFollowerXp += xp.ToInt32();
+                    needToAddFollowerXpReward = false;
+                }
                 rewards.Add(new MissionReward(rewardTitle, rewardQuantity, rewardCurrencyId, rewardItemId, rewardFollowerXp, rewardName, rewardIcon));
                 //GarrisonButler.Diagnostic("Loop (" + i.ToString() + ")");
                 //GarrisonButler.Diagnostic("rewardTitle: " + rewardTitle);
@@ -276,6 +284,13 @@ namespace GarrisonButler.API
                 //GarrisonButler.Diagnostic("rewardFollowerXP: " + rewardFollowerXP);
                 //GarrisonButler.Diagnostic("rewardName: " + rewardName);
                 //GarrisonButler.Diagnostic("rewardIcon: " + rewardIcon);
+            }
+
+            // If this quest does not offer bonus followerXP but has base follower XP, need to add it as a reward
+            if (needToAddFollowerXpReward
+                && xp.ToInt32() > 0)
+            {
+                rewards.Add(new MissionReward(string.Empty, 0, 0, 0, xp.ToInt32(), "FollowerXP", string.Empty));
             }
             //TEST
 
@@ -292,7 +307,7 @@ namespace GarrisonButler.API
             var lua =
                 "local b = {}; local RetInfo = {};" +
                 String.Format(//"for idx = 1, #am do " +
-                              "local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus, materialMultiplier =  = C_Garrison.GetPartyMissionInfo(\"{0}\");" +
+                              "local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus, materialMultiplier = C_Garrison.GetPartyMissionInfo(\"{0}\");" +
                               //"if am[idx].missionID == {0} then " +
                               "b[0] = totalTimeString;" +
                               "b[1] = totalTimeSeconds;" +

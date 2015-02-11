@@ -2,13 +2,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Facet.Combinatorics;
 using GarrisonButler.Config;
 using GarrisonButler.Objects;
+using Styx;
 using Styx.Common;
 
 #endregion
@@ -22,7 +25,7 @@ namespace GarrisonButler.API
         public static List<Follower> GetAllFollowers()
         {
             var followers = API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
-            //var newMissionStubCodeResult = NewMissionStubCode(followers);
+            var newMissionStubCodeResult = NewMissionStubCode(followers);
             return followers;
         }
 
@@ -39,6 +42,14 @@ namespace GarrisonButler.API
             {
                 GarrisonButler.Diagnostic(">> Mission: " + f.Name);
                 f.Rewards.ForEach(r => GarrisonButler.Diagnostic("  >> Reward: " + r.Name));
+            });
+
+            followers.ForEach(f =>
+            {
+                GarrisonButler.Diagnostic(">> Follower: " + f.Name);
+                GarrisonButler.Diagnostic("  Quality: " + f.Quality);
+                GarrisonButler.Diagnostic("  Level: " + f.Level);
+                GarrisonButler.Diagnostic("  Status: " + f.Status);
             });
 
             if (slots == 0)
@@ -59,31 +70,184 @@ namespace GarrisonButler.API
                 return new List<Follower>();
             }
 
+            // Only consider followers that are collected
+            followers.RemoveAll(f => !f.IsCollected);
+
+            //local statusPriority = {
+            //    [GARRISON_FOLLOWER_IN_PARTY] = 1,
+            //    [GARRISON_FOLLOWER_WORKING] = 2,
+            //    [GARRISON_FOLLOWER_ON_MISSION] = 3,
+            //    [GARRISON_FOLLOWER_EXHAUSTED] = 4,
+            //    [GARRISON_FOLLOWER_INACTIVE] = 5,
+            //}
+            // Only consider followers that are available (0) or in party (1)
+            followers.RemoveAll(f => f.Status.ToInt32() > 1);
+
             // Get the current top of the list reward
             foreach (var reward in rewards)
             {
-                // Sort missions by highest quantity of reward
-                //missions.Where(m => m.Rewards.Any(mr => mr.Id == reward.Id))
-                missions.Sort((a, b) =>
+                GarrisonButler.Diagnostic("-- Reward: {0} --", reward.Name);
+
+                // Discard any missions where the reward is set to "disallowed"
+                if (reward.DisallowMissionsWithThisReward)
                 {
-                    var afound = a.Rewards.FirstOrDefault(mreward => mreward.Id == reward.Id);
-                    var avalue = 0;
-                    var bfound = b.Rewards.FirstOrDefault(mreward => mreward.Id == reward.Id);
-                    var bvalue = 0;
+                    missions.RemoveAll(m => m.Rewards.Any(mr => mr.Id == reward.Id));
+                    continue;
+                }
+                
+                var missionsWithCurrentReward = missions
+                    // Pick the missions off the list matching the current reward
+                    .Where(m => m.Rewards.Any(mr => mr.Id == reward.Id))
+                    // Sort missions by highest quantity of reward
+                    .OrderByDescending(m =>
+                    {
+                        var found = m.Rewards.FirstOrDefault(mr => mr.Id == reward.Id);
+                        return found == null ? 0 : found.Quantity;
+                    })
+                    .ToList();
 
-                    if (afound != null)
-                        avalue = afound.Quantity;
+                if (!missionsWithCurrentReward.Any())
+                {
+                    GarrisonButler.Diagnostic("  !! No Missions with this reward !!");
+                    continue;
+                }
 
-                    if (bfound != null)
-                        bvalue = bfound.Quantity;
+                foreach (var mission in missionsWithCurrentReward)
+                {
+                    GarrisonButler.Diagnostic("  >> Mission: {0} <<", mission.Name);
+                    foreach (var mr in mission.Rewards)
+                    {
+                        GarrisonButler.Diagnostic("    ** Reward ({0}): {1} **", mr.Quantity, mr.Name);
+                    }
+                }
 
-                    return avalue.CompareTo(bvalue);
-                });
+                // Skip any missions that don't meet user requirements (quantity > X for example)
+                var missionsThatMeetRequirement = missionsWithCurrentReward
+                    .Where(m => m.Rewards
+                        .Where(mr => mr.Id == reward.Id)
+                        // Check both Mission amount conditions & Player amount conditions
+                        .Any(mr => 
+                            (reward.ConditionForMission == null || reward.ConditionForMission.GetCondition(mr))
+                            && (reward.ConditionForPlayer == null || reward.ConditionForPlayer.GetCondition(mr))
+                        )
+                    )
+                    .ToList();
+
+                if (!missionsThatMeetRequirement.Any())
+                {
+                    GarrisonButler.Diagnostic("  !! No Missions meet user requirements !!");
+                    continue;
+                }
+
+                //Indicates the quality (or rarity) of an item. Possible values and examples:
+                //0. Poor (gray): Broken I.W.I.N. Button
+                //1. Common (white): Archmage Vargoth's Staff
+                //2. Uncommon (green): X-52 Rocket Helmet
+                //3. Rare / Superior (blue): Onyxia Scale Cloak
+                //4. Epic (purple): Talisman of Ephemeral Power
+                //5. Legendary (orange): Fragment of Val'anyr
+                //6. Artifact (golden yellow): The Twin Blades of Azzinoth
+                //7. Heirloom (light yellow): Bloodied Arcanite Reaper
+
+                var followersToConsider =
+                    // If reward type is FollowerXP, discard all level 100 epic followers
+                    (
+                    reward.Category == MissionReward.MissionRewardCategory.FollowerExperience
+                        ? followers.SkipWhile(f => f.Quality.ToInt32() > 4 && f.Level >= 100)
+                        : followers
+                    )
+                    .ToList();
+
+                GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
+                followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
+
+                foreach (var mission in missionsThatMeetRequirement)
+                {
+                    Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
+                    GarrisonButler.Diagnostic("**Combination**");
+                    GarrisonButler.Diagnostic("Mission: " + mission.Name);
+                    GarrisonButler.Diagnostic("Combinations: " + followerCombinations.Count);
+
+                    //var follwerIds = followersToConsider
+                    //    .Select(f => f.FollowerId)
+                    //    .ToList();
+
+                    using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+                    {
+                        foreach (var combo in followerCombinations)
+                        {
+                            var followerIds = combo.Select(f => f.FollowerId).ToList();
+                            Stopwatch timer = new Stopwatch();
+                            timer.Start();
+                            while (!InterfaceLua.IsGarrisonMissionTabVisible()
+                                   && timer.ElapsedMilliseconds < 2000)
+                            {
+                                GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
+                                InterfaceLua.ClickTabMission();
+                            }
+
+                            if (!InterfaceLua.IsGarrisonMissionTabVisible())
+                            {
+                                GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
+                                return new List<Follower>();
+                            }
+
+                            timer.Reset();
+                            timer.Start();
+                            while (!InterfaceLua.IsGarrisonMissionVisible()
+                                   && timer.ElapsedMilliseconds < 2000)
+                            {
+                                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + mission.MissionId +
+                                                          " - " +
+                                                          mission.Name);
+                                InterfaceLua.OpenMission(mission);
+                            }
+
+                            if (!InterfaceLua.IsGarrisonMissionVisible())
+                            {
+                                GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
+                                return new List<Follower>();
+                            }
+
+                            timer.Reset();
+                            timer.Start();
+                            while (!InterfaceLua.IsGarrisonMissionVisibleAndValid(mission.MissionId)
+                                   && timer.ElapsedMilliseconds < 2000)
+                            {
+                                GarrisonButler.Diagnostic(
+                                    "Mission not visible or not valid, close and then opening mission: " +
+                                    mission.MissionId + " - " + mission.Name);
+                                InterfaceLua.ClickCloseMission();
+                                InterfaceLua.OpenMission(mission);
+                            }
+
+                            if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(mission.MissionId))
+                            {
+                                GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                                return new List<Follower>();
+                            }
+
+
+                            InterfaceLua.AddFollowersToMissionNonTask(mission.MissionId, followerIds);
+                            API.MissionLua.GetPartyMissionInfo(mission);
+                            combo.ForEach(f => RemoveFollowerFromMission(mission.MissionId.ToInt32(), f.FollowerId.ToInt32()));
+                            //RemoveFollowerFromMission(mission.MissionId, );
+                            GarrisonButler.Diagnostic("** Current Combo: ");
+                            combo.ForEach(f => GarrisonButler.Diagnostic(" - " + f.Name));
+                            GarrisonButler.Diagnostic("--> Success Chance: " + mission.SuccessChance);
+                            GarrisonButler.Diagnostic("--> Material Multiplier: " + mission.MaterialMultiplier);
+                            GarrisonButler.Diagnostic("--> XP Bonus: " + mission.XpBonus);
+                        }
+                    }
+
+                }
+
+                //Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider.ToList(), );
             }
             // Sort missions by highest quantity
             // Pick the missions off the list matching the current reward
             // Discard any missions where the reward is set to "disallowed"
-            // Discard any missions that don't meet user requirements (quantity > X for example)
+            // Skip any missions that don't meet user requirements (quantity > X for example)
             // Calculate # of slots for the remaining misssions in this batch
 
             // If reward type is FollowerXP, discard all level 100 epic followers
@@ -267,7 +431,16 @@ namespace GarrisonButler.API
                     "if (followerID == {0}) then " +
                     "Temp[0] = followerID;" +
                     "Temp[1] = f.name;" +
-                    "Temp[2] = f.status;" +
+                    //"Temp[2] = f.status;" +
+                    "if f.status == GARRISON_FOLLOWER_IN_PARTY then Temp[2] = 1;" +
+                    "elseif f.status == GARRISON_FOLLOWER_WORKING then Temp[2] = 2;" +
+                    "elseif f.status == GARRISON_FOLLOWER_ON_MISSION then Temp[2] = 3;" +
+                    "elseif f.status == GARRISON_FOLLOWER_EXHAUSTED then Temp[2] = 4;" +
+                    "elseif f.status == GARRISON_FOLLOWER_INACTIVE then Temp[2] = 5;" +
+                    "else Temp[2] = 0;" +
+                    "end;" + 
+                    "print(f.name);" + 
+                    "print(f.status);" + 
                     "Temp[3] = f.ClassSpecName;" +
                     "Temp[4] = f.quality;" +
                     "Temp[5] = f.level;" +

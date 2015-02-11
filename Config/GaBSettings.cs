@@ -190,7 +190,7 @@ namespace GarrisonButler.Config
             if (newRewardValues.Any())
             {
                 GarrisonButler.Diagnostic("Updating reward settings with values:");
-                ObjectDumper.WriteToHb(newRewardValues, 1);
+                //ObjectDumper.WriteToHb(newRewardValues, 1);
                 _rewards.AddRange(newRewardValues);
             }
         }
@@ -394,7 +394,7 @@ namespace GarrisonButler.Config
                 }
                 CurrentSettings.PopulateMissingSettings();
                 GarrisonButler.Log("Configuration successfully loaded.");
-                ObjectDumper.WriteToHb(CurrentSettings, 5);
+                //ObjectDumper.WriteToHb(CurrentSettings, 5);
             }
             catch (Exception e)
             {

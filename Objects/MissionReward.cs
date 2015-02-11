@@ -13,13 +13,27 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 using System.Xml.Serialization;
 using GarrisonButler.Config;
+using GarrisonButler.Libraries;
 
 namespace GarrisonButler.Objects
 {
     public class MissionReward : INotifyPropertyChanged
     {
+        private int _id;
         [XmlAttribute("Id")]
-        public int Id { get; set; }
+        public int Id
+        {
+            get { return _id; }
+            set
+            {
+                _id = value;
+                if(IsItemReward)
+                    _ItemInfo = ItemInfo.FromId((uint)value);
+                else if (IsCurrencyReward)
+                    _CurrencyInfo = WoWCurrency.GetCurrencyById((uint) value);
+            }
+        }
+        [XmlAttribute("Name")]
         public string Name { get; set; }
         [XmlAttribute("Category")]
         public MissionRewardCategory Category { get; set; }
@@ -41,28 +55,77 @@ namespace GarrisonButler.Objects
         [XmlIgnore]
         public string Icon { get; set; }
 
-        private MissionCondition _condition;
-        private string _comment;
+        private MissionCondition _missionCondition;
+        private string _missionConditionComment;
+        private MissionCondition _playerCondition;
+        private string _playerConditionComment;
 
         [XmlElement("MissionCondition")]
-        public MissionCondition Condition
+        public MissionCondition ConditionForMission
         {
-            get { return _condition; }
+            get { return _missionCondition; }
             set
             {
-                if (value == _condition) return;
-                _condition = value;
+                if (value == _missionCondition) return;
+                _missionCondition = value;
                 OnPropertyChanged();
             }
         }
 
-        public string Comment
+        [XmlIgnore]
+        public int CheckValueForMission
         {
-            get { return _comment; }
+            get { return _missionCondition != null ? _missionCondition.CheckValue : 0; }
             set
             {
-                if (value == _comment) return;
-                _comment = value;
+                if (value == _missionCondition.CheckValue) return;
+                _missionCondition.CheckValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CommentForMissionCondition
+        {
+            get { return _missionConditionComment; }
+            set
+            {
+                if (value == _missionConditionComment) return;
+                _missionConditionComment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [XmlElement("PlayerCondition")]
+        public MissionCondition ConditionForPlayer
+        {
+            get { return _playerCondition; }
+            set
+            {
+                if (value == _playerCondition) return;
+                _playerCondition = value;
+                OnPropertyChanged();
+            }
+        }
+
+        [XmlIgnore]
+        public int CheckValueForPlayer
+        {
+            get { return _playerCondition != null ? _playerCondition.CheckValue : 0; }
+            set
+            {
+                if (value == _playerCondition.CheckValue) return;
+                _playerCondition.CheckValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CommentForPlayerCondition
+        {
+            get { return _playerConditionComment; }
+            set
+            {
+                if (value == _playerConditionComment) return;
+                _playerConditionComment = value;
                 OnPropertyChanged();
             }
         }
@@ -97,21 +160,21 @@ namespace GarrisonButler.Objects
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void SetCondition(string name)
-        {
-            _condition.Name = name;
-            OnPropertyChanged("Condition");
-        }
+        //public void SetCondition(string name)
+        //{
+        //    _condition.Name = name;
+        //    OnPropertyChanged("Condition");
+        //}
 
-        public bool CanConsiderReward()
-        {
-            return _condition.GetCondition(this);
-        }
+        //public bool CanConsiderReward()
+        //{
+        //    return _condition.GetCondition(this);
+        //}
 
-        public async Task<IEnumerable<object>> GetRewardObjectList()
-        {
-            return await _condition.GetItemsOrNull(this);
-        }
+        //public async Task<IEnumerable<object>> GetRewardObjectList()
+        //{
+        //    return await _condition.GetItemsOrNull(this);
+        //}
 
 
         /*
@@ -234,7 +297,7 @@ namespace GarrisonButler.Objects
                         this.Category = MissionRewardCategory.FollowerExperience;
                         this.Id = (int)MissionRewardCategory.FollowerExperience;
                     }
-                    this.Quantity = quantity;
+                    this.Quantity = followerXP;
                     this.Name = "FollowerXP";
                 }
                 // ???
@@ -259,7 +322,8 @@ namespace GarrisonButler.Objects
                        || Category == MissionRewardCategory.Profession
                        || Category == MissionRewardCategory.FollowerContract
                        || Category == MissionRewardCategory.VanityItem
-                       || Category == MissionRewardCategory.UnknownItem;
+                       || Category == MissionRewardCategory.UnknownItem
+                       || Category == MissionRewardCategory.PlayerExperience;
             }
         }
 
@@ -296,11 +360,13 @@ namespace GarrisonButler.Objects
             if (IsCurrencyReward)
             {
                 PopulateCurrencyInfo(id);
-            }
-
-            if (IsItemReward)
+            } else if (IsItemReward)
             {
                 PopulateItemInfo(Id);
+            }
+            else if(id == (int)category)
+            {
+                Name = category.ToString();
             }
 
             if (reqLevel != 0)
@@ -325,7 +391,7 @@ namespace GarrisonButler.Objects
             if(_CurrencyInfo != null)
                 Name = _CurrencyInfo.Name;
 
-            if (Name == null || Name.Length == 0)
+            if (Name.IsNullOrEmpty())
             {
                 var currencyItemLink = API.ApiLua.GetCurrencyItemLink(currencyID);
                 var name = API.ApiLua.GetNameFromItemLink(currencyItemLink);
@@ -337,6 +403,9 @@ namespace GarrisonButler.Objects
         public static readonly List<MissionReward> AllRewards =
             new List<MissionReward>
             {
+                // Special Items
+                new MissionReward((int)MissionRewardCategory.FollowerExperience, MissionRewardCategory.FollowerExperience),
+                new MissionReward((int)MissionRewardCategory.Gold, MissionRewardCategory.Gold),
                 // Currency - http://www.wowhead.com/guides/garrisons/warlords-of-draenor-garrison-missions-guide#rewards
                 new MissionReward(823, MissionRewardCategory.Currency),             // Currency - Apexis Crystal - http://www.wowhead.com/currency=823/apexis-crystal
                 new MissionReward(824, MissionRewardCategory.Currency),             // Currency - Garrison Resources - http://www.wowhead.com/currency=824/garrison-resources
@@ -479,10 +548,7 @@ namespace GarrisonButler.Objects
                 new MissionReward(118727, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Frostfire Treasure Map - Blue - http://ptr.wowhead.com/item=118727/frostfire-treasure-map
                 new MissionReward(118728, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Shadowmoon Valley Treasure Map - Blue - http://ptr.wowhead.com/item=118728/shadowmoon-valley-treasure-map
                 new MissionReward(118730, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Talador Treasure Map - Blue - http://ptr.wowhead.com/item=118730/talador-treasure-map
-                new MissionReward(118731, MissionRewardCategory.MiscItem),          // MiscItem - PATCH 6.1 - Spires of Arak Treasure Map - Blue - http://ptr.wowhead.com/item=118731/spires-of-arak-treasure-map
-                // Special Items
-                new MissionReward((int)MissionRewardCategory.FollowerExperience, MissionRewardCategory.FollowerExperience),
-                new MissionReward((int)MissionRewardCategory.Gold, MissionRewardCategory.Gold)
+                new MissionReward(118731, MissionRewardCategory.MiscItem)          // MiscItem - PATCH 6.1 - Spires of Arak Treasure Map - Blue - http://ptr.wowhead.com/item=118731/spires-of-arak-treasure-map
             };
 
         public override string ToString()
