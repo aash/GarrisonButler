@@ -19,7 +19,7 @@ CalculateSuccessChance: function(c) {
          }
       }
    }
-   var d = [];  // mission mechanics (abilities that the bosses have)
+   var d = [];  // mission encounter mechanics (abilities that the bosses have)
    if (this.mission && this.mission.encounters) {
       for (w in this.mission.encounters) {
          if (this.mission.encounters[w].mechanics) {
@@ -57,7 +57,7 @@ CalculateSuccessChance: function(c) {
    var D = this.mission.followers * 100;
    var B = D;
     // This code calculates some sort of coefficient called D
-    // d = <missionmechanics> object
+    // d = mission encounters mechanics
     // <missionmechanics>.length > 0
    if (d.length > 0) {
        // Loop all mission mechanics
@@ -100,6 +100,7 @@ CalculateSuccessChance: function(c) {
    this.registeredThreatCounters = {};  // registeredThreatCounters array, initialize
     // d = <missionmechanics> object
     // <missionmechanics>.length > 0
+    //*** Check if follower counters boss mechanics
    if (d.length > 0) {
       do {
          C = d[A];  // Current mission mechanic
@@ -157,6 +158,8 @@ CalculateSuccessChance: function(c) {
          }++A   // Increment A - Also end of if statement - // If no category or the category == Abilities - if (!C.category || C.category == 2) {
       } while (A < d.length)    // Loop while mechanics remain
    } // if (d.length > 0) { - If mission has mechanics to counter
+
+    //*** Check if follower counters enemy race
     // Loop all mission mechanics
    for (A = 0; A < d.length; ++A) {
       C = d[A]; // current mission mechanic
@@ -189,6 +192,8 @@ CalculateSuccessChance: function(c) {
          }
       }
    } // Loop all mission mechanics - for (A = 0; A < d.length; ++A) {
+
+    //*** Check if follower counters enviornment ability of mission
     // Only if the mission has follower slots
    if (this.mission.followers > 0) {
        // Loop all followers
@@ -202,10 +207,10 @@ CalculateSuccessChance: function(c) {
             for (E = 0; E < e; ++E) {
                 // If the ability counter exists for this type
                 // AND
-                // If it counters the mission mechanictype
+                // If it counters the mission mechanictype (Desert, etc..)
                if (F.counters[E] && F.counters[E] == this.mission.mechanictype) {
                   q = this.CalcChance(F.amount2[E], F.amount3[E], r.bias);
-                  q *= b;
+                  q *= b; // multiply by coefficient calculated earlier
                   q = $WH.fround(q);
                   l += q;
                   if (n) {
@@ -215,45 +220,63 @@ CalculateSuccessChance: function(c) {
             }
          }
       }
-   }
+   } // if (this.mission.followers > 0) {
+    // s = followers object
+    // returns "missiontime" and "traveltime"
    var y = this.GetMissionTimes(s);
+    // If the mission has any follower slots
    if (this.mission.followers > 0) {
+       // Loop all followers
       for (w = 0; w < s.length; ++w) {
-         r = s[w];
+         r = s[w];  // current follower
+          // Loop all follower abilities
          for (v = 0; v < r.abilities.length; ++v) {
-            F = g_garrison_abilities[r.abilities[v]];
-            e = F.type.length;
+            F = g_garrison_abilities[r.abilities[v]];   // current ability
+            e = F.type.length; // number of types of this ability
+             // Loop all the types of this ability
             for (E = 0; E < e; ++E) {
                var u = false;
                switch (F.type[E]) {
+                   // Lone Wolf - Increases success chance when on a mission alone.
                   case 1:
                      if (s.length == 1) {
                         u = true
                      }
                      break;
+                   // Combat Experience - Grants a bonus to mission success chance.
                   case 2:
                      u = true;
                      break;
+                   // Race - Gnome-Lover / Humanist / Dwarvenborn / etc...
+                   // Increases success chance when on a mission with a <race>
                   case 5:
+                      // s = followers object
+                      // F = current ability
+                      // E = current ability index
+                      // w = current follower index
                      if (this.CheckEffectRace.call(this, s, F.race[E], w)) {
                         u = true
                      }
                      break;
+                   // High Stamina - Increases success chance on missions with duration longer than 7 hours.
                   case 6:
                      if (y.missiontime > 3600 * F.hours[E]) {
                         u = true
                      }
                      break;
+                   // Burst of Power - Increases success chance on missions with duration shorter than 7 hours.
                   case 7:
                      if (y.missiontime < 3600 * F.hours[E]) {
                         u = true
                      }
                      break;
+                   // Doesn't appear to matter anymore travel time??
                   case 9:
                      if (y.traveltime > 3600 * F.hours[E]) {
                         u = true
                      }
                      break;
+                   // Doesn't appear to matter anymore travel time??
                   case 10:
                      if (y.traveltime < 3600 * F.hours[E]) {
                         u = true
@@ -395,17 +418,23 @@ CalcChance: function(b, a, c) {
 
 //==================================================================
 GetMissionTimes: function(g) {
-   var e = this.mission.missiontime;
-   var h = this.mission.traveltime;
+   var e = this.mission.missiontime;    // "missiontime"
+   var h = this.mission.traveltime;     // "traveltime"
+    // Loops all followers
    for (var c = 0; c < g.length; ++c) {
-      var d = g[c];
+      var d = g[c]; // current follower
+       // Loop all follower abilities
       for (var b = 0; b < d.abilities.length; ++b) {
-         var a = g_garrison_abilities[d.abilities[b]];
-         var f = a.type.length;
+         var a = g_garrison_abilities[d.abilities[b]];  // current ability
+         var f = a.type.length; // number of types of this ability
+          // Loop all the types of this ability
          for (var k = 0; k < f; ++k) {
+             // None appear to have type 3 - this would decrease travel time
+             // Don't think travel time matters anymore, looks like they removed it
             if (a.type[k] == 3) {
                h *= a.amount4[k]
             }
+             // Epic Mount - 17 - this decreases mission time
             if (a.type[k] == 17) {
                e *= a.amount4[k]
             }
