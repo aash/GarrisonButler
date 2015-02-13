@@ -60,8 +60,13 @@
     <Compile Include="ButlerCoroutines\Combat.cs" />
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
+    <Compile Include="Libraries\JSON\JSON.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
+    <Compile Include="Libraries\Wowhead\FollowerInfo.cs" />
+    <Compile Include="Libraries\Wowhead\GarrisonAbility.cs" />
+    <Compile Include="Libraries\Wowhead\MechanicInfo.cs" />
+    <Compile Include="Libraries\Wowhead\MissionCalc.cs" />
     <Compile Include="LuaObjects\LuaEvents.cs" />
     <Compile Include="LuaObjects\CapacitiveDisplayFrame.cs" />
     <Compile Include="Objects\BItem.cs" />
@@ -358,7 +363,7 @@
     <Reference Include="Honorbuddy.Launcher">
       <HintPath>References\Honorbuddy.Launcher.exe</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -2619,6 +2624,11 @@
     <Content Include="WebUI\Libraries\BootstrapSwitch\css\bootstrap-switch.min.css" />
     <Content Include="WebUI\Libraries\BootstrapSwitch\js\bootstrap-switch.js" />
     <Content Include="WebUI\Libraries\BootstrapSwitch\js\bootstrap-switch.min.js" />
+    <Content Include="WebUI\Libraries\follower_data.js" />
+    <Content Include="WebUI\Libraries\garrison_abilities.js" />
+    <Content Include="WebUI\Libraries\MissionCalc.js" />
+    <Content Include="WebUI\Libraries\mission_data.js" />
+    <Content Include="WebUI\Libraries\MissonCalcSimple.js" />
     <Content Include="WebUI\Libraries\MobileAngularUI\css\mobile-angular-ui-base.css" />
     <Content Include="WebUI\Libraries\MobileAngularUI\css\mobile-angular-ui-base.min.css" />
     <Content Include="WebUI\Libraries\MobileAngularUI\css\mobile-angular-ui-desktop.css" />

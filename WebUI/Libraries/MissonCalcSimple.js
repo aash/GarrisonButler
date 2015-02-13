@@ -484,4 +484,19 @@ RegisterThreatCounter: function(a, b, c) {
         this.registeredThreatCounters[a][b] = {}
     }
     this.registeredThreatCounters[a][b][c] = true
-},
+}
+
+//====================================================================
+$WH.fround = function(b) {
+    if (Math.fround) {
+        return Math.fround(b)
+    } else {
+        if (typeof Float32Array != "undefined" && Float32Array) {
+            var a = new Float32Array(1);
+            a[0] = +b;
+            return a[0]
+        } else {
+            return b
+        }
+    }
+}

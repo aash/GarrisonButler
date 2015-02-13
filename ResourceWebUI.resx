@@ -124,6 +124,12 @@
   <data name="angular_route_min_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\angular\angular-route.min.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="follower_data" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>WebUI\Libraries\follower_data.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="mission_data" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>WebUI\Libraries\mission_data.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
   <data name="mobile_angular_ui_base_min_css" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>webui\libraries\mobileangularui\css\mobile-angular-ui-base.min.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>

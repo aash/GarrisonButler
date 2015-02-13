@@ -24,7 +24,8 @@ namespace GarrisonButler
                 && string.Equals(Name, other.Name)
                 && string.Equals(Quality, other.Quality)
                 && string.Equals(Status, other.Status)
-                && Xp == other.Xp;
+                && Xp == other.Xp
+                && Abilities.Equals(other.Abilities);
         }
 
         public override bool Equals(object obj)
@@ -50,6 +51,7 @@ namespace GarrisonButler
                 hashCode = (hashCode*397) ^ Quality.GetHashCode();
                 hashCode = (hashCode*397) ^ Status.GetHashCode();
                 hashCode = (hashCode*397) ^ Xp;
+                hashCode = (hashCode*397) ^ Abilities.GetHashCode();
                 return hashCode;
             }
         }
@@ -75,10 +77,11 @@ namespace GarrisonButler
         public readonly String Quality;
         public readonly String Status;
         public readonly int Xp;
+        public readonly List<int> Abilities; 
 
         public Follower(string followerId, string name, string status,
             string Class_, String quality, int level, bool isCollected,
-            int iItemLevel, int xp, int levelXp, List<String> counters)
+            int iItemLevel, int xp, int levelXp, List<String> counters, List<int> abilities )
         {
             FollowerId = followerId;
             Name = name;
@@ -91,6 +94,7 @@ namespace GarrisonButler
             Xp = xp;
             LevelXp = levelXp;
             Counters = counters;
+            Abilities = abilities;
             //GarrisonButler.Diagnostic(ToString());
         }
 

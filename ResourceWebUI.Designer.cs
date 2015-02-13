@@ -89,6 +89,62 @@ namespace GarrisonButler {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to var g_garrison_followers = {
+        ///	&quot;32&quot;: {
+        ///		&quot;id&quot;: 32,
+        ///		&quot;source&quot;: 4,
+        ///		&quot;quality&quot;: 2,
+        ///		&quot;level&quot;: 90,
+        ///		&quot;itemlevelarmor&quot;: 600,
+        ///		&quot;itemlevelweapon&quot;: 600,
+        ///		&quot;alliance&quot;: {
+        ///			&quot;npc&quot;: 79607,
+        ///			&quot;race&quot;: 15,
+        ///			&quot;name&quot;: &quot;Dagg&quot;,
+        ///			&quot;classs&quot;: &quot;Subtlety Rogue&quot;,
+        ///			&quot;classid&quot;: 28,
+        ///			&quot;baseclass&quot;: 4,
+        ///			&quot;portrait&quot;: &quot;followerportrait_55124&quot;,
+        ///			&quot;abilities&quot;: [104]
+        ///		},
+        ///		&quot;horde&quot;: {
+        ///			&quot;npc&quot;: 79607,
+        ///			&quot;race&quot;: 15,
+        ///			&quot;name&quot;: &quot;Dagg&quot;,
+        ///			&quot;classs&quot;: &quot;Subtlety Rogue&quot;,
+        ///			&quot;classid&quot;: 28,
+        ///			&quot;baseclass&quot;: 4,
+        ///			&quot;p [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string follower_data {
+            get {
+                return ResourceManager.GetString("follower_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [{
+        ///    &quot;id&quot;: 2,
+        ///    &quot;name&quot;: &quot;Gronnlings Abound&quot;,
+        ///    &quot;description&quot;: &quot;Gronnlings are a menace to the region.  We should partner with the Frostwolf clan to thin the population.  One may even join our cause...&quot;,
+        ///    &quot;duration&quot;: 1800,
+        ///    &quot;level&quot;: 90,
+        ///    &quot;itemlevel&quot;: 0,
+        ///    &quot;rare&quot;: &quot;&quot;,
+        ///    &quot;mechanictype&quot;: &quot;Snow&quot;,
+        ///    &quot;missiontype&quot;: &quot;Combat&quot;
+        ///}, {
+        ///    &quot;id&quot;: 3,
+        ///    &quot;name&quot;: &quot;Landfall Recovery&quot;,
+        ///    &quot;description&quot;: &quot;It would be a worthwhile endeavor to search the ship we escaped Tanaan Jungle in, it&apos;s b [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string mission_data {
+            get {
+                return ResourceManager.GetString("mission_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to @font-face{font-family:FontAwesome;src:url(../fonts/fontawesome-webfont.eot?v=4.2.0);src:url(../fonts/fontawesome-webfont.eot?#iefix&amp;v=4.2.0) format(&apos;embedded-opentype&apos;),url(../fonts/fontawesome-webfont.woff?v=4.2.0) format(&apos;woff&apos;),url(../fonts/fontawesome-webfont.ttf?v=4.2.0) format(&apos;truetype&apos;),url(../fonts/fontawesome-webfont.svg?v=4.2.0#fontawesomeregular) format(&apos;svg&apos;);font-weight:400;font-style:normal}.fa{display:inline-block;font:normal normal normal 14px/1 FontAwesome;font-size:inherit;text-rendering [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mobile_angular_ui_base_min_css {
@@ -126,25 +182,23 @@ namespace GarrisonButler {
         
         /// <summary>
         ///   Looks up a localized string similar to .tabsdemoStaticTabs {
-        ///  /*
-        /// * Animation styles
-        /// */ }
+        ///    /*
+        ///   * Animation styles
+        ///   */ }
         ///  .tabsdemoStaticTabs #tab1-content {
-        ///    background-color: #3F51B5; }
+        ///    background-color: #ffffff; }
         ///  .tabsdemoStaticTabs #tab2-content {
-        ///    background-color: #FBFBFB; }
-        ///  .tabsdemoStaticTabs #tab3-content {
-        ///    background-color: white; }
+        ///    background-color: #ffffff; }
+        ///.tabsdemoStaticTabs #tab3-content {
+        ///    background-color: #ffffff; }
+        ///.tabsdemoStaticTabs #tab4-content {
+        ///    background-color: #ffffff; }
         ///  .tabsdemoStaticTabs .tabpanel-container {
         ///    display: block;
-        ///    position: relative;
-        ///    background: #3F51B5;
-        ///    border: 0px solid black;
-        ///    overflow: hidden;
-        ///    height: 600px;
-        ///
-        ///  }
-        ///  .tabsdemoStaticTabs [role=&quot;tabpanel&quot;] { [rest of string was truncated]&quot;;.
+        ///    /*position: relative;*/
+        ///    background: #ffffff;
+        ///    border: 10px solid black;
+        ///    overf [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string test_css {
             get {
@@ -164,7 +218,8 @@ namespace GarrisonButler {
         ///    &lt;meta name=&quot;viewport&quot; content=&quot;user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui&quot; /&gt;
         ///    &lt;meta name=&quot;apple-mobile-web-app-status-bar-style&quot; content=&quot;yes&quot; /&gt;
         ///
-        ///    &lt;script src=&quot;./Libraries/Angular/ [rest of string was truncated]&quot;;.
+        ///
+        ///    &lt;script src=&quot;./libraries/Angula [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string test_html {
             get {
@@ -173,17 +228,23 @@ namespace GarrisonButler {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to var app = angular.module(&apos;GarrisonButlerApp&apos;, [&apos;mobile-angular-ui&apos;, &apos;ngMaterial&apos;, &apos;ui.grid&apos;, &apos;ui.grid.edit&apos;, &apos;ui.grid.cellNav&apos;, &apos;ngTouch&apos;]);
+        ///   Looks up a localized string similar to app = angular.module(&apos;GarrisonButlerApp&apos;,
+        ///    [
+        ///        &apos;GarrisonButlerApp.general-tab&apos;,
+        ///        &apos;GarrisonButlerApp.profession-tab&apos;,
+        ///        &apos;GarrisonButlerApp.work-order-tab&apos;,
+        ///        &apos;GarrisonButlerApp.mailing-tab&apos;,
+        ///        &apos;GarrisonButlerApp.milling-tab&apos;
+        ///    ])
         ///
-        ///app.controller(&apos;mainController&apos;, function($scope) {
-        ///    // Save boolean from js value in c# code
-        ///    $scope.saveCSharpBool = function (propertyName, value) {
-        ///        window.external.UpdateBooleanValue(propertyName, value);
-        ///    };
         ///
-        ///    // Load boolean in js value from c# code
-        ///    $scope.loadCSharpBool = function (propertyName) {
-        ///        var res = window.exter [rest of string was truncated]&quot;;.
+        ///    .controller(&apos;mainController&apos;, function($scope) {
+        ///
+        ///        $scope.butlerSettings = {};
+        ///
+        ///        // Save boolean from js value in c# code
+        ///        $scope.saveCSharpBool = function (propertyName, value) {
+        ///            window.exter [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string test_js {
             get {
@@ -203,7 +264,7 @@ namespace GarrisonButler {
         /// <summary>
         ///   Looks up a localized string similar to /*! ui-grid - v3.0.0-RC.18 - 2014-12-09
         ///* Copyright (c) 2014 ; License: MIT */
-        ///!function () { &quot;use strict&quot;; angular.module(&quot;ui.grid.i18n&quot;, []), angular.module(&quot;ui.grid&quot;, [&quot;ui.grid.i18n&quot;]) }(), function () { &quot;use strict&quot;; angular.module(&quot;ui.grid&quot;).constant(&quot;uiGridConstants&quot;, { LOG_DEBUG_MESSAGES: !0, LOG_WARN_MESSAGES: !0, LOG_ERROR_MESSAGES: !0, CUSTOM_FILTERS: /CUSTOM_FILTERS/g, COL_FIELD: /COL_FIELD/g, MODEL_COL_FIELD: /MODEL_COL_FIELD/g, DISPLAY_CELL_TEMPLATE: /DISPLAY_CELL_TEMPLATE/g, TEMPLATE_REGEXP: / [rest of string was truncated]&quot;;.
+        ///!function () { &quot;use strict&quot;; angular.module(&quot;ui.grid.i18n&quot;, []), angular.module(&quot;ui.grid&quot;, [&quot;ui.grid.i18n&quot;]) }(), function () { &quot;use strict&quot;; angular.module(&quot;ui.grid&quot;).constant(&quot;uiGridConstants&quot;, { LOG_DEBUG_MESSAGES: !0, LOG_WARN_MESSAGES: !0, LOG_ERROR_MESSAGES: !0, CUSTOM_FILTERS: /CUSTOM_FILTERS/g, COL_FIELD: /COL_FIELD/g, MODEL_COL_FIELD: /MODEL_COL_FIELD/g, DISPLAY_CELL_TEMPLATE: /DISPLAY_CELL_TEMPLATE/g, TEMPLATE_REGEXP: [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ui_grid_min_js {
             get {
