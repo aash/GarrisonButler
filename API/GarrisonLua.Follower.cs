@@ -49,6 +49,14 @@ namespace GarrisonButler.API
             {
                 MissionCalc.mission = m;
             }
+            int count = 0;
+            var toAdd = new List<Follower>();
+            while (count < 3)
+            {
+                toAdd.Add(followers[count]);
+                count++;
+            }
+            MissionCalc.followers = toAdd;
             //TEST JSON
 
             missions.ForEach(f =>

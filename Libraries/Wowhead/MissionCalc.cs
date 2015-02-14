@@ -112,6 +112,8 @@ namespace GarrisonButler.Libraries.Wowhead
             var chanceOver = 0.0f;
             var returnValue = new Tuple<double, double>(0, 0);
 
+            var mentorinfo = GetMentorInfo();
+
             //how do I find encounter data?
 
             return returnValue;
@@ -121,10 +123,9 @@ namespace GarrisonButler.Libraries.Wowhead
         {
             var level = 0;
             var itemlevel = 0;
-            var returnValue = new Tuple<int, int>(0, 0);
 
             if (mission.NumFollowers <= 0)
-                return returnValue;
+                return new Tuple<int, int>(0, 0);
 
             for (var followerIndex = 0; followerIndex < followerInfo.Count; followerIndex++)
             {
@@ -132,11 +133,24 @@ namespace GarrisonButler.Libraries.Wowhead
 
                 for (var abilityIndex = 0; abilityIndex < currentFollower.abilities.Count; abilityIndex++)
                 {
-                    
+                    var currentAbility = (Hashtable)g_garrison_abilities[currentFollower.abilities[abilityIndex].ToString()];
+                    var type = (ArrayList) currentAbility["type"];
+                    var numTypes = type.Count;
+
+                    for (var typeIndex = 0; typeIndex < numTypes; typeIndex++)
+                    {
+                        if (type[typeIndex].ToString().ToInt32() == 18)
+                        {
+                            if (currentFollower.level > level)
+                                level = currentFollower.level;
+                            if (currentFollower.avgilvl > itemlevel)
+                                itemlevel = currentFollower.avgilvl;
+                        }
+                    }
                 }
             }
 
-            return returnValue;
+            return new Tuple<int, int>(level, itemlevel);
         }
 
         //public static double fround(float b)
