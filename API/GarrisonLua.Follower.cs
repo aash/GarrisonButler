@@ -45,6 +45,10 @@ namespace GarrisonButler.API
 
             //TEST JSON
             MissionCalc.LoadJSONData();
+            foreach (Mission m in missions)
+            {
+                MissionCalc.mission = m;
+            }
             //TEST JSON
 
             missions.ForEach(f =>

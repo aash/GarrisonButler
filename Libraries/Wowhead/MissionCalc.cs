@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization.Json;
 using GarrisonButler.Libraries;
 using GarrisonButler.Libraries.JSON;
 using Styx.Helpers;
@@ -13,10 +14,10 @@ namespace GarrisonButler.Libraries.Wowhead
     public class MissionCalc
     {
         //public static string jsonString = System.IO.File.ReadAllText(ResourceWebUI.follower_data);
-        public static ArrayList g_garrison_followers { get; set; }
-        public static ArrayList g_garrison_abilities { get; set; }
-        public static ArrayList g_garrison_mechanics { get; set; }
-        public static ArrayList g_garrison_missions { get; set; }
+        public static Hashtable g_garrison_followers { get; set; }
+        public static Hashtable g_garrison_abilities { get; set; }
+        public static Hashtable g_garrison_mechanics { get; set; }
+        public static Hashtable g_garrison_missions { get; set; }
         public static Hashtable wowheadMissionObject { get; set; }
         private static Mission _mission;
 
@@ -29,11 +30,28 @@ namespace GarrisonButler.Libraries.Wowhead
             set
             {
                 _mission = value;
-                foreach (Hashtable currentMission in g_garrison_missions)
+                string missionCalcPage = "";
+                using (var client = new WebClient())
                 {
-                    if (currentMission["id"].ToString().ToInt32() == value.MissionId.ToInt32())
-                        wowheadMissionObject = currentMission;
+                    missionCalcPage = client.DownloadString("http://www.wowhead.com/mission=" + value.MissionId);
                 }
+                missionCalcPage = missionCalcPage.Replace("\r\n", "\n");
+                var startString = "new MissionCalc(";
+                var startAdjust = startString.Length;
+                var startingIndex = missionCalcPage.IndexOf(startString);
+                var endString = "} });\n</script>";
+                var endAdjust = ("} }").Length;
+                var endingIndex = missionCalcPage.IndexOf(endString);
+                var missionCalcJSON = missionCalcPage.Substring(startingIndex + startAdjust,
+                    (endingIndex + endAdjust) - (startingIndex + startAdjust));
+                var missionJSON = missionCalcJSON.Substring(missionCalcJSON.IndexOf("mission: ") + 9, missionCalcJSON.LastIndexOf("}") - (missionCalcJSON.IndexOf("mission: ") + 8));
+                var decoded = JSON.JSON.JsonDecode(missionJSON);
+                wowheadMissionObject = (Hashtable) decoded;
+                //foreach (Hashtable currentMission in g_garrison_missions)
+                //{
+                //    if (currentMission["id"].ToString().ToInt32() == value.MissionId.ToInt32())
+                //        wowheadMissionObject = currentMission;
+                //}
             }
         }
 
@@ -69,13 +87,13 @@ namespace GarrisonButler.Libraries.Wowhead
                 var jsonStringWithoutLine1Line2 = jsonStringWithoutLine1.Substring(jsonStringWithoutLine1.IndexOf(";\n") + 1);
                 var line3 = jsonStringWithoutLine1Line2;
                 line3 = line3.Replace("var g_garrison_mechanics = ", "");
-                g_garrison_followers = (ArrayList)JSON.JSON.JsonDecode(line1);
-                g_garrison_abilities = (ArrayList)JSON.JSON.JsonDecode(line2);
-                g_garrison_mechanics = (ArrayList)JSON.JSON.JsonDecode(line3);
+                g_garrison_followers = (Hashtable)JSON.JSON.JsonDecode(line1);
+                g_garrison_abilities = (Hashtable)JSON.JSON.JsonDecode(line2);
+                g_garrison_mechanics = (Hashtable)JSON.JSON.JsonDecode(line3);
 
-                var jsonString2 = ResourceWebUI.mission_data;   //https://www.wowhead.com/data=missions&locale=0&7w19342
-                jsonString2 = jsonString2.Replace("\r\n", "\n");
-                g_garrison_missions = (ArrayList)JSON.JSON.JsonDecode(jsonString2);
+                //var jsonString2 = ResourceWebUI.mission_data;   //https://www.wowhead.com/data=missions&locale=0&7w19342
+                //jsonString2 = jsonString2.Replace("\r\n", "\n");
+                //g_garrison_missions = (ArrayList)JSON.JSON.JsonDecode(jsonString2);
                 //foreach (var a in (ArrayList)g_garrison_missions)
                 //{
                 //    foreach(DictionaryEntry entry in (Hashtable)a)

@@ -61,6 +61,10 @@
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
     <Compile Include="Libraries\JSON\JSON.cs" />
+    <Compile Include="Libraries\JSON\SimpleJSON\JObject.cs" />
+    <Compile Include="Libraries\JSON\SimpleJSON\JSONDecoder.cs" />
+    <Compile Include="Libraries\JSON\SimpleJSON\JSONEncoder.cs" />
+    <Compile Include="Libraries\JSON\SimpleJSON\JSONStreamEncoder.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
     <Compile Include="Libraries\Wowhead\FollowerInfo.cs" />
