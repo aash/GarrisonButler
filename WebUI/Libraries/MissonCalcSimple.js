@@ -403,65 +403,73 @@ GetFollowerBias: function(d, c) {
 
 //====================================================================
 CalcChance: function(b, a, c) {
-    // ability.amount2 and ability.amount3 come from g_garrison_abilities
-    // b = ability.amount2
-    // a = ability.amount3
-    // c = bias
-   var d;
-   if (c >= 0) {
-      d = (a - b) * c + b
-   } else {
-      d = (c + 1) * b
-   }
-   return d
-}
+          // ability.amount2 and ability.amount3 come from g_garrison_abilities
+          // b = ability.amount2
+          // a = ability.amount3
+          // c = bias
+          var d;
+          if (c >= 0) {
+              d = (a - b) * c + b
+          } else {
+              d = (c + 1) * b
+          }
+          return d
+      }
 
 //==================================================================
-GetMissionTimes: function(g) {
-   var e = this.mission.missiontime;    // "missiontime"
-   var h = this.mission.traveltime;     // "traveltime"
-    // Loops all followers
-   for (var c = 0; c < g.length; ++c) {
-      var d = g[c]; // current follower
-       // Loop all follower abilities
-      for (var b = 0; b < d.abilities.length; ++b) {
-         var a = g_garrison_abilities[d.abilities[b]];  // current ability
-         var f = a.type.length; // number of types of this ability
-          // Loop all the types of this ability
-         for (var k = 0; k < f; ++k) {
-             // None appear to have type 3 - this would decrease travel time
-             // Don't think travel time matters anymore, looks like they removed it
-            if (a.type[k] == 3) {
-               h *= a.amount4[k]
-            }
-             // Epic Mount - 17 - this decreases mission time
-            if (a.type[k] == 17) {
-               e *= a.amount4[k]
-            }
-         }
-      }
-   }
-   return {
-      missiontime: Math.floor(e),
-      traveltime: Math.floor(h)
-   }
-}
+       GetMissionTimes: function(g) {
+           var e = this.mission.missiontime;    // "missiontime"
+           var h = this.mission.traveltime;     // "traveltime"
+           // Loops all followers
+           for (var c = 0; c < g.length; ++c) {
+               var d = g[c]; // current follower
+               // Loop all follower abilities
+               for (var b = 0; b < d.abilities.length; ++b) {
+                   var a = g_garrison_abilities[d.abilities[b]];  // current ability
+                   var f = a.type.length; // number of types of this ability
+                   // Loop all the types of this ability
+                   for (var k = 0; k < f; ++k) {
+                       // None appear to have type 3 - this would decrease travel time
+                       // Don't think travel time matters anymore, looks like they removed it
+                       if (a.type[k] == 3) {
+                           h *= a.amount4[k]
+                       }
+                       // Epic Mount - 17 - this decreases mission time
+                       if (a.type[k] == 17) {
+                           e *= a.amount4[k]
+                       }
+                   }
+               }
+           }
+           return {
+               missiontime: Math.floor(e),
+               traveltime: Math.floor(h)
+           }
+       }
 
 //===========================================================
-CheckEffectRace: function(c, a, d) {
-   if (this.mission.followers > 0) {
-      for (var e = 0; e < c.length; ++e) {
-         if (e == d) {
-            continue
-         }
-         var f = c[e];
-         var b = g_garrison_followers && g_garrison_followers[f.follower] && g_garrison_followers[f.follower][this.side] ? g_garrison_followers[f.follower][this.side] : null;
-         if (b == null) {
-            continue
-         }
-         if (b.race == a) {
-            return true
-         }
+       CheckEffectRace: function(c, a, d) {
+           // s = followers object
+           // F = current ability
+           // E = current ability index
+           // w = current follower index
+           //if (this.CheckEffectRace.call(this, s, F.race[E], w)) {
+           // c = follower object
+           // a = race
+           // d = current follower index
+           if (this.mission.followers > 0) {
+               for (var e = 0; e < c.length; ++e) {
+                   if (e == d) {
+                       continue
+                   }
+                   var f = c[e];
+                   var b = g_garrison_followers && g_garrison_followers[f.follower] && g_garrison_followers[f.follower][this.side] ? g_garrison_followers[f.follower][this.side] : null;
+                   if (b == null) {
+                       continue
+                   }
+                   if (b.race == a) {
+                       return true
+                   }
       }
    }
    return false

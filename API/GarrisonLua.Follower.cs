@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -42,21 +43,44 @@ namespace GarrisonButler.API
             var numMissions = missions.Count;
             var numFollowers = followers.Count;
             var numRewards = rewards.Count;
+            DateTime missionCodeStartedAt = DateTime.Now;
+            long combosTried = 0;
+            double totalSuccessChance = 0;
 
             //TEST JSON
             MissionCalc.LoadJSONData();
-            foreach (Mission m in missions)
-            {
-                MissionCalc.mission = m;
-            }
             int count = 0;
-            var toAdd = new List<Follower>();
-            while (count < 3)
-            {
-                toAdd.Add(followers[count]);
-                count++;
-            }
-            MissionCalc.followers = toAdd;
+
+
+
+            //var toAdd = new List<Follower>();
+            //while (count < 3)
+            //{
+            //    toAdd.Add(followers[count]);
+            //    count++;
+            //}
+            //MissionCalc.followers = toAdd;
+
+
+            //foreach (Mission m in missions)
+            //{
+            //    MissionCalc.mission = m;
+            //    GarrisonButler.Diagnostic("** Mission = {0} **", m.Name);
+            //    for (int offset = 0; offset < numFollowers; offset += m.NumFollowers)
+            //    {
+            //        MissionCalc.followers = followers.GetRange(offset, m.NumFollowers);
+            //        count = 0;
+            //        while (count < MissionCalc.followers.Count)
+            //        {
+            //            GarrisonButler.Diagnostic("  Follower {0}: {1}", (count + 1).ToString(),
+            //                MissionCalc.followers[count]);
+            //            count++;
+            //        }
+            //        var result = MissionCalc.CalculateSuccessChance();
+            //        GarrisonButler.Diagnostic("  Success: " + result.Item1);
+            //        GarrisonButler.Diagnostic("  ChanceOver: " + result.Item2);
+            //    }
+            //}
             //TEST JSON
 
             missions.ForEach(f =>
@@ -182,12 +206,65 @@ namespace GarrisonButler.API
                 GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
                 followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
 
+                DateTime startedAt = DateTime.Now;
                 foreach (var mission in missionsThatMeetRequirement)
                 {
                     Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
-                    GarrisonButler.Diagnostic("**Combination**");
-                    GarrisonButler.Diagnostic("Mission: " + mission.Name);
-                    GarrisonButler.Diagnostic("Combinations: " + followerCombinations.Count);
+                    //GarrisonButler.Diagnostic("**Combination**");
+                    //GarrisonButler.Diagnostic("Mission: " + mission.Name);
+                    //GarrisonButler.Diagnostic("Combinations: " + followerCombinations.Count);
+
+                    MissionCalc.mission = mission;
+                    //for (int offset = 0; offset < numFollowers; offset += mission.NumFollowers)
+                    //{
+                    var bestCombo = followerCombinations.FirstOrDefault();
+                    var bestSuccess = 0.0d;
+                    List<Tuple<IList<Follower>, double>> successChances = new List<Tuple<IList<Follower>, double>>();
+                    foreach (var combo in followerCombinations)
+                    {
+                        //MissionCalc.followers = followers.GetRange(offset, mission.NumFollowers);
+                        MissionCalc.followers = combo.ToList();
+                        //MissionCalc.followers.ForEach(f => GarrisonButler.Diagnostic("  Follower: " + f));
+                        //count = 0;
+                        //while (count < MissionCalc.followers.Count)
+                        //{
+                        //    GarrisonButler.Diagnostic("  Follower {0}: {1}", (count + 1).ToString(),
+                        //        MissionCalc.followers[count]);
+                        //    count++;
+                        //}
+                        var result = MissionCalc.CalculateSuccessChance();
+                        //GarrisonButler.Diagnostic("  Success: " + result.Item1);
+                        //GarrisonButler.Diagnostic("  ChanceOver: " + result.Item2);
+                        successChances.Add(new Tuple<IList<Follower>, double>(combo, result.Item1));
+                    }
+
+                    if (bestCombo != null)
+                    {
+                        combosTried += followerCombinations.Count;
+                        GarrisonButler.Diagnostic("************* BEGIN Mission=" + mission.Name + "**************");
+                        GarrisonButler.Diagnostic("Total combinations tried = " + followerCombinations.Count);
+                        GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations", startedAt);
+                        var first = successChances.OrderByDescending(sc => sc.Item2).FirstOrDefault();
+                        if (first != null)
+                        {
+                            bestCombo = first.Item1;
+                            bestSuccess = first.Item2;
+                        }
+                        GarrisonButler.Diagnostic("Best Combination with success=" + bestSuccess  + "% for Mission=" + mission.Name + " is ");
+                        bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
+                        successChances.ForEach(c =>
+                        {
+                            //GarrisonButler.Diagnostic(" >> Combo << ");
+                            //c.Item1.ForEach(i => GarrisonButler.Diagnostic(" -> Follower: " + i.Name));
+                            //GarrisonButler.Diagnostic(" = " + c.Item2 + "% success");
+                            totalSuccessChance += c.Item2;
+                        });
+                        GarrisonButler.Diagnostic("Followers before removal: " + followersToConsider.Count);
+                        bestCombo.ForEach(c => followersToConsider.RemoveAll(f => f.FollowerId == c.FollowerId));
+                        GarrisonButler.Diagnostic("Followers after removal: " + followersToConsider.Count);
+                        GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+                    }
+                    //}
 
                     //using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
                     //{
@@ -261,6 +338,13 @@ namespace GarrisonButler.API
 
                 //Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider.ToList(), );
             }
+
+            GarrisonButler.Diagnostic("Done with Mission Calculations");
+            GarrisonButler.Diagnostic("Total combinations = " + combosTried);
+            GarrisonButler.Diagnostic("Total missions = " + missions.Count);
+            GarrisonButler.Diagnostic("Total followers = " + followers.Count);
+            GarrisonButler.Diagnostic("Average success chance = " + totalSuccessChance / (double)combosTried + "%");
+            GarrisonButler.DiagnosticLogTimeTaken("Mission Stub Code", missionCodeStartedAt);
             // Sort missions by highest quantity
             // Pick the missions off the list matching the current reward
             // Discard any missions where the reward is set to "disallowed"
@@ -456,8 +540,6 @@ namespace GarrisonButler.API
                     "elseif f.status == GARRISON_FOLLOWER_INACTIVE then Temp[2] = 5;" +
                     "else Temp[2] = 0;" +
                     "end;" + 
-                    "print(f.name);" + 
-                    "print(f.status);" + 
                     "Temp[3] = f.ClassSpecName;" +
                     "Temp[4] = f.quality;" +
                     "Temp[5] = f.level;" +
@@ -465,9 +547,10 @@ namespace GarrisonButler.API
                     "Temp[7] = f.iLevel;" +
                     "Temp[8] = f.levelXP;" +
                     "Temp[9] = f.xp;" +
+                    "Temp[10] = f.followerID;" +
                     "end;" +
                     "end;" +
-                    "for j_=0,9 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
+                    "for j_=0,10 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", followerId);
             var follower = Lua.GetReturnValues(lua);
 
@@ -483,8 +566,9 @@ namespace GarrisonButler.API
             var iLevel = follower[7].ToInt32();
             var xp = follower[8].ToInt32();
             var levelXp = follower[9].ToInt32();
+            var uniqueId = follower[10];
 
-            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", followerId) +
+            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", uniqueId != "nil" ? uniqueId : followerId) +
                   "local RetInfo = {};" +
                   "for a = 1, #abilities do " +
                   "local ability= abilities[a];" +
@@ -496,7 +580,7 @@ namespace GarrisonButler.API
 
             var counters = Lua.GetReturnValues(lua);
 
-            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", followerId) +
+            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", uniqueId != "nil" ? uniqueId : followerId) +
                   "local RetInfo = {};" +
                   "for a = 1, #abilities do " +
                   "local ability= abilities[a];" +
@@ -509,7 +593,7 @@ namespace GarrisonButler.API
             var abil_string = Lua.GetReturnValues(lua);
             var abilities = abil_string.Select(a => a.ToInt32()).ToList();
 
-            return new Follower(followerId, name, status, classSpecName, quality, level, isCollected, iLevel, xp,
+            return new Follower(followerId, uniqueId, name, status, classSpecName, quality, level, isCollected, iLevel, xp,
                 levelXp, counters, abilities);
         }
 

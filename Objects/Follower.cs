@@ -69,6 +69,7 @@ namespace GarrisonButler
         public readonly String Class;
         public readonly List<String> Counters;
         public readonly String FollowerId;
+        public readonly String UniqueId;
         public readonly int ItemLevel;
         public readonly bool IsCollected;
         public readonly int Level;
@@ -77,13 +78,14 @@ namespace GarrisonButler
         public readonly String Quality;
         public readonly String Status;
         public readonly int Xp;
-        public readonly List<int> Abilities; 
+        public readonly List<int> Abilities;
 
-        public Follower(string followerId, string name, string status,
+        public Follower(string followerId, string uniqueId, string name, string status,
             string Class_, String quality, int level, bool isCollected,
             int iItemLevel, int xp, int levelXp, List<String> counters, List<int> abilities )
         {
             FollowerId = followerId;
+            UniqueId = uniqueId;
             Name = name;
             Status = status;
             Class = Class_;

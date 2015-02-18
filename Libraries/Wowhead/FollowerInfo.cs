@@ -10,6 +10,7 @@ namespace GarrisonButler.Libraries.Wowhead
         public int avgilvl { get; set; }
         public int level { get; set; }
         public int quality { get; set; }
+        public double bias { get; set; }
 
         public FollowerInfo(Follower f)
         {
