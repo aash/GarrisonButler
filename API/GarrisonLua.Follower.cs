@@ -131,6 +131,12 @@ namespace GarrisonButler.API
             // Get the current top of the list reward
             foreach (var reward in rewards)
             {
+                if (followers.Count <= 0)
+                {
+                    GarrisonButler.Diagnostic("Breaking reward loop due to followers.Count = 0");
+                    break;
+                }
+
                 GarrisonButler.Diagnostic("-- Reward: {0} --", reward.Name);
 
                 // Discard any missions where the reward is set to "disallowed"
@@ -157,14 +163,11 @@ namespace GarrisonButler.API
                     continue;
                 }
 
-                foreach (var mission in missionsWithCurrentReward)
+                missionsWithCurrentReward.ForEach(m =>
                 {
-                    GarrisonButler.Diagnostic("  >> Mission: {0} <<", mission.Name);
-                    foreach (var mr in mission.Rewards)
-                    {
-                        GarrisonButler.Diagnostic("    ** Reward ({0}): {1} **", mr.Quantity, mr.Name);
-                    }
-                }
+                    GarrisonButler.Diagnostic("  >> Mission: {0} <<", m.Name);
+                    m.Rewards.ForEach(r => GarrisonButler.Diagnostic("    ** Reward ({0}): {1} **", r.Quantity, r.Name));
+                });
 
                 // Skip any missions that don't meet user requirements (quantity > X for example)
                 var missionsThatMeetRequirement = missionsWithCurrentReward
@@ -198,7 +201,7 @@ namespace GarrisonButler.API
                     // If reward type is FollowerXP, discard all level 100 epic followers
                     (
                     reward.Category == MissionReward.MissionRewardCategory.FollowerExperience
-                        ? followers.SkipWhile(f => f.Quality.ToInt32() > 4 && f.Level >= 100)
+                        ? followers.SkipWhile(f => f.Quality.ToInt32() > 3 && f.Level >= 100)
                         : followers
                     )
                     .ToList();
@@ -260,9 +263,18 @@ namespace GarrisonButler.API
                             totalSuccessChance += c.Item2;
                         });
                         GarrisonButler.Diagnostic("Followers before removal: " + followersToConsider.Count);
-                        bestCombo.ForEach(c => followersToConsider.RemoveAll(f => f.FollowerId == c.FollowerId));
+                        bestCombo.ForEach(c =>
+                        {
+                            followersToConsider.RemoveAll(f => f.FollowerId == c.FollowerId);
+                            followers.RemoveAll(f => f.FollowerId == c.FollowerId);
+                        });
                         GarrisonButler.Diagnostic("Followers after removal: " + followersToConsider.Count);
                         GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+                        if (followersToConsider.Count <= 0)
+                        {
+                            GarrisonButler.Diagnostic("Breaking mission loop due to followersToConsider = 0");
+                            break;
+                        }
                     }
                     //}
 
