@@ -243,7 +243,6 @@ namespace GarrisonButler.API
 
                     if (bestCombo != null)
                     {
-                        combosTried += followerCombinations.Count;
                         GarrisonButler.Diagnostic("************* BEGIN Mission=" + mission.Name + "**************");
                         GarrisonButler.Diagnostic("Total combinations tried = " + followerCombinations.Count);
                         GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations", startedAt);
@@ -252,7 +251,23 @@ namespace GarrisonButler.API
                         {
                             bestCombo = first.Item1;
                             bestSuccess = first.Item2;
+
+                            var sucChanceToCompareAgainst = reward.IndividualSuccessChanceEnabled
+                                ? reward.RequiredSuccessChance
+                                : GaBSettings.Get().DefaultMissionSuccessChance;
+
+                            if (Convert.ToInt32(bestSuccess) < sucChanceToCompareAgainst)
+                            {
+                                GarrisonButler.Diagnostic("Best combo doesn't meet minimum success chance requirements!");
+                                continue;
+                            }
                         }
+                        else
+                        {
+                            GarrisonButler.Diagnostic("Error retrieving success chance for best combo: bestCombo.Count={0}, successChances.Count={1}", bestCombo.GetEmptyIfNull().Count(), successChances.GetEmptyIfNull().Count());
+                            continue;
+                        }
+                        combosTried += followerCombinations.Count;
                         GarrisonButler.Diagnostic("Best Combination with success=" + bestSuccess  + "% for Mission=" + mission.Name + " is ");
                         bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
                         successChances.ForEach(c =>
