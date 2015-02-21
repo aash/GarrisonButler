@@ -54,6 +54,7 @@
     <Compile Include="ButlerCoroutines\Combat.cs" />
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
+    <Compile Include="Libraries\JSON\Class1.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
     <Compile Include="LuaObjects\LuaEvents.cs" />
@@ -63,6 +64,11 @@
     <Compile Include="Objects\MissionFollowerCombo.cs" />
     <Compile Include="Objects\Pigment.cs" />
     <Compile Include="Objects\SafeString.cs" />
+    <Compile Include="ResourceWebUI.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceWebUI.resx</DependentUpon>
+    </Compile>
     <None Include="App.config" />
     <Compile Include="API\GarrisonLua.Building.cs" />
     <Compile Include="API\GarrisonLua.Follower.cs" />
@@ -144,6 +150,8 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -156,6 +164,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Config\ConfigForm.resources" />
     <EmbeddedResource Include="Config\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -166,7 +175,15 @@
       <LastGenOutput>GarrisonButlerImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ResourceWebUI.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceWebUI.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,24 +1,29 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Windows;
 using System.Xml.Serialization;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using JetBrains.Annotations;
 using Styx.Helpers;
+using GarrisonButler.Libraries.JSON;
 
 #endregion
 
 namespace GarrisonButler.Config
 {
+    [ComVisible(true)]
     [XmlRoot("GarrisonButlerSettings")]
-    public class GaBSettings:INotifyPropertyChanged
+    public class GaBSettings : INotifyPropertyChanged
     {
         private List<Pigment> _pigments;
 
@@ -26,6 +31,363 @@ namespace GarrisonButler.Config
         {
             GreensToChar = new SafeString();
         }
+
+
+        #region interface
+
+        [ComVisible(true)]
+        public void UpdateBooleanValue(string propertyName, bool value)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            prop.SetValue(this, value);
+        }
+
+        [ComVisible(true)]
+        public bool GetBooleanValue(string propertyName)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            return (bool)prop.GetValue(this);
+        }
+
+        public struct BuildingJs
+        {
+            public int id;
+            public string name;
+            public string displayicon;
+            public bool canStartOrder;
+            public int maxCanStartOrder;
+            public bool canCollectOrder;
+            public bool available;
+        }
+
+        [ComVisible(true)]
+        //public string getBuildingsJs()
+        //{
+        //    return "";
+        //}
+        public string getBuildingsJs()
+        {
+            GarrisonButler.Diagnostic("Sending buildings to interface.");
+            var buildingsJs = new ArrayList();
+
+            var buildingsWithOrders = BuildingsSettings.GetEmptyIfNull()
+                .Where(bs => Building.HasOrder((Buildings) bs.BuildingIds.GetEmptyIfNull().FirstOrDefault())).ToList();
+            for (int i = 0; i < buildingsWithOrders.Count; i++)
+            {
+                buildingsJs.Add(buildingsWithOrders[i].BuildingIds.First());
+            }
+            var res = JSON.JsonEncode(buildingsJs);
+            GarrisonButler.Diagnostic("Json buildings: " + res);
+            return res;
+        }
+
+        public string getBuildingById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var buildingJs = new ArrayList();
+            var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            if (bSettings == default(BuildingSettings))
+                return "";
+
+            buildingJs.Add(bSettings.Name);
+            buildingJs.Add(bSettings.CanCollectOrder);
+            buildingJs.Add(bSettings.MaxCanStartOrder);
+            buildingJs.Add(bSettings.CanStartOrder);
+            buildingJs.Add(ButlerCoroutines.ButlerCoroutine._buildings.Any(
+                        b => bSettings.BuildingIds.Contains(b.Id)));
+
+            var res = JSON.JsonEncode(buildingJs);
+            GarrisonButler.Diagnostic("Json building: " + res);
+            return res;
+        }
+
+        public void saveBuildingCanCollectOrder(int id, bool canCollect)
+        {
+            GarrisonButler.Diagnostic("Save Value for canCollect, new value={0}", canCollect);
+            var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            if (bSettings == default(BuildingSettings))
+                return;
+
+            GarrisonButler.Diagnostic("Save Value for canCollect, old value={0}", bSettings.CanCollectOrder);
+            bSettings.CanCollectOrder = canCollect;
+        }
+        public void saveBuildingCanStartOrder(int id, bool canStart)
+        {
+            GarrisonButler.Diagnostic("Save Value for canStart, new value={0}", canStart);
+            var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            if (bSettings == default(BuildingSettings))
+                return;
+
+            GarrisonButler.Diagnostic("Save Value for CanStartOrder, old value={0}", bSettings.CanStartOrder);
+            bSettings.CanStartOrder = canStart;
+        }
+        public void saveBuildingMaxCanStart(int id, int maxCanStart)
+        {
+            GarrisonButler.Diagnostic("Save Value for maxCanStart, new value={0}", maxCanStart);
+            var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
+            if (bSettings == default(BuildingSettings))
+                return;
+
+            GarrisonButler.Diagnostic("Save Value for MaxCanStartOrder, old value={0}", bSettings.MaxCanStartOrder);
+            bSettings.MaxCanStartOrder = maxCanStart;
+        }
+
+        public string getDailyCdJs()
+        {
+            GarrisonButler.Diagnostic("Sending Daily CDs to interface.");
+            var dailiesJs = new ArrayList();
+
+            for (int i = 0; i < DailySettings.Count; i++)
+            {
+                dailiesJs.Add(DailySettings[i].ItemId);
+            }
+            var res = JSON.JsonEncode(dailiesJs);
+            GarrisonButler.Diagnostic("Json dailies: " + res);
+            return res;
+        }
+
+        public string getDailyCdById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var dailyJs = new ArrayList();
+            var dailySettings = DailySettings.FirstOrDefault(d => d.ItemId == id);
+            if (dailySettings == default(DailyProfession))
+                return "";
+
+            dailyJs.Add(dailySettings.Name);
+            dailyJs.Add(dailySettings.TradeskillId.ToString());
+            dailyJs.Add(dailySettings.Activated);
+
+            var res = JSON.JsonEncode(dailyJs);
+            GarrisonButler.Diagnostic("Json daily: " + res);
+            return res;
+        }
+
+        public void saveDailyCd(int itemId, bool activated)
+        {
+            var cdSettings = DailySettings.FirstOrDefault(d => d.ItemId == itemId);
+            if (cdSettings == default(DailyProfession))
+            {
+                GarrisonButler.Diagnostic("Could not find settings for {0}.", itemId);
+                return;
+            }
+            GarrisonButler.Diagnostic("Save dailyCD {0}, old={1}, new={2}", itemId, cdSettings.Activated, activated);
+            cdSettings.Activated = activated;
+        }
+
+
+
+
+
+        public string getMillingJs()
+        {
+            GarrisonButler.Diagnostic("Sending Milling items to interface.");
+            var millingJs = new ArrayList();
+
+            for (int i = 0; i < Pigments.FirstOrDefault().MilledFrom.Count; i++)
+            {
+                millingJs.Add(Pigments.FirstOrDefault().MilledFrom[i].ItemId);
+            }
+            var res = JSON.JsonEncode(millingJs);
+            GarrisonButler.Diagnostic("Json milling: " + res);
+            return res;
+        }
+
+        public string getMillingById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var millingJs = new ArrayList();
+            var millingSetting = Pigments.FirstOrDefault().MilledFrom.FirstOrDefault(d => d.ItemId == id);
+            if (millingSetting == default(SourcePigment))
+                return "";
+
+            millingJs.Add(millingSetting.Name);
+            millingJs.Add(millingSetting.Activated);
+
+            var res = JSON.JsonEncode(millingJs);
+            GarrisonButler.Diagnostic("Json milling item: " + res);
+            return res;
+        }
+
+        public void saveMillingItem(int itemId, bool activated)
+        {
+            var millingSettings = Pigments.FirstOrDefault().MilledFrom.FirstOrDefault(d => d.ItemId == itemId);
+            if (millingSettings == default(SourcePigment))
+            {
+                GarrisonButler.Diagnostic("Could not find settings for milling item {0}.", itemId);
+                return;
+            }
+            GarrisonButler.Diagnostic("Save milling item {0}, old={1}, new={2}", itemId, millingSettings.Activated, activated);
+            millingSettings.Activated = activated;
+        }
+
+
+
+        public string getTPJs()
+        {
+            GarrisonButler.Diagnostic("Sending TP items to interface.");
+            var tpJs = new ArrayList();
+
+            for (int i = 0; i < TradingPostReagentsSettings.Count; i++)
+            {
+                tpJs.Add(TradingPostReagentsSettings[i].ItemId);
+            }
+            var res = JSON.JsonEncode(tpJs);
+            GarrisonButler.Diagnostic("Json tp: " + res);
+            return res;
+        }
+
+        public string getTPById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var tpJs = new ArrayList();
+            var tpSettings = TradingPostReagentsSettings.FirstOrDefault(d => d.ItemId == id);
+            if (tpSettings == default(BItem))
+                return "";
+
+            tpJs.Add(tpSettings.Name);
+            tpJs.Add(tpSettings.Activated);
+
+            var res = JSON.JsonEncode(tpJs);
+            GarrisonButler.Diagnostic("Json tp item: " + res);
+            return res;
+        }
+
+        public void saveTPItem(int itemId, bool activated)
+        {
+            var tpSettings = TradingPostReagentsSettings.FirstOrDefault(d => d.ItemId == itemId);
+            if (tpSettings == default(BItem))
+            {
+                GarrisonButler.Diagnostic("Could not find settings for tp item {0}.", itemId);
+                return;
+            }
+            GarrisonButler.Diagnostic("Save tp item {0}, old={1}, new={2}", itemId, tpSettings.Activated, activated);
+            tpSettings.Activated = activated;
+        }
+
+
+        public string getMailsJs()
+        {
+            GarrisonButler.Diagnostic("Sending mail items to interface.");
+            var mailsJs = new ArrayList();
+
+            for (int i = 0; i < MailItems.Count; i++)
+            {
+                mailsJs.Add(MailItems[i].ItemId);
+            }
+            var res = JSON.JsonEncode(mailsJs);
+            GarrisonButler.Diagnostic("Json mail: " + res);
+            return res;
+        }
+
+
+        public string getMailConditions()
+        {
+            GarrisonButler.Diagnostic("Sending mail conditions to interface.");
+            var conditionsJs = new ArrayList();
+            var conditions = MailCondition.GetAllPossibleConditions();
+            for (int i = 0; i < conditions.Count; i++)
+            {
+                conditionsJs.Add(conditions[i].ToString());
+            }
+            var res = JSON.JsonEncode(conditionsJs);
+            GarrisonButler.Diagnostic("Json mail conditions: " + res);
+            return res;
+        }
+
+        public string getMailById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var mailJs = new ArrayList();
+            var mailSettings = MailItems.FirstOrDefault(d => d.ItemId == id);
+            if (mailSettings == default(MailItem))
+                return "";
+
+            mailJs.Add(mailSettings.Recipient.Value);
+            mailJs.Add(mailSettings.Condition.Name);
+            mailJs.Add(mailSettings.CheckValue);
+            mailJs.Add(mailSettings.Comment);
+
+            var res = JSON.JsonEncode(mailJs);
+            GarrisonButler.Diagnostic("Json mail item: " + res);
+            return res;
+        }
+
+        public void deleteMailById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var mailSettings = MailItems.FirstOrDefault(d => d.ItemId == id);
+            if (mailSettings == default(MailItem))
+                return;
+
+            MailItems.Remove(mailSettings);
+        }
+
+        public void saveMail(string mailJson)
+        {
+            GarrisonButler.Diagnostic("Save mail element: " + mailJson);
+            try
+            {
+                ArrayList mail = JSON.JsonDecode(mailJson) as ArrayList;
+                GarrisonButler.Diagnostic("Save mail element decoded: ");
+                ObjectDumper.WriteToHb(mail,3);
+
+                var condition = MailCondition.GetAllPossibleConditions().FirstOrDefault(c => c.Name == mail[2].ToString());
+
+                MailItem mailItem = new MailItem(
+                    (uint)mail[0].ToString().ToInt32(),
+                    mail[1].ToString(),
+                    condition,
+                    mail[3].ToString().ToInt32(),
+                    (mail[4] ?? "").ToString());
+
+                var current = MailItems.FirstOrDefault(m => m.ItemId == mailItem.ItemId);
+                if (current != null)
+                {
+                    GarrisonButler.Diagnostic("Updating mail element from: " + current.ToString());
+                    GarrisonButler.Diagnostic("Updating mail element to: " + mailItem.ToString());
+                    current.ItemId = mailItem.ItemId;
+                    current.Condition = mailItem.Condition;
+                    current.Recipient = mailItem.Recipient;
+                    current.CheckValue = mailItem.CheckValue;
+                    current.Comment = mailItem.Comment;
+                }
+                else
+                {
+                    GarrisonButler.Diagnostic("Adding mail element: " + mailItem.ToString());
+                    MailItems.Add(mailItem);
+                }
+            }
+            catch (Exception e)
+            {
+                GarrisonButler.Diagnostic(e.ToString());
+            }
+        }
+
+        //public void saveTPItem(int itemId, bool activated)
+        //{
+        //    var tpSettings = TradingPostReagentsSettings.FirstOrDefault(d => d.ItemId == itemId);
+        //    if (tpSettings == default(BItem))
+        //    {
+        //        GarrisonButler.Diagnostic("Could not find settings for tp item {0}.", itemId);
+        //        return;
+        //    }
+        //    GarrisonButler.Diagnostic("Save tp item {0}, old={1}, new={2}", itemId, tpSettings.Activated, activated);
+        //    tpSettings.Activated = activated;
+        //}
+
+
+
+        public void diagnosticJs(string message)
+        {
+            GarrisonButler.Diagnostic("[UI] " + message);
+        }
+
+            #endregion
+
+
 
         [XmlIgnore]
         public static GaBSettings CurrentSettings { get; set; }
@@ -85,8 +447,7 @@ namespace GarrisonButler.Config
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
-
-
+        
         private static GaBSettings DefaultConfig()
         {
             var ret = new GaBSettings
@@ -231,7 +592,6 @@ namespace GarrisonButler.Config
             return true;
         }
 
-       
 
         public static void Save()
         {

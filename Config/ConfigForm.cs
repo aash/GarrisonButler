@@ -1,10 +1,12 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -21,26 +23,188 @@ using Label = System.Windows.Controls.Label;
 using Orientation = System.Windows.Controls.Orientation;
 using TabControl = System.Windows.Controls.TabControl;
 using TextBox = System.Windows.Controls.TextBox;
+using WebBrowser = System.Windows.Forms.WebBrowser;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 #endregion
 
 namespace GarrisonButler.Config
 {
+    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class ConfigForm : Form
     {
         private static MyWindow _myWindow;
         private static List<CheckBox> _collectCheckBoxes;
         private static List<CheckBox> _startCheckBoxes;
-
+        public string firstName = "Manas";
         public ConfigForm()
         {
-            Close();
-            if (_myWindow == null)
-                _myWindow = new MyWindow();
+            InitializeComponent();
 
-            _myWindow.Activate();
-            _myWindow.Show();
+            ////Close();
+            //if (_myWindow == null)
+            //    _myWindow = new MyWindow();
+            
+            //_myWindow.Activate();
+            //_myWindow.Show();
         }
+        public void Test(String message)
+        {
+            MessageBox.Show(message, "client code");
+        }
+        public string Test2()
+        {
+            return "my Message";
+        }
+        private void ConfigForm_Load_1(object sender, EventArgs e)
+        {
+            var html = ResourceWebUI.mainUI_html;
+            html = ReplaceFromFilesToResources(html);
+            
+            webBrowser1.ScriptErrorsSuppressed = false;
+            webBrowser1.AllowWebBrowserDrop = false;
+            
+            webBrowser1.IsWebBrowserContextMenuEnabled = true;
+            webBrowser1.WebBrowserShortcutsEnabled = false;
+            webBrowser1.ObjectForScripting = GaBSettings.Get();
+            webBrowser1.DocumentText = html;
+
+            //var window = webBrowser1.Document.Window;
+            //return window.GetType().InvokeMember(propertyName, BindingFlags.GetProperty, null, window, null);
+
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            //do my stuff before closing
+            GaBSettings.Save();
+            base.OnClosing(e);
+        }
+
+        private string ReplaceFromFilesToResources(string html)
+        {
+            Dictionary<string, string> dictJs = new Dictionary<string, string>()
+            {
+                {"<script src=\"./mainUI.js\"></script>", ResourceWebUI.mainUI_js},
+                
+                {"<script src=\"./Modules/general-tab.module.js\"></script>", ResourceWebUI.general_tab_module_js},
+
+                {"<script src=\"./Modules/work-order-tab.module.js\"></script>", ResourceWebUI.work_order_tab_module_js},
+
+                {"<script src=\"./Modules/profession-tab.module.js\"></script>", ResourceWebUI.profession_tab_module_js},
+
+                {"<script src=\"./Modules/mailing-tab.module.js\"></script>", ResourceWebUI.mailing_tab_module_js},
+
+                {"<script src=\"./Modules/milling-tab.module.js\"></script>", ResourceWebUI.milling_tab_module_js},
+
+                {"<script src=\"./Modules/trading-post.module.js\"></script>", ResourceWebUI.trading_post_module},
+
+                {"<script src=\"./Libraries/SmartTable/smart-table.min.js\"></script>", ResourceWebUI.smart_table_min},
+
+                {"<script src=\"./Libraries/slider/slider.js\"></script>", ResourceWebUI.slider_js},
+
+                {"<script src=\"./Libraries/angular-xeditable/js/xeditable.min.js\"></script>", ResourceWebUI.xeditable_min_js},
+
+                //{"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourceWebUI.angular_min_js},
+                
+                //{"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourceWebUI.angular_route_min_js},
+     
+            };
+            Dictionary<string, string> dictCss = new Dictionary<string, string>()
+            {
+                {"<link rel=\"stylesheet\" href=\"./Libraries/angular-xeditable/css/xeditable.css\" />", ResourceWebUI.xeditable_css},
+
+                {"<link rel=\"stylesheet\" href=\"./mainUI.css\" />", ResourceWebUI.mainUI_css},
+                
+            };
+            foreach (var file in dictJs)
+            {
+                if (file.Key == null)
+                {
+                    MessageBox.Show("Key null");
+
+                }
+                else if (file.Value == null)
+                {
+                    MessageBox.Show("value null for key: " + file.Key);
+                }
+                else
+                {
+                    html = html.Replace(file.Key, "<script>" + file.Value + "</script>");
+                }
+            }
+            foreach (var file in dictCss)
+            {
+                if (file.Key == null)
+                {
+                    MessageBox.Show("css Key null");
+
+                }
+                else if (file.Value == null)
+                {
+                    MessageBox.Show("css value null for key: " + file.Key);
+                }
+                else
+                {
+                    html = html.Replace(file.Key, "<style>" + file.Value + "</style>");
+                }
+            }
+            return html;
+        }
+
+
+
+
+
+
+
+
+        [ComVisible(true)]
+        public class ViewInterface
+        {
+            private static ViewInterface instance;
+            public static ViewInterface Instance
+            {
+                get { return instance ?? new ViewInterface(); }
+                set { instance = value; }
+            }
+            
+            private ViewInterface()
+            {}
+
+
+            [ComVisible(true)]
+            public void UpdateBooleanValue(string propertyName, bool value)
+            {
+                var prop = GetType().GetProperty(propertyName);
+                GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+                prop.SetValue(this, value);
+            }
+
+            [ComVisible(true)]
+            public bool GetBooleanValue(string propertyName)
+            {
+                var prop = GetType().GetProperty(propertyName);
+                GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+                return (bool)prop.GetValue(this);
+            }
+            
+        
+        
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         public class MyWindow : Window
         {
@@ -368,15 +532,16 @@ namespace GarrisonButler.Config
             {
                 var mainFrame = new ScrollViewer {VerticalScrollBarVisibility = ScrollBarVisibility.Auto};
 
-                var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
+                //var mainWrapPanel = new WrapPanel {Orientation = Orientation.Vertical, Width = double.NaN};
 
-                var submit = new Button {Content = "Submit"};
-                submit.Click += SendBugReport;
-                mainWrapPanel.Children.Add(submit);
+                //var submit = new Button {Content = "Submit"};
+                //submit.Click += SendBugReport;
+                //mainWrapPanel.Children.Add(submit);
 
-                mainFrame.Content = mainWrapPanel;
+                //mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
+           
 
             private static object ContentTabSplash()
             {
@@ -601,5 +766,6 @@ namespace GarrisonButler.Config
                 }
             }
         }
+
     }
 }
