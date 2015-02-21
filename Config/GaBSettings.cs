@@ -51,6 +51,12 @@ namespace GarrisonButler.Config
             return (bool)prop.GetValue(this);
         }
 
+        [ComVisible(true)]
+        public string GetVersionNumber()
+        {
+            return ConfigVersion.ToString();
+        }
+
         public struct BuildingJs
         {
             public int id;
