@@ -278,7 +278,7 @@ namespace GarrisonButler.Config
                 mailsJs.Add(MailItems[i].ItemId);
             }
             var res = JSON.JsonEncode(mailsJs);
-            GarrisonButler.Diagnostic("Json mail: " + res);
+            GarrisonButler.Diagnostic("Json mail computed.");
             return res;
         }
 
