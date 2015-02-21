@@ -3,13 +3,14 @@
  */
 
 // General Tab
-angular.module('GarrisonButlerApp.general-tab', ['mobile-angular-ui', 'ngMaterial', 'ngAria', 'ngTouch'])
+angular.module('GarrisonButlerApp.general-tab', ['ngMaterial', 'uiSwitch'])
 
-    .controller('switchListController', function ($scope) {
+    .controller('GeneralOptionsController', function ($scope) {
 
         // Represents a variable name, a title and a description
         $scope.Entry = function Entry(variableName, label, description, displayicon) {
             this.variableName = variableName;
+            this.value = false;
             this.label = label;
             this.description = description;
             this.displayicon = displayicon;
@@ -109,57 +110,64 @@ angular.module('GarrisonButlerApp.general-tab', ['mobile-angular-ui', 'ngMateria
                 'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_17.jpg')
         ];
 
-
         $scope.items = $scope.butlerSettings.general;
 
+        $scope.selectAll = function(val)
+        {
+            for (var i = 0; i < $scope.items.length; i++)
+            {
+                $scope.items[i].value = val;
+            }
+        };
     })
 
-    .controller('switchController', function ($scope, $mdDialog) {
+    .controller('switchController', function ($scope) {
         $scope.init = function (item) {
             $scope.propertyName = item.variableName;
             $scope.propertyTitle = item.label;
             $scope.propertyDescription = item.description;
-            try {
-                $scope.value = $scope.loadCSharpBool($scope.propertyName);
-            } catch (e) {
 
+            $scope.$watch(
+                'item.value',
+                function (newValue, oldValue)
+                {
+                    $scope.saveCSharpBool($scope.propertyName, newValue);
+                }
+            );
+
+            try
+            {
+                item.value = $scope.loadCSharpBool($scope.propertyName);
             }
-
-            $scope.alert = '';
-
-            $scope.visible = false;
-
-            document.addEventListener("keyup", function(e) {
-                if (e.keyCode === 27)
-                    $scope.$apply(function() {
-                        if ($scope.visible === true)
-                        {
-                            $scope.close();
-                            $scope.visible = false;
-                        }
-                    });
-            });
-        };
-
-        $scope.close = function() {
-            $scope.visible = false;
-            $scope.close();
-        };
-
-        $scope.save = function () {
-            $scope.saveCSharpBool($scope.propertyName, $scope.value);
-        };
-
-        $scope.showAlert = function(ev) {
-            $scope.visible = true;
-            //$mdDialog.show(
-            //    $mdDialog.alert()
-            //        .title($scope.propertyTitle)
-            //        .content($scope.propertyDescription)
-            //        .ariaLabel('Password notification')
-            //        .ok('Got it!')
-            //        .targetEvent(ev)
-            //);
+            catch (e)
+            {
+            }
         };
     });
 
+angular.module('uiSwitch', [])
+
+    .directive('switch', function(){
+        return {
+            restrict: 'AE'
+            , replace: true
+            , transclude: true
+            , template: function(element, attrs) {
+                var html = '';
+                html += '<span';
+                html +=   ' class="switch' + (attrs.class ? ' ' + attrs.class : '') + '"';
+                html +=   attrs.ngModel ? ' ng-click="' + attrs.ngModel + '=!' + attrs.ngModel + '"' : '';
+                html +=   ' ng-class="{ checked:' + attrs.ngModel + ' }"';
+                html +=   '>';
+                html +=   '<small></small>';
+                html +=   '<input type="checkbox"';
+                html +=     attrs.id ? ' id="' + attrs.id + '"' : '';
+                html +=     attrs.name ? ' name="' + attrs.name + '"' : '';
+                html +=     attrs.ngModel ? ' ng-model="' + attrs.ngModel + '"' : '';
+                html +=     attrs.ngChange ? ' ng-change="' + attrs.ngChange + '"' : '';
+                html +=     ' style="display:none" />';
+                html += '</span>';
+                return html;
+            }
+        }
+    });

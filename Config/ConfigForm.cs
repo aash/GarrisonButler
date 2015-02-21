@@ -43,12 +43,12 @@ namespace GarrisonButler.Config
         {
             InitializeComponent();
 
-            //Close();
-            if (_myWindow == null)
-                _myWindow = new MyWindow();
-
-            _myWindow.Activate();
-            _myWindow.Show();
+            ////Close();
+            //if (_myWindow == null)
+            //    _myWindow = new MyWindow();
+            
+            //_myWindow.Activate();
+            //_myWindow.Show();
         }
         public void Test(String message)
         {
@@ -60,8 +60,9 @@ namespace GarrisonButler.Config
         }
         private void ConfigForm_Load_1(object sender, EventArgs e)
         {
-            var html = ResourceWebUI.test_html;
+            var html = ResourceWebUI.mainUI_html;
             html = ReplaceFromFilesToResources(html);
+            
             webBrowser1.ScriptErrorsSuppressed = false;
             webBrowser1.AllowWebBrowserDrop = false;
             
@@ -75,33 +76,48 @@ namespace GarrisonButler.Config
 
         }
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            //do my stuff before closing
+            GaBSettings.Save();
+            base.OnClosing(e);
+        }
+
         private string ReplaceFromFilesToResources(string html)
         {
             Dictionary<string, string> dictJs = new Dictionary<string, string>()
             {
-                {"<script src=\"./test.js\"></script>", ResourceWebUI.test_js},
-
-                {"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourceWebUI.angular_min_js},
+                {"<script src=\"./mainUI.js\"></script>", ResourceWebUI.mainUI_js},
                 
-                {"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourceWebUI.angular_route_min_js},
+                {"<script src=\"./Modules/general-tab.module.js\"></script>", ResourceWebUI.general_tab_module_js},
 
-                {"<script src=\"./Libraries/MobileAngularUI/js/mobile-angular-ui.min.js\"></script>", ResourceWebUI.mobile_angular_ui_min_js},
+                {"<script src=\"./Modules/work-order-tab.module.js\"></script>", ResourceWebUI.work_order_tab_module_js},
 
-                {"<script src=\"./Libraries/UIgrid/ui-grid.min.js\"></script>", ResourceWebUI.ui_grid_min_js},
+                {"<script src=\"./Modules/profession-tab.module.js\"></script>", ResourceWebUI.profession_tab_module_js},
+
+                {"<script src=\"./Modules/mailing-tab.module.js\"></script>", ResourceWebUI.mailing_tab_module_js},
+
+                {"<script src=\"./Modules/milling-tab.module.js\"></script>", ResourceWebUI.milling_tab_module_js},
+
+                {"<script src=\"./Modules/trading-post.module.js\"></script>", ResourceWebUI.trading_post_module},
+
+                {"<script src=\"./Libraries/SmartTable/smart-table.min.js\"></script>", ResourceWebUI.smart_table_min},
+
+                {"<script src=\"./Libraries/slider/slider.js\"></script>", ResourceWebUI.slider_js},
+
+                {"<script src=\"./Libraries/angular-xeditable/js/xeditable.min.js\"></script>", ResourceWebUI.xeditable_min_js},
+
+                //{"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourceWebUI.angular_min_js},
+                
+                //{"<script src=\"./Libraries/Angular/angular-route.min.js\"></script>", ResourceWebUI.angular_route_min_js},
      
             };
             Dictionary<string, string> dictCss = new Dictionary<string, string>()
             {
-                {"<link rel=\"stylesheet\" href=\"./test.css\" />", ResourceWebUI.test_css},
+                {"<link rel=\"stylesheet\" href=\"./Libraries/angular-xeditable/css/xeditable.css\" />", ResourceWebUI.xeditable_css},
 
-                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-hover.min.css\" />", ResourceWebUI.mobile_angular_ui_hover_min_css},
-
-                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-base.min.css\" />", ResourceWebUI.mobile_angular_ui_base_min_css},
-
-                {"<link rel=\"stylesheet\" href=\"./Libraries/MobileAngularUI/css/mobile-angular-ui-desktop.min.css\" />", ResourceWebUI.mobile_angular_ui_desktop_min_css},
-
-                {"<link rel=\"stylesheet\" href=\"./Libraries/UIgrid/ui-grid.min.css\" />", ResourceWebUI.ui_grid_min_css},
-
+                {"<link rel=\"stylesheet\" href=\"./mainUI.css\" />", ResourceWebUI.mainUI_css},
+                
             };
             foreach (var file in dictJs)
             {
@@ -138,26 +154,60 @@ namespace GarrisonButler.Config
             return html;
         }
 
-        [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-        public class ScriptInterface
+
+
+
+
+
+
+
+        [ComVisible(true)]
+        public class ViewInterface
         {
-            [ComVisibleAttribute(true)]
-            public string firstName = "Manas";
-
-            [ComVisibleAttribute(true)]
-            public bool option1 = false;
-
-            [ComVisibleAttribute(true)]
-            public void Test()
+            private static ViewInterface instance;
+            public static ViewInterface Instance
             {
-                MessageBox.Show(option1.ToString(), "client code");
+                get { return instance ?? new ViewInterface(); }
+                set { instance = value; }
             }
+            
+            private ViewInterface()
+            {}
+
+
+            [ComVisible(true)]
+            public void UpdateBooleanValue(string propertyName, bool value)
+            {
+                var prop = GetType().GetProperty(propertyName);
+                GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+                prop.SetValue(this, value);
+            }
+
+            [ComVisible(true)]
+            public bool GetBooleanValue(string propertyName)
+            {
+                var prop = GetType().GetProperty(propertyName);
+                GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+                return (bool)prop.GetValue(this);
+            }
+            
+        
+        
         }
+
+
+
+
+
+
+
+
+
+
+
 
         public class MyWindow : Window
         {
-            private static WebBrowser webBrowser1;
-
             public MyWindow()
             {
                 Width = 600;
@@ -491,110 +541,7 @@ namespace GarrisonButler.Config
                 //mainFrame.Content = mainWrapPanel;
                 return mainFrame;
             }
-            // Displays the Save dialog box. 
-            private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-            {
-                webBrowser1.ShowSaveAsDialog();
-            }
-
-            // Displays the Page Setup dialog box. 
-            private void pageSetupToolStripMenuItem_Click(object sender, EventArgs e)
-            {
-                webBrowser1.ShowPageSetupDialog();
-            }
-
-            // Displays the Print dialog box. 
-            private void printToolStripMenuItem_Click(object sender, EventArgs e)
-            {
-                webBrowser1.ShowPrintDialog();
-            }
-
-            // Displays the Print Preview dialog box. 
-            private void printPreviewToolStripMenuItem_Click(
-                object sender, EventArgs e)
-            {
-                webBrowser1.ShowPrintPreviewDialog();
-            }
-
-            // Displays the Properties dialog box. 
-            private void propertiesToolStripMenuItem_Click(
-                object sender, EventArgs e)
-            {
-                webBrowser1.ShowPropertiesDialog();
-            }
-
-            
-
-            // Navigates to the given URL if it is valid. 
-            private void Navigate(String address)
-            {
-                if (String.IsNullOrEmpty(address)) return;
-                if (address.Equals("about:blank")) return;
-                if (!address.StartsWith("http://") &&
-                    !address.StartsWith("https://"))
-                {
-                    address = "http://" + address;
-                }
-                try
-                {
-                    webBrowser1.Navigate(new Uri(address));
-                }
-                catch (System.UriFormatException)
-                {
-                    return;
-                }
-            }
-
-
-            // Navigates webBrowser1 to the previous page in the history. 
-            private void backButton_Click(object sender, EventArgs e)
-            {
-                webBrowser1.GoBack();
-            }
-
-
-            // Navigates webBrowser1 to the next page in history. 
-            private void forwardButton_Click(object sender, EventArgs e)
-            {
-                webBrowser1.GoForward();
-            }
-
-            // Halts the current navigation and any sounds or animations on  
-            // the page. 
-            private void stopButton_Click(object sender, EventArgs e)
-            {
-                webBrowser1.Stop();
-            }
-
-            // Reloads the current page. 
-            private void refreshButton_Click(object sender, EventArgs e)
-            {
-                // Skip refresh if about:blank is loaded to avoid removing 
-                // content specified by the DocumentText property. 
-                if (!webBrowser1.Url.Equals("about:blank"))
-                {
-                    webBrowser1.Refresh();
-                }
-            }
-
-            // Navigates webBrowser1 to the home page of the current user. 
-            private void homeButton_Click(object sender, EventArgs e)
-            {
-                webBrowser1.GoHome();
-            }
-
-            // Navigates webBrowser1 to the search page of the current user. 
-            private void searchButton_Click(object sender, EventArgs e)
-            {
-                webBrowser1.GoSearch();
-            }
-
-            // Prints the current document using the current print settings. 
-            private void printButton_Click(object sender, EventArgs e)
-            {
-                webBrowser1.Print();
-            }
-
+           
 
             private static object ContentTabSplash()
             {

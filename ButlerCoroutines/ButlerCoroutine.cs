@@ -40,7 +40,7 @@ namespace GarrisonButler.ButlerCoroutines
         private static Composite _lootBehavior;
         private static Composite _vendorBehavior;
         private static readonly WaitTimer ResetAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
-        private static List<Building> _buildings;
+        public static List<Building> _buildings;
         private static List<Mission> _missions;
         private static List<Follower> _followers;
 
@@ -379,7 +379,6 @@ namespace GarrisonButler.ButlerCoroutines
 
             CheckForVendors();
 
-            TreeRoot.Stop();
             if (await RestoreUiIfNeeded())
                 return true;
 
