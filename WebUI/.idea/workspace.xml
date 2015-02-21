@@ -18,113 +18,80 @@
   <component name="DaemonCodeAnalyzer">
     <disable_hints />
   </component>
-  <component name="DockManager">
-    <window id="1">
-      <content type="file-editors">
-        <state>
-          <leaf>
-            <file leaf-file-name="mainUI.html" pinned="false" current-in-tab="true">
-              <entry file="file://$PROJECT_DIR$/mainUI.html">
-                <provider selected="true" editor-type-id="text-editor">
-                  <state vertical-scroll-proportion="0.97199535" vertical-offset="0" max-vertical-offset="5797">
-                    <caret line="49" column="47" selection-start-line="49" selection-start-column="47" selection-end-line="51" selection-end-column="63" />
-                    <folding>
-                      <element signature="n#style#0;n#div#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#h3#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#h3#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#4;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                    </folding>
-                  </state>
-                </provider>
-              </entry>
-            </file>
-            <file leaf-file-name="mainUI.css" pinned="false" current-in-tab="false">
-              <entry file="file://$PROJECT_DIR$/mainUI.css">
-                <provider selected="true" editor-type-id="text-editor">
-                  <state vertical-scroll-proportion="-8.206897" vertical-offset="0" max-vertical-offset="3434">
-                    <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
-                    <folding />
-                  </state>
-                </provider>
-              </entry>
-            </file>
-          </leaf>
-        </state>
-      </content>
-    </window>
-  </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="GarrisonButler" />
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="mainUI.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mainUI.js">
+      <file leaf-file-name="test.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1419" max-vertical-offset="2431">
-              <caret line="119" column="8" selection-start-line="119" selection-start-column="8" selection-end-line="119" selection-end-column="8" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="408" max-vertical-offset="5729">
+              <caret line="24" column="16" selection-start-line="24" selection-start-column="16" selection-end-line="24" selection-end-column="16" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="general-tab.module.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Modules/general-tab.module.js">
+      <file leaf-file-name="test.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.137931" vertical-offset="1581" max-vertical-offset="3026">
-              <caret line="112" column="53" selection-start-line="112" selection-start-column="53" selection-end-line="120" selection-end-column="10" />
+            <state vertical-scroll-proportion="-0.0" vertical-offset="1088" max-vertical-offset="5967">
+              <caret line="64" column="66" selection-start-line="64" selection-start-column="66" selection-end-line="64" selection-end-column="66" />
+              <folding>
+                <element signature="n#style#0;n#h3#0;n#div#1;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#md-slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#input#0;n#div#1;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MissonCalcSimple.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Libraries/MissonCalcSimple.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="2.6790123" vertical-offset="3614" max-vertical-offset="6103">
+              <caret line="353" column="1" selection-start-line="353" selection-start-column="1" selection-end-line="353" selection-end-column="1" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mailing-tab.module.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Modules/mailing-tab.module.js">
+      <file leaf-file-name="MissionCalc.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Libraries/MissionCalc.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.34035477" vertical-offset="84" max-vertical-offset="1785">
-              <caret line="23" column="46" selection-start-line="23" selection-start-column="46" selection-end-line="23" selection-end-column="46" />
+            <state vertical-scroll-proportion="22.357143" vertical-offset="19411" max-vertical-offset="28696">
+              <caret line="1105" column="42" selection-start-line="1105" selection-start-column="27" selection-end-line="1105" selection-end-column="42" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="work-order-tab.module.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Modules/work-order-tab.module.js">
+      <file leaf-file-name="test.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="89" max-vertical-offset="2601">
-              <caret line="34" column="132" selection-start-line="34" selection-start-column="124" selection-end-line="34" selection-end-column="132" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="782">
+              <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="milling-tab.module.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Modules/milling-tab.module.js">
+      <file leaf-file-name="wowhead.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wowhead.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="102" max-vertical-offset="1258">
-              <caret line="46" column="9" selection-start-line="46" selection-start-column="9" selection-end-line="53" selection-end-column="10" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="trading-post.module.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Modules/trading-post.module.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="123" max-vertical-offset="1173">
-              <caret line="35" column="54" selection-start-line="35" selection-start-column="54" selection-end-line="35" selection-end-column="54" />
-              <folding />
+            <state vertical-scroll-proportion="0.0" vertical-offset="39233" max-vertical-offset="156366">
+              <caret line="2405" column="1" selection-start-line="2405" selection-start-column="1" selection-end-line="2405" selection-end-column="1" />
+              <folding>
+                <element signature="e#87530#88369#2" expanded="true" />
+                <element signature="e#89457#90296#2" expanded="true" />
+                <element signature="e#92334#93085#2" expanded="true" />
+                <element signature="e#93866#94617#2" expanded="true" />
+                <element signature="e#95560#96311#2" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -134,7 +101,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Libraries/MissonCalcSimple.js" />
         <option value="$PROJECT_DIR$/Libraries/MissionCalc.js" />
         <option value="$PROJECT_DIR$/wowhead.css" />
         <option value="$PROJECT_DIR$/Libraries/slider.js" />
@@ -151,16 +117,7 @@
         <option value="$PROJECT_DIR$/general-tab/milling-tab.module.js" />
         <option value="$PROJECT_DIR$/test.css" />
         <option value="$PROJECT_DIR$/test.html" />
-        <option value="$PROJECT_DIR$/Libraries/slider/slider.js" />
-        <option value="$PROJECT_DIR$/mainUI.css" />
-        <option value="$PROJECT_DIR$/Modules/work-order-tab.module.js" />
-        <option value="$PROJECT_DIR$/Modules/general-tab.module.js" />
-        <option value="$PROJECT_DIR$/Modules/profession-tab.module.js" />
-        <option value="$PROJECT_DIR$/Modules/trading-post.module.js" />
-        <option value="$PROJECT_DIR$/Modules/milling-tab.module.js" />
-        <option value="$PROJECT_DIR$/mainUI.js" />
-        <option value="$PROJECT_DIR$/Modules/mailing-tab.module.js" />
-        <option value="$PROJECT_DIR$/mainUI.html" />
+        <option value="$PROJECT_DIR$/Libraries/MissonCalcSimple.js" />
       </list>
     </option>
   </component>
@@ -168,10 +125,10 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1920" />
-    <option name="y" value="260" />
-    <option name="width" value="960" />
-    <option name="height" value="1080" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -184,7 +141,7 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -195,7 +152,57 @@
       <autoscrollFromSource />
       <sortByType />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GarrisonButler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GarrisonButler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebUI" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GarrisonButler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebUI" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GarrisonButler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="WebUI" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="general-tab" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -204,7 +211,6 @@
     <property name="list.type.of.created.stylesheet" value="CSS" />
     <property name="recentsLimit" value="5" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="FullScreen" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -217,10 +223,14 @@
       <ConfigurationWrapper RunnerId="JavascriptDebugRunner" />
       <method />
     </configuration>
+    <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+      <method />
+    </configuration>
     <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
       <method />
     </configuration>
-    <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+    <configuration default="true" type="JavaScriptTestRunnerKarma" factoryName="Karma" config-file="">
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
@@ -228,10 +238,6 @@
       <setting name="settingsFile" value="" />
       <setting name="serverType" value="INTERNAL" />
       <setting name="preferredDebugBrowser" value="Chrome" />
-      <method />
-    </configuration>
-    <configuration default="true" type="JavaScriptTestRunnerKarma" factoryName="Karma" config-file="">
-      <envs />
       <method />
     </configuration>
     <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
@@ -250,7 +256,6 @@
       <node-options />
       <gulpfile />
       <tasks />
-      <arguments />
       <pass-parent-envs>true</pass-parent-envs>
       <envs />
       <method />
@@ -278,7 +283,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1920" y="260" width="960" height="1080" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -286,19 +291,19 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14270833" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.23199153" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39979756" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16614583" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3281893" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32946146" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39979756" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -324,42 +329,47 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Modules/general-tab.module.js">
+    <entry file="file://$PROJECT_DIR$/test.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1884" max-vertical-offset="2788">
-          <caret line="158" column="7" selection-start-line="158" selection-start-column="7" selection-end-line="158" selection-end-column="7" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="408" max-vertical-offset="5729">
+          <caret line="24" column="16" selection-start-line="24" selection-start-column="16" selection-end-line="24" selection-end-column="16" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/work-order-tab.module.js">
+    <entry file="file://$PROJECT_DIR$/test.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1683">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="5967">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#style#0;n#h3#0;n#div#1;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#md-slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#input#0;n#div#1;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="187" max-vertical-offset="765">
+          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/profession-tab.module.js">
+    <entry file="file://$PROJECT_DIR$/wowhead.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="10" max-vertical-offset="1105">
-          <caret line="33" column="48" selection-start-line="33" selection-start-column="48" selection-end-line="33" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="408" max-vertical-offset="510">
-          <caret line="24" column="3" selection-start-line="24" selection-start-column="3" selection-end-line="24" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Libraries/SmartTable/smart-table.min.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1160" max-vertical-offset="2499">
-          <caret line="89" column="9" selection-start-line="89" selection-start-column="9" selection-end-line="89" selection-end-column="9" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="39233" max-vertical-offset="156366">
+          <caret line="2405" column="1" selection-start-line="2405" selection-start-column="1" selection-end-line="2405" selection-end-column="1" />
+          <folding>
+            <element signature="e#87530#88369#2" expanded="true" />
+            <element signature="e#89457#90296#2" expanded="true" />
+            <element signature="e#92334#93085#2" expanded="true" />
+            <element signature="e#93866#94617#2" expanded="true" />
+            <element signature="e#95560#96311#2" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -367,6 +377,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="4419" max-vertical-offset="5338">
           <caret line="308" column="1" selection-start-line="308" selection-start-column="1" selection-end-line="308" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -386,10 +397,55 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="153" max-vertical-offset="4658">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1286" max-vertical-offset="4930">
+          <caret line="100" column="35" selection-start-line="100" selection-start-column="35" selection-end-line="100" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wowhead.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="39233" max-vertical-offset="156366">
+          <caret line="2405" column="1" selection-start-line="2405" selection-start-column="1" selection-end-line="2405" selection-end-column="1" />
+          <folding>
+            <element signature="e#87530#88369#2" expanded="true" />
+            <element signature="e#89457#90296#2" expanded="true" />
+            <element signature="e#92334#93085#2" expanded="true" />
+            <element signature="e#93866#94617#2" expanded="true" />
+            <element signature="e#95560#96311#2" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6358">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#style#0;n#h3#0;n#div#1;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#md-slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#input#0;n#div#1;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="1088" max-vertical-offset="15946">
           <caret line="82" column="17" selection-start-line="82" selection-start-column="17" selection-end-line="82" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -397,6 +453,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="5236" max-vertical-offset="5338">
           <caret line="308" column="1" selection-start-line="308" selection-start-column="1" selection-end-line="308" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -412,13 +469,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="1088" max-vertical-offset="15946">
           <caret line="82" column="17" selection-start-line="82" selection-start-column="17" selection-end-line="82" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Libraries/MissonCalcSimple.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="5236" max-vertical-offset="5338">
-          <caret line="308" column="1" selection-start-line="308" selection-start-column="1" selection-end-line="308" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -430,120 +481,71 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Libraries/MissionCalc.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="3269" max-vertical-offset="28696">
-          <caret line="926" column="14" selection-start-line="926" selection-start-column="14" selection-end-line="926" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="1088" max-vertical-offset="15946">
           <caret line="82" column="17" selection-start-line="82" selection-start-column="17" selection-end-line="82" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Libraries/SmartTable/smart-table.min.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1160" max-vertical-offset="2499">
-          <caret line="89" column="9" selection-start-line="89" selection-start-column="9" selection-end-line="89" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Libraries/slider/slider.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6024915" vertical-offset="3650" max-vertical-offset="5525">
-          <caret line="246" column="66" selection-start-line="246" selection-start-column="66" selection-end-line="246" selection-end-column="66" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/work-order-tab.module.js">
+    <entry file="file://$PROJECT_DIR$/wowhead.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="89" max-vertical-offset="2601">
-          <caret line="34" column="132" selection-start-line="34" selection-start-column="124" selection-end-line="34" selection-end-column="132" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.206897" vertical-offset="0" max-vertical-offset="3434">
-          <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/general-tab.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.137931" vertical-offset="1581" max-vertical-offset="3026">
-          <caret line="112" column="53" selection-start-line="112" selection-start-column="53" selection-end-line="120" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/profession-tab.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="357" max-vertical-offset="1547">
-          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="49" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/milling-tab.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="102" max-vertical-offset="1258">
-          <caret line="46" column="9" selection-start-line="46" selection-start-column="9" selection-end-line="53" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/trading-post.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="123" max-vertical-offset="1173">
-          <caret line="35" column="54" selection-start-line="35" selection-start-column="54" selection-end-line="35" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1419" max-vertical-offset="2431">
-          <caret line="119" column="8" selection-start-line="119" selection-start-column="8" selection-end-line="119" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/mailing-tab.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.34035477" vertical-offset="84" max-vertical-offset="1785">
-          <caret line="23" column="46" selection-start-line="23" selection-start-column="46" selection-end-line="23" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.97199535" vertical-offset="0" max-vertical-offset="5797">
-          <caret line="49" column="47" selection-start-line="49" selection-start-column="47" selection-end-line="51" selection-end-column="63" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="39233" max-vertical-offset="156366">
+          <caret line="2405" column="1" selection-start-line="2405" selection-start-column="1" selection-end-line="2405" selection-end-column="1" />
           <folding>
-            <element signature="n#style#0;n#div#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h3#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h3#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#1;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#4;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="e#87530#88369#2" expanded="true" />
+            <element signature="e#89457#90296#2" expanded="true" />
+            <element signature="e#92334#93085#2" expanded="true" />
+            <element signature="e#93866#94617#2" expanded="true" />
+            <element signature="e#95560#96311#2" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="408" max-vertical-offset="5729">
+          <caret line="24" column="16" selection-start-line="24" selection-start-column="16" selection-end-line="24" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1088" max-vertical-offset="5967">
+          <caret line="64" column="66" selection-start-line="64" selection-start-column="66" selection-end-line="64" selection-end-column="66" />
+          <folding>
+            <element signature="n#style#0;n#h3#0;n#div#1;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#md-slider#0;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#input#0;n#div#1;n#div#2;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#div#0;n#div#1;n#ng-switch#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="187" max-vertical-offset="782">
+          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Libraries/MissionCalc.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="22.357143" vertical-offset="19411" max-vertical-offset="28696">
+          <caret line="1105" column="42" selection-start-line="1105" selection-start-column="27" selection-end-line="1105" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Libraries/MissonCalcSimple.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.6790123" vertical-offset="3614" max-vertical-offset="6103">
+          <caret line="353" column="1" selection-start-line="353" selection-start-column="1" selection-end-line="353" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
