@@ -54,7 +54,7 @@ namespace GarrisonButler.Config
         [ComVisible(true)]
         public string GetVersionNumber()
         {
-            return ConfigVersion.ToString();
+            return GarrisonButler.Version.ToString();
         }
 
         public struct BuildingJs
