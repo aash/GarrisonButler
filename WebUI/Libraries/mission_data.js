@@ -27,7 +27,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Underground",
-    "missiontype": "Recipe: Alchemy"
+    "missiontype": "Alchemy"
 }, {
     "id": 6,
     "name": "Grimfrost Wolfbeaters",
@@ -57,7 +57,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Snow",
-    "missiontype": "Recipe: Alchemy"
+    "missiontype": "Alchemy"
 }, {
     "id": 42,
     "name": "Gimme Loots",
@@ -97,7 +97,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Snow",
-    "missiontype": "Recipe: Alchemy"
+    "missiontype": "Alchemy"
 }, {
     "id": 54,
     "name": "No Loots For You",
@@ -127,7 +127,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Desert",
-    "missiontype": "Recipe: Tailoring"
+    "missiontype": "Tailoring"
 }, {
     "id": 57,
     "name": "Undead In The Snow",
@@ -137,7 +137,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Snow",
-    "missiontype": "Recipe: Leatherworking"
+    "missiontype": "Leatherworking"
 }, {
     "id": 58,
     "name": "Arakkoa Underground",
@@ -147,7 +147,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Underground",
-    "missiontype": "Recipe: Jewelcrafting"
+    "missiontype": "Jewelcrafting"
 }, {
     "id": 59,
     "name": "Beasts in the Jungle",
@@ -157,7 +157,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Jungle",
-    "missiontype": "Recipe: Alchemy"
+    "missiontype": "Alchemy"
 }, {
     "id": 60,
     "name": "Demons in the Forest",
@@ -167,7 +167,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Forest",
-    "missiontype": "Recipe: Blacksmith"
+    "missiontype": "Blacksmithing"
 }, {
     "id": 61,
     "name": "Breakers in Town",
@@ -177,7 +177,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Town",
-    "missiontype": "Recipe: Enchanting"
+    "missiontype": "Enchanting"
 }, {
     "id": 62,
     "name": "Furies in the Swamp",
@@ -187,7 +187,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Swamp",
-    "missiontype": "Recipe: Engineering"
+    "missiontype": "Engineering"
 }, {
     "id": 63,
     "name": "Primals in the Plains",
@@ -197,7 +197,7 @@
     "itemlevel": 0,
     "rare": "",
     "mechanictype": "Plains",
-    "missiontype": "Recipe: Inscription"
+    "missiontype": "Inscription"
 }, {
     "id": 64,
     "name": "One Mission To Rule Them All",
@@ -2044,7 +2044,7 @@
     "description": "Our shaman have prepared a ritual to return souls summoned by the Shadowmoon to rest. Go and perform this ritual at the burial grounds.",
     "duration": 21600,
     "level": 100,
-    "itemlevel": 630,
+    "itemlevel": 615,
     "rare": "",
     "mechanictype": "Underground",
     "missiontype": "Combat"
@@ -2054,7 +2054,7 @@
     "description": "The Iron Horde's flagship is at the Iron Docks. It's intimidating, but if it's steered into a shoal, it'll founder like any other boat.",
     "duration": 21600,
     "level": 100,
-    "itemlevel": 630,
+    "itemlevel": 615,
     "rare": "",
     "mechanictype": "Desert",
     "missiontype": "Combat"
@@ -2064,7 +2064,7 @@
     "description": "Apexis devices are sun powered, but what if the sun is blocked? Zeppelins will work, and the goblins might help. Go, but pack airsick bags.",
     "duration": 28800,
     "level": 100,
-    "itemlevel": 630,
+    "itemlevel": 615,
     "rare": "",
     "mechanictype": "Mountains",
     "missiontype": "Combat"
@@ -2074,7 +2074,7 @@
     "description": "A fortress in a volcano is both ingenious and foolhardy. Impenetrable, yes, but a shaman can cause an eruption that will decimate it.",
     "duration": 28800,
     "level": 100,
-    "itemlevel": 630,
+    "itemlevel": 0,
     "rare": "",
     "mechanictype": "Mountains",
     "missiontype": "Combat"
@@ -2084,7 +2084,7 @@
     "description": "Soulbinder Nyami has hidden caches of reagents for the Sargerai's summoning rituals all across Auchindoun. Find the caches and destroy them.",
     "duration": 28800,
     "level": 100,
-    "itemlevel": 630,
+    "itemlevel": 0,
     "rare": "",
     "mechanictype": "Demon",
     "missiontype": "Combat"
@@ -2661,7 +2661,7 @@
 }, {
     "id": 359,
     "name": "Rukhmar",
-    "description": "A manifestation of a Sun God, Rukhmar demands fealty and obedience.  He will not be defeated easily.",
+    "description": "A manifestation of a Sun God, Rukhmar demands fealty and obedience.  She will not be defeated easily.",
     "duration": 36000,
     "level": 100,
     "itemlevel": 0,
@@ -2862,9 +2862,9 @@
     "id": 379,
     "name": "Too Much Business",
     "description": "We suspect a goblin merchant of selling to both us and the Iron Horde. Tail him, and if he is double-dealing, drag him back by his ears.",
-    "duration": 3600,
+    "duration": 28800,
     "level": 90,
-    "itemlevel": 0,
+    "itemlevel": 675,
     "rare": "",
     "mechanictype": "Mountains",
     "missiontype": "Combat"
@@ -2880,11 +2880,11 @@
     "missiontype": "Combat"
 }, {
     "id": 381,
-    "name": "What's Mine Is a Mine",
+    "name": "What's Mine Is A Mine",
     "description": "Word has it that an Iron Horde mine near our outpost has hit a rich vein. We can't let them have nice things. Storm in and claim the mine.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 675,
     "rare": "",
     "mechanictype": "Underground",
     "missiontype": "Combat"
@@ -2912,11 +2912,11 @@
     "id": 384,
     "name": "Warchief's Pride",
     "description": "Grommash has a legendary ego and temper. Hit the Warsong hard and he'll be consumed with the need for vengeance. We want him distracted.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 615,
     "rare": "",
-    "mechanictype": "Orc",
+    "mechanictype": "Plains",
     "missiontype": "Combat"
 }, {
     "id": 385,
@@ -2982,9 +2982,9 @@
     "id": 391,
     "name": "Spring Preening",
     "description": "We cannot allow the arakkoa to acquire more of their deadly Apexis technology. Raid their excavation sites. Leave nothing but dust behind!",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 675,
     "rare": "",
     "mechanictype": "Desert",
     "missiontype": "Combat"
@@ -2992,9 +2992,9 @@
     "id": 392,
     "name": "Pluck Them All",
     "description": "Our alchemists have found uses for the oils secreted by arakkoa feathers. Gather as many as you can - by any means necessary.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 615,
     "rare": "",
     "mechanictype": "Arakkoa",
     "missiontype": "Combat"
@@ -3012,9 +3012,9 @@
     "id": 394,
     "name": "Mulch Ado about Nothing",
     "description": "The podlings have been raiding the graves of our allies to feed one of their genesaur. Recover the bodies. If they want mulch, mulch them!",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
     "rare": "",
     "mechanictype": "Jungle",
     "missiontype": "Combat"
@@ -3022,9 +3022,9 @@
     "id": 395,
     "name": "Lunch Breakers",
     "description": "We need to get the gronn riled again. Kill the local meat-based wildlife and see if starvation turns them against the Iron Horde nearby.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
     "rare": "",
     "mechanictype": "Beast",
     "missiontype": "Combat"
@@ -3032,9 +3032,9 @@
     "id": 396,
     "name": "Night of the Primals",
     "description": "Our scouts report that the botani are snatching workers from the quarries. Kill the primals and find out what they are using the orcs for.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 675,
     "rare": "",
     "mechanictype": "Primal",
     "missiontype": "Combat"
@@ -3042,9 +3042,9 @@
     "id": 397,
     "name": "Green Fel",
     "description": "The reckless warlock Gul'dan intends to create a fel volcano in the center of Shadowmoon Valley. Stop him before he dooms us all.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 675,
     "rare": "",
     "mechanictype": "Forest",
     "missiontype": "Combat"
@@ -3052,19 +3052,19 @@
     "id": 398,
     "name": "Highway to Fel",
     "description": "Shadow Council agents plan to cut a path through Tanaan and pave it with their enemies' bones. Such an atrocity must not come to pass.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
     "rare": "",
-    "mechanictype": "Orc",
+    "mechanictype": "Demon",
     "missiontype": "Combat"
 }, {
     "id": 399,
     "name": "Felraiser",
     "description": "Warlocks in the northwest are draining life from the land, preparing to summon a demon lord. Well? Don't just stand there!",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 675,
     "rare": "",
     "mechanictype": "Demon",
     "missiontype": "Combat"
@@ -3082,9 +3082,9 @@
     "id": 401,
     "name": "Bucket Brigade",
     "description": "Massive flooding has cut off our supply lines, and the water elementals responsible show no signs of stopping. Let's hang them out to dry.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
     "rare": "",
     "mechanictype": "Fury",
     "missiontype": "Combat"
@@ -3092,16 +3092,16 @@
     "id": 402,
     "name": "Deathhoof",
     "description": "A doomsday weapon has been enchanted to look like an adorable baby clefthoof. Clefthoof violently defend their young. Proceed with caution.",
-    "duration": 3600,
-    "level": 90,
-    "itemlevel": 0,
-    "rare": "",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 645,
+    "rare": "Rare",
     "mechanictype": "Beast",
     "missiontype": "Combat"
 }, {
     "id": 403,
     "name": "Rock the Boat",
-    "description": "Disrupt tense negotiations between the Iron Horde and the Highmail Ogres to acquire an Abrogator Stone for Khadgar.",
+    "description": "Disrupt tense negotiations between the Iron Horde and the Highmaul ogres to acquire an Abrogator Stone for Khadgar.",
     "duration": 86000,
     "level": 100,
     "itemlevel": 0,
@@ -3170,8 +3170,8 @@
     "missiontype": "Combat"
 }, {
     "id": 410,
-    "name": "A Rune with a View",
-    "description": "In the chaos of the battle of Shattrath, the Sargeri absconded with some of the Elemental Runes that Khadgar is looking for.",
+    "name": "A Rune With a View",
+    "description": "In the chaos of the battle of Shattrath, the Sargerei absconded with some of the Elemental Runes that Khadgar is looking for.",
     "duration": 86000,
     "level": 100,
     "itemlevel": 0,
@@ -3191,7 +3191,7 @@
 }, {
     "id": 412,
     "name": "Beyond the Pale",
-    "description": "The Bladefist clan are capturing Pale prisoners. We suspect they're looking for the same Runes as Khadgar.",
+    "description": "The Bladefist clan are capturing pale prisoners. We suspect they're looking for the same Elemental Runes as Khadgar.",
     "duration": 86000,
     "level": 100,
     "itemlevel": 0,
@@ -3201,11 +3201,901 @@
 }, {
     "id": 413,
     "name": "Pumping Iron",
-    "description": "Elemental Runes have been smuggled to the Iron Siegeworks. Practically a suicide mission. Send followers you don't like.",
+    "description": "Elemental Runes have been smuggled into the Iron Siegeworks. Essentially a suicide mission. Send followers you don't like.",
     "duration": 86000,
     "level": 100,
     "itemlevel": 0,
     "rare": "Rare",
     "mechanictype": "Town",
+    "missiontype": "Combat"
+}, {
+    "id": 414,
+    "name": "Wanted: Amethon",
+    "description": "Amethon has been long forgotten, deep in a cave in Talador. His crystals are very valuable.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Underground",
+    "missiontype": "Combat"
+}, {
+    "id": 415,
+    "name": "Wanted: Gor'thul",
+    "description": "Gor'thul, betrayer of the Shattered Hand, is an outcast. It is said he has befriended a lot of cats.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Orc",
+    "missiontype": "Combat"
+}, {
+    "id": 416,
+    "name": "Wanted: Nullifier Darkoor",
+    "description": "Nullifier Darkoor has been in hiding long enough. It's time to take him down and put an end to the Fel Breakers once and for all.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Ogre",
+    "missiontype": "Combat"
+}, {
+    "id": 417,
+    "name": "Wanted: Undertow",
+    "description": "Undertow appears from the depths, pulling boats into the sea and destroying our lines of contact between Tanaan Jungle and Shadowmoon Valley.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Fury",
+    "missiontype": "Combat"
+}, {
+    "id": 418,
+    "name": "Wanted: Tremor",
+    "description": "A massive rockworm has taken residence on the shores of Gorgrond, devouring the local lobstroks.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Desert",
+    "missiontype": "Combat"
+}, {
+    "id": 419,
+    "name": "Wanted: Hivelord Ik'rix",
+    "description": "Hemet Nesingwary would be very interested in his head.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Beast",
+    "missiontype": "Combat"
+}, {
+    "id": 420,
+    "name": "The Final Relic: Secrets",
+    "description": "PH",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 645,
+    "rare": "Rare",
+    "mechanictype": "Desert",
+    "missiontype": "Combat"
+}, {
+    "id": 421,
+    "name": "Relic Hunter: Gutrek's Cleaver",
+    "description": "Reforge the weapon of the most brutal gladiator to fight in the Ring of Blood.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 630,
+    "rare": "",
+    "mechanictype": "Plains",
+    "missiontype": "Combat"
+}, {
+    "id": 422,
+    "name": "Relic Hunter: Amulet of Rukhmar",
+    "description": "Claim the power of the arakkoa god before the Adherents of Rukhmar can take it for themselves.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 630,
+    "rare": "",
+    "mechanictype": "Beast",
+    "missiontype": "Combat"
+}, {
+    "id": 423,
+    "name": "Relic Hunter: Grimoire of Nameless Void",
+    "description": "Destroy the ancient barrier to access this dark and powerful tome.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 630,
+    "rare": "",
+    "mechanictype": "Forest",
+    "missiontype": "Combat"
+}, {
+    "id": 424,
+    "name": "Relic Hunter: Gronnsbane",
+    "description": "Seek the blessings of Frostfire to empower the ancient Thunderlord spear.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 630,
+    "rare": "",
+    "mechanictype": "Breaker",
+    "missiontype": "Combat"
+}, {
+    "id": 425,
+    "name": "Relic Hunter: Silent Skull",
+    "description": "Take the cursed skull mask from the legendary Laughing Skull assassin.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 630,
+    "rare": "",
+    "mechanictype": "Desert",
+    "missiontype": "Combat"
+}, {
+    "id": 426,
+    "name": "Relic Hunter: Dream of Argus",
+    "description": "Recover the ancient crystal shards to restore this mysterious artifact of the draenei.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 630,
+    "rare": "",
+    "mechanictype": "Orc",
+    "missiontype": "Combat"
+}, {
+    "id": 427,
+    "name": "Slagworks",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Fury",
+    "missiontype": "Combat"
+}, {
+    "id": 428,
+    "name": "Black Forge",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Mountains",
+    "missiontype": "Combat"
+}, {
+    "id": 429,
+    "name": "Iron Assembly",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Underground",
+    "missiontype": "Combat"
+}, {
+    "id": 430,
+    "name": "Blackhand's Crucible",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Orc",
+    "missiontype": "Combat"
+}, {
+    "id": 432,
+    "name": "Scouting Draenor: Frostfire Ridge",
+    "description": "Your scouts report that our forces need backup in Frostfire Ridge.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Snow",
+    "missiontype": "Exploration"
+}, {
+    "id": 433,
+    "name": "Scouting Draenor: Spires of Arak",
+    "description": "Your scouts report that our forces need backup in Spires of Arak.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Forest",
+    "missiontype": "Exploration"
+}, {
+    "id": 434,
+    "name": "Scouting Draenor: Talador",
+    "description": "Your scouts report that our forces need backup in Talador.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Town",
+    "missiontype": "Exploration"
+}, {
+    "id": 435,
+    "name": "Scouting Draenor: Gorgrond",
+    "description": "Your scouts report that our forces need backup in Gorgrond.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Desert",
+    "missiontype": "Exploration"
+}, {
+    "id": 436,
+    "name": "Scouting Draenor: Shadowmoon Valley",
+    "description": "Your scouts report that our forces need backup in Shadowmoon Valley.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Mountains",
+    "missiontype": "Exploration"
+}, {
+    "id": 437,
+    "name": "Scouting Draenor: Nagrand",
+    "description": "Your scouts report that our forces need backup in Nagrand.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Plains",
+    "missiontype": "Exploration"
+}, {
+    "id": 438,
+    "name": "Scouting Draenor: Frostfire Ridge",
+    "description": "Your scouts report that our forces need backup in Frostfire Ridge.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Snow",
+    "missiontype": "Exploration"
+}, {
+    "id": 439,
+    "name": "Scouting Draenor: Spires of Arak",
+    "description": "Your scouts report that our forces need backup in Spires of Arak.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Forest",
+    "missiontype": "Exploration"
+}, {
+    "id": 440,
+    "name": "Scouting Draenor: Talador",
+    "description": "Your scouts report that our forces need backup in Talador.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Town",
+    "missiontype": "Exploration"
+}, {
+    "id": 441,
+    "name": "Scouting Draenor: Gorgrond",
+    "description": "Your scouts report that our forces need backup in Gorgrond.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Desert",
+    "missiontype": "Exploration"
+}, {
+    "id": 442,
+    "name": "Scouting Draenor: Shadowmoon Valley",
+    "description": "Your scouts report that our forces need backup in Shadowmoon Valley.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Mountains",
+    "missiontype": "Exploration"
+}, {
+    "id": 443,
+    "name": "Scouting Draenor: Nagrand",
+    "description": "Your scouts report that our forces need backup in Nagrand.",
+    "duration": 10800,
+    "level": 100,
+    "itemlevel": 615,
+    "rare": "",
+    "mechanictype": "Plains",
+    "missiontype": "Exploration"
+}, {
+    "id": 444,
+    "name": "Emancipation",
+    "description": "The more slaves we free at the Stonefury Cliffs, the more we weaken the Bloodmaul.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "",
+    "mechanictype": "Snow",
+    "missiontype": "Combat"
+}, {
+    "id": 445,
+    "name": "Socrethar Sabotage",
+    "description": "Scouts report that a rapid assault on Socrethar's Rise could turn up an additional stash of apexis crystals.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "",
+    "mechanictype": "Forest",
+    "missiontype": "Combat"
+}, {
+    "id": 446,
+    "name": "Slagworks",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Fury",
+    "missiontype": "Combat"
+}, {
+    "id": 447,
+    "name": "Black Forge",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Mountains",
+    "missiontype": "Combat"
+}, {
+    "id": 448,
+    "name": "Iron Assembly",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Underground",
+    "missiontype": "Combat"
+}, {
+    "id": 449,
+    "name": "Blackhand's Crucible",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Orc",
+    "missiontype": "Combat"
+}, {
+    "id": 450,
+    "name": "Slagworks",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Fury",
+    "missiontype": "Combat"
+}, {
+    "id": 451,
+    "name": "Black Forge",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Mountains",
+    "missiontype": "Combat"
+}, {
+    "id": 452,
+    "name": "Iron Assembly",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Underground",
+    "missiontype": "Combat"
+}, {
+    "id": 453,
+    "name": "Blackhand's Crucible",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Orc",
+    "missiontype": "Combat"
+}, {
+    "id": 454,
+    "name": "Slagworks",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Fury",
+    "missiontype": "Combat"
+}, {
+    "id": 455,
+    "name": "Black Forge",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Mountains",
+    "missiontype": "Combat"
+}, {
+    "id": 456,
+    "name": "Iron Assembly",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Underground",
+    "missiontype": "Combat"
+}, {
+    "id": 457,
+    "name": "Blackhand's Crucible",
+    "description": "A strike against the Foundry could cripple the war machinery of the Iron Horde. Our forces await your command.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "Rare",
+    "mechanictype": "Orc",
+    "missiontype": "Combat"
+}, {
+    "id": 458,
+    "name": "A Rare Flower",
+    "description": "A rare lily grows in the waters of Talador.  Our alchemists say it is many times more efficient than frostweed.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Alchemy",
+    "missiontype": "Alchemy"
+}, {
+    "id": 459,
+    "name": "Fickle Loyalty",
+    "description": "A disgruntled Bladespire Chef has provided us with a lead on an ancient map hidden in the mines beneath the citadel.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Underground",
+    "missiontype": "Exploration"
+}, {
+    "id": 460,
+    "name": "Fickle Loyalty",
+    "description": "A disgruntled Bladespire Chef has provided us with a lead on an ancient map hidden in the mines beneath the citadel.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Underground",
+    "missiontype": "Exploration"
+}, {
+    "id": 461,
+    "name": "It's a Jungle Out There",
+    "description": "A Steamscar saberon has been caught skulking around our walls. If we let him go, he's agreed to sell out a rival shaman who has been mapping the location of many hidden treasures.",
+    "duration": 14400,
+    "level": 93,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Mountains",
+    "missiontype": "Exploration"
+}, {
+    "id": 462,
+    "name": "Fields of Sorrow",
+    "description": "A farmer claims knowledge of where many of Talador's secrets are hidden, and will share them if we'll help destroy the demons that ruined his land.",
+    "duration": 14400,
+    "level": 95,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Plains",
+    "missiontype": "Exploration"
+}, {
+    "id": 463,
+    "name": "Bird Watching",
+    "description": "Rumors are swirling that a raid on an Outcast hovel has yielded a particularly interesting map. Intercept the arakkoa before they return to Skyreach!",
+    "duration": 21600,
+    "level": 97,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Arakkoa",
+    "missiontype": "Exploration"
+}, {
+    "id": 464,
+    "name": "Highplains Robbery",
+    "description": "A Warsong elder carrying historical documents important to the clan is communing at the Elemental Plateau. Relieve him of his burdens.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Plains",
+    "missiontype": "Exploration"
+}, {
+    "id": 465,
+    "name": "Tomb Raider",
+    "description": "Ancient carvings in the tombs of the Fortress of Anguish may lead us to discover many secrets in Shadowmoon Valley. We'll have to fight our way in.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Orc",
+    "missiontype": "Exploration"
+}, {
+    "id": 466,
+    "name": "Tomb Raider",
+    "description": "Ancient carvings in the tombs of the Fortress of Anguish may lead us to discover many secrets in Shadowmoon Valley. We'll have to fight our way in.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Orc",
+    "missiontype": "Exploration"
+}, {
+    "id": 467,
+    "name": "Mushroom Mystery",
+    "description": "The Umbrafen swamps have been overgrown by giant fungi for as long as anyone can remember - why are Ogre ruins buried here?",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Swamp",
+    "missiontype": "Exploration"
+}, {
+    "id": 468,
+    "name": "I See Dead Orcs",
+    "description": "The Shadowmoon Clan have interred their dead in this area for generations - find out more about their history.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Swamp",
+    "missiontype": "Exploration"
+}, {
+    "id": 469,
+    "name": "The Bigger They Are",
+    "description": "The Thunderlord regard Colossal's Fall as a sacred location, claiming it was their clan who felled this Colossal many decades ago.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Snow",
+    "missiontype": "Exploration"
+}, {
+    "id": 470,
+    "name": "Boiling Hot Magma",
+    "description": "Relics of long-forgotten orc clans can be found by carefully traversing between the Daggermaw Flows lava streams - and dealing with deadly fire elementals.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Snow",
+    "missiontype": "Exploration"
+}, {
+    "id": 471,
+    "name": "Backbreaker",
+    "description": "The Iron Horde are attempting to unearth long-lost ogre artifacts in the Broken Spine area. Evict them and claim the rewards as your own.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Orc",
+    "missiontype": "Exploration"
+}, {
+    "id": 472,
+    "name": "Green Thumb",
+    "description": "The botani have claimed the abandoned ogre fortress at the Overlook Ruins as a new incubator. Stop them before they overgrow all of Gorgrond.",
+    "duration": 14400,
+    "level": 91,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Jungle",
+    "missiontype": "Exploration"
+}, {
+    "id": 473,
+    "name": "We Will Fight In the Shadar",
+    "description": "The outcast arakkoa were forced to abandon much of their written knowledge and history when the high arakkoa attacked Veil Shadar.",
+    "duration": 14400,
+    "level": 94,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Arakkoa",
+    "missiontype": "Exploration"
+}, {
+    "id": 474,
+    "name": "I See Dead Ogres",
+    "description": "The ghosts of ogre sorcerers haunt the Ango'rosh ruins, guarding artifacts forgotten by all others.",
+    "duration": 14400,
+    "level": 94,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Forest",
+    "missiontype": "Exploration"
+}, {
+    "id": 475,
+    "name": "Pro-Labor",
+    "description": "The high arakkoa have enslaved their outcast brethren to dig in the apexis excavation site, looking for ancient artifacts. Set the workers free.",
+    "duration": 14400,
+    "level": 96,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Arakkoa",
+    "missiontype": "Exploration"
+}, {
+    "id": 476,
+    "name": "Fall From Grace",
+    "description": "Many shiny trinkets and precious valuables have been lost in Sethekk Hollow, the place where cursed arakkoa are cast out from Skyreach.",
+    "duration": 14400,
+    "level": 96,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Swamp",
+    "missiontype": "Exploration"
+}, {
+    "id": 477,
+    "name": "Forced Eviction",
+    "description": "The Steamwheedle Preservation Society management needs the Stonecrag dig site to be an ogre-free zone before their workers will agree to excavate, and have promised a cut of the proceeds if we help out.",
+    "duration": 14400,
+    "level": 98,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Ogre",
+    "missiontype": "Exploration"
+}, {
+    "id": 478,
+    "name": "Early Mover",
+    "description": "We've heard reports that the Steamwheedle Preservation Society is looking to start a dig site at the razed Warsong outpost - why wait for them when you can claim the easy finds now?",
+    "duration": 14400,
+    "level": 98,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Beast",
+    "missiontype": "Exploration"
+}, {
+    "id": 479,
+    "name": "Mountain of Spirits",
+    "description": "The ancient communal site of Oshu'gun holds offerings from various orc clans. If not for the murderous void elementals unleashed by the pale, it would be a nice place to visit.",
+    "duration": 14400,
+    "level": 98,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Aberration",
+    "missiontype": "Exploration"
+}, {
+    "id": 480,
+    "name": "Herb Infused",
+    "description": "A monstrous beast roams the Murkbog.  Our alchemists say they can harvest it for a bounty of alchemy supplies.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Alchemy",
+    "missiontype": "Alchemy"
+}, {
+    "id": 481,
+    "name": "Battlefield Scavengers",
+    "description": "Scavengers gnaw and pick at the fallen.  Kill them so we can do some scavenging of our own.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Blacksmithing",
+    "missiontype": "Blacksmithing"
+}, {
+    "id": 482,
+    "name": "Flux to Give",
+    "description": "Blacksmiths know that furies can be harvested for the best flux.  Snuff the fires and bring it home.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Blacksmithing",
+    "missiontype": "Blacksmithing"
+}, {
+    "id": 483,
+    "name": "Enchanted Weapons",
+    "description": "The Shadowmoon clan possess weaponry we can harness for raw magic.  Raid their encampment and collect their enchanted weapons.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Enchanting",
+    "missiontype": "Enchanting"
+}, {
+    "id": 484,
+    "name": "Big Hands, Big Swords",
+    "description": "Ogre are known to possess massive, thick, and long swords.  Disenchanting them makes a tremendous amount of dust.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Enchanting",
+    "missiontype": "Enchanting"
+}, {
+    "id": 485,
+    "name": "The Wonder Gears",
+    "description": "Our engineers are excited about tearing apart a siege engine for parts.  Let's take one down and let them have their fun.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Engineering",
+    "missiontype": "Engineering"
+}, {
+    "id": 486,
+    "name": "You're Fired",
+    "description": "The pale are expert scavengers.  Let's relieve them of some of that salvage.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Engineering",
+    "missiontype": "Engineering"
+}, {
+    "id": 487,
+    "name": "Jewels of Denial",
+    "description": "The arakkoa decorate their weapons and armor with fantastic jewels.  Acquire them and let our jewelcrafters cut them into something useful.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Jewelcrafting",
+    "missiontype": "Jewelcrafting"
+}, {
+    "id": 488,
+    "name": "Waste Not, Want Not",
+    "description": "Apparently the goren can't digest the valuable gems they eat.  Your mission should be clear.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Jewelcrafting",
+    "missiontype": "Jewelcrafting"
+}, {
+    "id": 489,
+    "name": "Spy Games",
+    "description": "If we can decipher some stolen iron horde documents, we can find and assassinate their scouts.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Inscription",
+    "missiontype": "Inscription"
+}, {
+    "id": 490,
+    "name": "The Quill is Mighty",
+    "description": "It's time to make some changes to the Iron Horde's orders.  If we can kill the guards, we can rewrite history before it happens.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Inscription",
+    "missiontype": "Inscription"
+}, {
+    "id": 491,
+    "name": "That's Some Bull",
+    "description": "There's some rather large clefthoof in Nagrand.  Let's take one down before they are killed by trappers.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Leatherworking",
+    "missiontype": "Leatherworking"
+}, {
+    "id": 492,
+    "name": "Kill and Cut",
+    "description": "Iron Horde tents are made from rugged leather that can be crafted into fine leather armor.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Leatherworking",
+    "missiontype": "Leatherworking"
+}, {
+    "id": 493,
+    "name": "Nest Raid",
+    "description": "Rylak's collect an immense amount of fur when building their nests.  Raid a nest and recover the fur.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Tailoring",
+    "missiontype": "Tailoring"
+}, {
+    "id": 494,
+    "name": "Hunting the Hunters",
+    "description": "The garn are primarily known for their ferocity, but they are only slightly lesser well known for their sumptuous furry pelts.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Tailoring",
+    "missiontype": "Tailoring"
+}, {
+    "id": 495,
+    "name": "Apexis Nexus",
+    "description": "Our need for equipment upgrades never ends, take a few of our best to the apexis excavation site.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "",
+    "mechanictype": "Desert",
+    "missiontype": "Combat"
+}, {
+    "id": 496,
+    "name": "Prime Directive",
+    "description": "We'll leave the elementals of Nagrand to themselves right after we've gotten some of the elemental samples we need.",
+    "duration": 28800,
+    "level": 100,
+    "itemlevel": 660,
+    "rare": "",
+    "mechanictype": "Fury",
+    "missiontype": "Combat"
+}, {
+    "id": 497,
+    "name": "Ring of Cooperation",
+    "description": "Head to neutral ground at the Ring of Trials and learn a thing or two about fighting alongside ogres.",
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Ogre",
+    "missiontype": "Combat"
+}, {
+    "id": 498,
+    "name": "Outcast Relations",
+    "description": "As we have a number of arakkoa allies, let's run some joint operations to build relations.",
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Arakkoa",
+    "missiontype": "Combat"
+}, {
+    "id": 499,
+    "name": "You, Robot",
+    "description": "With the installation of a negatronic control unit, a true emotional bond between lifeform and machine can happen!  Get one!",
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Arakkoa",
+    "missiontype": "Combat"
+}, {
+    "id": 500,
+    "name": "Summer is Here",
+    "description": "The saberon have highly developed rituals and customs.  Live among them, learn their ways, and gain strength from this experience.",
+    "duration": 36000,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "Rare",
+    "mechanictype": "Plains",
+    "missiontype": "Combat"
+}, {
+    "id": 501,
+    "name": "Field Photography",
+    "description": "We need someone to document the devastation taking place here on Draenor. Head to Nagrand and photograph all you can.",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Plains",
+    "missiontype": "Logistics"
+}, {
+    "id": 502,
+    "name": "Lens Some Hands",
+    "description": "Your photos turned out great, but now we need some more creative shots. Head back out to the field and see what you can do!",
+    "duration": 14400,
+    "level": 100,
+    "itemlevel": 0,
+    "rare": "",
+    "mechanictype": "Plains",
+    "missiontype": "Logistics"
+}, {
+    "id": 503,
+    "name": "Lessons of the Blade",
+    "description": "You will find Yozshura the Blademaster atop Mount Volwrath.  Seek his wisdom, challenge him, and return enlightened.",
+    "duration": 21600,
+    "level": 100,
+    "itemlevel": 675,
+    "rare": "Rare",
+    "mechanictype": "Orc",
     "missiontype": "Combat"
 }]

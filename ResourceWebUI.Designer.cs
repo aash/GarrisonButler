@@ -90,31 +90,25 @@ namespace GarrisonButler {
         
         /// <summary>
         ///   Looks up a localized string similar to var g_garrison_followers = {
-        ///	&quot;32&quot;: {
-        ///		&quot;id&quot;: 32,
-        ///		&quot;source&quot;: 4,
-        ///		&quot;quality&quot;: 2,
-        ///		&quot;level&quot;: 90,
-        ///		&quot;itemlevelarmor&quot;: 600,
-        ///		&quot;itemlevelweapon&quot;: 600,
-        ///		&quot;alliance&quot;: {
-        ///			&quot;npc&quot;: 79607,
-        ///			&quot;race&quot;: 15,
-        ///			&quot;name&quot;: &quot;Dagg&quot;,
-        ///			&quot;classs&quot;: &quot;Subtlety Rogue&quot;,
-        ///			&quot;classid&quot;: 28,
-        ///			&quot;baseclass&quot;: 4,
-        ///			&quot;portrait&quot;: &quot;followerportrait_55124&quot;,
-        ///			&quot;abilities&quot;: [104]
-        ///		},
-        ///		&quot;horde&quot;: {
-        ///			&quot;npc&quot;: 79607,
-        ///			&quot;race&quot;: 15,
-        ///			&quot;name&quot;: &quot;Dagg&quot;,
-        ///			&quot;classs&quot;: &quot;Subtlety Rogue&quot;,
-        ///			&quot;classid&quot;: 28,
-        ///			&quot;baseclass&quot;: 4,
-        ///			&quot;p [rest of string was truncated]&quot;;.
+        ///    &quot;32&quot;: {
+        ///        &quot;id&quot;: 32,
+        ///        &quot;source&quot;: 4,
+        ///        &quot;quality&quot;: 2,
+        ///        &quot;level&quot;: 90,
+        ///        &quot;itemlevelarmor&quot;: 600,
+        ///        &quot;itemlevelweapon&quot;: 600,
+        ///        &quot;alliance&quot;: {
+        ///            &quot;npc&quot;: 79607,
+        ///            &quot;race&quot;: 15,
+        ///            &quot;name&quot;: &quot;Dagg&quot;,
+        ///            &quot;classs&quot;: &quot;Subtlety Rogue&quot;,
+        ///            &quot;classid&quot;: 28,
+        ///            &quot;baseclass&quot;: 4,
+        ///            &quot;portrait&quot;: &quot;followerportrait_55124&quot;,
+        ///            &quot;abilities&quot;: [104]
+        ///        },
+        ///        &quot;horde&quot;: {
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string follower_data {
             get {

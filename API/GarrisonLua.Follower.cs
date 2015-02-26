@@ -172,7 +172,9 @@ namespace GarrisonButler.API
                 // Skip any missions that don't meet user requirements (quantity > X for example)
                 var missionsThatMeetRequirement = missionsWithCurrentReward
                     .Where(m => m.Rewards
-                        .Where(mr => mr.Id == reward.Id)
+                        .Where(mr => mr.Id == reward.Id
+                            // Handle the case where we are looking at a category of rewards instead of individual rewards
+                            || (mr.Id != reward.Id && mr.Category == reward.Category && mr.Id == (int)mr.Category))
                         // Check both Mission amount conditions & Player amount conditions
                         .Any(mr => 
                             (reward.ConditionForMission == null || reward.ConditionForMission.GetCondition(mr))
@@ -290,81 +292,9 @@ namespace GarrisonButler.API
                             GarrisonButler.Diagnostic("Breaking mission loop due to followersToConsider = 0");
                             break;
                         }
-                    }
-                    //}
-
-                    //using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
-                    //{
-                    //    foreach (var combo in followerCombinations)
-                    //    {
-                    //        var followerIds = combo.Select(f => f.FollowerId).ToList();
-                    //        Stopwatch timer = new Stopwatch();
-                    //        timer.Start();
-                    //        while (!InterfaceLua.IsGarrisonMissionTabVisible()
-                    //               && timer.ElapsedMilliseconds < 2000)
-                    //        {
-                    //            GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
-                    //            InterfaceLua.ClickTabMission();
-                    //        }
-
-                    //        if (!InterfaceLua.IsGarrisonMissionTabVisible())
-                    //        {
-                    //            GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
-                    //            return new List<Follower>();
-                    //        }
-
-                    //        timer.Reset();
-                    //        timer.Start();
-                    //        while (!InterfaceLua.IsGarrisonMissionVisible()
-                    //               && timer.ElapsedMilliseconds < 2000)
-                    //        {
-                    //            GarrisonButler.Diagnostic("Mission not visible, opening mission: " + mission.MissionId +
-                    //                                      " - " +
-                    //                                      mission.Name);
-                    //            InterfaceLua.OpenMission(mission);
-                    //        }
-
-                    //        if (!InterfaceLua.IsGarrisonMissionVisible())
-                    //        {
-                    //            GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
-                    //            return new List<Follower>();
-                    //        }
-
-                    //        timer.Reset();
-                    //        timer.Start();
-                    //        while (!InterfaceLua.IsGarrisonMissionVisibleAndValid(mission.MissionId)
-                    //               && timer.ElapsedMilliseconds < 2000)
-                    //        {
-                    //            GarrisonButler.Diagnostic(
-                    //                "Mission not visible or not valid, close and then opening mission: " +
-                    //                mission.MissionId + " - " + mission.Name);
-                    //            InterfaceLua.ClickCloseMission();
-                    //            InterfaceLua.OpenMission(mission);
-                    //        }
-
-                    //        if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(mission.MissionId))
-                    //        {
-                    //            GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
-                    //            return new List<Follower>();
-                    //        }
-
-
-                    //        InterfaceLua.AddFollowersToMissionNonTask(mission.MissionId, followerIds);
-                    //        API.MissionLua.GetPartyMissionInfo(mission);
-                    //        combo.ForEach(f => RemoveFollowerFromMission(mission.MissionId.ToInt32(), f.FollowerId.ToInt32()));
-                    //        //RemoveFollowerFromMission(mission.MissionId, );
-                    //        GarrisonButler.Diagnostic("** Current Combo: ");
-                    //        combo.ForEach(f => GarrisonButler.Diagnostic(" - " + f.Name));
-                    //        GarrisonButler.Diagnostic("--> Success Chance: " + mission.SuccessChance);
-                    //        GarrisonButler.Diagnostic("--> Material Multiplier: " + mission.MaterialMultiplier);
-                    //        GarrisonButler.Diagnostic("--> XP Bonus: " + mission.XpBonus);
-                    //    }
-                    //}
-
-                }
-
-                //Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider.ToList(), );
-            }
+                    } // if (bestCombo != null)
+                } // foreach (var mission in missionsThatMeetRequirement)
+            } // foreach (var reward in rewards)
 
             GarrisonButler.Diagnostic("Done with Mission Calculations");
             GarrisonButler.Diagnostic("Total combinations = " + combosTried);
