@@ -1,0 +1,377 @@
+﻿<!DOCTYPE html>
+<html ng-app="GarrisonButlerApp">
+<head>
+    <meta charset="utf-8" />
+    <title>GarrisonButler</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.7.0/angular-material.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/hammerjs/2.0.4/hammer.min.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"></script>
+
+    <script src="./Libraries/SmartTable/smart-table.min.js"></script>
+    <script src="./Libraries/slider/slider.js"></script>
+    <script src="./Libraries/angular-xeditable/js/xeditable.min.js"></script>
+
+    <script src="./mainUI.js"></script>
+    <script src="./Modules/general-tab.module.js"></script>
+    <script src="./Modules/work-order-tab.module.js"></script>
+    <script src="./Modules/profession-tab.module.js"></script>
+    <script src="./Modules/mailing-tab.module.js"></script>
+    <script src="./Modules/milling-tab.module.js"></script>
+    <script src="./Modules/trading-post.module.js"></script>
+
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.7.0/angular-material.min.css">
+
+    <link rel="stylesheet" href="./Libraries/angular-xeditable/css/xeditable.css" />
+    <link rel="stylesheet" href="./mainUI.css" />
+</head>
+<body>
+<div ng-controller="MainController">
+    <tabset>
+
+        <tab heading="GarrisonButler">
+            <p>
+                Welcome! <br />
+
+            </p>
+            <div style="padding-left: 20px;">
+                <h3>Change Log</h3>
+                <h2>Version {{VersionNumber}}</h2>
+                <lu>
+                    <li>Added missing on/off buttons in mailing tab</li>
+                </lu>
+                <h2>Version 2.0.4.0</h2>
+                <lu>
+                    <li>New User Interface</li>
+                    <li>Fixed bot stopped at startup</li>
+                    <li>Fixed mail non deleted in settings</li>
+                    <li>Added diag output to Buildings</li>
+                </lu>
+            </div>
+        </tab>
+
+
+        <tab heading="General options">
+            <md-content  ng-controller="GeneralOptionsController">
+                <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
+                <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
+                <md-list>
+                    <div layout="row" layout-wrap>
+                        <md-item ng-repeat="item in items" ng-controller="switchController" ng-init="init(item)">
+                            <md-item-content flex="30">
+                                <accordion class="sectionBackground" close-others="oneAtATime">
+                                    <div layout="row" class="general-option-header">
+                                        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
+                                        <div class="md-tile-content general-item-title">
+                                            <h3>
+                                                <b>{{item.label}}</b>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <accordion-group is-open="status.open">
+                                    <accordion-heading>
+                                        More info
+                                        <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                    </accordion-heading>
+                                    <p>
+                                        {{item.description}}
+                                    </p>
+                                </accordion-group>
+                                </accordion>
+                            </md-item-content>
+                        </md-item>
+                    </div>
+                </md-list>
+            </md-content>
+        </tab>
+
+
+        <tab heading="Work Orders">
+            <div ng-controller=buildingsListController>
+                <md-button class="md-raised" ng-click='startAll(true)'>Start All</md-button>
+                <md-button class="md-raised" ng-click='collectAll(true)'>Collect All</md-button>
+                <md-button class="md-raised" ng-click='startAll(false)'>Start none</md-button>
+                <md-button class="md-raised" ng-click='collectAll(false)'>Collect none</md-button>
+                <h2>Building's Available</h2>
+                <md-content>
+                    <md-list layout="row" layout-wrap>
+                        <md-item ng-repeat="building in itemsAvailable">
+                            <md-item-content>
+                                <section class="sectionBackground-work-order" layout="row" ng-controller="buildingController" ng-init="init(building)">
+                                    <div class="md-tile-content-orders">
+                                        <div layout="column">
+                                            <div layout="row" layout-align="start center">
+                                                <div class="md-title-content">
+                                                    <h3 style="vertical-align: middle;"><b>{{building.name}}</b></h3>
+                                                </div>
+                                            </div>
+                                            <div layout="column" style="margin-left: 4px; margin-top: 4px;">
+                                                <div layout="row">
+                                                    <switch ng-model="building.canStartOrder" aria-label="Switch-{{nameNoSpaces}}" class="green"></switch>
+                                                    <p>Start Orders</p>
+                                                </div>
+                                                <div layout="row">
+                                                    <switch id="enabled" name="enabled" ng-model="building.canCollectOrder" class="green"></switch>
+                                                    <p>Collect Orders</p>
+                                                </div>
+                                            </div>
+                                            <div layout="row" style="width: 300px;">
+                                                <h3 style="margin-left: 4px;">Max: </h3>
+                                                <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1" precision="1" ng-model="building.maxCanStartOrder"></slider>
+                                                <input style="width:62px;height: 35px" ng-init="$scope.$apply();" type="number" ng-model="building.maxCanStartOrder" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="50">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </md-item-content>
+                        </md-item>
+                    </md-list>
+                </md-content>
+
+                <h2>Building's not Available</h2>
+                <md-content>
+                <md-list layout="row" layout-wrap>
+                    <md-item ng-repeat="building in itemsNotAvailable">
+                        <md-item-content>
+                            <section class="sectionBackground-work-order" layout="row" ng-controller="buildingController" ng-init="init(building)">
+                                <div class="md-tile-content-orders">
+                                    <div layout="column">
+                                        <div layout="row" layout-align="start center">
+                                            <div class="md-title-content">
+                                                <h3 style="vertical-align: middle;"><b>{{building.name}}</b></h3>
+                                            </div>
+                                        </div>
+                                        <div layout="column" style="margin-left: 4px; margin-top: 4px;">
+                                            <div layout="row">
+                                                <switch ng-model="building.canStartOrder" aria-label="Switch-{{nameNoSpaces}}" class="green"></switch>
+                                                <p>Start Orders</p>
+                                            </div>
+                                            <div layout="row">
+                                                <switch id="enabled" name="enabled" ng-model="building.canCollectOrder" class="green"></switch>
+                                                <p>Collect Orders</p>
+                                            </div>
+                                        </div>
+                                        <div layout="row" style="width: 300px;">
+                                            <h3 style="margin-left: 4px;">Max: </h3>
+                                            <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1" precision="1" ng-model="building.maxCanStartOrder"></slider>
+                                            <input style="width:62px;height: 35px" ng-init="$scope.$apply();" type="number" ng-model="building.maxCanStartOrder" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="50">
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </md-item-content>
+                    </md-item>
+                </md-list>
+            </md-content>
+            </div>
+        </tab>
+
+
+        <tab heading="Professions">
+            <div ng-controller="professionsListController">
+                <div class="tab-intro">
+                    <h2>Daily Profession CDs</h2>
+                </div>
+                <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
+                <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
+                <table st-table="Professions" class="table">
+                    <thead>
+                    <tr>
+                        <th st-sort="activated">Enabled</th>
+                        <th st-sort="profession" st-sort-default>Profession</th>
+                        <th st-sort="name">Item</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr st-select-row="row" st-select-mode="multiple" ng-repeat="row in Professions">
+                        <td cs-select="row">
+                            <div ng-controller="dailyController" ng-init="init(row)">
+                                <switch id="enabled" name="enabled" ng-model="row.activated" class="green"></switch>
+                            </div>
+                        </td>
+                        <td>{{row.profession}}</td>
+                        <td>{{row.name}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </tab>
+
+        <tab heading="Mailing">
+            <div ng-controller="mailingListController">
+                <div class="tab-intro">
+                    <h2>Mailing Engine</h2>
+                </div>
+
+                <div layout="row" class="general-option-header">
+                    <switch id="enabled" name="enabled" ng-model="retrieveMail" class="green"></switch>
+                    <div class="md-tile-content general-item-title">
+                        <h3>
+                            <b>Retrieve Mail</b>
+                        </h3>
+                    </div>
+                </div>
+
+                <div layout="row" class="general-option-header">
+                    <switch id="enabled" name="enabled" ng-model="sendMail" class="green"></switch>
+                    <div class="md-tile-content general-item-title">
+                        <h3>
+                            <b>Send Mail</b>
+                        </h3>
+                    </div>
+                </div>
+
+                <div layout="row" class="general-option-header">
+                    <switch id="enabled" name="enabled" ng-model="sendGreen" class="green"></switch>
+                    <div class="md-tile-content general-item-title">
+                        <h3>
+                            <b>Send Disenchantable Green</b>
+                        </h3>
+                        <div>
+                            <div>
+                                Recipient for disenchantable green:
+                            </div>
+                            <a href="#" editable-text="recipientGreen">{{ recipientGreen || 'empty' }}</a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <button class="btn btn-default" ng-click="addRow()">Add item</button>
+
+                <table st-table="mailItems" class="table">
+                    <thead>
+                    <tr>
+                       <!-- <th st-sort="activated">Enabled</th> -->
+                        <th st-sort="itemId" st-sort-default>Item ID</th>
+                        <th st-sort="recipient">Recipient</th>
+                        <th st-sort="condition">Condition</th>
+                        <th st-sort="value">Value</th>
+                        <th st-sort="comment">Comment</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in mailItems">
+                       <!-- <td>
+                            <switch id="enabled" name="enabled" ng-model="row.activated" class="green"></switch>
+                        </td> -->
+                        <td>
+                            <!-- editable itemId (text with validation) -->
+                            <span editable-text="row.itemId" e-name="itemId" e-form="rowform" onbeforesave="checkItemId($data, row)" e-required>
+                              {{ row.itemId || 'empty' }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- editable recipient (text with validation) -->
+                            <span editable-text="row.recipient" e-name="recipient" e-form="rowform" onbeforesave="checkEmpty($data)" e-required>
+                              {{ row.recipient || 'empty' }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- editable status (select-local) -->
+                            <span editable-select="row.condition" e-name="condition" e-form="rowform" onbeforesave="checkEmpty($data)" e-ng-options="s for s in conditions" e-required>
+                              {{ row.condition }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- editable value (text with validation) -->
+                            <span editable-text="row.value" e-name="value" e-form="rowform" onbeforesave="checkEmpty($data)" e-required>
+                              {{ row.value || 'empty' }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- editable comment (text with validation) -->
+                            <span editable-text="row.comment" e-name="comment" e-form="rowform">
+                              {{ row.comment || 'empty' }}
+                            </span>
+                        </td>
+                        <td style="white-space: nowrap">
+                            <!-- form -->
+                            <form editable-form name="rowform" onaftersave="saveMailToCSharp($data)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == row">
+                                <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
+                                    save
+                                </button>
+                                <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
+                                    cancel
+                                </button>
+                            </form>
+                            <div class="buttons" ng-show="!rowform.$visible">
+                                <button class="btn btn-primary" ng-click="rowform.$show()">edit</button>
+                                <button class="btn btn-danger" ng-click="removeRow(row)">del</button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </tab>
+
+
+        <tab heading="Milling">
+            <div ng-controller="millingListController">
+                <div class="tab-intro">
+                    <h2>Milling Engine</h2>
+                </div>
+                <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
+                <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
+                <table st-table="MillingItems" class="table">
+                    <thead>
+                    <tr>
+                        <th st-sort="activated">Enabled</th>
+                        <th st-sort="name" st-sort-default>Item</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr st-select-row="row" st-select-mode="multiple" ng-repeat="row in MillingItems">
+                        <td cs-select="row">
+                            <div ng-controller="millingController" ng-init="init(row)">
+                                <switch id="enabled" name="enabled" ng-model="row.activated" class="green"></switch>
+                            </div>
+                        </td>
+                        <td>{{row.itemName}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </tab>
+        <tab heading="Trading Post">
+            <div ng-controller="tradingPostListController">
+                <div class="tab-intro">
+                    <h2>Trading Post Reagents</h2>
+                </div>
+                <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
+                <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
+                <table st-table="TradingReagents" class="table">
+                    <thead>
+                    <tr>
+                        <th st-sort="activated">Enabled</th>
+                        <th st-sort="name" st-sort-default>Item</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr st-select-row="row" st-select-mode="multiple" ng-repeat="row in TradingReagents">
+                        <td cs-select="row">
+                            <div ng-controller="tradingController" ng-init="init(row)">
+                                <switch id="enabled" name="enabled" ng-model="row.activated" class="green"></switch>
+                            </div>
+                        </td>
+                        <td>{{row.itemName}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </tab>
+
+    </tabset>
+</div>
+</body>
+</html>

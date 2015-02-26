@@ -42,13 +42,25 @@ namespace GarrisonButler.Config
             GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
             prop.SetValue(this, value);
         }
-
-        [ComVisible(true)]
         public bool GetBooleanValue(string propertyName)
         {
             var prop = GetType().GetProperty(propertyName);
             GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
             return (bool)prop.GetValue(this);
+        }
+        public void UpdateGreenToCharRecipient(string value)
+        {
+            GreensToChar.Value = value;
+        }
+        public string GetGreenToCharRecipient()
+        {
+            return GreensToChar.Value;
+        }
+
+
+        public bool IsIceVersion()
+        {
+            return GarrisonButler.IsIceVersion();
         }
 
         [ComVisible(true)]

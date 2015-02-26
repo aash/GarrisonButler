@@ -184,6 +184,24 @@
       <LastGenOutput>ResourceWebUI.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="WebUI\Libraries\angular-xeditable\css\xeditable.css" />
+    <Content Include="WebUI\Libraries\angular-xeditable\js\xeditable.min.js" />
+    <Content Include="WebUI\Libraries\follower_data.js" />
+    <Content Include="WebUI\Libraries\MissionCalc.js" />
+    <Content Include="WebUI\Libraries\MissonCalcSimple.js" />
+    <Content Include="WebUI\Libraries\slider\slider.js" />
+    <Content Include="WebUI\Libraries\SmartTable\smart-table.min.js" />
+    <Content Include="WebUI\mainUI.css" />
+    <Content Include="WebUI\mainUI.html" />
+    <Content Include="WebUI\mainUI.js" />
+    <Content Include="WebUI\Modules\general-tab.module.js" />
+    <Content Include="WebUI\Modules\mailing-tab.module.js" />
+    <Content Include="WebUI\Modules\milling-tab.module.js" />
+    <Content Include="WebUI\Modules\profession-tab.module.js" />
+    <Content Include="WebUI\Modules\trading-post.module.js" />
+    <Content Include="WebUI\Modules\work-order-tab.module.js" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
