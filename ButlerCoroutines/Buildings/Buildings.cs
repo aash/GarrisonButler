@@ -101,7 +101,7 @@ namespace GarrisonButler.ButlerCoroutines
                             async () =>
                             {
                                 var tooMany =
-                                    TooManyItemInBags(MinersCofeeItemId, 5)();
+                                    TooManyItemInBags(MinersCofeeItemId, 20)();
                                 return
                                     new Result(
                                         tooMany.Item1 && GaBSettings.Get().DeleteCoffee
@@ -114,7 +114,7 @@ namespace GarrisonButler.ButlerCoroutines
                             async () =>
                             {
                                 var tooMany =
-                                    TooManyItemInBags(PreserverdMiningPickItemId, 5)();
+                                    TooManyItemInBags(PreserverdMiningPickItemId, 20)();
                                 return
                                     new Result(
                                         tooMany.Item1 && GaBSettings.Get().DeleteMiningPick
