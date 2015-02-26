@@ -153,6 +153,8 @@ namespace GarrisonButler.Objects
             if (Spell == null)
                 Spell = GetRecipeSpell();
 
+            if (Spell == null)
+                return 0;
             
             var maxRepeat = Int32.MaxValue;
             var spellReagents = Spell.InternalInfo.SpellReagents;
