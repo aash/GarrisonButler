@@ -200,7 +200,7 @@ namespace GarrisonButler.API
                 var followersToConsider =
                     // If reward type is FollowerXP, discard all level 100 epic followers
                     (
-                    reward.Category == MissionReward.MissionRewardCategory.FollowerExperience
+                    reward.Category == MissionReward.MissionRewardCategory.FollowerExperience && !GaBSettings.Get().IncludeEpicMaxLevelFollowersForExperience
                         ? followers.SkipWhile(f => f.Quality.ToInt32() > 3 && f.Level >= 100)
                         : followers
                     )
@@ -209,9 +209,9 @@ namespace GarrisonButler.API
                 GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
                 followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
 
-                DateTime startedAt = DateTime.Now;
                 foreach (var mission in missionsThatMeetRequirement)
                 {
+                    DateTime startedAt = DateTime.Now;
                     Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
                     //GarrisonButler.Diagnostic("**Combination**");
                     //GarrisonButler.Diagnostic("Mission: " + mission.Name);

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Json;
+using System.Security.Policy;
 using GarrisonButler.Libraries;
 using GarrisonButler.Libraries.JSON;
 using Styx;
@@ -144,6 +145,11 @@ namespace GarrisonButler.Libraries.Wowhead
 
             if(enableDebugPrint) GarrisonButler.Diagnostic("----- Start CalculateSuccessChance -----");
 
+            if (followers.Any(f => f.Name == "Gronnstalker Rokash")
+                && followers.Any(f => f.Name == "Mulverick")
+                && followers.Any(f => f.Name == "Ahm"))
+                GarrisonButler.Diagnostic("Special Diagnostic output message");
+
             var mentorinfo = GetMentorInfo();
 
             foreach (var currentFollower in followerInfo)
@@ -216,6 +222,7 @@ namespace GarrisonButler.Libraries.Wowhead
 
             var mechanicIndex = 0;
             registeredThreatCounters = new bool[100, 100, 100];
+            var typeAmountHashtable = new Hashtable();
             if (mechanicInfo.Count > 0)
             {
                 do
@@ -224,62 +231,139 @@ namespace GarrisonButler.Libraries.Wowhead
                     // Category 2 = Abilities
                     if (!currentMechanic.ContainsKey("category") || currentMechanic["category"].ToString().ToInt32() == 2)
                     {
-                        var mechanicAmount = currentMechanic["amount"].ToString().ToInt32();
-
-                        if (mission.NumFollowers > 0)
+                        var amt = currentMechanic["amount"].ToString().ToInt32();
+                        //Hashtable currentIndex = o.ContainsKey(currentMechanic["type"]) ? (Hashtable)o[currentMechanic["type"]] : o.Add(currentMechanic["type"].ToString(), );
+                        if (typeAmountHashtable.ContainsKey(currentMechanic["type"]))
                         {
-                            for (int followerIndex = 0; followerIndex < followerInfo.Count; followerIndex++)
-                            {
-                                var currentFollower = followerInfo[followerIndex];
-                                for (int abilityIndex = 0;
-                                    abilityIndex < currentFollower.abilities.Count;
-                                    abilityIndex++)
-                                {
-                                    var currentAbility = (Hashtable)g_garrison_abilities[currentFollower.abilities[abilityIndex].ToString()];
-                                    var currentAbilityType = (ArrayList)currentAbility["type"];
-                                    var numTypes = currentAbilityType.Count;
+                            Hashtable currentIndex = (Hashtable)typeAmountHashtable[currentMechanic["type"]];
+                            currentIndex["amount1"] = currentIndex["amount1"].ToString().ToInt32() + amt;
+                            currentIndex["amount2"] = currentIndex["amount2"].ToString().ToInt32() + amt;
+                        }
+                        else
+                        {
+                            Hashtable currentIndex = new Hashtable();
+                            currentIndex.Add("amount1", amt);
+                            currentIndex.Add("amount2", amt);
+                            currentIndex.Add("id", currentMechanic["id"].ToString().ToInt32());
+                            typeAmountHashtable.Add(currentMechanic["type"], currentIndex);
+                        }
+                        //var mechanicAmount = currentMechanic["amount"].ToString().ToInt32();
 
-                                    for (var typeIndex = 0; typeIndex < numTypes; typeIndex++)
-                                    {
-                                        var counters = (ArrayList) currentAbility["counters"];
-                                        var amount1 = (ArrayList) currentAbility["amount1"];
-                                        var amount2 = (ArrayList) currentAbility["amount2"];
-                                        var amount3 = (ArrayList) currentAbility["amount3"];
-                                        var currentMechanicType = currentMechanic["type"];
-                                        var currentMechanicTypeInt = currentMechanicType.ToString().ToInt32();
-                                        var counterInt = counters[typeIndex].ToString().ToInt32();
-                                        var amount1Int = amount1[typeIndex].ToString().ToInt32();
-                                        var amount2Int = amount2[typeIndex].ToString().ToInt32();
-                                        var amount3Int = amount3[typeIndex].ToString().ToInt32();
-                                        if ((currentMechanicTypeInt == counterInt)
-                                            && ((amount1Int & 1) != 1)
-                                            && (mechanicAmount > 0)
-                                            && !ThreatCounterIsAlreadyRegistered(followerIndex, abilityIndex, typeIndex))
-                                        {
-                                            var q = CalcChance(amount2Int, amount3Int, currentFollower.bias);
-                                            var a = currentMechanic["amount"].ToString().ToInt32();
-                                            if (q <= a)
-                                                a = Convert.ToInt32(q);
-                                            RegisterThreatCounter(followerIndex, abilityIndex, typeIndex);
-                                            // Reduce mechanic amount by amount countered
-                                            mechanicAmount -= a;
-                                        }
-                                    }
-                                }
-                            }
-                        } // if (mission.NumFollowers > 0)
+                        //if (mission.NumFollowers > 0)
+                        //{
+                        //    for (int followerIndex = 0; followerIndex < followerInfo.Count; followerIndex++)
+                        //    {
+                        //        var currentFollower = followerInfo[followerIndex];
+                        //        for (int abilityIndex = 0;
+                        //            abilityIndex < currentFollower.abilities.Count;
+                        //            abilityIndex++)
+                        //        {
+                        //            var currentAbility = (Hashtable)g_garrison_abilities[currentFollower.abilities[abilityIndex].ToString()];
+                        //            var currentAbilityType = (ArrayList)currentAbility["type"];
+                        //            var numTypes = currentAbilityType.Count;
 
-                        if (mechanicAmount < 0)
-                            mechanicAmount = 0;
+                        //            for (var typeIndex = 0; typeIndex < numTypes; typeIndex++)
+                        //            {
+                        //                var counters = (ArrayList) currentAbility["counters"];
+                        //                var amount1 = (ArrayList) currentAbility["amount1"];
+                        //                var amount2 = (ArrayList) currentAbility["amount2"];
+                        //                var amount3 = (ArrayList) currentAbility["amount3"];
+                        //                var currentMechanicType = currentMechanic["type"];
+                        //                var currentMechanicTypeInt = currentMechanicType.ToString().ToInt32();
+                        //                var counterInt = counters[typeIndex].ToString().ToInt32();
+                        //                var amount1Int = amount1[typeIndex].ToString().ToInt32();
+                        //                var amount2Int = amount2[typeIndex].ToString().ToInt32();
+                        //                var amount3Int = amount3[typeIndex].ToString().ToInt32();
+                        //                if ((currentMechanicTypeInt == counterInt)
+                        //                    && ((amount1Int & 1) != 1)
+                        //                    && (mechanicAmount > 0)
+                        //                    && !ThreatCounterIsAlreadyRegistered(followerIndex, abilityIndex, typeIndex))
+                        //                {
+                        //                    var q = CalcChance(amount2Int, amount3Int, currentFollower.bias);
+                        //                    var a = currentMechanic["amount"].ToString().ToInt32();
+                        //                    if (q <= a)
+                        //                        a = Convert.ToInt32(q);
+                        //                    RegisterThreatCounter(followerIndex, abilityIndex, typeIndex);
+                        //                    // Reduce mechanic amount by amount countered
+                        //                    mechanicAmount -= a;
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //} // if (mission.NumFollowers > 0)
 
-                        // Calculate success based on how much of the mechanic was countered
-                        var f = ((double)(currentMechanic["amount"].ToString().ToInt32() - mechanicAmount))*coeff;
-                        successChance += f;
-                        if (enableDebugPrint) GarrisonButler.Diagnostic("Added {0} to success due to followers countering boss mechanics {1}.", f, currentMechanic["id"]);
+                        //if (mechanicAmount < 0)
+                        //    mechanicAmount = 0;
+
+                        //// Calculate success based on how much of the mechanic was countered
+                        //var f = ((double)(currentMechanic["amount"].ToString().ToInt32() - mechanicAmount))*coeff;
+                        //successChance += f;
+                        //if (enableDebugPrint) GarrisonButler.Diagnostic("Added {0} to success due to followers countering boss mechanics {1}.", f, currentMechanic["id"]);
                     }
                     mechanicIndex++;
                 } while (mechanicIndex < mechanicInfo.Count);
             } //if (mechanicInfo.Count > 0)
+
+            //for(var currentTypeAmountIndex = 0; currentTypeAmountIndex < typeAmountHashtable.Count; currentTypeAmountIndex++)
+            foreach (DictionaryEntry currentTypeAmountDictionaryEntry in typeAmountHashtable)
+            {
+                Hashtable currentTypeAmount = (Hashtable)currentTypeAmountDictionaryEntry.Value;
+                // currentTypeAmount produces Hashtable with the following structure:
+                // amount1: <int>
+                // amount2: <int>
+                // type: <int>
+                var currentTypeAmount_Amount2 = currentTypeAmount["amount2"].ToString().ToInt32();
+                if (mission.NumFollowers > 0)
+                {
+                    for (var followerIndex = 0; followerIndex < followerInfo.Count; followerIndex++)
+                    {
+                        var currentFollower = followerInfo[followerIndex];
+                        for (int abilityIndex = 0;
+                            abilityIndex < currentFollower.abilities.Count;
+                            abilityIndex++)
+                        {
+                            var currentAbility =
+                                (Hashtable)g_garrison_abilities[currentFollower.abilities[abilityIndex].ToString()];
+                            var type = (ArrayList)currentAbility["type"];
+                            var numTypes = type.Count;
+
+                            for (var typeIndex = 0; typeIndex < numTypes; typeIndex++)
+                            {
+                                var counters = (ArrayList)currentAbility["counters"];
+                                var amount1 = (ArrayList)currentAbility["amount1"];
+                                var amount2 = (ArrayList)currentAbility["amount2"];
+                                var amount3 = (ArrayList)currentAbility["amount3"];
+                                if (typeIndex >= counters.Count
+                                    || typeIndex >= amount1.Count
+                                    || typeIndex >= amount2.Count
+                                    || typeIndex >= amount3.Count)
+                                    continue;
+                                var typeInt = type[typeIndex].ToString().ToInt32();
+                                var counterInt = counters[typeIndex].ToString().ToInt32();
+                                var amount1Int = amount1[typeIndex].ToString().ToInt32();
+                                var amount2Int = amount2[typeIndex].ToString().ToInt32();
+                                var amount3Int = amount3[typeIndex].ToString().ToInt32();
+                                if (currentTypeAmountDictionaryEntry.Key.ToString().ToInt32() == counterInt
+                                    && ((amount1Int & 1) != 1)
+                                    && currentTypeAmount_Amount2 > 0)
+                                {
+                                    var q = CalcChance(amount2Int, amount3Int, currentFollower.bias);
+                                    var s = currentTypeAmount_Amount2 - q;
+                                    if (s < 0)
+                                        s = 0;
+
+                                    currentTypeAmount_Amount2 = Convert.ToInt32(s);
+                                    //if (enableDebugPrint) GarrisonButler.Diagnostic("Added {0} to success due to follower {1} enemy race ability {2}", q, currentFollower.follower, currentMechanic["id"]);
+                                }
+                            }
+                        }
+                    } // for (var followerIndex = 0; followerIndex < followerInfo.Count; followerIndex++)
+                } // if (mission.NumFollowers > 0)
+
+                var v28 = (currentTypeAmount["amount1"].ToString().ToInt32() - currentTypeAmount_Amount2)*coeff;
+                successChance += v28;
+                if (enableDebugPrint) GarrisonButler.Diagnostic("Added {0} to success due to followers countering boss mechanic type {1}.", v28, currentTypeAmount["id"]);
+            }
 
             for (mechanicIndex = 0; mechanicIndex < mechanicInfo.Count; mechanicIndex++)
             {
@@ -632,14 +716,26 @@ namespace GarrisonButler.Libraries.Wowhead
 
         public static double GetFollowerBias(int level, int ilvl)
         {
+            const int defaultMinItemLevel = 600;
             double returnVal = (level - mission.Level) * (1.0d/3.0d);
 
-            if (mission.Level == 100 && mission.ItemLevel > 0)
+            if (mission.Level == 100)
             {
-                returnVal += (ilvl - mission.ItemLevel)*(1.0d/15.0d);
+                var d = mission.ItemLevel;
+
+                if (d <= 0)
+                    d = defaultMinItemLevel;
+
+                if (d > 0)
+                    returnVal += (ilvl - d)*(1.0d/15.0d);
             }
 
-            if (returnVal < -1 || (returnVal > 1))
+            if (returnVal < -1)
+            {
+                returnVal = -1;
+            }
+
+            if (returnVal > 1)
             {
                 returnVal = 1;
             }
