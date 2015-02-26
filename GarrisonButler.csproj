@@ -2625,7 +2625,6 @@
     <Content Include="WebUI\Libraries\BootstrapSwitch\js\bootstrap-switch.js" />
     <Content Include="WebUI\Libraries\BootstrapSwitch\js\bootstrap-switch.min.js" />
     <Content Include="WebUI\Libraries\follower_data.js" />
-    <Content Include="WebUI\Libraries\garrison_abilities.js" />
     <Content Include="WebUI\Libraries\MissionCalc.js" />
     <Content Include="WebUI\Libraries\mission_data.js" />
     <Content Include="WebUI\Libraries\MissonCalcSimple.js" />

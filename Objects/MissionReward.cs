@@ -20,6 +20,7 @@ namespace GarrisonButler.Objects
     public class MissionReward : INotifyPropertyChanged
     {
         private int _id;
+        private string _name;
         [XmlAttribute("Id")]
         public int Id
         {
@@ -34,7 +35,15 @@ namespace GarrisonButler.Objects
             }
         }
         [XmlAttribute("Name")]
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                if (_name == "") _name = Category.ToString();
+                return _name;
+            }
+            set { _name = value; }
+        }
         [XmlAttribute("Category")]
         public MissionRewardCategory Category { get; set; }
         [XmlAttribute("IndividualSuccessChanceEnabled")]
@@ -313,7 +322,7 @@ namespace GarrisonButler.Objects
         {
             get
             {
-                return Category == MissionRewardCategory.PlayerGear
+                return (Category == MissionRewardCategory.PlayerGear
                        || Category == MissionRewardCategory.FollowerGear
                        || Category == MissionRewardCategory.FollowerItem
                        || Category == MissionRewardCategory.MiscItem
@@ -323,14 +332,15 @@ namespace GarrisonButler.Objects
                        || Category == MissionRewardCategory.FollowerContract
                        || Category == MissionRewardCategory.VanityItem
                        || Category == MissionRewardCategory.UnknownItem
-                       || Category == MissionRewardCategory.PlayerExperience;
+                       || Category == MissionRewardCategory.PlayerExperience)
+                       && (this.Id != (int)this.Category);
             }
         }
 
         [XmlIgnore]
         public bool IsCurrencyReward
         {
-            get { return Category == MissionRewardCategory.Currency; }
+            get { return Category == MissionRewardCategory.Currency && (this.Id != (int)this.Category); }
         }
 
         [XmlIgnore]

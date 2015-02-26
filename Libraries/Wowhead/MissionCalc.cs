@@ -78,7 +78,7 @@ namespace GarrisonButler.Libraries.Wowhead
                 }
                 catch (Exception e)
                 {
-                    GarrisonButler.Diagnostic("EXCEPTION IN MISSION");
+                    GarrisonButler.Warning("EXCEPTION IN MISSION");
                 }
                 //foreach (Hashtable currentMission in g_garrison_missions)
                 //{

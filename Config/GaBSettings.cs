@@ -149,7 +149,7 @@ namespace GarrisonButler.Config
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
 
-            // Trading post
+            // Trading post / mission rewards
             ret.PopulateMissingSettings();
             
             // Pigments for milling
@@ -393,6 +393,7 @@ namespace GarrisonButler.Config
                     UpdateSettings(CurrentSettings);
                 }
                 CurrentSettings.PopulateMissingSettings();
+                GaBSettings.Save();
                 GarrisonButler.Log("Configuration successfully loaded.");
                 //ObjectDumper.WriteToHb(CurrentSettings, 5);
             }
