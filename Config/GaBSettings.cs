@@ -26,7 +26,8 @@ namespace GarrisonButler.Config
     public class GaBSettings : INotifyPropertyChanged
     {
         private List<Pigment> _pigments;
-        private List<MissionReward> _rewards; 
+        private List<MissionReward> _rewards;
+        private int _defaultMissionSuccessChance = 100;
 
         private GaBSettings()
         {
@@ -458,7 +459,13 @@ namespace GarrisonButler.Config
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
         public bool IncludeEpicMaxLevelFollowersForExperience { get; set; }
-        public int DefaultMissionSuccessChance { get; set; }
+
+        public int DefaultMissionSuccessChance
+        {
+            get { return _defaultMissionSuccessChance; }
+            set { _defaultMissionSuccessChance = value; }
+        }
+
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
