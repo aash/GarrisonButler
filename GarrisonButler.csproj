@@ -60,7 +60,6 @@
     <Compile Include="ButlerCoroutines\Combat.cs" />
     <Compile Include="Libraries\EnumHelper.cs" />
     <Compile Include="Libraries\ItemsExtensions.cs" />
-    <Compile Include="Libraries\JSON\Class1.cs" />
     <Compile Include="Libraries\JSON\JSON.cs" />
     <Compile Include="Libraries\PlayerExtensions.cs" />
     <Compile Include="Libraries\Salesman.cs" />
@@ -177,7 +176,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Config\ConfigForm.resources" />
+    <EmbeddedResource Include="Config\ConfigForm2.resources" />
     <EmbeddedResource Include="Config\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2431,10 +2430,6 @@
     <Content Include="WebUI\Libraries\MobileAngularUI\js\mobile-angular-ui.min.js" />
     <Content Include="WebUI\Libraries\UIgrid\ui-grid.min.css" />
     <Content Include="WebUI\Libraries\UIgrid\ui-grid.min.js" />
-    <Content Include="WebUI\test.css" />
-    <Content Include="WebUI\test.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

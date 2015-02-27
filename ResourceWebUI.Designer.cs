@@ -61,6 +61,34 @@ namespace GarrisonButler {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to var g_garrison_followers = {
+        ///    &quot;32&quot;: {
+        ///        &quot;id&quot;: 32,
+        ///        &quot;source&quot;: 4,
+        ///        &quot;quality&quot;: 2,
+        ///        &quot;level&quot;: 90,
+        ///        &quot;itemlevelarmor&quot;: 600,
+        ///        &quot;itemlevelweapon&quot;: 600,
+        ///        &quot;alliance&quot;: {
+        ///            &quot;npc&quot;: 79607,
+        ///            &quot;race&quot;: 15,
+        ///            &quot;name&quot;: &quot;Dagg&quot;,
+        ///            &quot;classs&quot;: &quot;Subtlety Rogue&quot;,
+        ///            &quot;classid&quot;: 28,
+        ///            &quot;baseclass&quot;: 4,
+        ///            &quot;portrait&quot;: &quot;followerportrait_55124&quot;,
+        ///            &quot;abilities&quot;: [104]
+        ///        },
+        ///        &quot;horde&quot;: {
+        ///  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string follower_data {
+            get {
+                return ResourceManager.GetString("follower_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /**
         /// * Created by Mickaël on 2/1/2015.
         /// */
@@ -73,9 +101,9 @@ namespace GarrisonButler {
         ///        // Represents a variable name, a title and a description
         ///        $scope.Entry = function Entry(variableName, label, description, displayicon) {
         ///            this.variableName = variableName;
+        ///            this.value = false;
         ///            this.label = label;
-        ///            this.description = description;
-        ///            this.displa [rest of string was truncated]&quot;;.
+        ///            this.description = desc [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string general_tab_module_js {
             get {
@@ -94,12 +122,12 @@ namespace GarrisonButler {
         ///    .controller(&apos;mailingListController&apos;, function ($scope) {
         ///
         ///        // Represents a mail item
-        ///        $scope.MailItem = function MailItem(itemId, recipient, condition, value, comment) {
+        ///        $scope.MailItem = function(itemId, recipient, condition, value, comment) {
         ///            this.itemId = itemId;
         ///            this.recipient = recipient;
         ///            this.condition = condition;
         ///            this.value = value;
-        ///  [rest of string was truncated]&quot;;.
+        ///           [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mailing_tab_module_js {
             get {
@@ -168,8 +196,8 @@ namespace GarrisonButler {
         ///        &apos;GarrisonButlerApp.general-tab&apos;,
         ///        &apos;GarrisonButlerApp.work-order-tab&apos;,
         ///        &apos;GarrisonButlerApp.profession-tab&apos;,
-        ///        &apos;GarrisonButlerApp.mailing-tab&apos;,
         ///        &apos;GarrisonButlerApp.milling-tab&apos;,
+        ///        &apos;GarrisonButlerApp.mailing-tab&apos;,
         ///        &apos;GarrisonButlerApp.trading-post-tab&apos;
         ///    ]);
         ///
@@ -194,19 +222,43 @@ namespace GarrisonButler {
         ///
         ///    .controller(&apos;millingListController&apos;, function ($scope) {
         ///
+        ///        console.log(&quot;test00&quot;);
         ///        // Represents a Item
-        ///        $scope.Item = function Item(itemId, name, activated) {
+        ///        $scope.MillingItem = function(itemId, name, activated) {
         ///            this.itemId = itemId;
         ///            this.itemName = name;
         ///            this.activated = activated;
         ///        };
         ///
-        ///        $scope.butlerSettings.Milling = [
-        ///            new $scope.Item(0, [rest of string was truncated]&quot;;.
+        ///        try
+        ///        {
+        ///            con [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string milling_tab_module_js {
             get {
                 return ResourceManager.GetString("milling_tab_module_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [{
+        ///    &quot;id&quot;: 2,
+        ///    &quot;name&quot;: &quot;Gronnlings Abound&quot;,
+        ///    &quot;description&quot;: &quot;Gronnlings are a menace to the region.  We should partner with the Frostwolf clan to thin the population.  One may even join our cause...&quot;,
+        ///    &quot;duration&quot;: 1800,
+        ///    &quot;level&quot;: 90,
+        ///    &quot;itemlevel&quot;: 0,
+        ///    &quot;rare&quot;: &quot;&quot;,
+        ///    &quot;mechanictype&quot;: &quot;Snow&quot;,
+        ///    &quot;missiontype&quot;: &quot;Combat&quot;
+        ///}, {
+        ///    &quot;id&quot;: 3,
+        ///    &quot;name&quot;: &quot;Landfall Recovery&quot;,
+        ///    &quot;description&quot;: &quot;It would be a worthwhile endeavor to search the ship we escaped Tanaan Jungle in, it&apos;s b [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string mission_data {
+            get {
+                return ResourceManager.GetString("mission_data", resourceCulture);
             }
         }
         
@@ -221,12 +273,13 @@ namespace GarrisonButler {
         ///    .controller(&apos;professionsListController&apos;, function ($scope) {
         ///
         ///        // Represents a dailyCD
-        ///        $scope.Daily = function Daily(itemId, spellId, name, profession, activated) {
+        ///        $scope.Daily = function Daily(itemId, name, profession, activated) {
         ///            this.itemId = itemId;
-        ///            this.spellId = spellId;
         ///            this.name = name;
         ///            this.profession = profession;
-        ///            this.ac [rest of string was truncated]&quot;;.
+        ///            this.activated = activated;
+        ///        };
+        ///        try        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string profession_tab_module_js {
             get {
@@ -268,7 +321,7 @@ namespace GarrisonButler {
         ///    &quot;use strict&quot;;
         ///    t.module(&quot;smart-table&quot;, []).run([&quot;$templateCache&quot;, function (t) {
         ///        t.put(&quot;template/smart-table/pagination.html&quot;, &apos;&lt;div class=&quot;pagination&quot; ng-if=&quot;pages.length &gt;= 2&quot;&gt;&lt;ul class=&quot;pagination&quot;&gt;&lt;li ng-repeat=&quot;page in pages&quot; ng-class=&quot;{active: page==currentPage}&quot;&gt;&lt;a ng-click=&quot;selectPage(page)&quot;&gt;{{page}}&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&apos;)
-        ///    }]), t.module(&quot;smart-table&quot;).controller(&quot;stTableController&quot;, [&quot;$scope&quot;, &quot;$parse&quot;, &quot;$filter&quot;, &quot;$attrs [rest of string was truncated]&quot;;.
+        ///    }]), t.module(&quot;smart-table&quot;).controller(&quot;stTableController&quot;, [&quot;$scope&quot;, &quot;$parse&quot;, &quot;$filter&quot;, [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string smart_table_min {
             get {
@@ -284,17 +337,17 @@ namespace GarrisonButler {
         ///// General Tab
         ///angular.module(&apos;GarrisonButlerApp.trading-post-tab&apos;, [&apos;ngMaterial&apos;, &apos;ngAria&apos;, &apos;smart-table&apos;])
         ///
-        ///    .controller(&apos;millingListController&apos;, function ($scope) {
-        ///
+        ///    .controller(&apos;tradingPostListController&apos;, function ($scope) {
         ///        // Represents a Item
-        ///        $scope.Item = function Item(itemId, name, activated) {
+        ///        $scope.TPItem = function(itemId, name, activated) {
         ///            this.itemId = itemId;
         ///            this.itemName = name;
         ///            this.activated = activated;
         ///        };
         ///
-        ///        $scope.butlerSettings.TradingReagents = [
-        ///            new  [rest of string was truncated]&quot;;.
+        ///        try
+        ///        {
+        ///            var tradingItems = JSON.parse($s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string trading_post_module {
             get {
@@ -312,12 +365,14 @@ namespace GarrisonButler {
         ///
         ///    .controller(&apos;buildingsListController&apos;, function ($scope) {
         ///
+        ///
+        ///        // Load buildings in js value from c# code
+        ///        $scope.loadBuildings = function () {
+        ///            var res = window.external.getBuildingsJs();
+        ///            return res;
+        ///        };
         ///        // Represents a building
-        ///        $scope.Building = function Building(id, name, displayicon, canStartOrder, maxCanStartOrder, canCollectOrder, available) {
-        ///            this.id = id;
-        ///            this.name = name;
-        ///            this.displayicon = displayicon;
-        ///        [rest of string was truncated]&quot;;.
+        ///        $scope.Building = function Building(id, [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string work_order_tab_module_js {
             get {
@@ -332,7 +387,7 @@ namespace GarrisonButler {
         ///Build date: 2014-01-10 
         ///*/
         ///
-        ///.editable-wrap{display:inline-block;white-space:nowrap;margin:0}.editable-wrap .editable-controls,.editable-wrap .editable-error{margin-bottom:0}.editable-wrap .editable-controls&gt;input,.editable-wrap .editable-controls&gt;select,.editable-wrap .editable-controls&gt;textarea{margin-bottom:0}.editable-wrap .editable-input{display:inline-block}.editable-buttons{display:inline-block;vertical-align:top}.editable-buttons button{margi [rest of string was truncated]&quot;;.
+        ///.editable-wrap{display:inline-block;white-space:nowrap;margin:0}.editable-wrap .editable-controls,.editable-wrap .editable-error{margin-bottom:0}.editable-wrap .editable-controls&gt;input,.editable-wrap .editable-controls&gt;select,.editable-wrap .editable-controls&gt;textarea{margin-bottom:0}.editable-wrap .editable-input{display:inline-block}.editable-buttons{display:inline-block;vertical-align:top}.editable-buttons button [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string xeditable_css {
             get {
@@ -346,7 +401,7 @@ namespace GarrisonButler {
         ///Edit-in-place for angular.js
         ///Build date: 2014-01-10 
         ///*/
-        ///angular.module(&quot;xeditable&quot;,[]).value(&quot;editableOptions&quot;,{theme:&quot;default&quot;,buttons:&quot;right&quot;,blurElem:&quot;cancel&quot;,blurForm:&quot;ignore&quot;,activate:&quot;focus&quot;}),angular.module(&quot;xeditable&quot;).directive(&quot;editableBsdate&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({directiveName:&quot;editableBsdate&quot;,inputTpl:&apos;&lt;input type=&quot;text&quot;&gt;&apos;})}]),angular.module(&quot;xeditable&quot;).directive(&quot;editableBstime&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({direct [rest of string was truncated]&quot;;.
+        ///angular.module(&quot;xeditable&quot;,[]).value(&quot;editableOptions&quot;,{theme:&quot;default&quot;,buttons:&quot;right&quot;,blurElem:&quot;cancel&quot;,blurForm:&quot;ignore&quot;,activate:&quot;focus&quot;}),angular.module(&quot;xeditable&quot;).directive(&quot;editableBsdate&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({directiveName:&quot;editableBsdate&quot;,inputTpl:&apos;&lt;input type=&quot;text&quot;&gt;&apos;})}]),angular.module(&quot;xeditable&quot;).directive(&quot;editableBstime&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({d [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string xeditable_min_js {
             get {
