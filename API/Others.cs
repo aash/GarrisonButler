@@ -94,5 +94,26 @@ namespace GarrisonButler.API
 
             return result.GetEmptyIfNull().FirstOrDefault();
         }
+
+        internal static string GetNameFromItemLink(string link)
+        {
+            var lua = @"
+            local firstPos = string.find('" + link + @"', '[', nil, true);
+            local secondPos = string.find('" + link + @"', ']', nil, true);
+            local itemName = string.sub('" + link + @"', firstPos + 1, -1*(string.len('" + link + @"')-secondPos+2));
+            return itemName;
+            ";
+            var result = Lua.GetReturnValues(lua);
+            return result.GetEmptyIfNull().FirstOrDefault();
+        }
+
+        internal static string GetCurrencyItemLink(int currencyID)
+        {
+            var lua = @"
+            return GetCurrencyLink('" + currencyID + @"');
+            ";
+            var result = Lua.GetReturnValues(lua);
+            return result.GetEmptyIfNull().FirstOrDefault();
+        }
     }
 }

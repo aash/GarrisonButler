@@ -145,21 +145,21 @@ namespace GarrisonButler.Config.OldSettings
         {
             try
             {
-                GarrisonButler.Diagnostic("Loading configuration");
+                GarrisonButler.Diagnostic("(old) Loading configuration");
                 var reader =
                     new XmlSerializer(typeof (GaBSettings));
                 var file =
                     new StreamReader(Path.Combine(Settings.CharacterSettingsDirectory, "GarrisonButlerSettings.xml"));
                 CurrentSettings = (GaBSettings) reader.Deserialize(file);
-                GarrisonButler.Diagnostic("Configuration successfully loaded.");
+                GarrisonButler.Diagnostic("(old) Configuration successfully loaded.");
             }
             catch (Exception e)
             {
                 if (e is Buddy.Coroutines.CoroutineStoppedException)
                     throw;
 
-                GarrisonButler.Diagnostic("Failed to load configuration, creating default configuration.");
-                GarrisonButler.Diagnostic("Exception: " + e.GetType());
+                GarrisonButler.Diagnostic("(old) Failed to load configuration, creating default configuration.");
+                GarrisonButler.Diagnostic("(old) Exception: " + e.GetType());
                 // TO DELETE
                 GarrisonButler.Diagnostic(e.ToString());
                 // TO DELETE end

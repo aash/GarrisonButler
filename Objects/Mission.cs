@@ -6,12 +6,13 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using GarrisonButler.API;
+using GarrisonButler.Objects;
 
 #endregion
 
 namespace GarrisonButler
 {
-    public class Mission : IEquatable<Mission>
+    public class Mission : IEquatable<Mission>, IComparable<Mission>
     {
         public bool Equals(Mission other)
         {
@@ -26,7 +27,7 @@ namespace GarrisonButler
                    && ItemLevel == other.ItemLevel
                    && Level == other.Level
                    && string.Equals(Location, other.Location)
-                   && MaterialMultiplier == other.MaterialMultiplier
+                   //&& MaterialMultiplier == other.MaterialMultiplier
                    && string.Equals(MissionId, other.MissionId)
                    && string.Equals(Name, other.Name)
                    && NumFollowers == other.NumFollowers
@@ -60,7 +61,7 @@ namespace GarrisonButler
                 hashCode = (hashCode*397) ^ ItemLevel;
                 hashCode = (hashCode*397) ^ Level;
                 hashCode = (hashCode*397) ^ Location.GetHashCode();
-                hashCode = (hashCode*397) ^ MaterialMultiplier;
+                //hashCode = (hashCode*397) ^ MaterialMultiplier;
                 hashCode = (hashCode*397) ^ MissionId.GetHashCode();
                 hashCode = (hashCode*397) ^ Name.GetHashCode();
                 hashCode = (hashCode*397) ^ NumFollowers;
@@ -94,7 +95,7 @@ namespace GarrisonButler
         public readonly bool IsRare;
         public readonly int Level;
         public readonly String Location;
-        public readonly int MaterialMultiplier;
+        public int MaterialMultiplier;
         public readonly String MissionId;
         public readonly String Name;
         public readonly int NumFollowers;
@@ -107,11 +108,34 @@ namespace GarrisonButler
         public String Type;
         public string Xp;
         public int XpBonus;
+        public int TotalTime;
 
+        public List<MissionReward> Rewards;
+
+        /// <summary>
+        /// AvailableMission
+        /// </summary>
+        /// <param name="cost"></param>
+        /// <param name="description"></param>
+        /// <param name="durationSeconds"></param>
+        /// <param name="enemies"></param>
+        /// <param name="level"></param>
+        /// <param name="iItemLevel"></param>
+        /// <param name="isRare"></param>
+        /// <param name="location"></param>
+        /// <param name="missionId"></param>
+        /// <param name="name"></param>
+        /// <param name="numFollowers"></param>
+        /// <param name="numRewards"></param>
+        /// <param name="state"></param>
+        /// <param name="type"></param>
+        /// <param name="xp"></param>
+        /// <param name="environment"></param>
+        /// <param name="rewards"></param>
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level,
             int iItemLevel,
             bool isRare, string location, string missionId, string name, int numFollowers, int numRewards, int state,
-            string type, string xp, string environment)
+            string type, string xp, string environment, List<MissionReward> rewards )
         {
             Cost = cost;
             Description = description;
@@ -129,9 +153,32 @@ namespace GarrisonButler
             Type = type;
             Xp = xp;
             Environment = environment;
+            Rewards = rewards;
             //GarrisonButler.Diagnostic(ToString());
         }
 
+        /// <summary>
+        /// CompletedMission
+        /// </summary>
+        /// <param name="cost"></param>
+        /// <param name="description"></param>
+        /// <param name="durationSeconds"></param>
+        /// <param name="enemies"></param>
+        /// <param name="level"></param>
+        /// <param name="iItemLevel"></param>
+        /// <param name="isRare"></param>
+        /// <param name="location"></param>
+        /// <param name="missionId"></param>
+        /// <param name="name"></param>
+        /// <param name="numFollowers"></param>
+        /// <param name="numRewards"></param>
+        /// <param name="state"></param>
+        /// <param name="type"></param>
+        /// <param name="xp"></param>
+        /// <param name="material"></param>
+        /// <param name="succesChance"></param>
+        /// <param name="xpBonus"></param>
+        /// <param name="success"></param>
         public Mission(int cost, string description, int durationSeconds, List<String> enemies, int level,
             int iItemLevel,
             bool isRare, string location, string missionId, string name, int numFollowers, int numRewards, int state,
@@ -297,6 +344,16 @@ namespace GarrisonButler
                 mission += "  Succes: " + Succes + "\n";
                 return mission;
             }
+        }
+
+        bool IEquatable<Mission>.Equals(Mission other)
+        {
+            return Equals(other);
+        }
+
+        int IComparable<Mission>.CompareTo(Mission other)
+        {
+            return MissionId.CompareTo(other.MissionId);
         }
     }
 }

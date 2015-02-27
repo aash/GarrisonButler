@@ -277,6 +277,43 @@ namespace GarrisonButler.API
             await CommonCoroutines.SleepForRandomReactionTime();
         }
 
+        public static void AddFollowersToMissionNonTask(string missionId, List<string> followersId)
+        {
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            {
+                // ReSharper disable once LoopCanBePartlyConvertedToQuery
+                foreach (var followerId in followersId)
+                {
+                    var luaAdd = String.Format(
+                        //Check if in current list
+                        "local button;" +
+                        "local buttons = GarrisonMissionFrameFollowersListScrollFrame.buttons;" +
+                        "local min, max = GarrisonMissionFrameFollowersListScrollFrame.scrollBar:GetMinMaxValues();" +
+                        "GarrisonMissionFrameFollowersListScrollFrame.scrollBar:SetValue(min);" +
+                        "for val=min,max,(max-min)/100 do " +
+                        "for idx = 1, #buttons do " +
+                        "local v = buttons[idx].info;" +
+                        "local followerID = (v.garrFollowerID) and tonumber(v.garrFollowerID) or v.followerID;" +
+                        "if(followerID == {0} ) then " +
+                        "button = buttons[idx];" +
+                        "break;" +
+                        "end;" +
+                        "end;" +
+                        "if (not button) then GarrisonMissionFrameFollowersListScrollFrame.scrollBar:SetValue(val);" +
+                        "else break; end;" +
+                        "end;" +
+                        "button:Click();" +
+                        "button:Click('RightButton');", followerId);
+
+                    Lua.DoString(luaAdd);
+                    luaAdd = "DropDownList1:Click();";
+                    Lua.DoString(luaAdd);
+                    luaAdd = "DropDownList1Button1:Click();";
+                    Lua.DoString(luaAdd);
+                }
+            }
+        }
+
         public static void ClickStartMission()
         {
             const string lua = "GarrisonMissionFrame.MissionTab.MissionPage.StartMissionButton:Click();";

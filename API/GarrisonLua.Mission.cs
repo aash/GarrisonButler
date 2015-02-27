@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GarrisonButler.Libraries;
+using GarrisonButler.Objects;
 using Styx.Helpers;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -175,11 +176,12 @@ namespace GarrisonButler.API
                 durationSeconds, enemies, level, ilevel,
                 isRare, location, missionId,
                 name, numFollowers, numRewards,
-                state, type, xp, environment);
+                state, type, xp, environment, new List<MissionReward>());
         }
 
         public static Mission GetMissionById(String missionIdArg)
         {
+            var cpt = 17;
             var lua =
                 "local b = {}; local am = {}; local RetInfo = {}; local cpt = 0; C_Garrison.GetAvailableMissions(am);" +
                 String.Format(
@@ -204,11 +206,24 @@ namespace GarrisonButler.API
                     "b[15] = xp;" +
                     "b[16] = am[idx].numRewards;" +
                     "b[17] = environment;" +
-                    "cpt = 17;" +
-                    "end;" +
-                    "end;"
+                    "cpt = " + cpt + ";" +  // count of values inserted into b up to this point
+                    @"
+                    for id, reward in pairs(am[idx].rewards) do
+		                b[cpt + 1] = reward.title;
+		                b[cpt + 2] = reward.quantity;
+		                b[cpt + 3] = reward.currencyID;
+		                b[cpt + 4] = reward.itemID;
+		                b[cpt + 5] = reward.followerXP;
+		                b[cpt + 6] = reward.name;
+		                b[cpt + 7] = reward.icon;
+		                cpt = cpt + 7;
+	                end
+                    " + 
+                    "end;" + // if am[idx].missionId == {0}
+                    "end;" // for idx = 1, #m do
                     , missionIdArg) +
                 "for j_=0,cpt do table.insert(RetInfo,tostring(b[j_]));end; " +
+                //"table.insert(RetInfo,am[idx].rewards);" +
                 "return unpack(RetInfo)";
             var mission = Lua.GetReturnValues(lua);
 
@@ -235,11 +250,112 @@ namespace GarrisonButler.API
             var numRewards = mission[16].ToInt32();
             var environment = mission[17];
 
+            if(numRewards > 0)
+            {
+
+            }
+
+            List<MissionReward> rewards = new List<MissionReward>();
+            bool needToAddFollowerXpReward = true;
+            //TEST
+            for (int i = 0; i < numRewards; i++)
+            {
+                var currentIndex = cpt + 7 * i;
+                var rewardTitle = mission[currentIndex + 1] == "nil" ? "" : mission[currentIndex + 1];
+                var rewardQuantity = mission[currentIndex + 2].ToInt32();
+                var rewardCurrencyId = mission[currentIndex + 3].ToInt32();
+                var rewardItemId = mission[currentIndex + 4].ToInt32();
+                var rewardFollowerXp = mission[currentIndex + 5].ToInt32();
+                var rewardName = mission[currentIndex + 6] == "nil" ? "" : mission[currentIndex + 6];
+                var rewardIcon = mission[currentIndex + 7] == "nil" ? "" : mission[currentIndex + 7];
+                if (needToAddFollowerXpReward
+                    && rewardFollowerXp > 0
+                    && xp.ToInt32() > 0)
+                {
+                    rewardFollowerXp += xp.ToInt32();
+                    needToAddFollowerXpReward = false;
+                }
+                rewards.Add(new MissionReward(rewardTitle, rewardQuantity, rewardCurrencyId, rewardItemId, rewardFollowerXp, rewardName, rewardIcon));
+                //GarrisonButler.Diagnostic("Loop (" + i.ToString() + ")");
+                //GarrisonButler.Diagnostic("rewardTitle: " + rewardTitle);
+                //GarrisonButler.Diagnostic("rewardQuantity: " + rewardQuantity);
+                //GarrisonButler.Diagnostic("rewardCurrencyID: " + rewardCurrencyID);
+                //GarrisonButler.Diagnostic("rewardItemID: " + rewardItemID);
+                //GarrisonButler.Diagnostic("rewardFollowerXP: " + rewardFollowerXP);
+                //GarrisonButler.Diagnostic("rewardName: " + rewardName);
+                //GarrisonButler.Diagnostic("rewardIcon: " + rewardIcon);
+            }
+
+            // If this quest does not offer bonus followerXP but has base follower XP, need to add it as a reward
+            if (needToAddFollowerXpReward
+                && xp.ToInt32() > 0)
+            {
+                rewards.Add(new MissionReward(string.Empty, 0, 0, 0, xp.ToInt32(), "FollowerXP", string.Empty));
+            }
+            //TEST
+
             return new Mission(cost, description,
                 durationSeconds, enemies, level, ilevel,
                 isRare, location, missionId,
                 name, numFollowers, numRewards,
-                state, type, xp, environment);
+                state, type, xp, environment, rewards);
+        }
+
+        public static Mission GetPartyMissionInfo(Mission m)
+        {
+            //local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus, materialMultiplier = C_Garrison.GetPartyMissionInfo(MISSION_PAGE_FRAME.missionInfo.missionID);
+            var lua =
+                "local b = {}; local RetInfo = {};" +
+                String.Format(//"for idx = 1, #am do " +
+                              "local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus, materialMultiplier = C_Garrison.GetPartyMissionInfo(\"{0}\");" +
+                              //"if am[idx].missionID == {0} then " +
+                              "b[0] = totalTimeString;" +
+                              "b[1] = totalTimeSeconds;" +
+                              "b[2] = isMissionTimeImproved;" +
+                              "b[3] = successChance;" +
+                              "b[4] = partyBuffs;" +
+                              "b[5] = isEnvMechanicCountered;" +
+                              "b[6] = xpBonus;" +
+                              "b[7] = materialMultiplier;" +
+                              //"b[8] = am[idx].iLevel;" +
+                              //"b[9] = am[idx].name;" +
+                              //"b[10] = am[idx].location;" +
+                              //"b[11] = am[idx].isRare;" +
+                              //"b[12] = am[idx].typeAtlas;" +
+                              //"b[13] = am[idx].missionID;" +
+                              //"b[14] = am[idx].numFollowers;" +
+                              //"b[15] = am[idx].numRewards;" +
+                              //"b[16] = xp;" +
+                              //"b[17] = am[idx].materialMultiplier;" +
+                              //"b[18] = am[idx].successChance;" +
+                              //"b[19] = am[idx].xpBonus;" +
+                              //"b[20] = am[idx].success;" +
+                              //"end;" + //if am[idex].missionID == {0} then 
+                              //"end;"
+                              ""
+                              , m.MissionId) +
+                "for j_=0,7 do table.insert(RetInfo,tostring(b[j_]));end; " +
+                "return unpack(RetInfo)";
+            var missionResult = Lua.GetReturnValues(lua);
+
+            if (missionResult.IsNullOrEmpty())
+                return null;
+
+            var totalTimeString = missionResult[0];
+            var totalTimeSeconds = missionResult[1].ToInt32();
+            var isMissionTimeImproved = missionResult[2].ToBoolean();
+            var successChance = missionResult[3];
+            var partyBuffs = missionResult[4];
+            var isEnvMechanicCountered = missionResult[5].ToBoolean();
+            var xpBonus = missionResult[6].ToInt32();
+            var materialMultiplier = missionResult[7].ToInt32();
+
+            m.SuccessChance = successChance;
+            m.XpBonus = xpBonus;
+            m.MaterialMultiplier = materialMultiplier;
+            m.TotalTime = totalTimeSeconds;
+
+            return m;
         }
 
         public static Mission GetCompletedMissionById(String missionIdArg)

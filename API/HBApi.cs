@@ -38,6 +38,20 @@ namespace GarrisonButler.API
         }
 
         /// <summary>
+        /// Return the number of item with entry itemId that the player has (items & currency).
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public static long GetNumberItemCarried(uint itemId)
+        {
+            var carried = Me.GetCarriedItemCount(itemId);
+                //StyxWoW.Me.BagItems.GetEmptyIfNull()
+                //    .Sum(i => i != null && i.IsValid && i.Entry == itemId ? i.StackCount : 0);
+            GarrisonButler.Diagnostic("[HBApi] Get number of item carried: item={0}, #={1}", itemId, carried);
+            return carried;
+        }
+
+        /// <summary>
         /// Return the number of item with entry itemId in reagent bank.
         /// </summary>
         /// <param name="itemId"></param>
@@ -154,6 +168,45 @@ namespace GarrisonButler.API
                     .ToList();
             GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from predicate.", inBags.Count());
             return inBags;
+        }
+
+        /// <summary>
+        /// Return all items (currency included) with Entry equal to itemId or null
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public static IEnumerable<WoWItem> GetItemCarried(uint itemId)
+        {
+            var carried =
+                Me.CarriedItems.GetEmptyIfNull()
+                    .Where(i => i != null && i.IsValid && i.Entry == itemId)
+                    .GetEmptyIfNull()
+                    .ToList();
+            GarrisonButler.Diagnostic("[HBApi] Get item carried: item={0}, #Found={1}", itemId, carried.Count());
+            return carried;
+        }
+
+        public static IEnumerable<WoWItem> GetItemsCarried(List<uint> ids)
+        {
+            var carried =
+                Me.CarriedItems.GetEmptyIfNull()
+                    .Where(i => i != null && i.IsValid && ids.Contains(i.Entry))
+                    .GetEmptyIfNull()
+                    .ToList();
+            GarrisonButler.Diagnostic("[HBApi] Get items carried: #Found={0}, from list:", carried.Count());
+            ObjectDumper.WriteToHb(ids, 3);
+            return carried;
+        }
+
+        public static IEnumerable<WoWItem> GetItemsCarried(Func<WoWItem, bool> predicate)
+        {
+            var carried =
+                Me.CarriedItems.GetEmptyIfNull()
+                    .Where(i => i != null && i.IsValid && predicate(i))
+                    .GetEmptyIfNull()
+                    .ToList();
+            GarrisonButler.Diagnostic("[HBApi] Get items carried: #Found={0}, from predicate.", carried.Count());
+            return carried;
         }
 
         /// <summary>

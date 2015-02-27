@@ -19,6 +19,7 @@ namespace GarrisonButler.Objects
     /// </summary>
     public class MailCondition : INotifyPropertyChanged, IComparable
     {
+        [XmlType(TypeName = "MailConditions")]
         public enum Conditions
         {
             NumberInBagsSuperiorTo = 0,
@@ -100,7 +101,7 @@ namespace GarrisonButler.Objects
                     return Conditions.None;
 
                 default:
-                    GarrisonButler.Diagnostic("This rule has not been implemented! Defaulting to None.");
+                    GarrisonButler.Diagnostic("This mail rule has not been implemented! Defaulting to None.");
                     break;
             }
             return Conditions.None;
@@ -133,7 +134,7 @@ namespace GarrisonButler.Objects
                     return false;
 
                 default:
-                    GarrisonButler.Diagnostic("This rule has not been implemented!");
+                    GarrisonButler.Diagnostic("This mail rule has not been implemented!");
                     break;
             }
             return false;
@@ -176,7 +177,7 @@ namespace GarrisonButler.Objects
                     return null;
 
                 default:
-                    GarrisonButler.Diagnostic("This rule has not been implemented!");
+                    GarrisonButler.Diagnostic("This mail rule has not been implemented!");
                     break;
             }
             return null;

@@ -1,11 +1,24 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using System.Windows.Documents;
 using GarrisonButler.Libraries;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using Facet.Combinatorics;
+using GarrisonButler.Config;
+using GarrisonButler.Libraries.JSON;
+using GarrisonButler.Libraries.Wowhead;
+using GarrisonButler.Objects;
+using Styx;
+using Styx.Common;
 
 #endregion
 
@@ -17,26 +30,9 @@ namespace GarrisonButler.API
 
         public static List<Follower> GetAllFollowers()
         {
-            return API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
-            //List<MissionFollowersCombo> sortedByExperience = missionList
-            //    .SelectMany<Mission, MissionFollowersCombo, MissionFollowersCombo>(
-            //        (mission, index) =>
-            //        {
-            //            int remainingFollowers = followerList.Count;
-            //            List<MissionFollowersCombo> mfComboList = new List<MissionFollowersCombo>();
-
-            //            while (remainingFollowers > mission.NumFollowers)
-            //            {
-            //                List<Follower> followers = followerList.GetRange(followerList.Count - remainingFollowers, mission.NumFollowers);
-            //                remainingFollowers -= mission.NumFollowers;
-            //                mfComboList.Add(new MissionFollowersCombo(mission, followers));
-            //            }
-            //            return mfComboList;
-            //        },
-            //        (origMission, combo) =>
-            //        {
-            //            return .GetExperience();
-            //        });
+            var followers = API.ButlerLua.GetAllFromLua<Follower>(GetListFollowersId, GetFollowerById);
+            //var newMissionStubCodeResult = NewMissionStubCode(followers);
+            return followers;
         }
 
         public static string GetFollowerName(string follower)
@@ -104,7 +100,14 @@ namespace GarrisonButler.API
                     "if (followerID == {0}) then " +
                     "Temp[0] = followerID;" +
                     "Temp[1] = f.name;" +
-                    "Temp[2] = f.status;" +
+                    //"Temp[2] = f.status;" +
+                    "if f.status == GARRISON_FOLLOWER_IN_PARTY then Temp[2] = 1;" +
+                    "elseif f.status == GARRISON_FOLLOWER_WORKING then Temp[2] = 2;" +
+                    "elseif f.status == GARRISON_FOLLOWER_ON_MISSION then Temp[2] = 3;" +
+                    "elseif f.status == GARRISON_FOLLOWER_EXHAUSTED then Temp[2] = 4;" +
+                    "elseif f.status == GARRISON_FOLLOWER_INACTIVE then Temp[2] = 5;" +
+                    "else Temp[2] = 0;" +
+                    "end;" + 
                     "Temp[3] = f.ClassSpecName;" +
                     "Temp[4] = f.quality;" +
                     "Temp[5] = f.level;" +
@@ -112,9 +115,10 @@ namespace GarrisonButler.API
                     "Temp[7] = f.iLevel;" +
                     "Temp[8] = f.levelXP;" +
                     "Temp[9] = f.xp;" +
+                    "Temp[10] = f.followerID;" +
                     "end;" +
                     "end;" +
-                    "for j_=0,9 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
+                    "for j_=0,10 do table.insert(RetInfo,tostring(Temp[j_]));end; " +
                     "return unpack(RetInfo)", followerId);
             var follower = Lua.GetReturnValues(lua);
 
@@ -130,8 +134,9 @@ namespace GarrisonButler.API
             var iLevel = follower[7].ToInt32();
             var xp = follower[8].ToInt32();
             var levelXp = follower[9].ToInt32();
+            var uniqueId = follower[10];
 
-            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", followerId) +
+            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", uniqueId != "nil" ? uniqueId : followerId) +
                   "local RetInfo = {};" +
                   "for a = 1, #abilities do " +
                   "local ability= abilities[a];" +
@@ -141,10 +146,23 @@ namespace GarrisonButler.API
                   "end;" +
                   "return unpack(RetInfo)";
 
-            var abilities = Lua.GetReturnValues(lua);
+            var counters = Lua.GetReturnValues(lua);
 
-            return new Follower(followerId, name, status, classSpecName, quality, level, isCollected, iLevel, xp,
-                levelXp, abilities);
+            lua = String.Format("local abilities = C_Garrison.GetFollowerAbilities(\"{0}\");", uniqueId != "nil" ? uniqueId : followerId) +
+                  "local RetInfo = {};" +
+                  "for a = 1, #abilities do " +
+                  "local ability= abilities[a];" +
+                  //"for counterID, counterInfo in pairs(ability.counters) do " +
+                  "table.insert(RetInfo,tostring(ability.id));" +
+                  //"end;" +
+                  "end;" +
+                  "return unpack(RetInfo)";
+
+            var abil_string = Lua.GetReturnValues(lua);
+            var abilities = abil_string.Select(a => a.ToInt32()).ToList();
+
+            return new Follower(followerId, uniqueId, name, status, classSpecName, quality, level, isCollected, iLevel, xp,
+                levelXp, counters, abilities);
         }
 
         // Return list of all available missions

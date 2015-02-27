@@ -26,6 +26,7 @@ namespace GarrisonButler.Config
     public class GaBSettings : INotifyPropertyChanged
     {
         private List<Pigment> _pigments;
+        private List<MissionReward> _rewards; 
 
         private GaBSettings()
         {
@@ -437,7 +438,7 @@ namespace GarrisonButler.Config
 
         [XmlArrayItem("Item", typeof(BItem))]
         [XmlArray("TradePostReagents")]
-        public List<BItem> TradingPostReagentsSettings { get; set; } 
+        public List<BItem> TradingPostReagentsSettings { get; set; }
         public bool UseGarrisonHearthstone { get; set; }
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
@@ -456,6 +457,8 @@ namespace GarrisonButler.Config
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
+        public bool IncludeEpicMaxLevelFollowersForExperience { get; set; }
+        public int DefaultMissionSuccessChance { get; set; }
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
@@ -465,6 +468,19 @@ namespace GarrisonButler.Config
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }
+
+        [XmlArrayItem("Reward", typeof(MissionReward))]
+        [XmlArray("MissionRewardSettings")]
+        public List<MissionReward> MissionRewardSettings
+        {
+            get { return _rewards; }
+            set
+            {
+                if (Equals(value, _rewards)) return;
+                _rewards = value;
+                OnPropertyChanged();
+            }
+        }
         
         private static GaBSettings DefaultConfig()
         {
@@ -495,7 +511,7 @@ namespace GarrisonButler.Config
             // Profession
             ret.DailySettings = DailyProfession.AllDailies;
 
-            // Trading post
+            // Trading post / mission rewards
             ret.PopulateMissingSettings();
             
             // Pigments for milling
@@ -527,6 +543,17 @@ namespace GarrisonButler.Config
                 GarrisonButler.Diagnostic("Updating pigments settings with values:");
                 ObjectDumper.WriteToHb(newPigmentsValues, 3);
                 _pigments.AddRange(newPigmentsValues);
+            }
+
+            if (_rewards == null)
+                _rewards = new List<MissionReward>();
+
+            var newRewardValues = MissionReward.AllRewards.Where(r => _rewards.All(rew => rew.Id != r.Id)).ToArray();
+            if (newRewardValues.Any())
+            {
+                GarrisonButler.Diagnostic("Updating reward settings with values:");
+                //ObjectDumper.WriteToHb(newRewardValues, 1);
+                _rewards.AddRange(newRewardValues);
             }
         }
 
@@ -728,8 +755,9 @@ namespace GarrisonButler.Config
                     UpdateSettings(CurrentSettings);
                 }
                 CurrentSettings.PopulateMissingSettings();
+                GaBSettings.Save();
                 GarrisonButler.Log("Configuration successfully loaded.");
-                ObjectDumper.WriteToHb(CurrentSettings, 5);
+                //ObjectDumper.WriteToHb(CurrentSettings, 5);
             }
             catch (Exception e)
             {

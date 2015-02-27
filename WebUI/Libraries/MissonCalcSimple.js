@@ -3,7 +3,7 @@ CalculateSuccessChance: function(c) {
    if (n) {
       console.log("----- Start ComputeSuccessChance -----")
    }
-   var s = [];
+   var s = [];  // Follower information
    if (c) {
       s = c
    } else {
@@ -19,7 +19,7 @@ CalculateSuccessChance: function(c) {
          }
       }
    }
-   var d = [];
+   var d = [];  // mission encounter mechanics (abilities that the bosses have)
    if (this.mission && this.mission.encounters) {
       for (w in this.mission.encounters) {
          if (this.mission.encounters[w].mechanics) {
@@ -29,16 +29,19 @@ CalculateSuccessChance: function(c) {
          }
       }
    }
-   var o = this.GetMentorInfo(s);
+   var o = this.GetMentorInfo(s);   // mentor information
    var r;
+    // Loop all follower objects
    for (w = 0; w < s.length; ++w) {
-      r = s[w];
+      r = s[w]; // current follower
+       // If mentor level > current follower level
       if (o.level > r.level) {
          if (n) {
             console.log("Mentored follower %d from level %d to level %d.", r.follower, r.level, o.level)
          }
          r.level = o.level
       }
+       // If mentor itemlevel > current follower itemlevel
       if (o.itemlevel > r.avgilvl) {
          if (n) {
             console.log("Mentored follower %d from item level %d to item level %d.", r.follower, r.avgilvl, o.itemlevel)
@@ -50,11 +53,20 @@ CalculateSuccessChance: function(c) {
          console.log("Follower %d bias: %.2f", r.follower, r.bias)
       }
    }
+    //this.mission.numFollowers in c#
    var D = this.mission.followers * 100;
    var B = D;
+    // This code calculates some sort of coefficient called D
+    // d = mission encounters mechanics
+    // <missionmechanics>.length > 0
    if (d.length > 0) {
+       // Loop all mission mechanics
       for (w = 0; w < d.length; ++w) {
-         var C = d[w];
+         var C = d[w];  // current mechanic
+          // If it's not "Abilities"
+          // 0 = Environments
+          // 1 = Races
+          // 2 = Abilities
          if (C.category != 2) {
             D = B
          } else {
@@ -73,7 +85,8 @@ CalculateSuccessChance: function(c) {
    if (n) {
       console.log("coeff: ", b)
    }
-   var l = 0;
+   var l = 0;   // running amount of success chance
+    // Loop all follower objects
    for (w = 0; w < s.length; ++w) {
       r = s[w];
       var z = $WH.fround(this.CalcChance(100, 150, r.bias) * b);
@@ -84,19 +97,40 @@ CalculateSuccessChance: function(c) {
    }
    var A = 0;
    var f = 0;
-   this.registeredThreatCounters = {};
+   this.registeredThreatCounters = {};  // registeredThreatCounters array, initialize
+    // d = <missionmechanics> object
+    // <missionmechanics>.length > 0
+    //*** Check if follower counters boss mechanics
    if (d.length > 0) {
       do {
-         C = d[A];
+         C = d[A];  // Current mission mechanic
+          // 0 = Environments
+          // 1 = Races
+          // 2 = Abilities
+          // If no category or the category == Abilities
          if (!C.category || C.category == 2) {
-            var m = C.amount;
+            var m = C.amount;   // amount for this mechanic
+             // Only if the mission has follower slots
             if (this.mission.followers > 0) {
+                // Loop all follower objects
                for (w = 0; w < s.length; ++w) {
-                  r = s[w];
+                  r = s[w]; // Current follower object
+                   // Loop current follower's abilities
                   for (v = 0; v < r.abilities.length; ++v) {
-                     var F = g_garrison_abilities[r.abilities[v]];
-                     var e = F.type.length;
+                     var F = g_garrison_abilities[r.abilities[v]];  // Current ability object
+                     var e = F.type.length; // number of types of this ability
+                      // Loop all the types of this ability
                      for (var E = 0; E < e; ++E) {
+                         // If the current ability counters this mission mechanic
+                         // AND
+                         // the low order bit of amount1 for this ability is NOT set
+                         // AND
+                         // the amount for this mechanic is greater than 0
+                         // AND
+                         // we haven't already countered this threat with a different follower
+                         // w = index for follower objects
+                         // v = index for current follower ability
+                         // E = index for current Type of this ability
                         if (C.type == F.counters[E] && !(F.amount1[E] & 1) && m > 0 && !this.ThreatCounterIsAlreadyRegistered(w, v, E)) {
                            var q = this.CalcChance(F.amount2[E], F.amount3[E], r.bias);
                            var a = C.amount;
@@ -104,36 +138,48 @@ CalculateSuccessChance: function(c) {
                               a = q
                            }
                            this.RegisterThreatCounter(w, v, E);
+                            // reduce mechanic amount by amount countered
                            m = m - a
                         }
                      }
                   }
                }
-            }
+            } // if (this.mission.followers > 0) // mission has follower slots
+             // Insure mechanic amount is not negative
             if (m < 0) {
                m = 0
             }
+             // Calculate success based on how much of the mechanic was countered
             f = $WH.fround((C.amount - m) * b);
             l += f;
             if (n) {
                console.log("Added %.2f to success due to followers countering boss mechanic %d.", f, C.id)
             }
-         }++A
-      } while (A < d.length)
-   }
+         }++A   // Increment A - Also end of if statement - // If no category or the category == Abilities - if (!C.category || C.category == 2) {
+      } while (A < d.length)    // Loop while mechanics remain
+   } // if (d.length > 0) { - If mission has mechanics to counter
+
+    //*** Check if follower counters enemy race
+    // Loop all mission mechanics
    for (A = 0; A < d.length; ++A) {
-      C = d[A];
+      C = d[A]; // current mission mechanic
+       // Category == Races
       if (C.category == 1) {
+          // Only if the mission has follower slots
          if (this.mission.followers > 0) {
+             // Loop all follower objects
             for (w = 0; w < s.length; ++w) {
-               r = s[w];
+               r = s[w];    // current follower
+                // Loop current follower's abilities
                for (v = 0; v < r.abilities.length; ++v) {
-                  F = g_garrison_abilities[r.abilities[v]];
-                  e = F.type.length;
+                  F = g_garrison_abilities[r.abilities[v]];  // Current ability object
+                  e = F.type.length; // number of types of this ability
+                   // Loop all the types of this ability
                   for (E = 0; E < e; ++E) {
+                      // If the current ability counters this mission mechanic
                      if (C.type == F.counters[E]) {
                         q = this.CalcChance(F.amount2[E], F.amount3[E], r.bias);
-                        q *= b;
+                        q *= b; // multiply by coefficient calculated earlier
                         q = $WH.fround(q);
                         l += q;
                         if (n) {
@@ -145,17 +191,26 @@ CalculateSuccessChance: function(c) {
             }
          }
       }
-   }
+   } // Loop all mission mechanics - for (A = 0; A < d.length; ++A) {
+
+    //*** Check if follower counters enviornment ability of mission
+    // Only if the mission has follower slots
    if (this.mission.followers > 0) {
+       // Loop all followers
       for (w = 0; w < s.length; ++w) {
-         r = s[w];
+         r = s[w];  // current follower
+          // Loop all follower abilities
          for (v = 0; v < r.abilities.length; ++v) {
-            F = g_garrison_abilities[r.abilities[v]];
-            e = F.type.length;
+            F = g_garrison_abilities[r.abilities[v]];  // Current ability object
+            e = F.type.length; // number of types of this ability
+             // Loop all the types of this ability
             for (E = 0; E < e; ++E) {
+                // If the ability counter exists for this type
+                // AND
+                // If it counters the mission mechanictype (Desert, etc..)
                if (F.counters[E] && F.counters[E] == this.mission.mechanictype) {
                   q = this.CalcChance(F.amount2[E], F.amount3[E], r.bias);
-                  q *= b;
+                  q *= b; // multiply by coefficient calculated earlier
                   q = $WH.fround(q);
                   l += q;
                   if (n) {
@@ -165,45 +220,63 @@ CalculateSuccessChance: function(c) {
             }
          }
       }
-   }
+   } // if (this.mission.followers > 0) {
+    // s = followers object
+    // returns "missiontime" and "traveltime"
    var y = this.GetMissionTimes(s);
+    // If the mission has any follower slots
    if (this.mission.followers > 0) {
+       // Loop all followers
       for (w = 0; w < s.length; ++w) {
-         r = s[w];
+         r = s[w];  // current follower
+          // Loop all follower abilities
          for (v = 0; v < r.abilities.length; ++v) {
-            F = g_garrison_abilities[r.abilities[v]];
-            e = F.type.length;
+            F = g_garrison_abilities[r.abilities[v]];   // current ability
+            e = F.type.length; // number of types of this ability
+             // Loop all the types of this ability
             for (E = 0; E < e; ++E) {
                var u = false;
                switch (F.type[E]) {
+                   // Lone Wolf - Increases success chance when on a mission alone.
                   case 1:
                      if (s.length == 1) {
                         u = true
                      }
                      break;
+                   // Combat Experience - Grants a bonus to mission success chance.
                   case 2:
                      u = true;
                      break;
+                   // Race - Gnome-Lover / Humanist / Dwarvenborn / etc...
+                   // Increases success chance when on a mission with a <race>
                   case 5:
+                      // s = followers object
+                      // F = current ability
+                      // E = current ability index
+                      // w = current follower index
                      if (this.CheckEffectRace.call(this, s, F.race[E], w)) {
                         u = true
                      }
                      break;
+                   // High Stamina - Increases success chance on missions with duration longer than 7 hours.
                   case 6:
                      if (y.missiontime > 3600 * F.hours[E]) {
                         u = true
                      }
                      break;
+                   // Burst of Power - Increases success chance on missions with duration shorter than 7 hours.
                   case 7:
                      if (y.missiontime < 3600 * F.hours[E]) {
                         u = true
                      }
                      break;
+                   // Doesn't appear to matter anymore travel time??
                   case 9:
                      if (y.traveltime > 3600 * F.hours[E]) {
                         u = true
                      }
                      break;
+                   // Doesn't appear to matter anymore travel time??
                   case 10:
                      if (y.traveltime < 3600 * F.hours[E]) {
                         u = true
@@ -255,16 +328,44 @@ CalculateSuccessChance: function(c) {
 }
 
 // =============================================================
+// This function appears to always return {level: 0, itemlevel: 0}
 GetMentorInfo: function(h) {
-   var f = 0;
-   var a = 0;
+    //h is an object containing follower information
+    // follower:
+    // abilities:
+    // avgilvl:
+    // level:
+    // quality:
+   var f = 0; // return: level
+   var a = 0; // return: itemlevel
    if (this.mission.followers > 0) {
+       // Loop all passed in follower objects
       for (var d = 0; d < h.length; ++d) {
-         var e = h[d];
+         var e = h[d];  // current follower
+          // Loop all follower abilities
          for (var c = 0; c < e.abilities.length; ++c) {
             //g_garrison_abilities genereated by http://www.wowhead.com/data=followers&locale=0&7w19342
-            var b = g_garrison_abilities[e.abilities[c]];
+             //amount1:
+             //amount2:
+             //amount3:
+             //amount4:
+             //category:
+             //counters:
+             //description:
+             //followerclass:
+             //hours:
+             //icon:
+             //id:
+             //missionparty:
+             //name:
+             //race:
+             //side:
+             //trait:
+             //type:
+            var b = g_garrison_abilities[e.abilities[c]];   // Information object of current ability
+             // Loop all of the "type" array from the garrison ability
             var g = b.type.length;
+             // none of the abilities appear to have type 18
             for (var k = 0; k < g; ++k) {
                if (b.type[k] == 18) {
                   if (e.level > f) {
@@ -286,7 +387,10 @@ GetMentorInfo: function(h) {
 
 //====================================================================
 GetFollowerBias: function(d, c) {
+    //d = follower level
+    //c = follower item level
    var a = (d - this.mission.level) * $WH.fround(1 / 3);
+    //this.maxLevel = 100
    if (this.mission.level == this.maxLevel && this.mission.itemlevel > 0) {
       a += (c - this.mission.itemlevel) * $WH.fround(1 / 15)
    }
@@ -299,56 +403,108 @@ GetFollowerBias: function(d, c) {
 
 //====================================================================
 CalcChance: function(b, a, c) {
-   var d;
-   if (c >= 0) {
-      d = (a - b) * c + b
-   } else {
-      d = (c + 1) * b
-   }
-   return d
-}
+          // ability.amount2 and ability.amount3 come from g_garrison_abilities
+          // b = ability.amount2
+          // a = ability.amount3
+          // c = bias
+          var d;
+          if (c >= 0) {
+              d = (a - b) * c + b
+          } else {
+              d = (c + 1) * b
+          }
+          return d
+      }
 
 //==================================================================
-GetMissionTimes: function(g) {
-   var e = this.mission.missiontime;
-   var h = this.mission.traveltime;
-   for (var c = 0; c < g.length; ++c) {
-      var d = g[c];
-      for (var b = 0; b < d.abilities.length; ++b) {
-         var a = g_garrison_abilities[d.abilities[b]];
-         var f = a.type.length;
-         for (var k = 0; k < f; ++k) {
-            if (a.type[k] == 3) {
-               h *= a.amount4[k]
-            }
-            if (a.type[k] == 17) {
-               e *= a.amount4[k]
-            }
-         }
-      }
-   }
-   return {
-      missiontime: Math.floor(e),
-      traveltime: Math.floor(h)
-   }
-}
+       GetMissionTimes: function(g) {
+           var e = this.mission.missiontime;    // "missiontime"
+           var h = this.mission.traveltime;     // "traveltime"
+           // Loops all followers
+           for (var c = 0; c < g.length; ++c) {
+               var d = g[c]; // current follower
+               // Loop all follower abilities
+               for (var b = 0; b < d.abilities.length; ++b) {
+                   var a = g_garrison_abilities[d.abilities[b]];  // current ability
+                   var f = a.type.length; // number of types of this ability
+                   // Loop all the types of this ability
+                   for (var k = 0; k < f; ++k) {
+                       // None appear to have type 3 - this would decrease travel time
+                       // Don't think travel time matters anymore, looks like they removed it
+                       if (a.type[k] == 3) {
+                           h *= a.amount4[k]
+                       }
+                       // Epic Mount - 17 - this decreases mission time
+                       if (a.type[k] == 17) {
+                           e *= a.amount4[k]
+                       }
+                   }
+               }
+           }
+           return {
+               missiontime: Math.floor(e),
+               traveltime: Math.floor(h)
+           }
+       }
 
 //===========================================================
-CheckEffectRace: function(c, a, d) {
-   if (this.mission.followers > 0) {
-      for (var e = 0; e < c.length; ++e) {
-         if (e == d) {
-            continue
-         }
-         var f = c[e];
-         var b = g_garrison_followers && g_garrison_followers[f.follower] && g_garrison_followers[f.follower][this.side] ? g_garrison_followers[f.follower][this.side] : null;
-         if (b == null) {
-            continue
-         }
-         if (b.race == a) {
-            return true
-         }
+       CheckEffectRace: function(c, a, d) {
+           // s = followers object
+           // F = current ability
+           // E = current ability index
+           // w = current follower index
+           //if (this.CheckEffectRace.call(this, s, F.race[E], w)) {
+           // c = follower object
+           // a = race
+           // d = current follower index
+           if (this.mission.followers > 0) {
+               for (var e = 0; e < c.length; ++e) {
+                   if (e == d) {
+                       continue
+                   }
+                   var f = c[e];
+                   var b = g_garrison_followers && g_garrison_followers[f.follower] && g_garrison_followers[f.follower][this.side] ? g_garrison_followers[f.follower][this.side] : null;
+                   if (b == null) {
+                       continue
+                   }
+                   if (b.race == a) {
+                       return true
+                   }
       }
    }
    return false
+}
+
+//=================================================================
+ThreatCounterIsAlreadyRegistered: function(a, b) {
+    // a = index for follower objects
+    // b = index for current follower ability
+    // c = index for current Type of this ability
+    return this.registeredThreatCounters.hasOwnProperty(a) && this.registeredThreatCounters[a].hasOwnProperty(b) && this.registeredThreatCounters[a][b]
+}
+
+//====================================================================
+RegisterThreatCounter: function(a, b, c) {
+    if (!this.registeredThreatCounters.hasOwnProperty(a)) {
+        this.registeredThreatCounters[a] = {}
+    }
+    if (!this.registeredThreatCounters[a].hasOwnProperty(b)) {
+        this.registeredThreatCounters[a][b] = {}
+    }
+    this.registeredThreatCounters[a][b][c] = true
+}
+
+//====================================================================
+$WH.fround = function(b) {
+    if (Math.fround) {
+        return Math.fround(b)
+    } else {
+        if (typeof Float32Array != "undefined" && Float32Array) {
+            var a = new Float32Array(1);
+            a[0] = +b;
+            return a[0]
+        } else {
+            return b
+        }
+    }
 }

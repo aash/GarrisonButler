@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace GarrisonButler
 {
-    public class Follower : IEquatable<Follower>
+    public class Follower : IEquatable<Follower>, IComparable<Follower>
     {
         public bool Equals(Follower other)
         {
@@ -24,7 +24,8 @@ namespace GarrisonButler
                 && string.Equals(Name, other.Name)
                 && string.Equals(Quality, other.Quality)
                 && string.Equals(Status, other.Status)
-                && Xp == other.Xp;
+                && Xp == other.Xp
+                && Abilities.Equals(other.Abilities);
         }
 
         public override bool Equals(object obj)
@@ -50,6 +51,7 @@ namespace GarrisonButler
                 hashCode = (hashCode*397) ^ Quality.GetHashCode();
                 hashCode = (hashCode*397) ^ Status.GetHashCode();
                 hashCode = (hashCode*397) ^ Xp;
+                hashCode = (hashCode*397) ^ Abilities.GetHashCode();
                 return hashCode;
             }
         }
@@ -67,6 +69,7 @@ namespace GarrisonButler
         public readonly String Class;
         public readonly List<String> Counters;
         public readonly String FollowerId;
+        public readonly String UniqueId;
         public readonly int ItemLevel;
         public readonly bool IsCollected;
         public readonly int Level;
@@ -75,12 +78,14 @@ namespace GarrisonButler
         public readonly String Quality;
         public readonly String Status;
         public readonly int Xp;
+        public readonly List<int> Abilities;
 
-        public Follower(string followerId, string name, string status,
+        public Follower(string followerId, string uniqueId, string name, string status,
             string Class_, String quality, int level, bool isCollected,
-            int iItemLevel, int xp, int levelXp, List<String> counters)
+            int iItemLevel, int xp, int levelXp, List<String> counters, List<int> abilities )
         {
             FollowerId = followerId;
+            UniqueId = uniqueId;
             Name = name;
             Status = status;
             Class = Class_;
@@ -91,6 +96,7 @@ namespace GarrisonButler
             Xp = xp;
             LevelXp = levelXp;
             Counters = counters;
+            Abilities = abilities;
             //GarrisonButler.Diagnostic(ToString());
         }
 
@@ -108,6 +114,11 @@ namespace GarrisonButler
             follower += "  Xp: " + Xp + "\n";
             follower += "  LevelXp: " + LevelXp + "\n";
             return Counters.Aggregate(follower, (current, counter) => current + ("   Counter: " + counter + "\n"));
+        }
+
+        int IComparable<Follower>.CompareTo(Follower other)
+        {
+            return this.FollowerId.CompareTo(other.FollowerId);
         }
     }
 }
