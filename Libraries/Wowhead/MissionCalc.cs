@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Security.Policy;
+using System.Threading.Tasks;
+using GarrisonButler.API;
+using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Libraries.JSON;
 using Styx;
+using Styx.Common;
+using Styx.CommonBot.Coroutines;
+using Styx.CommonBot.Frames;
 using Styx.Helpers;
 
 namespace GarrisonButler.Libraries.Wowhead
@@ -25,6 +32,8 @@ namespace GarrisonButler.Libraries.Wowhead
         public static bool[, ,] registeredThreatCounters { get; set; }
         private static Mission _mission;
         public static bool enableDebugPrint = false;
+        public static bool valid = true;    // Used for when wowhead pages don't contain a "new MissionCalc" variable
+                                            // such as the selfie missions and any Logistic missions
 
         public static Mission mission
         {
@@ -35,30 +44,31 @@ namespace GarrisonButler.Libraries.Wowhead
             set
             {
                 _mission = value;
-                string missionCalcPage = "";
-                using (var client = new WebClient())
-                {
-                    missionCalcPage = client.DownloadString("http://www.wowhead.com/mission=" + value.MissionId);
-                }
-                missionCalcPage = missionCalcPage.Replace("\r\n", "\n");
-                var startString = "new MissionCalc(";
-                var startAdjust = startString.Length;
-                var startingIndex = missionCalcPage.IndexOf(startString);
-                var endString = "} });\n</script>";
-                var endAdjust = ("} }").Length;
-                var endingIndex = missionCalcPage.IndexOf(endString);
-                var missionCalcJSON = missionCalcPage.Substring(startingIndex + startAdjust,
-                    (endingIndex + endAdjust) - (startingIndex + startAdjust));
-                var missionJSON = missionCalcJSON.Substring(missionCalcJSON.IndexOf("mission: ") + 9, missionCalcJSON.LastIndexOf("}") - (missionCalcJSON.IndexOf("mission: ") + 8));
-                var decoded = JSON.JSON.JsonDecode(missionJSON);
-                wowheadMissionObject = (Hashtable) decoded;
-                //mechanicInfo = (ArrayList)wowheadMissionObject["mechanics"];
-                var encounters = (Hashtable) wowheadMissionObject["encounters"];
-                if (encounters == null)
-                    return;
-                mechanicInfo = new ArrayList();
                 try
                 {
+                    string missionCalcPage = "";
+                    using (var client = new WebClient())
+                    {
+                        missionCalcPage = client.DownloadString("http://www.wowhead.com/mission=" + value.MissionId);
+                    }
+                    missionCalcPage = missionCalcPage.Replace("\r\n", "\n");
+                    var startString = "new MissionCalc(";
+                    var startAdjust = startString.Length;
+                    var startingIndex = missionCalcPage.IndexOf(startString);
+                    var endString = "} });\n</script>";
+                    var endAdjust = ("} }").Length;
+                    var endingIndex = missionCalcPage.IndexOf(endString);
+                    var missionCalcJSON = missionCalcPage.Substring(startingIndex + startAdjust,
+                        (endingIndex + endAdjust) - (startingIndex + startAdjust));
+                    var missionJSON = missionCalcJSON.Substring(missionCalcJSON.IndexOf("mission: ") + 9, missionCalcJSON.LastIndexOf("}") - (missionCalcJSON.IndexOf("mission: ") + 8));
+                    var decoded = JSON.JSON.JsonDecode(missionJSON);
+                    wowheadMissionObject = (Hashtable) decoded;
+                    //mechanicInfo = (ArrayList)wowheadMissionObject["mechanics"];
+                    var encounters = (Hashtable) wowheadMissionObject["encounters"];
+                    if (encounters == null)
+                        return;
+                    mechanicInfo = new ArrayList();
+
                     foreach (DictionaryEntry encounter in encounters)
                     {
                         Hashtable curEncounter = (Hashtable)encounter.Value;
@@ -78,7 +88,8 @@ namespace GarrisonButler.Libraries.Wowhead
                 }
                 catch (Exception e)
                 {
-                    GarrisonButler.Warning("EXCEPTION IN MISSION");
+                    GarrisonButler.Warning("EXCEPTION IN MISSION: " + e.GetType() + " - " + e.StackTrace);
+                    valid = false;
                 }
                 //foreach (Hashtable currentMission in g_garrison_missions)
                 //{
@@ -134,21 +145,100 @@ namespace GarrisonButler.Libraries.Wowhead
             catch (Exception e)
             {
                 GarrisonButler.Diagnostic("Could not LoadJSONData(): " + e.GetType());
+                valid = false;
             }
+        }
+
+        public static void NonValidMissionCalc()
+        {
+            //using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            //{
+            //    Stopwatch timer = new Stopwatch();
+            //    timer.Start();
+            //    while (!InterfaceLua.IsGarrisonMissionTabVisible()
+            //           && timer.ElapsedMilliseconds < 2000)
+            //    {
+            //        GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
+            //        InterfaceLua.ClickTabMission();
+            //    }
+
+            //    if (!InterfaceLua.IsGarrisonMissionTabVisible())
+            //    {
+            //        GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
+            //        return;
+            //    }
+
+            //    timer.Reset();
+            //    timer.Start();
+            //    while (!InterfaceLua.IsGarrisonMissionVisible()
+            //           && timer.ElapsedMilliseconds < 2000)
+            //    {
+            //        GarrisonButler.Diagnostic("Mission not visible, opening mission: " + mission.MissionId +
+            //                                  " - " +
+            //                                  mission.Name);
+            //        InterfaceLua.OpenMission(mission);
+            //    }
+
+            //    if (!InterfaceLua.IsGarrisonMissionVisible())
+            //    {
+            //        GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
+            //        return;
+            //    }
+
+            //    timer.Reset();
+            //    timer.Start();
+            //    while (!InterfaceLua.IsGarrisonMissionVisibleAndValid(mission.MissionId)
+            //           && timer.ElapsedMilliseconds < 2000)
+            //    {
+            //        GarrisonButler.Diagnostic(
+            //            "Mission not visible or not valid, close and then opening mission: " +
+            //            mission.MissionId + " - " + mission.Name);
+            //        InterfaceLua.ClickCloseMission();
+            //        InterfaceLua.OpenMission(mission);
+            //    }
+
+            //    if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(mission.MissionId))
+            //    {
+            //        GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+            //        return;
+            //    }
+
+            //    InterfaceLua.AddFollowersToMissionNonTask(mission.MissionId, followerIds);
+            //    API.MissionLua.GetPartyMissionInfo(mission);
+            //    combo.ForEach(f => RemoveFollowerFromMission(mission.MissionId.ToInt32(), f.FollowerId.ToInt32()));
+            //    InterfaceLua.ClickCloseMission();
+            //}
         }
 
         public static Tuple<double, double> CalculateSuccessChance()
         {
             var successChance = 0.0d;
             var chanceOver = 0.0d;
-            var returnValue = new Tuple<double, double>(0, 0);
+            var returnValue = new Tuple<double, double>(-1.0, 0);
 
             if(enableDebugPrint) GarrisonButler.Diagnostic("----- Start CalculateSuccessChance -----");
 
-            if (followers.Any(f => f.Name == "Gronnstalker Rokash")
-                && followers.Any(f => f.Name == "Mulverick")
-                && followers.Any(f => f.Name == "Ahm"))
-                GarrisonButler.Diagnostic("Special Diagnostic output message");
+            // Probably because this mission has a base success chance of 100% and wowhead has no data on it
+            if (!valid)
+            {
+                try
+                {
+                    GarrisonButler.Diagnostic("Mission not valid, manually determine success chance");
+                    //var followersToAssign = followers.Take(mission.NumFollowers);
+                    //if (!followersToAssign.Any())
+                    //    return returnValue;
+                    //followersToAssign.ForEach(f => API.FollowersLua.AddFollowerToMission(mission.MissionId.ToInt32(), f.UniqueId.ToInt32()));
+                    //var missionInfo = API.MissionLua.GetPartyMissionInfo(mission);
+                    //returnValue = new Tuple<double, double>(missionInfo.SuccessChance.ToFloat(), 0.0d);
+                    //followersToAssign.ForEach(f => API.FollowersLua.RemoveFollowerFromMission(mission.MissionId.ToInt32(), f.UniqueId.ToInt32()));
+                }
+                catch (Exception e)
+                {
+                    GarrisonButler.Diagnostic("ERROR in !valid workaround during CalculateSuccessChance - " + e.GetType() + " - " + e.StackTrace);
+                }
+                
+                return returnValue;
+            }
 
             var mentorinfo = GetMentorInfo();
 

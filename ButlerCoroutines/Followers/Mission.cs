@@ -277,11 +277,14 @@ namespace GarrisonButler.ButlerCoroutines
                             if (followersToConsider.Count > 0
                                 && followers.Count > followersToConsider.Count)
                             {
+                                var reducedFollowerSet = followers.Except(followersToConsider).ToList();
+                                if (!reducedFollowerSet.Any())
+                                    break;
                                 // Get only the followers that were excluded
-                                var reducedFollowerSet =
-                                    followers
-                                    .SkipWhile((f, i) => f.FollowerId == followersToConsider[i].FollowerId)
-                                    .ToList();
+                                //var reducedFollowerSet =
+                                //    followers
+                                //    .SkipWhile((f, i) => f.FollowerId == followersToConsider[i].FollowerId)
+                                //    .ToList();
                                 // Adding some followers back in would allow us to complete the mission
                                 if ((followersToConsider.Count + reducedFollowerSet.Count) >= mission.NumFollowers)
                                 {
