@@ -26,14 +26,38 @@ namespace GarrisonButler.Libraries.Wowhead
         public static Hashtable g_garrison_followers { get; set; }
         public static Hashtable g_garrison_abilities { get; set; }
         public static Hashtable g_garrison_mechanics { get; set; }
-        public static Hashtable g_garrison_missions { get; set; }
+        public static ArrayList g_garrison_missions { get; set; }
         public static Hashtable wowheadMissionObject { get; set; }
+        public static Hashtable wowheadGlobalMissionInfo { get; set; }
         public static ArrayList mechanicInfo { get; set; }
         public static bool[, ,] registeredThreatCounters { get; set; }
         private static Mission _mission;
         public static bool enableDebugPrint = false;
         public static bool valid = true;    // Used for when wowhead pages don't contain a "new MissionCalc" variable
                                             // such as the selfie missions and any Logistic missions
+        // Right now this only takes into account mission type
+        private static bool DefaultSuccessChanceIs100Percent
+        {
+            get
+            {
+                if (wowheadGlobalMissionInfo == null)
+                    return false;
+
+                if (!wowheadGlobalMissionInfo.ContainsKey("missiontype"))
+                    return false;
+
+                var missionType = wowheadGlobalMissionInfo["missiontype"].ToString().ToLower();
+
+                switch (missionType)
+                {
+                    case "logistics":
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        }
 
         public static Mission mission
         {
@@ -44,6 +68,30 @@ namespace GarrisonButler.Libraries.Wowhead
             set
             {
                 _mission = value;
+                var missionId = value.MissionId.ToString().ToInt32();
+                try
+                {
+                    foreach (Hashtable globalMission in g_garrison_missions)
+                    {
+                        if (globalMission == null)
+                            continue;
+
+                        if (!globalMission.ContainsKey("id"))
+                            continue;
+
+                        var id = globalMission["id"].ToString().ToInt32();
+                        if (missionId == id)
+                        {
+                            GarrisonButler.Diagnostic("Found global mission object: {0}", globalMission);
+                            wowheadGlobalMissionInfo = globalMission;
+                            break;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    GarrisonButler.Warning("EXCEPTION IN GLOBAL MISSION: " + e.GetType() + " - " + e.StackTrace);
+                }
                 try
                 {
                     string missionCalcPage = "";
@@ -88,7 +136,7 @@ namespace GarrisonButler.Libraries.Wowhead
                 }
                 catch (Exception e)
                 {
-                    GarrisonButler.Warning("EXCEPTION IN MISSION: " + e.GetType() + " - " + e.StackTrace);
+                    GarrisonButler.Warning("EXCEPTION IN MISSION CALC: " + e.GetType() + " - " + e.StackTrace);
                     valid = false;
                 }
                 //foreach (Hashtable currentMission in g_garrison_missions)
@@ -117,7 +165,7 @@ namespace GarrisonButler.Libraries.Wowhead
                 //string jsonString = "";
                 //using (var client = new WebClient())
                 //{
-                //    jsonString = client.DownloadString("http://www.wowhead.com/data=followers&locale=0&7w19342");
+                //    jsonString = client.DownloadString("http://www.wowhead.com/data=followers&locale=0");
                 //}
                 var jsonString = ResourceWebUI.follower_data;
                 jsonString = jsonString.Replace("\r\n", "\n");
@@ -133,9 +181,9 @@ namespace GarrisonButler.Libraries.Wowhead
                 g_garrison_abilities = (Hashtable)JSON.JSON.JsonDecode(line2);
                 g_garrison_mechanics = (Hashtable)JSON.JSON.JsonDecode(line3);
 
-                //var jsonString2 = ResourceWebUI.mission_data;   //https://www.wowhead.com/data=missions&locale=0&7w19342
-                //jsonString2 = jsonString2.Replace("\r\n", "\n");
-                //g_garrison_missions = (ArrayList)JSON.JSON.JsonDecode(jsonString2);
+                var jsonString2 = ResourceWebUI.mission_data;   //https://www.wowhead.com/data=missions&locale=0
+                jsonString2 = jsonString2.Replace("\r\n", "\n");
+                g_garrison_missions = (ArrayList)JSON.JSON.JsonDecode(jsonString2);
                 //foreach (var a in (ArrayList)g_garrison_missions)
                 //{
                 //    foreach(DictionaryEntry entry in (Hashtable)a)
@@ -218,6 +266,12 @@ namespace GarrisonButler.Libraries.Wowhead
 
             if(enableDebugPrint) GarrisonButler.Diagnostic("----- Start CalculateSuccessChance -----");
 
+            if (DefaultSuccessChanceIs100Percent)
+            {
+                GarrisonButler.Diagnostic("Returning 100% success chance due to DefaultSuccessChanceIs100Percent being true.");
+                return new Tuple<double, double>(100.0d, 0.0d);
+            }
+
             // Probably because this mission has a base success chance of 100% and wowhead has no data on it
             if (!valid)
             {
@@ -231,6 +285,7 @@ namespace GarrisonButler.Libraries.Wowhead
                     //var missionInfo = API.MissionLua.GetPartyMissionInfo(mission);
                     //returnValue = new Tuple<double, double>(missionInfo.SuccessChance.ToFloat(), 0.0d);
                     //followersToAssign.ForEach(f => API.FollowersLua.RemoveFollowerFromMission(mission.MissionId.ToInt32(), f.UniqueId.ToInt32()));
+                    //InterfaceLua.ClickCloseMission();
                 }
                 catch (Exception e)
                 {

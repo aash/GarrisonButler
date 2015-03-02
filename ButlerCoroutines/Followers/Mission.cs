@@ -559,6 +559,11 @@ namespace GarrisonButler.ButlerCoroutines
                 : new Result(ActionResult.Running, toStart.First());
         }
 
+        //public static async Task<Result> HandleTableAndMissionInterface()
+        //{
+            
+        //}
+
         public static async Task<Result> StartMission(object obj)
         {
             var missionToStart = obj as Tuple<Mission, Follower[]>;

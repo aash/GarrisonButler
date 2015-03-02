@@ -2443,7 +2443,6 @@
   <ItemGroup>
     <Content Include="WebUI\Libraries\angular-xeditable\css\xeditable.css" />
     <Content Include="WebUI\Libraries\angular-xeditable\js\xeditable.min.js" />
-    <Content Include="WebUI\Libraries\follower_data.js" />
     <Content Include="WebUI\Libraries\MissionCalc.js" />
     <Content Include="WebUI\Libraries\MissonCalcSimple.js" />
     <Content Include="WebUI\Libraries\slider\slider.js" />
