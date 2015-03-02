@@ -133,6 +133,8 @@ namespace GarrisonButler.Libraries.Wowhead
                             mechanicInfo.Add((Hashtable)mechanic.Value);
                         }
                     }
+
+                    valid = true;
                 }
                 catch (Exception e)
                 {

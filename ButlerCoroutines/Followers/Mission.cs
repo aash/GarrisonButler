@@ -279,7 +279,7 @@ namespace GarrisonButler.ButlerCoroutines
                             {
                                 var reducedFollowerSet = followers.Except(followersToConsider).ToList();
                                 if (!reducedFollowerSet.Any())
-                                    break;
+                                    continue;
                                 // Get only the followers that were excluded
                                 //var reducedFollowerSet =
                                 //    followers
@@ -306,7 +306,7 @@ namespace GarrisonButler.ButlerCoroutines
                         {
                             GarrisonButler.Diagnostic(
                                 "Breaking mission loop due to followersToConsider < mission.NumFollowers");
-                            break;
+                            continue;
                         }
                     }
                     DateTime startedAt = DateTime.Now;
@@ -532,19 +532,27 @@ namespace GarrisonButler.ButlerCoroutines
                 return new Result(ActionResult.Failed);
             }
 
-            //var toStart = new List<Tuple<Mission, Follower[]>>();
-            //var followersTemp = _followers.ToList();
-            //foreach (var mission in missions)
-            //{
-            //    var match =
-            //        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status == "nil").ToList());
-            //    if (match == null)
-            //        continue;
-            //    toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
-            //    followersTemp.RemoveAll(match.Contains);
-            //}
+            List<Tuple<Mission, Follower[]>> toStart;
 
-            var toStart = NewMissionStubCode(_followers.ToList());
+            // Enhanced Mission Logic
+            if (GarrisonButler.IsIceVersion())
+            {
+                toStart = NewMissionStubCode(_followers.ToList());
+            }
+            else
+            {
+                toStart = new List<Tuple<Mission, Follower[]>>();
+                var followersTemp = _followers.ToList();
+                foreach (var mission in missions)
+                {
+                    var match =
+                        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status == "nil").ToList());
+                    if (match == null)
+                        continue;
+                    toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
+                    followersTemp.RemoveAll(match.Contains);
+                }
+            }
 
             var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
                        "Can successfully complete: " + toStart.Count + " missions.";
