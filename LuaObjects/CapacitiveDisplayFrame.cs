@@ -46,7 +46,7 @@ namespace GarrisonButler.LuaObjects
             Instance = null;
         }
 
-        public static async Task ClickStartOrderButton(Building building)
+        public static async Task<bool> ClickStartOrderButton(Building building)
         {
             var currentStarted = building.ShipmentsTotal;
             var lua = @"
@@ -58,13 +58,16 @@ namespace GarrisonButler.LuaObjects
 	        end
             ";
             await ButlerLua.DoString(lua);
+            building.StartWorkOrderTries++;
             if (await Buddy.Coroutines.Coroutine.Wait(10000, () => currentStarted != building.ShipmentsTotal))
             {
                 GarrisonButler.Log("Successfully started a work order at {0}.", building.Name);
+                return true;
             }
             else
             {
                 GarrisonButler.Log("Failed to start a work order at {0}.", building.Name);
+                return false;
             }
         }
     }

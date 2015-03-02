@@ -64,8 +64,10 @@ namespace GarrisonButler
 
         public int WorkFrameWorkAroundTries = 0;
         public int GossipFrameTries = 0;
+        public int StartWorkOrderTries = 0;
         public const int GossipFrameMaxTries = 15;
         public const int WorkFrameWorkAroundMaxTriesUntilBlacklist = 10;
+        public const int StartWorkOrderMaxTries = 5;
         // Settings
 
         public List<uint> buildingIDs { get; set; }
@@ -161,8 +163,8 @@ namespace GarrisonButler
             // add number in reagent banks
             count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
-            GarrisonButler.Diagnostic("[CanCompleteOrderItem] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
-                count, NumberReagent, count >= NumberReagent);
+            GarrisonButler.Diagnostic("[CanCompleteOrderItem,{4}] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
+                count, NumberReagent, count >= NumberReagent, Id);
 
             return new Result(ActionResult.Done, (int)count / NumberReagent);
         }
@@ -178,8 +180,8 @@ namespace GarrisonButler
                 // add number in reagent banks
                 count += HbApi.GetNumberItemInReagentBank(reagentId);
 
-                GarrisonButler.Diagnostic("[CanCompleteOrderItems] Total found {0} - #{1} - needed #{2}", reagentId, count,
-                    NumberReagent);
+                GarrisonButler.Diagnostic("[CanCompleteOrderItems,{3}] Total found {0} - #{1} - needed #{2}", reagentId, count,
+                    NumberReagent, Id);
                 if (count < NumberReagent)
                 {
                     maxCanStart = 0;

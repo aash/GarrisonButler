@@ -390,6 +390,14 @@ namespace GarrisonButler.ButlerCoroutines
                     return new Result(ActionResult.Failed);
                 }
 
+                // Reached limit of tries?
+                if (building.StartWorkOrderTries >= Building.StartWorkOrderMaxTries)
+                {
+                    GarrisonButler.Warning("[ShipmentStart,{0}] Cannot collect shipments due to reaching max tries ({2}): {1}",
+                        building.Id, building.Name, Building.StartWorkOrderMaxTries);
+                    return new Result(ActionResult.Failed);
+                }
+
                 // max start by user ?
                 var maxToStartCheck = await GetMaxShipmentToStart(building);
                 if (maxToStartCheck.Status == ActionResult.Running)
@@ -603,7 +611,21 @@ namespace GarrisonButler.ButlerCoroutines
             {
                 for (var i = 0; i < maxToStart; i++)
                 {
-                    await CapacitiveDisplayFrame.ClickStartOrderButton(building);
+                    if (!await CapacitiveDisplayFrame.ClickStartOrderButton(building))
+                    {
+                        if (building.StartWorkOrderTries >= Building.StartWorkOrderMaxTries)
+                        {
+                            GarrisonButler.Diagnostic(
+                                "[ShipmentStart,{0}] Max number of tries ({1}) reached to start shipment at {2}",
+                                building.Id, Building.StartWorkOrderMaxTries, building.Name);
+                            return new Result(ActionResult.Failed);
+                        }
+                    }
+                    // Reset on success
+                    else
+                    {
+                        building.StartWorkOrderTries = 0;
+                    }
 
                     // Need to refresh if we used "create all" button
                     building.Refresh();
@@ -636,12 +658,16 @@ namespace GarrisonButler.ButlerCoroutines
                         : 0;
                     if (max == 0)
                     {
-                        GarrisonButler.Log("[ShipmentStart] Finished starting work orders at {0}.",
-                            buildingShipment.Name);
+                        GarrisonButler.Log("[ShipmentStart{1}] Finished starting work orders at {0}.",
+                            buildingShipment.Name, building.Id);
                         //await ButlerLua.CloseLandingPage();
                         return new Result(ActionResult.Done);
                     }
-                    GarrisonButler.Diagnostic("[ShipmentStart] Waiting for shipment to update.");
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Waiting for shipment to update.", building.Id);
+                }
+                else
+                {
+                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Building was not found in _buildings!  _buildings.Count={1} - _buildings={2}", building.Id, _buildings.Count, _buildings);
                 }
                 await Buddy.Coroutines.Coroutine.Yield();
             }
@@ -667,8 +693,8 @@ namespace GarrisonButler.ButlerCoroutines
 
             maxToStart = Math.Min(maxCanComplete, maxToStart);
             GarrisonButler.Diagnostic(
-                "GetMaxShipmentToStart: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
-                maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart);
+                "[GetMaxShipmentToStart,{5}]: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
+                maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart, building.Id);
             return new Result(ActionResult.Done, maxToStart);
         }
 
