@@ -49,7 +49,15 @@ namespace GarrisonButler.LuaObjects
         public static async Task ClickStartOrderButton(Building building)
         {
             var currentStarted = building.ShipmentsTotal;
-            await ButlerLua.DoString("C_Garrison.RequestShipmentCreation()");
+            var lua = @"
+            local available = GarrisonCapacitiveDisplayFrame.available;
+	        if (available and available > 0) then
+		        C_Garrison.RequestShipmentCreation(available);
+            else
+                C_Garrison.RequestShipmentCreation();
+	        end
+            ";
+            await ButlerLua.DoString(lua);
             if (await Buddy.Coroutines.Coroutine.Wait(10000, () => currentStarted != building.ShipmentsTotal))
             {
                 GarrisonButler.Log("Successfully started a work order at {0}.", building.Name);

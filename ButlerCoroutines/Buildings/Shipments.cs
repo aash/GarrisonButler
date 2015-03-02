@@ -604,7 +604,19 @@ namespace GarrisonButler.ButlerCoroutines
                 for (var i = 0; i < maxToStart; i++)
                 {
                     await CapacitiveDisplayFrame.ClickStartOrderButton(building);
-                    //building.Refresh();
+
+                    // Need to refresh if we used "create all" button
+                    building.Refresh();
+                    resCheckMax = await GetMaxShipmentToStart(building);
+
+                    if (resCheckMax.Status == ActionResult.Done)
+                    {
+                        maxToStart = (int) resCheckMax.Result1;
+                        if (maxToStart <= 0)
+                        {
+                            break;
+                        }
+                    }
                     //await CommonCoroutines.SleepForLagDuration();
                     //await Buddy.Coroutines.Coroutine.Yield();
                 }
