@@ -48,7 +48,8 @@ namespace GarrisonButler.ButlerCoroutines
             var herbToGather =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
-                    .Where(o => GardenItems.Contains(o.Entry))
+                    .Where(o => GardenItems.Contains(o.Entry) && !Objects.Blacklist.IsBlacklisted(o))
+                    .Where(o => ButlerCoroutine.MovementGraph.Nodes.Keys.Any(n => o.Location.Distance(n) < 20))
                     .OrderBy(o => o.DistanceSqr)
                     .FirstOrDefault();
             if (herbToGather == null)

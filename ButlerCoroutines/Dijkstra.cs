@@ -23,6 +23,8 @@ namespace GarrisonButler.ButlerCoroutines
         private static Graph _movementGraph;
         private static List<WoWPoint> _zonePoints;
 
+        public static Graph MovementGraph { get { return _movementGraph; } }
+
         private static NavigationGaB _customNavigation;
         internal static bool CustomNavigationLoaded = false;
         internal static NavigationProvider NativeNavigation;

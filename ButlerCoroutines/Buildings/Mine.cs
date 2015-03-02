@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
+using Styx.Common;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -79,7 +80,9 @@ namespace GarrisonButler.ButlerCoroutines
             var allObjects =
                 ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
                     .GetEmptyIfNull()
-                    .Where(o => MineItems.Contains(o.Entry) && !Objects.Blacklist.IsBlacklisted(o)).ToArray();
+                    .Where(o => MineItems.Contains(o.Entry) && !Objects.Blacklist.IsBlacklisted(o))
+                    .Where(o => ButlerCoroutine.MovementGraph.Nodes.Keys.Any(n => o.Location.Distance(n) < 20))
+                    .ToArray();
 
             if (!allObjects.Any(o => OresMine.Contains(o.Entry)))
             {
