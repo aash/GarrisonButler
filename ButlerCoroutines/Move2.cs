@@ -51,7 +51,7 @@ namespace GarrisonButler.ButlerCoroutines
                     GarrisonButler.Warning("[MovePath] Index outside bounds of array for Path.Points.Length={0} and path.Index={1}",
                         path.Path.Points.Length, path.Index);
                 }
-                while (StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && path.Index > 3 &&
+                while (path.Path.Points.Length >= path.Index && StyxWoW.Me.Location.Distance(path.Path.Points[path.Index]) < pathPrecision && path.Index > 3 &&
                        max < 5)
                 {
                     path.Index++;

@@ -188,6 +188,7 @@ namespace GarrisonButler.ButlerCoroutines
                 missionsWithCurrentReward.ForEach(m =>
                 {
                     GarrisonButler.Diagnostic("  >> Mission: {0} <<", m.Name);
+                    GarrisonButler.Diagnostic("  Slots: {0}", m.NumFollowers);
                     m.Rewards.ForEach(r => GarrisonButler.Diagnostic("    ** Reward ({0}): {1} **", r.Quantity, r.Name));
                 });
 
