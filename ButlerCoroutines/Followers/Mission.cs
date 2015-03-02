@@ -567,6 +567,149 @@ namespace GarrisonButler.ButlerCoroutines
                 : new Result(ActionResult.Running, toStart.First());
         }
 
+        private static async Task<Result> CanRunPutGearOnFollower()
+        {
+            const int maxItemLevel = 675;
+            RefreshMissions();
+            RefreshFollowers();
+
+            // Any follower reward settings available?
+            var followerSettings = GaBSettings.Get().MissionRewardSettings
+                .Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerGear
+                || f.Category == MissionReward.MissionRewardCategory.FollowerItem
+                && f.Action == MissionReward.MissionRewardAction.UseOnFollowers)
+                .ToList();
+            //var followerGearSettings = GaBSettings.Get().MissionRewardSettings.Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerGear);
+            //var followerItemSettings = GaBSettings.Get().MissionRewardSettings.Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerItem);
+
+            if (followerSettings.Count <= 0)
+            {
+                GarrisonButler.Diagnostic("[Followers] No follower items in user settings.");
+                return new Result(ActionResult.Failed);
+            }
+
+            // Any token settings available?
+            var followerTokenSettings = followerSettings.SkipWhile(f => f.IsCategoryReward).ToList();
+
+            if (followerTokenSettings.Count <= 0)
+            {
+                GarrisonButler.Diagnostic("[Followers] No follower tokens in user settings.");
+                return new Result(ActionResult.Failed);
+            }
+
+            // Any tokens available to use on the followers?
+            var tokensAvailable = followerTokenSettings
+                .Select(f => HbApi.GetItemInBags((uint) f.Id))
+                .Aggregate((a, b) => a.Union(b))
+                // Start with highest level items to assign to lowest level followers
+                .OrderByDescending(f => f.ItemInfo.Level)
+                .ToList();
+
+            if (tokensAvailable.Count <= 0)
+            {
+                GarrisonButler.Diagnostic("[Followers] No tokens available in user inventory.");
+                return new Result(ActionResult.Failed);
+            }
+
+            // Any actual followers available?
+            var numberFollowersAvailable = _followers
+                // Only followers In Party (1) or Doing Nothing (nil = 0)
+                .SkipWhile(f => f.ItemLevel >= maxItemLevel || f.Level < 100 || f.Status.ToInt32() < 2)
+                // Prioritize lower ilvl followers
+                .OrderBy(f => f.ItemLevel)
+                .ToList();
+
+            if (numberFollowersAvailable.Count <= 0)
+            {
+                GarrisonButler.Diagnostic("[Followers] No followers eligible to use tokens.");
+                return new Result(ActionResult.Failed);
+            }
+
+            //var tokenArray = tokensAvailable.ToArray();
+            //var followerArray = numberFollowersAvailable.ToArray();
+
+            //GarrisonButler.Diagnostic("[Followers] tokenArray.Length={0}, tokenArray={1}", tokenArray.Length, tokenArray);
+            //GarrisonButler.Diagnostic("[Followers] followerArray.Length={0}, followerArray={1}", followerArray.Length, followerArray);
+
+            return new Result(ActionResult.Running,
+                new Tuple<WoWItem, Follower>(tokensAvailable.FirstOrDefault(), numberFollowersAvailable.FirstOrDefault()));
+        }
+
+        public static async Task<Result> PutGearOnFollower(object obj)
+        {
+            var inventoryAndFollower = obj as Tuple<WoWItem, Follower>;
+
+            if(inventoryAndFollower == null)
+            {
+                GarrisonButler.Diagnostic("[Followers] Passed in obj is null.");
+                return new Result(ActionResult.Failed);
+            }
+
+            var token = inventoryAndFollower.Item1;
+            var follower = inventoryAndFollower.Item2;
+
+            if (token == null)
+            {
+                GarrisonButler.Diagnostic("[Followers] Token is null.");
+                return new Result(ActionResult.Failed);
+            }
+
+            if (follower == null)
+            {
+                GarrisonButler.Diagnostic("[Followers] Follower is null.");
+                return new Result(ActionResult.Failed);
+            }
+
+            if (await MoveToTable())
+                return new Result(ActionResult.Running);
+
+            if (!InterfaceLua.IsGarrisonFollowersTabVisible())
+            {
+                GarrisonButler.Diagnostic("[Followers] Followers tab not visible, clicking.");
+                InterfaceLua.ClickTabFollowers();
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonFollowersTabVisible))
+                {
+                    GarrisonButler.Warning("[Followers] Couldn't display GarrisonFollowerTab.");
+                    return new Result(ActionResult.Running);
+                }
+            }
+
+            if (!InterfaceLua.IsGarrisonFollowerVisible())
+            {
+                GarrisonButler.Diagnostic("Follower not visible, opening follower: "
+                                          + follower.FollowerId + " (" + follower.Name + ")");
+                InterfaceLua.OpenFollower(follower);
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonFollowerVisible))
+                {
+                    GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame.");
+                    return new Result(ActionResult.Running);
+                }
+            }
+            else if (!InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId))
+            {
+                GarrisonButler.Diagnostic("Follower not visible or not valid, close and then opening follower: " +
+                                          follower.FollowerId + " - " + follower.Name);
+                //InterfaceLua.ClickCloseFollower();
+                InterfaceLua.OpenFollower(follower);
+                if (
+                    !await
+                        Buddy.Coroutines.Coroutine.Wait(2000,
+                            () => InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId)))
+                {
+                    GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame or wrong follower opened.");
+                    return new Result(ActionResult.Running);
+                }
+            }
+
+            GarrisonButler.Diagnostic("Adding item {0} ({1}) to follower {2} ({3}) with item level {4}", token.Entry, token.Name, follower.FollowerId, follower.Name, follower.ItemLevel);
+            await InterfaceLua.ApplyItemToFollower(token.Entry.ToString(), follower.FollowerId);
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+
+            RefreshFollowers(true);
+            RefreshMissions(true);
+            return new Result(ActionResult.Refresh);
+        }
+
         //public static async Task<Result> HandleTableAndMissionInterface()
         //{
             
@@ -759,6 +902,10 @@ namespace GarrisonButler.ButlerCoroutines
             //// StartMissions
             missionsActionsSequence.AddAction(
                 new ActionHelpers.ActionOnTimer(StartMission, CanRunStartMission));
+
+            // Put gear on followers
+            //missionsActionsSequence.AddAction(
+            //    new ActionHelpers.ActionOnTimer(PutGearOnFollower, CanRunPutGearOnFollower));
 
             GarrisonButler.Diagnostic("Initialization Missions coroutines done!");
             return missionsActionsSequence;

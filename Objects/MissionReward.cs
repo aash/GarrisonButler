@@ -19,8 +19,23 @@ namespace GarrisonButler.Objects
 {
     public class MissionReward : INotifyPropertyChanged
     {
+        public enum MissionRewardAction
+        {
+            Vendor = 0,
+            Disenchant = 1,
+            Mill = 2,
+            RightClick = 3,
+            Destroy = 4,
+            Mail = 5,
+            DepositGBank = 6,
+            DepositPBank = 7,
+            UseOnFollowers = 8,
+            None = 20
+        }
         private int _id;
         private string _name;
+        [XmlAttribute("Action")]
+        public MissionRewardAction Action { get; set; }
         [XmlAttribute("Id")]
         public int Id
         {
@@ -341,6 +356,11 @@ namespace GarrisonButler.Objects
         public bool IsCurrencyReward
         {
             get { return Category == MissionRewardCategory.Currency && (this.Id != (int)this.Category); }
+        }
+
+        public bool IsCategoryReward
+        {
+            get { return (int)Category == Id; }
         }
 
         [XmlIgnore]

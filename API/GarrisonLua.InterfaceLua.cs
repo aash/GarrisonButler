@@ -124,6 +124,91 @@ namespace GarrisonButler.API
             Lua.DoString("/click MailFrameCloseButton()");
         }
 
+        //TODO - Implement
+        public static bool IsGarrisonFollowersTabVisible()
+        {
+            const string lua =
+                "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab then return false; else return tostring(GarrisonMissionFrame.MissionTab:IsVisible()); end;";
+
+            var results = Lua.GetReturnValues(lua);
+
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+
+        //TODO - Implement - May not need?
+        public static bool IsGarrisonFollowerVisible()
+        {
+            const string lua =
+                "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab or not GarrisonMissionFrame.MissionTab.MissionPage then return false;end;" +
+                "return tostring(GarrisonMissionFrame.MissionTab.MissionPage:IsShown())";
+
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+
+        //TODO - Implement - May not need?
+        // Maybe check that the follower is eligible for upgrades AGAIN?
+        public static bool IsGarrisonFollowerVisibleAndValid(string followerId)
+        {
+            var lua =
+                String.Format(
+                    "if not GarrisonMissionFrame.MissionTab.MissionPage or not GarrisonMissionFrame.MissionTab.MissionPage.missionInfo or not GarrisonMissionFrame.MissionTab.MissionPage:IsShown() then return false;end;" +
+                    "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )",
+                    followerId);
+
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
+
+        public static void ClickTabFollowers()
+        {
+            Lua.DoString("GarrisonMissionFrameTab2:Click();");
+        }
+
+        //TODO - Implement
+        public static void OpenFollower(Follower follower)
+        {
+            GarrisonButler.Diagnostic("OpenFollower - id: " + follower.FollowerId);
+            //Scroll until we see follower first
+            //TODO - Change for followers instead of missions
+            var lua =
+                "local mission; local am = {}; C_Garrison.GetAvailableMissions(am);" +
+                String.Format(
+                    "for idx = 1, #am do " +
+                    "if am[idx].followerID == {0} then " +
+                    "follower = am[idx];" +
+                    "end;" +
+                    "end;" +
+                    "GarrisonMissionList_Update();" +
+                    "GarrisonMissionFrame.FollowerTab.FollowerList:Hide();" +
+                    "GarrisonMissionFrame.FollowerTab.MissionPage:Show();" +
+                    "GarrisonFollowerPage_ShowFollower(follower);" +
+                    "GarrisonMissionFrame.followerCounters = C_Garrison.GetBuffedFollowersForMission(\"{0}\");" +
+                    "GarrisonMissionFrame.followerTraits = C_Garrison.GetFollowersTraitsForMission(\"{0}\");" +
+                    "GarrisonFollowerList_UpdateFollowers(GarrisonMissionFrame.FollowerList);"
+                    , follower.FollowerId);
+
+            Lua.DoString(lua);
+        }
+
+        //TODO - Implement
+        public static void ClickCloseFollower()
+        {
+            const string lua = "GarrisonMissionFrame.MissionTab.MissionPage:Hide();" +
+                               "GarrisonMissionFrame.MissionTab.MissionList:Show();" +
+                               "GarrisonMissionPage_ClearParty();" +
+                               "GarrisonMissionFrame.followerCounters = nil;" +
+                               "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo = nil;";
+
+            Lua.DoString(lua);
+        }
+
+        //TODO - Implement
+        public static async Task ApplyItemToFollower(string itemSlotNumber, string followerId)
+        {
+            
+        }
+
         public static bool IsGarrisonMissionTabVisible()
         {
             const string lua =
