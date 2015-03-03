@@ -55,9 +55,61 @@ namespace GarrisonButler.ButlerCoroutines
             RefreshFollowerTimer.Reset();
         }
 
+        public static bool IsMissionDisallowed(Mission mission)
+        {
+            var disallowedRewardSettings = GaBSettings.Get().MissionRewardSettings.Where(mrs => mrs.DisallowMissionsWithThisReward);
+            var returnValue = disallowedRewardSettings.Any(drs =>
+                drs.IsCategoryReward
+                    ? mission.Rewards.Any(r => r.Category == drs.Category)
+                    : mission.Rewards.Any(r => r.Id == drs.Id));
+            //var returnValue = false;
+
+            //foreach (var drs in disallowedRewardSettings)
+            //{
+            //    if (drs.IsCategoryReward)
+            //    {
+            //        foreach (var reward in mission.Rewards)
+            //        {
+            //            if (reward.Category == drs.Category)
+            //            {
+            //                returnValue = true;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        foreach (var r in mission.Rewards)
+            //        {
+            //            if (r.Category == drs.Category)
+            //            {
+            //                returnValue = true;
+            //                break;
+            //            }
+            //        }
+            //    }
+
+            //    if (returnValue == true)
+            //        break;
+            //}
+
+            GarrisonButler.Diagnostic(
+                returnValue
+                    ? "[Missions] Mission is DISALLOWED id: {0} name: {1}"
+                    : "[Missions] Mission is enabled id: {0} name: {1}", mission.MissionId, mission.Name);
+
+            return returnValue;
+        }
+
         public static List<Tuple<Mission, Follower[]>> NewMissionStubCode(List<Follower> followers)
         {
-            var missions = MissionLua.GetAllAvailableMissions();
+            var allAvailableMissions = MissionLua.GetAllAvailableMissions();
+            allAvailableMissions.ForEach(m => IsMissionDisallowed(m));
+            GarrisonButler.Diagnostic("[Missions] ------------");
+            var missions = allAvailableMissions
+                .GetEmptyIfNull()
+                .SkipWhile(IsMissionDisallowed)
+                .ToList();
             var slots = missions.Sum(m => m.NumFollowers);
             var rewards = GaBSettings.Get().MissionRewardSettings;
             var numMissions = missions.Count;
@@ -271,7 +323,7 @@ namespace GarrisonButler.ButlerCoroutines
                 // Attempt boosting (re-run with all followers considered)
                 if (returnedToStart != null && returnedToStart.Count <= 0)
                 {
-                    GarrisonButler.Diagnostic("[Missions] No combos found normally, attempting with Epic Max Level Boost");
+                    GarrisonButler.Diagnostic("[Missions] >>> No combos found normally, attempting with Epic Max Level Boost <<<");
                     result = DoMissionCalc(followers, missionsThatMeetRequirement, reward, followers);
                     returnedToStart = result.Item1;
                     returnedCombosTried = result.Item2;
@@ -363,6 +415,7 @@ namespace GarrisonButler.ButlerCoroutines
 
             foreach (var mission in missionsThatMeetRequirement)
             {
+                GarrisonButler.Diagnostic("************* BEGIN Mission=" + mission.Name + "**************");
                 if (followersToConsider.Count < mission.NumFollowers)
                 {
                     var shouldBreak = true;
@@ -416,13 +469,25 @@ namespace GarrisonButler.ButlerCoroutines
                 DateTime startedAt = DateTime.Now;
                 Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
                 MissionCalc.mission = mission;
-                var bestCombo = followerCombinations.FirstOrDefault();
+                var bestCombo = Enumerable.Empty<Follower>();
                 var bestSuccess = 0.0d;
                 List<Tuple<IList<Follower>, double>> successChances = new List<Tuple<IList<Follower>, double>>();
                 foreach (var combo in followerCombinations)
                 {
+                    var allMaxLevelEpic = combo.All(c => c.IsMaxLevelEpic);
+                    var isFollowerExperienceCategory = reward.Category ==
+                                                       MissionReward.MissionRewardCategory.FollowerExperience;
+                    if (!GaBSettings.Get().AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers
+                        && isFollowerExperienceCategory
+                        && allMaxLevelEpic)
+                    {
+                        // Don't fill all slots with epic max level followers
+                        continue;
+                    }
                     // Restrict combinations based on user settings
-                    if (GaBSettings.Get().UseEpicMaxLevelFollowersToBoostLowerFollowers)
+                    // Only for FollowerExperience
+                    if (GaBSettings.Get().UseEpicMaxLevelFollowersToBoostLowerFollowers
+                        && reward.Category == MissionReward.MissionRewardCategory.FollowerExperience)
                     {
                         // Skip any combinations where # of epic followers is greater than allowed
                         var maxEpicFollowers = GaBSettings.Get().MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting;
@@ -435,9 +500,8 @@ namespace GarrisonButler.ButlerCoroutines
                     successChances.Add(new Tuple<IList<Follower>, double>(combo, result.Item1));
                 }
 
-                if (bestCombo != null)
+                if (successChances != null && successChances.Count > 0)
                 {
-                    GarrisonButler.Diagnostic("************* BEGIN Mission=" + mission.Name + "**************");
                     GarrisonButler.Diagnostic("Total combinations tried = " + followerCombinations.Count);
                     GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations", startedAt);
                     var first = successChances.OrderByDescending(sc => sc.Item2).FirstOrDefault();
@@ -466,7 +530,16 @@ namespace GarrisonButler.ButlerCoroutines
                         GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
                         continue;
                     }
+
                     combosTried += (int)followerCombinations.Count;
+
+                    if (bestCombo.IsNullOrEmpty())
+                    {
+                        GarrisonButler.Diagnostic("[Missions] No best combo found for mission {0}", mission.Name);
+                        RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
+                        GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+                        continue;
+                    }
                     acceptedCombos++;
                     GarrisonButler.Diagnostic("Best Combination with success=" + bestSuccess + "% for Mission=" + mission.Name + " is ");
                     bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
@@ -483,9 +556,10 @@ namespace GarrisonButler.ButlerCoroutines
                         followers.RemoveAll(f => f.FollowerId == c.FollowerId);
                     });
                     GarrisonButler.Diagnostic("Followers after removal: " + followersToConsider.Count);
-                    GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
                 } // if (bestCombo != null)
-            } // foreach (var mission in missionsThatMeetRequirement)
+
+                GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+            } // if (successChances != null && successChances.Any())
 
             return new Tuple<List<Tuple<Mission, Follower[]>>, long, int, double>(toStart, combosTried, acceptedCombos, totalSuccessChance);
         }
