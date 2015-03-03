@@ -21,7 +21,7 @@ namespace GarrisonButler.Objects
     {
         public enum MissionRewardAction
         {
-            Vendor = 0,
+            None = 0,
             Disenchant = 1,
             Mill = 2,
             RightClick = 3,
@@ -30,7 +30,8 @@ namespace GarrisonButler.Objects
             DepositGBank = 6,
             DepositPBank = 7,
             UseOnFollowers = 8,
-            None = 20
+            Vendor = 9,
+            Unknown = 20
         }
         private int _id;
         private string _name;
