@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Styx.Helpers;
 
 #endregion
 
@@ -79,6 +80,8 @@ namespace GarrisonButler
         public readonly String Status;
         public readonly int Xp;
         public readonly List<int> Abilities;
+
+        public bool IsMaxLevelEpic { get { return Quality.ToInt32() > 3 && Level >= 100; } }
 
         public Follower(string followerId, string uniqueId, string name, string status,
             string Class_, String quality, int level, bool isCollected,

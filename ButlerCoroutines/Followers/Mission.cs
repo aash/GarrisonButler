@@ -225,14 +225,13 @@ namespace GarrisonButler.ButlerCoroutines
                 List<Follower> followersToConsider;
 
                 if (reward.Category == MissionReward.MissionRewardCategory.FollowerExperience
-                    && !GaBSettings.Get().IncludeEpicMaxLevelFollowersForExperience)
+                    && !GaBSettings.Get().AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers)
                 {
                     GarrisonButler.Diagnostic("Going to use reduced follower list");
                     followersToConsider = new List<Follower>();
                     for (var i = 0; i < followers.Count; i++)
                     {
-                        if (followers[i].Quality.ToInt32() > 3
-                            && followers[i].Level >= 100)
+                        if (followers[i].IsMaxLevelEpic)
                         {
                             GarrisonButler.Diagnostic("Skipping max level epic 100 follower: " + followers[i].Name);
                         }
@@ -262,116 +261,35 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
                 followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
 
-                var followersToRemoveIfFailure = new List<Follower>();
+                var result = DoMissionCalc(followersToConsider, missionsThatMeetRequirement, reward, followers);
+                var returnedToStart = result.Item1;
+                var returnedCombosTried = result.Item2;
+                var returnedAcceptedCombos = result.Item3;
+                var returnedTotalSuccessChance = result.Item4;
 
-                foreach (var mission in missionsThatMeetRequirement)
+                // No combos were found
+                // Attempt boosting (re-run with all followers considered)
+                if (returnedToStart != null && returnedToStart.Count <= 0)
                 {
-                    if (followersToConsider.Count < mission.NumFollowers)
-                    {
-                        var shouldBreak = true;
+                    GarrisonButler.Diagnostic("[Missions] No combos found normally, attempting with Epic Max Level Boost");
+                    result = DoMissionCalc(followers, missionsThatMeetRequirement, reward, followers);
+                    returnedToStart = result.Item1;
+                    returnedCombosTried = result.Item2;
+                    returnedAcceptedCombos = result.Item3;
+                    returnedTotalSuccessChance = result.Item4;
+                }
 
-                        if (!GaBSettings.Get().IncludeEpicMaxLevelFollowersForExperience
-                            && reward.Category == MissionReward.MissionRewardCategory.FollowerExperience)
-                        {
-                            // Followers were excluded (followers.Count > followersToConsider.Count)
-                            // but still a follower remaining in the queue that needs experience (followersToConsider.Count > 0)
-                            if (followersToConsider.Count > 0
-                                && followers.Count > followersToConsider.Count)
-                            {
-                                var reducedFollowerSet = followers.Except(followersToConsider).ToList();
-                                if (!reducedFollowerSet.Any())
-                                    continue;
-                                // Get only the followers that were excluded
-                                //var reducedFollowerSet =
-                                //    followers
-                                //    .SkipWhile((f, i) => f.FollowerId == followersToConsider[i].FollowerId)
-                                //    .ToList();
-                                // Adding some followers back in would allow us to complete the mission
-                                if ((followersToConsider.Count + reducedFollowerSet.Count) >= mission.NumFollowers)
-                                {
-                                    var amount = mission.NumFollowers - followersToConsider.Count;
-                                    followersToRemoveIfFailure = reducedFollowerSet.Take(amount).ToList();
+                if (returnedToStart != null && returnedToStart.Count > 0)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Able to start {0} missions. (unassigned followers = {1}, tried {2} combos, accepted {3} combos, avg success = {4}%",
+                        returnedToStart.Count, followersToConsider.Count, returnedCombosTried, returnedAcceptedCombos,
+                        returnedAcceptedCombos > 0 ? (returnedAcceptedCombos / (double)returnedAcceptedCombos).ToString() : "0");
+                    toStart.AddRange(returnedToStart);
+                    combosTried += returnedCombosTried;
+                    acceptedCombos += returnedAcceptedCombos;
+                    totalSuccessChance += returnedTotalSuccessChance;
+                }
 
-                                    if (followersToRemoveIfFailure.Count > 0)
-                                    {
-                                        GarrisonButler.Diagnostic("Using epic level 100 followers to help fill up mission slots:");
-                                        followersToRemoveIfFailure.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
-                                        followersToConsider.AddRange(followersToRemoveIfFailure);
-                                        shouldBreak = false;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (shouldBreak)
-                        {
-                            GarrisonButler.Diagnostic(
-                                "Breaking mission loop due to followersToConsider < mission.NumFollowers");
-                            continue;
-                        }
-                    }
-                    DateTime startedAt = DateTime.Now;
-                    Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
-                    MissionCalc.mission = mission;
-                    var bestCombo = followerCombinations.FirstOrDefault();
-                    var bestSuccess = 0.0d;
-                    List<Tuple<IList<Follower>, double>> successChances = new List<Tuple<IList<Follower>, double>>();
-                    foreach (var combo in followerCombinations)
-                    {
-                        MissionCalc.followers = combo.ToList();
-                        var result = MissionCalc.CalculateSuccessChance();
-                        successChances.Add(new Tuple<IList<Follower>, double>(combo, result.Item1));
-                    }
-
-                    if (bestCombo != null)
-                    {
-                        GarrisonButler.Diagnostic("************* BEGIN Mission=" + mission.Name + "**************");
-                        GarrisonButler.Diagnostic("Total combinations tried = " + followerCombinations.Count);
-                        GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations", startedAt);
-                        var first = successChances.OrderByDescending(sc => sc.Item2).FirstOrDefault();
-                        if (first != null)
-                        {
-                            bestCombo = first.Item1;
-                            bestSuccess = first.Item2;
-
-                            var sucChanceToCompareAgainst = reward.IndividualSuccessChanceEnabled
-                                ? reward.RequiredSuccessChance
-                                : GaBSettings.Get().DefaultMissionSuccessChance;
-
-                            if (Convert.ToInt32(bestSuccess) < sucChanceToCompareAgainst)
-                            {
-                                GarrisonButler.Diagnostic("Best combo doesn't meet minimum success chance requirements!  Need {0}% and only have {1}%", sucChanceToCompareAgainst, Convert.ToInt32(bestSuccess));
-                                bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
-                                followersToConsider.RemoveAll(f => followersToRemoveIfFailure.Any(fr => fr.FollowerId == f.FollowerId));
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            GarrisonButler.Diagnostic("Error retrieving success chance for best combo: bestCombo.Count={0}, successChances.Count={1}", bestCombo.GetEmptyIfNull().Count(), successChances.GetEmptyIfNull().Count());
-                            followersToConsider.RemoveAll(f => followersToRemoveIfFailure.Any(fr => fr.FollowerId == f.FollowerId));
-                            continue;
-                        }
-                        combosTried += followerCombinations.Count;
-                        acceptedCombos++;
-                        GarrisonButler.Diagnostic("Best Combination with success=" + bestSuccess + "% for Mission=" + mission.Name + " is ");
-                        bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
-                        //successChances.ForEach(c =>
-                        //{
-                        //    totalSuccessChance += c.Item2;
-                        //});
-                        totalSuccessChance += bestSuccess;
-                        toStart.Add(new Tuple<Mission, Follower[]>(mission, bestCombo.ToArray()));
-                        GarrisonButler.Diagnostic("Followers before removal: " + followersToConsider.Count);
-                        bestCombo.ForEach(c =>
-                        {
-                            followersToConsider.RemoveAll(f => f.FollowerId == c.FollowerId);
-                            followers.RemoveAll(f => f.FollowerId == c.FollowerId);
-                        });
-                        GarrisonButler.Diagnostic("Followers after removal: " + followersToConsider.Count);
-                        GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
-                    } // if (bestCombo != null)
-                } // foreach (var mission in missionsThatMeetRequirement)
             } // foreach (var reward in rewards)
 
             GarrisonButler.Diagnostic("Done with Mission Calculations");
@@ -379,128 +297,197 @@ namespace GarrisonButler.ButlerCoroutines
             GarrisonButler.Diagnostic("Total combinations accepted = " + acceptedCombos);
             GarrisonButler.Diagnostic("Total missions = " + missions.Count);
             GarrisonButler.Diagnostic("Followers not assigned = " + followers.Count);
-            GarrisonButler.Diagnostic("Average success chance = " + totalSuccessChance / (double)acceptedCombos + "%");
+            GarrisonButler.Diagnostic("Average success chance = " + (acceptedCombos > 0 ? (totalSuccessChance / (double)acceptedCombos) : 0d).ToString() + "%");
             GarrisonButler.DiagnosticLogTimeTaken("Mission Stub Code", missionCodeStartedAt);
-            // Sort missions by highest quantity
-            // Pick the missions off the list matching the current reward
-            // Discard any missions where the reward is set to "disallowed"
-            // Skip any missions that don't meet user requirements (quantity > X for example)
-            // Calculate # of slots for the remaining misssions in this batch
-
-            // If reward type is FollowerXP, discard all level 100 epic followers
-            // Find all combinations of X followers to Y mission slots for this batch
-            // Calculate success chance (via LUA call) for each follower combination
-
-            // STEP 1 - Take missions off the list where they match the highest
-            //          priority in the user settings
-
-            // STEP 2 - Sort missions by highest quantity
-
-            //IEnumerable<> missions
-            //    .OrderBy(m => m.Rewards[0].Id)
-            //    .ThenBy(m => m.Rewards[1].Id)
-            //    .ThenBy(m => m.Rewards[2])
-
-
-            //CASE 1 - slots < # followers
-            //if (slots < numFollowers)
-            if (false)
-            {
-                missions = missions.OrderBy(m => m.NumFollowers).ToList();
-                //STEP 1 - Sort by "reward type"
-                GarrisonButler.Diagnostic("followers count=" + numFollowers);
-                GarrisonButler.Diagnostic("slots count=" + slots);
-                GarrisonButler.Diagnostic("missions count=" + missions.Count);
-                var followerCombinations = new Combinations<Follower>(followers, slots, GenerateOption.WithoutRepetition);
-                GarrisonButler.Diagnostic("Combinations Count=" + followerCombinations.Count);
-                int myCount = 0;
-                int iter = 0;
-                //Enumerable
-                DateTime startedAt = DateTime.Now;
-                var missionFollowerCombos = followerCombinations
-                    .Select(
-                        fc =>
-                        {
-                            // Loop all missions and all followers
-                            // to fill up missions slots with followers
-                            //var mfComboList = new List<MissionFollowersCombo>();
-                            var mfComboList = new Dictionary<Mission, List<Follower>>();
-                            var slotsRemaining = slots;
-                            List<Follower> followerCombo = fc.ToList();
-                            foreach (Mission m in missions)
-                            {
-                                var startIndex = slots - slotsRemaining;
-                                var slotsToFill = m.NumFollowers;
-                                var followersToAdd = followerCombo.GetRange(startIndex, slotsToFill);
-                                //mfComboList.Add(new MissionFollowersCombo(m, followersToAdd));
-                                mfComboList.Add(m, followersToAdd);
-                                slotsRemaining -= slotsToFill;
-                            }
-                            return mfComboList;
-                        });
-                using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
-                {
-                    missionFollowerCombos.ForEach(mfc =>
-                    {
-                        myCount += mfc.Count;
-                        iter++;
-                        mfc.ForEach(
-                            kv =>
-                                InterfaceLua.AddFollowersToMission(kv.Key.MissionId,
-                                    kv.Value.Select(f => f.FollowerId).ToList()));
-                        //InterfaceLua.AddFollowersToMission(mfc.Keys)
-                        //GarrisonButler.Diagnostic("Configuration - count=" + mfc.Count);
-                        //foreach (MissionFollowersCombo combo in mfc)
-                        //{
-                        //    GarrisonButler.Diagnostic("  mission: " + combo._mission.Name);
-                        //    GarrisonButler.Diagnostic("  followers:");
-                        //    int count = 0;
-                        //    foreach (Follower f in combo._followers)
-                        //    {
-                        //        count++;
-                        //        GarrisonButler.Diagnostic("    " + count + ")" + f.Name);
-                        //    }
-                        //}
-                    });
-                }
-
-                GarrisonButler.Diagnostic("======");
-                GarrisonButler.Diagnostic("myCount=" + myCount);
-                GarrisonButler.Diagnostic("iter=" + iter);
-                GarrisonButler.DiagnosticLogTimeTaken("Follower LUA loop", startedAt);
-                GarrisonButler.Diagnostic("======");
-            }
-            //CASE 2 - slots = # followers
-            else if (slots == numFollowers)
-            {
-
-            }
-            //CASE 3 - slots > # followers
-            else
-            {
-
-            }
-            //List<MissionFollowersCombo> sortedByExperience = missionList
-            //    .SelectMany<Mission, MissionFollowersCombo, MissionFollowersCombo>(
-            //        (mission, index) =>
-            //        {
-            //            int remainingFollowers = followerList.Count;
-            //            List<MissionFollowersCombo> mfComboList = new List<MissionFollowersCombo>();
-
-            //            while (remainingFollowers > mission.NumFollowers)
-            //            {
-            //                List<Follower> followers = followerList.GetRange(followerList.Count - remainingFollowers, mission.NumFollowers);
-            //                remainingFollowers -= mission.NumFollowers;
-            //                mfComboList.Add(new MissionFollowersCombo(mission, followers));
-            //            }
-            //            return mfComboList;
-            //        },
-            //        (origMission, combo) =>
-            //        {
-            //            return .GetExperience();
-            //        });
 
             return toStart;
+        }
+
+        public static List<Follower> FillFollowersWithEpicLevel100(List<Follower> followersToConsider,
+            List<Follower> followers, Mission mission)
+        {
+            var followersToRemoveIfFailure = new List<Follower>();
+            // Followers were excluded (followers.Count > followersToConsider.Count)
+            // but still a follower remaining in the queue that needs experience (followersToConsider.Count > 0)
+            if (followersToConsider.Count > 0
+                && followers.Count > 0
+                && followers.Count > followersToConsider.Count
+                && GaBSettings.Get().UseEpicMaxLevelFollowersToBoostLowerFollowers
+                && GaBSettings.Get().MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting > 0)
+            {
+                var reducedFollowerSet = followers
+                    // Gets only the followers that were originally excluded
+                    .Except(followersToConsider)
+                    // Reduces the number of epic followers by user settings
+                    .Take(GaBSettings.Get().MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting)
+                    .ToList();
+                if (!reducedFollowerSet.Any())
+                    return followersToRemoveIfFailure;
+                // Get only the followers that were excluded
+                //var reducedFollowerSet =
+                //    followers
+                //    .SkipWhile((f, i) => f.FollowerId == followersToConsider[i].FollowerId)
+                //    .ToList();
+                // Adding some followers back in would allow us to complete the mission
+                if ((followersToConsider.Count + reducedFollowerSet.Count) >= mission.NumFollowers)
+                {
+                    var amount = mission.NumFollowers - followersToConsider.Count;
+                    followersToRemoveIfFailure = reducedFollowerSet.Take(amount).ToList();
+
+                    if (followersToRemoveIfFailure.Count > 0)
+                    {
+                        GarrisonButler.Diagnostic("Using epic level 100 followers to help fill up mission slots:");
+                        followersToRemoveIfFailure.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
+                        followersToConsider.AddRange(followersToRemoveIfFailure);
+                    }
+                }
+            }
+
+            return followersToRemoveIfFailure;
+        }
+
+        public static void RemoveAddedMaxLevelFollowers(List<Follower> followersToConsider,
+            List<Follower> followersToRemoveIfFailure)
+        {
+            followersToConsider.RemoveAll(f => followersToRemoveIfFailure.Any(fr => fr.FollowerId == f.FollowerId));
+        }
+
+        // Returns list mission/followers combos with combosTried, acceptedCombos, totalSuccessChance
+        public static Tuple<List<Tuple<Mission, Follower[]>>, long, int, double> DoMissionCalc(List<Follower> followersToConsider, List<Mission> missionsThatMeetRequirement, MissionReward reward, List<Follower> followers  )
+        {
+            long combosTried = 0;
+            var acceptedCombos = 0;
+            double totalSuccessChance = 0;
+            var toStart = new List<Tuple<Mission, Follower[]>>();
+            var followersToRemoveIfFailure = new List<Follower>();
+
+            foreach (var mission in missionsThatMeetRequirement)
+            {
+                if (followersToConsider.Count < mission.NumFollowers)
+                {
+                    var shouldBreak = true;
+
+                    // Attempt to "fill up" slots if they didn't enable AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers
+                    if (!GaBSettings.Get().AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers
+                        && reward.Category == MissionReward.MissionRewardCategory.FollowerExperience)
+                    {
+                        followersToRemoveIfFailure = FillFollowersWithEpicLevel100(followersToConsider, followers, mission);
+                        if (followersToRemoveIfFailure.Count > 0)
+                        {
+                            shouldBreak = false;
+                        }
+                        // Followers were excluded (followers.Count > followersToConsider.Count)
+                        // but still a follower remaining in the queue that needs experience (followersToConsider.Count > 0)
+                        //if (followersToConsider.Count > 0
+                        //    && followers.Count > followersToConsider.Count)
+                        //{
+                        //    var reducedFollowerSet = followers.Except(followersToConsider).ToList();
+                        //    if (!reducedFollowerSet.Any())
+                        //        continue;
+                        //    // Get only the followers that were excluded
+                        //    //var reducedFollowerSet =
+                        //    //    followers
+                        //    //    .SkipWhile((f, i) => f.FollowerId == followersToConsider[i].FollowerId)
+                        //    //    .ToList();
+                        //    // Adding some followers back in would allow us to complete the mission
+                        //    if ((followersToConsider.Count + reducedFollowerSet.Count) >= mission.NumFollowers)
+                        //    {
+                        //        var amount = mission.NumFollowers - followersToConsider.Count;
+                        //        followersToRemoveIfFailure = reducedFollowerSet.Take(amount).ToList();
+
+                        //        if (followersToRemoveIfFailure.Count > 0)
+                        //        {
+                        //            GarrisonButler.Diagnostic("Using epic level 100 followers to help fill up mission slots:");
+                        //            followersToRemoveIfFailure.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
+                        //            followersToConsider.AddRange(followersToRemoveIfFailure);
+                        //            shouldBreak = false;
+                        //        }
+                        //    }
+                        //}
+                    }
+
+                    if (shouldBreak)
+                    {
+                        GarrisonButler.Diagnostic(
+                            "Breaking mission loop due to followersToConsider < mission.NumFollowers");
+                        continue;
+                    }
+                }
+                DateTime startedAt = DateTime.Now;
+                Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
+                MissionCalc.mission = mission;
+                var bestCombo = followerCombinations.FirstOrDefault();
+                var bestSuccess = 0.0d;
+                List<Tuple<IList<Follower>, double>> successChances = new List<Tuple<IList<Follower>, double>>();
+                foreach (var combo in followerCombinations)
+                {
+                    // Restrict combinations based on user settings
+                    if (GaBSettings.Get().UseEpicMaxLevelFollowersToBoostLowerFollowers)
+                    {
+                        // Skip any combinations where # of epic followers is greater than allowed
+                        var maxEpicFollowers = GaBSettings.Get().MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting;
+                        maxEpicFollowers = maxEpicFollowers < 0 ? 0 : maxEpicFollowers;
+                        if (combo.Count(c => c.IsMaxLevelEpic) > maxEpicFollowers)
+                            continue;
+                    }
+                    MissionCalc.followers = combo.ToList();
+                    var result = MissionCalc.CalculateSuccessChance();
+                    successChances.Add(new Tuple<IList<Follower>, double>(combo, result.Item1));
+                }
+
+                if (bestCombo != null)
+                {
+                    GarrisonButler.Diagnostic("************* BEGIN Mission=" + mission.Name + "**************");
+                    GarrisonButler.Diagnostic("Total combinations tried = " + followerCombinations.Count);
+                    GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations", startedAt);
+                    var first = successChances.OrderByDescending(sc => sc.Item2).FirstOrDefault();
+                    if (first != null)
+                    {
+                        bestCombo = first.Item1;
+                        bestSuccess = first.Item2;
+
+                        var sucChanceToCompareAgainst = reward.IndividualSuccessChanceEnabled
+                            ? reward.RequiredSuccessChance
+                            : GaBSettings.Get().DefaultMissionSuccessChance;
+
+                        if (Convert.ToInt32(bestSuccess) < sucChanceToCompareAgainst)
+                        {
+                            GarrisonButler.Diagnostic("Best combo doesn't meet minimum success chance requirements!  Need {0}% and only have {1}%", sucChanceToCompareAgainst, Convert.ToInt32(bestSuccess));
+                            bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
+                            RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
+                            GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        GarrisonButler.Diagnostic("Error retrieving success chance for best combo: bestCombo.Count={0}, successChances.Count={1}", bestCombo.GetEmptyIfNull().Count(), successChances.GetEmptyIfNull().Count());
+                        RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
+                        GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+                        continue;
+                    }
+                    combosTried += (int)followerCombinations.Count;
+                    acceptedCombos++;
+                    GarrisonButler.Diagnostic("Best Combination with success=" + bestSuccess + "% for Mission=" + mission.Name + " is ");
+                    bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
+                    //successChances.ForEach(c =>
+                    //{
+                    //    totalSuccessChance += c.Item2;
+                    //});
+                    totalSuccessChance += bestSuccess;
+                    toStart.Add(new Tuple<Mission, Follower[]>(mission, bestCombo.ToArray()));
+                    GarrisonButler.Diagnostic("Followers before removal: " + followersToConsider.Count);
+                    bestCombo.ForEach(c =>
+                    {
+                        followersToConsider.RemoveAll(f => f.FollowerId == c.FollowerId);
+                        followers.RemoveAll(f => f.FollowerId == c.FollowerId);
+                    });
+                    GarrisonButler.Diagnostic("Followers after removal: " + followersToConsider.Count);
+                    GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
+                } // if (bestCombo != null)
+            } // foreach (var mission in missionsThatMeetRequirement)
+
+            return new Tuple<List<Tuple<Mission, Follower[]>>, long, int, double>(toStart, combosTried, acceptedCombos, totalSuccessChance);
         }
 
 

@@ -28,6 +28,8 @@ namespace GarrisonButler.Config
         private List<Pigment> _pigments;
         private List<MissionReward> _rewards;
         private int _defaultMissionSuccessChance = 100;
+        private int _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = 2;
+        private bool _useEpicMaxLevelFollowersToBoostLowerFollowers = true;
 
         private GaBSettings()
         {
@@ -458,20 +460,30 @@ namespace GarrisonButler.Config
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }
         public bool CompletedMissions { get; set; }
-        public bool IncludeEpicMaxLevelFollowersForExperience { get; set; }
-
-        public int DefaultMissionSuccessChance
-        {
-            get { return _defaultMissionSuccessChance; }
-            set { _defaultMissionSuccessChance = value; }
-        }
-
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
         public DateTime LastCheckTradingPost { get; set; }
         public uint ItemIdTradingPost { get; set; }
         public int NumberReagentTradingPost { get; set; }
+        public bool AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers { get; set; }
+        public int DefaultMissionSuccessChance
+        {
+            get { return _defaultMissionSuccessChance; }
+            set { _defaultMissionSuccessChance = value; }
+        }
+
+        public bool UseEpicMaxLevelFollowersToBoostLowerFollowers
+        {
+            get { return _useEpicMaxLevelFollowersToBoostLowerFollowers; }
+            set { _useEpicMaxLevelFollowersToBoostLowerFollowers = value; }
+        }
+
+        public int MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting
+        {
+            get { return _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting; }
+            set { _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = value; }
+        }
 
         [XmlElement("Version")]
         public ModuleVersion ConfigVersion { get; set; }

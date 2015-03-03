@@ -381,10 +381,11 @@ namespace GarrisonButler.Objects
         /// <param name="id"></param>
         /// <param name="category"></param>
         /// <param name="reqLevel"></param>
-        public MissionReward(int id, MissionRewardCategory category, int reqLevel = 0)
+        public MissionReward(int id, MissionRewardCategory category, int reqLevel = 0, int reqSuccessChance = 100)
         {
             Category = category;
             RequiredLevel = reqLevel;
+            RequiredSuccessChance = reqSuccessChance;
             Id = id;
 
             if (IsCurrencyReward)
