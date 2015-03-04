@@ -631,36 +631,51 @@ namespace GarrisonButler.ButlerCoroutines
 
         private static async Task<Result> CanRunPutGearOnFollower()
         {
+            // Check addon FollowerGearOptimizer
             const int maxItemLevel = 675;
             RefreshMissions();
             RefreshFollowers();
 
-            // Any follower reward settings available?
-            var followerSettings = GaBSettings.Get().MissionRewardSettings
-                .Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerGear
-                || f.Category == MissionReward.MissionRewardCategory.FollowerItem
-                && f.Action == MissionReward.MissionRewardAction.UseOnFollowers)
-                .ToList();
-            //var followerGearSettings = GaBSettings.Get().MissionRewardSettings.Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerGear);
-            //var followerItemSettings = GaBSettings.Get().MissionRewardSettings.Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerItem);
+            var rewardSettings = GaBSettings.Get().MissionRewardSettings;
 
-            if (followerSettings.Count <= 0)
+            var allRewardSettingsWithCategory = rewardSettings
+                .Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerGear
+                || f.Category == MissionReward.MissionRewardCategory.FollowerItem)
+                .ToList();
+
+            if (allRewardSettingsWithCategory.Count <= 0)
             {
                 GarrisonButler.Diagnostic("[Followers] No follower items in user settings.");
                 return new Result(ActionResult.Failed);
             }
 
-            // Any token settings available?
-            var followerTokenSettings = followerSettings.SkipWhile(f => f.IsCategoryReward).ToList();
+            var categorySettings = allRewardSettingsWithCategory.SkipWhile(f => !f.IsCategoryReward).ToList();
 
-            if (followerTokenSettings.Count <= 0)
+            var followerSettings = allRewardSettingsWithCategory
+                .SkipWhile(
+                    f =>
+                        // Make sure this item isn't a category setting
+                        !f.IsCategoryReward &&
+                        // Make sure category settings exist for this item
+                        categorySettings.Any(c => c.Category == f.Category)
+                        // Check category setting is NOT UseOnFollowers
+                        ? !categorySettings.Any(
+                            r =>
+                                r.IsCategoryReward && r.Category == f.Category &&
+                                r.Action != MissionReward.MissionRewardAction.UseOnFollowers)
+                        // Check individual setting is NOT UseOnFollowers
+                        : f.Action != MissionReward.MissionRewardAction.UseOnFollowers)
+                .SkipWhile(f => f.IsCategoryReward)
+                .ToList();
+
+            if (followerSettings.Count <= 0)
             {
                 GarrisonButler.Diagnostic("[Followers] No follower tokens in user settings.");
                 return new Result(ActionResult.Failed);
             }
 
             // Any tokens available to use on the followers?
-            var tokensAvailable = followerTokenSettings
+            var tokensAvailable = followerSettings
                 .Select(f => HbApi.GetItemInBags((uint) f.Id))
                 .Aggregate((a, b) => a.Union(b))
                 // Start with highest level items to assign to lowest level followers
@@ -736,35 +751,35 @@ namespace GarrisonButler.ButlerCoroutines
                 }
             }
 
-            if (!InterfaceLua.IsGarrisonFollowerVisible())
-            {
-                GarrisonButler.Diagnostic("Follower not visible, opening follower: "
-                                          + follower.FollowerId + " (" + follower.Name + ")");
-                InterfaceLua.OpenFollower(follower);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonFollowerVisible))
-                {
-                    GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame.");
-                    return new Result(ActionResult.Running);
-                }
-            }
-            else if (!InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId))
-            {
-                GarrisonButler.Diagnostic("Follower not visible or not valid, close and then opening follower: " +
-                                          follower.FollowerId + " - " + follower.Name);
-                //InterfaceLua.ClickCloseFollower();
-                InterfaceLua.OpenFollower(follower);
-                if (
-                    !await
-                        Buddy.Coroutines.Coroutine.Wait(2000,
-                            () => InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId)))
-                {
-                    GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame or wrong follower opened.");
-                    return new Result(ActionResult.Running);
-                }
-            }
+            //if (!InterfaceLua.IsGarrisonFollowerVisible())
+            //{
+            //    GarrisonButler.Diagnostic("Follower not visible, opening follower: "
+            //                              + follower.FollowerId + " (" + follower.Name + ")");
+            //    InterfaceLua.OpenFollower(follower);
+            //    if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonFollowerVisible))
+            //    {
+            //        GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame.");
+            //        return new Result(ActionResult.Running);
+            //    }
+            //}
+            //else if (!InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId))
+            //{
+            //    GarrisonButler.Diagnostic("Follower not visible or not valid, close and then opening follower: " +
+            //                              follower.FollowerId + " - " + follower.Name);
+            //    //InterfaceLua.ClickCloseFollower();
+            //    InterfaceLua.OpenFollower(follower);
+            //    if (
+            //        !await
+            //            Buddy.Coroutines.Coroutine.Wait(2000,
+            //                () => InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId)))
+            //    {
+            //        GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame or wrong follower opened.");
+            //        return new Result(ActionResult.Running);
+            //    }
+            //}
 
             GarrisonButler.Diagnostic("Adding item {0} ({1}) to follower {2} ({3}) with item level {4}", token.Entry, token.Name, follower.FollowerId, follower.Name, follower.ItemLevel);
-            await InterfaceLua.ApplyItemToFollower(token.Entry.ToString(), follower.FollowerId);
+            await InterfaceLua.UseItemOnFollower(token, follower.FollowerId);
             await CommonCoroutines.SleepForRandomUiInteractionTime();
 
             RefreshFollowers(true);
