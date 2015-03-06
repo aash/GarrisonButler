@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CommonBehaviors.Actions;
 using GarrisonButler.Libraries;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
@@ -124,11 +126,10 @@ namespace GarrisonButler.API
             Lua.DoString("/click MailFrameCloseButton()");
         }
 
-        //TODO - Implement
         public static bool IsGarrisonFollowersTabVisible()
         {
             const string lua =
-                "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab then return false; else return tostring(GarrisonMissionFrame.MissionTab:IsVisible()); end;";
+                "if not GarrisonMissionFrame or not GarrisonMissionFrame.FollowerTab then return false; else return tostring(GarrisonMissionFrame.FollowerTab:IsVisible()); end;";
 
             var results = Lua.GetReturnValues(lua);
 
@@ -138,26 +139,28 @@ namespace GarrisonButler.API
         //TODO - Implement - May not need?
         public static bool IsGarrisonFollowerVisible()
         {
-            const string lua =
-                "if not GarrisonMissionFrame or not GarrisonMissionFrame.MissionTab or not GarrisonMissionFrame.MissionTab.MissionPage then return false;end;" +
-                "return tostring(GarrisonMissionFrame.MissionTab.MissionPage:IsShown())";
+            return IsGarrisonFollowersTabVisible();
+            //const string lua =
+            //    "if not GarrisonMissionFrame or not GarrisonMissionFrame.FollowerTab or not GarrisonMissionFrame.FollowerTab.MissionPage then return false;end;" +
+            //    "return tostring(GarrisonMissionFrame.MissionTab.MissionPage:IsShown())";
 
-            var results = Lua.GetReturnValues(lua);
-            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+            //var results = Lua.GetReturnValues(lua);
+            //return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         //TODO - Implement - May not need?
         // Maybe check that the follower is eligible for upgrades AGAIN?
         public static bool IsGarrisonFollowerVisibleAndValid(string followerId)
         {
-            var lua =
-                String.Format(
-                    "if not GarrisonMissionFrame.MissionTab.MissionPage or not GarrisonMissionFrame.MissionTab.MissionPage.missionInfo or not GarrisonMissionFrame.MissionTab.MissionPage:IsShown() then return false;end;" +
-                    "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )",
-                    followerId);
+            return IsGarrisonFollowersTabVisible();
+            //var lua =
+            //    String.Format(
+            //        "if not GarrisonMissionFrame.MissionTab.MissionPage or not GarrisonMissionFrame.MissionTab.MissionPage.missionInfo or not GarrisonMissionFrame.MissionTab.MissionPage:IsShown() then return false;end;" +
+            //        "return tostring(GarrisonMissionFrame.MissionTab.MissionPage.missionInfo.missionID == {0} )",
+            //        followerId);
 
-            var results = Lua.GetReturnValues(lua);
-            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+            //var results = Lua.GetReturnValues(lua);
+            //return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
 
         public static void ClickTabFollowers()
@@ -194,19 +197,23 @@ namespace GarrisonButler.API
         //TODO - Implement
         public static void ClickCloseFollower()
         {
-            const string lua = "GarrisonMissionFrame.MissionTab.MissionPage:Hide();" +
-                               "GarrisonMissionFrame.MissionTab.MissionList:Show();" +
-                               "GarrisonMissionPage_ClearParty();" +
-                               "GarrisonMissionFrame.followerCounters = nil;" +
-                               "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo = nil;";
+            //const string lua = "GarrisonMissionFrame.MissionTab.FollowerPage:Hide();" +
+            //                   "GarrisonMissionFrame.MissionTab.MissionList:Show();" +
+            //                   "GarrisonMissionPage_ClearParty();" +
+            //                   "GarrisonMissionFrame.followerCounters = nil;" +
+            //                   "GarrisonMissionFrame.MissionTab.MissionPage.missionInfo = nil;";
 
-            Lua.DoString(lua);
+            //Lua.DoString(lua);
         }
 
         //TODO - Implement
-        public static async Task ApplyItemToFollower(string itemSlotNumber, string followerId)
+        public static async Task UseItemOnFollower(WoWItem item, string followerId)
         {
-            
+            GarrisonButler.Diagnostic("UseItemOnFollower: itemId={0} followerId={1}", item.Entry, followerId);
+            item.Use();
+            await CommonCoroutines.SleepForRandomReactionTime();
+            var lua = String.Format("C_Garrison.CastSpellOnFollower('{0}')", followerId);
+            Lua.DoString(lua);
         }
 
         public static bool IsGarrisonMissionTabVisible()
