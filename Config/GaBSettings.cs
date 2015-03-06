@@ -109,16 +109,27 @@ namespace GarrisonButler.Config
         {
             var id = idAsString.ToInt32();
             var buildingJs = new ArrayList();
+            GarrisonButler.Diagnostic("Init bsettings");
+
             var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (bSettings == default(BuildingSettings))
+            {
+                GarrisonButler.Diagnostic("bsettings null");
                 return "";
-
+            }
+            GarrisonButler.Diagnostic("buildingJs add name");
             buildingJs.Add(bSettings.Name);
+            GarrisonButler.Diagnostic("buildingJs add collect");
             buildingJs.Add(bSettings.CanCollectOrder);
+            GarrisonButler.Diagnostic("buildingJs add max");
             buildingJs.Add(bSettings.MaxCanStartOrder);
+            GarrisonButler.Diagnostic("buildingJs add start");
             buildingJs.Add(bSettings.CanStartOrder);
-            buildingJs.Add(ButlerCoroutines.ButlerCoroutine._buildings.Any(
-                        b => bSettings.BuildingIds.Contains(b.Id)));
+            GarrisonButler.Diagnostic("buildingJs check available");
+            var available = ButlerCoroutines.ButlerCoroutine._buildings.Any(
+                b => bSettings.BuildingIds.Contains(b.Id));
+            GarrisonButler.Diagnostic("buildingJs add available");
+            buildingJs.Add(available);
 
             var res = JSON.JsonEncode(buildingJs);
             GarrisonButler.Diagnostic("Json building: " + res);
