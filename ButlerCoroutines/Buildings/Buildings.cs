@@ -161,7 +161,7 @@ namespace GarrisonButler.ButlerCoroutines
             return buildingsActionsSequence;
         }
 
-        private static void RefreshBuildings(bool forced = false)
+        public static void RefreshBuildings(bool forced = false)
         {
             if (!RefreshBuildingsTimer.IsFinished && !_buildings.IsNullOrEmpty() && !forced) return;
 

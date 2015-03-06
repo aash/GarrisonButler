@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Windows;
 using System.Xml.Serialization;
+using GarrisonButler.API;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using JetBrains.Annotations;
@@ -112,7 +113,7 @@ namespace GarrisonButler.Config
             GarrisonButler.Diagnostic("Init bsettings");
 
             var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
-            if (bSettings == default(BuildingSettings))
+            if (bSettings == default(BuildingSettings) || bSettings == null)
             {
                 GarrisonButler.Diagnostic("bsettings null");
                 return "";
@@ -125,9 +126,20 @@ namespace GarrisonButler.Config
             buildingJs.Add(bSettings.MaxCanStartOrder);
             GarrisonButler.Diagnostic("buildingJs add start");
             buildingJs.Add(bSettings.CanStartOrder);
+
             GarrisonButler.Diagnostic("buildingJs check available");
-            var available = ButlerCoroutines.ButlerCoroutine._buildings.Any(
-                b => bSettings.BuildingIds.Contains(b.Id));
+            ButlerCoroutines.ButlerCoroutine.RefreshBuildings(true);
+            var available = false;
+            var buildingsInGame = ButlerCoroutines.ButlerCoroutine._buildings;
+            if (buildingsInGame != null)
+            {
+                available = buildingsInGame.Any(
+                b => bSettings.BuildingIds != null && bSettings.BuildingIds.Contains(b.Id));
+            }
+            else
+            {
+                GarrisonButler.Diagnostic("buildingJs add available: No buildings detected");
+            }
             GarrisonButler.Diagnostic("buildingJs add available");
             buildingJs.Add(available);
 
