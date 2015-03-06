@@ -516,6 +516,7 @@ namespace GarrisonButler.Config
             get { return _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting; }
             set { _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = value; }
         }
+        public int MinimumMissionLevel { get; set; }
 
         [XmlArrayItem("Reward", typeof(MissionReward))]
         [XmlArray("MissionRewardSettings")]

@@ -205,9 +205,16 @@ namespace GarrisonButler.ButlerCoroutines
             // Get the current top of the list reward
             foreach (var reward in rewards)
             {
+                if (Me.Level < reward.RequiredPlayerLevel)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Player level {0} does not meet minimum {1} for this reward: ({2}) {3}",
+                        Me.Level, reward.RequiredPlayerLevel, reward.Id, reward.Name);
+                }
+
                 if (followers.Count <= 0)
                 {
-                    GarrisonButler.Diagnostic("Breaking reward loop due to followers.Count = 0");
+                    GarrisonButler.Diagnostic("[Missions] Breaking reward loop due to followers.Count = 0");
                     break;
                 }
 
@@ -246,6 +253,8 @@ namespace GarrisonButler.ButlerCoroutines
 
                 // Skip any missions that don't meet user requirements (quantity > X for example)
                 var missionsThatMeetRequirement = missionsWithCurrentReward
+                    // Make sure the mission level meets minimum required by global settings OR reward settings
+                    .Where(m => reward.IndividualMissionLevelEnabled ? m.Level >= reward.RequiredMissionLevel : m.Level >= GaBSettings.Get().MinimumMissionLevel )
                     .Where(m => m.Rewards
                         .Where(mr => mr.Id == reward.Id
                             // Handle the case where we are looking at a category of rewards instead of individual rewards

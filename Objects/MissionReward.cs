@@ -66,8 +66,12 @@ namespace GarrisonButler.Objects
         public bool IndividualSuccessChanceEnabled { get; set; }
         [XmlAttribute("DisallowMissionsWithThisReward")]
         public bool DisallowMissionsWithThisReward { get; set; }
-        [XmlAttribute("RequiredLevel")]
-        public int RequiredLevel { get; set; }
+        [XmlAttribute("RequiredPlayerLevel")]
+        public int RequiredPlayerLevel { get; set; }
+        [XmlAttribute("IndividualMissionLevelEnabled")]
+        public bool IndividualMissionLevelEnabled { get; set; }
+        [XmlAttribute("RequiredMissionLevel")]
+        public int RequiredMissionLevel { get; set; }
         // Set by the user with the slider for this reward
         [XmlAttribute("RequiredSuccessChance")]
         public int RequiredSuccessChance { get; set; }
@@ -224,7 +228,7 @@ namespace GarrisonButler.Objects
             this.Category = other.Category;
             this.Name = other.Name;
             this.Id = other.Id;
-            this.RequiredLevel = other.RequiredLevel;
+            this.RequiredPlayerLevel = other.RequiredPlayerLevel;
             this.RequiredSuccessChance = other.RequiredSuccessChance;
             this._ItemInfo = other._ItemInfo;
             this._CurrencyInfo = other._CurrencyInfo;
@@ -235,7 +239,7 @@ namespace GarrisonButler.Objects
             this.Category = other.Category;
             this.Name = other.Name;
             this.Id = other.Id;
-            this.RequiredLevel = other.RequiredLevel;
+            this.RequiredPlayerLevel = other.RequiredPlayerLevel;
             this.RequiredSuccessChance = other.RequiredSuccessChance;
             this._ItemInfo = other._ItemInfo;
             this._CurrencyInfo = other._CurrencyInfo;
@@ -381,11 +385,11 @@ namespace GarrisonButler.Objects
         /// </summary>
         /// <param name="id"></param>
         /// <param name="category"></param>
-        /// <param name="reqLevel"></param>
-        public MissionReward(int id, MissionRewardCategory category, int reqLevel = 0, int reqSuccessChance = 100)
+        /// <param name="reqPlayerLevel"></param>
+        public MissionReward(int id, MissionRewardCategory category, int reqPlayerLevel = 0, int reqSuccessChance = 100)
         {
             Category = category;
-            RequiredLevel = reqLevel;
+            RequiredPlayerLevel = reqPlayerLevel;
             RequiredSuccessChance = reqSuccessChance;
             Id = id;
 
@@ -401,8 +405,8 @@ namespace GarrisonButler.Objects
                 Name = category.ToString();
             }
 
-            if (reqLevel != 0)
-                RequiredLevel = reqLevel;
+            if (reqPlayerLevel != 0)
+                RequiredPlayerLevel = reqPlayerLevel;
         }
 
         public void PopulateItemInfo(int itemID)
@@ -412,7 +416,7 @@ namespace GarrisonButler.Objects
             if (_ItemInfo != null)
             {
                 Name = _ItemInfo.Name;
-                RequiredLevel = _ItemInfo.RequiredLevel;
+                RequiredPlayerLevel = _ItemInfo.RequiredLevel;
             }
         }
 
