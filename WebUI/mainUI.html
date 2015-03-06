@@ -8,7 +8,6 @@
     <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
     <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
 
-
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-aria.min.js"></script>
@@ -45,10 +44,44 @@
             </p>
             <div style="padding-left: 20px;">
                 <h3>Change Log</h3>
-                <h2>Version {{VersionNumber}}</h2>
+                <h2>Version 2.1.16.0</h2>
                 <lu>
-                    <li>Added missing on/off buttons in mailing tab</li>
-                    <li>Changed max stack for coffee and mining pick up to 20 instead of 5 (6.1)</li>
+                    <li>Added fix for milling only flytrap</li>
+                </lu>
+                <h2>Version 2.1.15.0</h2>
+                <lu>
+                    <li>Added fix for mail options not sticking.</li>
+                </lu>
+                <h2>Version 2.1.14.0</h2>
+                <lu>
+                    <li>Changed "Vendor" Reward action to 9</li>
+                    <li>Added "None" Reward action as 0</li>
+                    <li>Fix more mission bugs with Max Level Followers and not honoring Disallowed Mission Rewards</li>
+                </lu>
+                <h2>Version 2.1.12.0</h2>
+                <lu>
+                    <li>Allow epic 100s to boost lower level followers.</li>
+                </lu>
+                <h2>Version 2.1.11.0</h2>
+                <lu>
+                    <li>Workaround for StartWorkOrderButton not working properly (will fail out after 10 tries)</li>
+                    <li>Fixed index out of bounds for movement & additional diag for missions</li>
+                    <li>Preparing follower gears support</li>
+                    <li>Enhanced Missions are now only available to ICE edition. Lite edition uses old logic.</li>
+                    <li>Fix bug when "valid" is set to false but never reset to true inside Mission Calculations</li>
+                    <li>Fix bug when missions were being skipped when the first mission in a set was less slots than the number of followers.</li>
+                    <li>Will use "create all" button for work orders</li>
+                    <li>Workaround for "floating mines" Blizzard has</li>
+                    <li>Added Check for mission type being logistics to return 100% success</li>
+                    <li>Fix bugs with new missions</li>
+                </lu>
+                <h2>Version 2.1.1.0</h2>
+                <lu>
+                    <li>Modified default success chance to 100%.</li>
+                </lu>
+                <h2>Version 2.1.0.0</h2>
+                <lu>
+                    <li>Added mission engine (see settings files for configuration, UI on the way).</li>
                 </lu>
                 <h2>Version 2.0.4.0</h2>
                 <lu>
@@ -56,6 +89,8 @@
                     <li>Fixed bot stopped at startup</li>
                     <li>Fixed mail non deleted in settings</li>
                     <li>Added diag output to Buildings</li>
+                    <li>Added missing on/off buttons in mailing tab</li>
+                    <li>Changed max stack for coffee and mining pick up to 20 instead of 5 (6.1)</li>
                 </lu>
             </div>
         </tab>
@@ -371,6 +406,7 @@
                 </table>
             </div>
         </tab>
+
 
     </tabset>
 </div>
