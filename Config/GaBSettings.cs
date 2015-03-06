@@ -461,10 +461,6 @@ namespace GarrisonButler.Config
                 OnPropertyChanged();
             }
         }
-
-        [XmlArrayItem("Item", typeof(BItem))]
-        [XmlArray("TradePostReagents")]
-        public List<BItem> TradingPostReagentsSettings { get; set; }
         public bool UseGarrisonHearthstone { get; set; }
         public bool RetrieveMail { get; set; }
         public bool SendMail { get; set; }
@@ -481,14 +477,27 @@ namespace GarrisonButler.Config
         public bool DeleteMiningPick { get; set; }
         public bool ActivateBuildings { get; set; }
         public bool SalvageCrates { get; set; }
-        public bool StartMissions { get; set; }
-        public bool CompletedMissions { get; set; }
         public int TimeMinBetweenRun { get; set; }
         public bool HbRelogMode { get; set; }
         public bool DisableLastRoundCheck { get; set; }
+
+
+        #region tradingPost
+
+        [XmlArrayItem("Item", typeof(BItem))]
+        [XmlArray("TradePostReagents")]
+        public List<BItem> TradingPostReagentsSettings { get; set; }
+
         public DateTime LastCheckTradingPost { get; set; }
         public uint ItemIdTradingPost { get; set; }
         public int NumberReagentTradingPost { get; set; }
+
+        #endregion
+
+
+        #region missions
+        public bool StartMissions { get; set; }
+        public bool CompletedMissions { get; set; }
         public bool AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers { get; set; }
         public int DefaultMissionSuccessChance
         {
@@ -508,9 +517,6 @@ namespace GarrisonButler.Config
             set { _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = value; }
         }
 
-        [XmlElement("Version")]
-        public ModuleVersion ConfigVersion { get; set; }
-
         [XmlArrayItem("Reward", typeof(MissionReward))]
         [XmlArray("MissionRewardSettings")]
         public List<MissionReward> MissionRewardSettings
@@ -523,7 +529,13 @@ namespace GarrisonButler.Config
                 OnPropertyChanged();
             }
         }
-        
+
+        #endregion
+
+
+        [XmlElement("Version")]
+        public ModuleVersion ConfigVersion { get; set; }
+
         private static GaBSettings DefaultConfig()
         {
             var ret = new GaBSettings

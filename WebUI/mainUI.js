@@ -6,7 +6,8 @@
         'GarrisonButlerApp.profession-tab',
         'GarrisonButlerApp.milling-tab',
         'GarrisonButlerApp.mailing-tab',
-        'GarrisonButlerApp.trading-post-tab'
+        'GarrisonButlerApp.trading-post-tab',
+        'GarrisonButlerApp.missions-tab',
     ]);
 
 angular.module('GarrisonButlerApp').controller('MainController', function ($scope, $window) {

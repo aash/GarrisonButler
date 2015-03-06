@@ -66,7 +66,7 @@ namespace GarrisonButler.Config
             webBrowser1.ScriptErrorsSuppressed = false;
             webBrowser1.AllowWebBrowserDrop = false;
             
-            webBrowser1.IsWebBrowserContextMenuEnabled = true;
+            webBrowser1.IsWebBrowserContextMenuEnabled = false;
             webBrowser1.WebBrowserShortcutsEnabled = false;
             webBrowser1.ObjectForScripting = GaBSettings.Get();
             webBrowser1.DocumentText = html;
@@ -96,8 +96,10 @@ namespace GarrisonButler.Config
                 {"<script src=\"./Modules/profession-tab.module.js\"></script>", ResourceWebUI.profession_tab_module_js},
 
                 {"<script src=\"./Modules/mailing-tab.module.js\"></script>", ResourceWebUI.mailing_tab_module_js},
-
+                
                 {"<script src=\"./Modules/milling-tab.module.js\"></script>", ResourceWebUI.milling_tab_module_js},
+
+                {"<script src=\"./Modules/missions-tab.module.js\"></script>", ResourceWebUI.missions_tab_module_js},
 
                 {"<script src=\"./Modules/trading-post.module.js\"></script>", ResourceWebUI.trading_post_module},
 

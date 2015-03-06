@@ -2453,6 +2453,7 @@
     <Content Include="WebUI\Modules\general-tab.module.js" />
     <Content Include="WebUI\Modules\mailing-tab.module.js" />
     <Content Include="WebUI\Modules\milling-tab.module.js" />
+    <None Include="WebUI\Modules\missions-tab.module.js" />
     <Content Include="WebUI\Modules\profession-tab.module.js" />
     <Content Include="WebUI\Modules\trading-post.module.js" />
     <Content Include="WebUI\Modules\work-order-tab.module.js" />

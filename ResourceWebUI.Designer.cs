@@ -180,8 +180,7 @@ namespace GarrisonButler {
         ///    &lt;meta name=&quot;viewport&quot; content=&quot;user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui&quot; /&gt;
         ///    &lt;meta name=&quot;apple-mobile-web-app-status-bar-style&quot; content=&quot;yes&quot; /&gt;
         ///
-        ///
-        ///    &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3. [rest of string was truncated]&quot;;.
+        ///    &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mainUI_html {
             get {
@@ -198,13 +197,12 @@ namespace GarrisonButler {
         ///        &apos;GarrisonButlerApp.profession-tab&apos;,
         ///        &apos;GarrisonButlerApp.milling-tab&apos;,
         ///        &apos;GarrisonButlerApp.mailing-tab&apos;,
-        ///        &apos;GarrisonButlerApp.trading-post-tab&apos;
+        ///        &apos;GarrisonButlerApp.trading-post-tab&apos;,
+        ///        &apos;GarrisonButlerApp.missions-tab&apos;,
         ///    ]);
         ///
         ///angular.module(&apos;GarrisonButlerApp&apos;).controller(&apos;MainController&apos;, function ($scope, $window) {
-        ///    $scope.butlerSettings = {};
-        ///
-        ///    // Save boolean from js value in c#  [rest of string was truncated]&quot;;.
+        ///    $scope.butlerSettings = {}; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mainUI_js {
             get {
@@ -259,6 +257,31 @@ namespace GarrisonButler {
         internal static string mission_data {
             get {
                 return ResourceManager.GetString("mission_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**
+        /// * Created by Mickaël on 3/1/2015.
+        /// */
+        ///
+        ///// General Tab
+        ///angular.module(&apos;GarrisonButlerApp.missions-tab&apos;, [&apos;ngMaterial&apos;, &apos;ngAria&apos;, &apos;smart-table&apos;])
+        ///
+        ///    .controller(&apos;missionsListController&apos;, function ($scope) {
+        ///        // Represents a Item
+        ///        $scope.missionSetting = function(itemId, name, activated) {
+        ///            this.itemId = itemId;
+        ///            this.itemName = name;
+        ///            this.activated = activated;
+        ///        };
+        ///
+        ///        $scope.color = {
+        ///            red: Math.floor(Math.random()  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string missions_tab_module_js {
+            get {
+                return ResourceManager.GetString("missions_tab_module_js", resourceCulture);
             }
         }
         
@@ -321,7 +344,7 @@ namespace GarrisonButler {
         ///    &quot;use strict&quot;;
         ///    t.module(&quot;smart-table&quot;, []).run([&quot;$templateCache&quot;, function (t) {
         ///        t.put(&quot;template/smart-table/pagination.html&quot;, &apos;&lt;div class=&quot;pagination&quot; ng-if=&quot;pages.length &gt;= 2&quot;&gt;&lt;ul class=&quot;pagination&quot;&gt;&lt;li ng-repeat=&quot;page in pages&quot; ng-class=&quot;{active: page==currentPage}&quot;&gt;&lt;a ng-click=&quot;selectPage(page)&quot;&gt;{{page}}&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&apos;)
-        ///    }]), t.module(&quot;smart-table&quot;).controller(&quot;stTableController&quot;, [&quot;$scope&quot;, &quot;$parse&quot;, &quot;$filter&quot;, [rest of string was truncated]&quot;;.
+        ///    }]), t.module(&quot;smart-table&quot;).controller(&quot;stTableController&quot;, [&quot;$scope&quot;, &quot;$parse&quot;, &quot;$filter&quot;, &quot;$attrs [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string smart_table_min {
             get {
@@ -387,7 +410,7 @@ namespace GarrisonButler {
         ///Build date: 2014-01-10 
         ///*/
         ///
-        ///.editable-wrap{display:inline-block;white-space:nowrap;margin:0}.editable-wrap .editable-controls,.editable-wrap .editable-error{margin-bottom:0}.editable-wrap .editable-controls&gt;input,.editable-wrap .editable-controls&gt;select,.editable-wrap .editable-controls&gt;textarea{margin-bottom:0}.editable-wrap .editable-input{display:inline-block}.editable-buttons{display:inline-block;vertical-align:top}.editable-buttons button [rest of string was truncated]&quot;;.
+        ///.editable-wrap{display:inline-block;white-space:nowrap;margin:0}.editable-wrap .editable-controls,.editable-wrap .editable-error{margin-bottom:0}.editable-wrap .editable-controls&gt;input,.editable-wrap .editable-controls&gt;select,.editable-wrap .editable-controls&gt;textarea{margin-bottom:0}.editable-wrap .editable-input{display:inline-block}.editable-buttons{display:inline-block;vertical-align:top}.editable-buttons button{margi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string xeditable_css {
             get {
@@ -401,7 +424,7 @@ namespace GarrisonButler {
         ///Edit-in-place for angular.js
         ///Build date: 2014-01-10 
         ///*/
-        ///angular.module(&quot;xeditable&quot;,[]).value(&quot;editableOptions&quot;,{theme:&quot;default&quot;,buttons:&quot;right&quot;,blurElem:&quot;cancel&quot;,blurForm:&quot;ignore&quot;,activate:&quot;focus&quot;}),angular.module(&quot;xeditable&quot;).directive(&quot;editableBsdate&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({directiveName:&quot;editableBsdate&quot;,inputTpl:&apos;&lt;input type=&quot;text&quot;&gt;&apos;})}]),angular.module(&quot;xeditable&quot;).directive(&quot;editableBstime&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({d [rest of string was truncated]&quot;;.
+        ///angular.module(&quot;xeditable&quot;,[]).value(&quot;editableOptions&quot;,{theme:&quot;default&quot;,buttons:&quot;right&quot;,blurElem:&quot;cancel&quot;,blurForm:&quot;ignore&quot;,activate:&quot;focus&quot;}),angular.module(&quot;xeditable&quot;).directive(&quot;editableBsdate&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({directiveName:&quot;editableBsdate&quot;,inputTpl:&apos;&lt;input type=&quot;text&quot;&gt;&apos;})}]),angular.module(&quot;xeditable&quot;).directive(&quot;editableBstime&quot;,[&quot;editableDirectiveFactory&quot;,function(a){return a({direct [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string xeditable_min_js {
             get {
