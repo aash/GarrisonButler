@@ -127,7 +127,7 @@ namespace GarrisonButler.API
         {
             return
                 pigmentsSettings.Where(p => p.Id == pigmentId)
-                    .SelectMany(p => p.MilledFrom)
+                    .SelectMany(p => p.MilledFrom.Where(pig => pig.Activated))
                     .SelectMany(p => GetItemInBags(p.ItemId).Where(i => i.StackCount >= 5));
         }
 

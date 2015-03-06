@@ -132,10 +132,10 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
 
         try
         {
-            retrieveMail = $scope.loadCSharpBool("RetrieveMail");
-            sendMail = $scope.loadCSharpBool("SendMail");
-            sendGreen = $scope.loadCSharpBool("SendDisenchantableGreens")
-            recipientGreen = window.external.GetGreenToCharRecipient();
+            $scope.retrieveMail = $scope.loadCSharpBool("RetrieveMail");
+            $scope.sendMail = $scope.loadCSharpBool("SendMail");
+            $scope.sendGreen = $scope.loadCSharpBool("SendDisenchantableGreens")
+            $scope.recipientGreen = window.external.GetGreenToCharRecipient();
         }
         catch (e)
         {
