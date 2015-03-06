@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7443e50e-58f6-46dc-8fd7-8689ddac8996" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Modules/missions-tab.module.js" />
-      <change type="DELETED" beforePath="D:\Games\World of Warcraft\Bots\Deams\Bots\GarrisonButler\WebUI\Modules\mission-tab.module.js" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Config/ConfigForm.cs" afterPath="$PROJECT_DIR$/../Config/ConfigForm.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Config/GaBSettings.cs" afterPath="$PROJECT_DIR$/../Config/GaBSettings.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../ResourceWebUI.Designer.cs" afterPath="$PROJECT_DIR$/../ResourceWebUI.Designer.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../ResourceWebUI.resx" afterPath="$PROJECT_DIR$/../ResourceWebUI.resx" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.css" afterPath="$PROJECT_DIR$/mainUI.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.html" afterPath="$PROJECT_DIR$/mainUI.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.js" afterPath="$PROJECT_DIR$/mainUI.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/work-order-tab.module.js" afterPath="$PROJECT_DIR$/Modules/work-order-tab.module.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/missions-tab.module.js" afterPath="$PROJECT_DIR$/Modules/missions-tab.module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GarrisonButler.iws" />
@@ -38,8 +31,8 @@
             <file leaf-file-name="mainUI.html" pinned="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/mainUI.html">
                 <provider selected="true" editor-type-id="text-editor">
-                  <state vertical-scroll-proportion="0.39416847" vertical-offset="8067" max-vertical-offset="9945">
-                    <caret line="496" column="61" selection-start-line="496" selection-start-column="61" selection-end-line="496" selection-end-column="61" />
+                  <state vertical-scroll-proportion="0.60910153" vertical-offset="7978" max-vertical-offset="9486">
+                    <caret line="500" column="30" selection-start-line="500" selection-start-column="30" selection-end-line="500" selection-end-column="30" />
                     <folding>
                       <element signature="n#style#0;n#div#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                       <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -59,14 +52,11 @@
                       <element signature="n#style#0;n#h3#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                       <element signature="n#style#0;n#slider#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                       <element signature="n#style#0;n#input#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#p#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#h3#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#slider#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                      <element signature="n#style#0;n#input#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                      <element signature="n#style#0;n#div#4;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                      <element signature="n#style#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                      <element signature="n#style#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                      <element signature="n#style#0;n#slider#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                      <element signature="n#style#0;n#input#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                     </folding>
                   </state>
                 </provider>
@@ -83,11 +73,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="mainUI.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mainUI.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mainUI.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1581" max-vertical-offset="2584">
-              <caret line="57" column="0" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
+            <state vertical-scroll-proportion="2.1061947" vertical-offset="0" max-vertical-offset="2584">
+              <caret line="112" column="6" selection-start-line="112" selection-start-column="6" selection-end-line="112" selection-end-column="6" />
               <folding />
             </state>
           </provider>
@@ -96,18 +86,38 @@
       <file leaf-file-name="mainUI.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mainUI.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1428" max-vertical-offset="3876">
-              <caret line="117" column="0" selection-start-line="117" selection-start-column="0" selection-end-line="117" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="3159" max-vertical-offset="4063">
+              <caret line="227" column="14" selection-start-line="227" selection-start-column="14" selection-end-line="227" selection-end-column="14" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="missions-tab.module.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="profession-tab.module.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Modules/profession-tab.module.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="6" max-vertical-offset="1547">
+              <caret line="9" column="23" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="missions-tab.module.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Modules/missions-tab.module.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6105499" vertical-offset="0" max-vertical-offset="1343">
-              <caret line="32" column="13" selection-start-line="32" selection-start-column="13" selection-end-line="32" selection-end-column="13" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="51" max-vertical-offset="1802">
+              <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mailing-tab.module.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Modules/mailing-tab.module.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-46.310345" vertical-offset="0" max-vertical-offset="2567">
+              <caret line="79" column="13" selection-start-line="79" selection-start-column="13" selection-end-line="79" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -160,10 +170,10 @@
         <option value="$PROJECT_DIR$/Libraries/MissonCalcSimple.js" />
         <option value="$PROJECT_DIR$/Modules/mission-tab.module.js" />
         <option value="$PROJECT_DIR$/mainUI.js" />
-        <option value="$PROJECT_DIR$/mainUI.css" />
         <option value="$PROJECT_DIR$/Modules/work-order-tab.module.js" />
         <option value="$PROJECT_DIR$/Modules/missions-tab.module.js" />
         <option value="$PROJECT_DIR$/mainUI.html" />
+        <option value="$PROJECT_DIR$/mainUI.css" />
       </list>
     </option>
   </component>
@@ -431,14 +441,11 @@
             <element signature="n#style#0;n#h3#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#slider#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#input#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#p#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h3#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#slider#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#input#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#4;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#slider#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#input#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -555,26 +562,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/mailing-tab.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1785">
-          <caret line="20" column="36" selection-start-line="20" selection-start-column="36" selection-end-line="20" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Libraries/slider/slider.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.83995706" vertical-offset="2856" max-vertical-offset="5525">
           <caret line="214" column="30" selection-start-line="214" selection-start-column="30" selection-end-line="214" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/profession-tab.module.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.16433942" vertical-offset="0" max-vertical-offset="1547">
-          <caret line="9" column="23" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
           <folding />
         </state>
       </provider>
@@ -587,26 +578,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1428" max-vertical-offset="3876">
-          <caret line="117" column="0" selection-start-line="117" selection-start-column="0" selection-end-line="117" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Modules/milling-tab.module.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="338" max-vertical-offset="1258">
           <caret line="54" column="6" selection-start-line="54" selection-start-column="6" selection-end-line="68" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1581" max-vertical-offset="2584">
-          <caret line="57" column="0" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -619,10 +594,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/mailing-tab.module.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-46.310345" vertical-offset="0" max-vertical-offset="2567">
+          <caret line="79" column="13" selection-start-line="79" selection-start-column="13" selection-end-line="79" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/profession-tab.module.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="6" max-vertical-offset="1547">
+          <caret line="9" column="23" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mainUI.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.39416847" vertical-offset="8067" max-vertical-offset="9945">
-          <caret line="496" column="61" selection-start-line="496" selection-start-column="61" selection-end-line="496" selection-end-column="61" />
+        <state vertical-scroll-proportion="0.60910153" vertical-offset="7978" max-vertical-offset="9486">
+          <caret line="500" column="30" selection-start-line="500" selection-start-column="30" selection-end-line="500" selection-end-column="30" />
           <folding>
             <element signature="n#style#0;n#div#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -642,22 +633,35 @@
             <element signature="n#style#0;n#h3#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#slider#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#input#0;n#div#3;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#p#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#slider#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#input#0;n#div#2;n#div#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h3#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#slider#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#input#0;n#div#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#4;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#slider#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#input#0;n#div#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#tab#7;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Modules/missions-tab.module.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6105499" vertical-offset="0" max-vertical-offset="1343">
-          <caret line="32" column="13" selection-start-line="32" selection-start-column="13" selection-end-line="32" selection-end-column="13" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="51" max-vertical-offset="1802">
+          <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mainUI.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3159" max-vertical-offset="4063">
+          <caret line="227" column="14" selection-start-line="227" selection-start-column="14" selection-end-line="227" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mainUI.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.1061947" vertical-offset="0" max-vertical-offset="2584">
+          <caret line="112" column="6" selection-start-line="112" selection-start-column="6" selection-end-line="112" selection-end-column="6" />
           <folding />
         </state>
       </provider>

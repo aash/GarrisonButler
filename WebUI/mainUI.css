@@ -220,3 +220,15 @@ li {
 }
 
 .thumbnail[data-drag="false"] { background: green; }
+
+
+.item, .placeholder {
+    padding: 2px;
+    width: 50px;
+    height: 75px;
+    border: 1px solid #333;
+    background: #EEE;
+}
+.placeholder {
+    background: #AEF;
+}
