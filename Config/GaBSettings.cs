@@ -44,25 +44,25 @@ namespace GarrisonButler.Config
         public bool GetBooleanValue(string propertyName)
         {
             var prop = GetType().GetProperty(propertyName);
-            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            //GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
             return (bool)prop.GetValue(this);
         }
         public void UpdateBooleanValue(string propertyName, bool value)
         {
             var prop = GetType().GetProperty(propertyName);
-            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            //GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
             prop.SetValue(this, value);
         }
         public int GetIntValue(string propertyName)
         {
             var prop = GetType().GetProperty(propertyName);
-            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            //GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
             return (int)prop.GetValue(this);
         }
         public void UpdateIntValue(string propertyName, int value)
         {
             var prop = GetType().GetProperty(propertyName);
-            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            //GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
             prop.SetValue(this, value);
         }
 
@@ -105,8 +105,12 @@ namespace GarrisonButler.Config
         //{
         //    return "";
         //}
+
+        private const bool Debug = false;
+
         public string getBuildingsJs()
         {
+            if(Debug)
             GarrisonButler.Diagnostic("Sending buildings to interface.");
             var buildingsJs = new ArrayList();
 
@@ -117,7 +121,8 @@ namespace GarrisonButler.Config
                 buildingsJs.Add(buildingsWithOrders[i].BuildingIds.First());
             }
             var res = JSON.JsonEncode(buildingsJs);
-            GarrisonButler.Diagnostic("Json buildings: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json buildings: " + res);
             return res;
         }
 
@@ -125,24 +130,31 @@ namespace GarrisonButler.Config
         {
             var id = idAsString.ToInt32();
             var buildingJs = new ArrayList();
-            GarrisonButler.Diagnostic("Init bsettings");
+            if (Debug)
+                GarrisonButler.Diagnostic("Init bsettings");
 
             var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (bSettings == default(BuildingSettings) || bSettings == null)
             {
-                GarrisonButler.Diagnostic("bsettings null");
+                if (Debug)
+                    GarrisonButler.Diagnostic("bsettings null");
                 return "";
             }
-            GarrisonButler.Diagnostic("buildingJs add name");
+            if (Debug)
+                GarrisonButler.Diagnostic("buildingJs add name");
             buildingJs.Add(bSettings.Name);
-            GarrisonButler.Diagnostic("buildingJs add collect");
+            if (Debug)
+                GarrisonButler.Diagnostic("buildingJs add collect");
             buildingJs.Add(bSettings.CanCollectOrder);
-            GarrisonButler.Diagnostic("buildingJs add max");
+            if (Debug)
+                GarrisonButler.Diagnostic("buildingJs add max");
             buildingJs.Add(bSettings.MaxCanStartOrder);
-            GarrisonButler.Diagnostic("buildingJs add start");
+            if (Debug)
+                GarrisonButler.Diagnostic("buildingJs add start");
             buildingJs.Add(bSettings.CanStartOrder);
 
-            GarrisonButler.Diagnostic("buildingJs check available");
+            if (Debug)
+                GarrisonButler.Diagnostic("buildingJs check available");
             ButlerCoroutines.ButlerCoroutine.RefreshBuildings(true);
             var available = false;
             var buildingsInGame = ButlerCoroutines.ButlerCoroutine._buildings;
@@ -153,50 +165,60 @@ namespace GarrisonButler.Config
             }
             else
             {
-                GarrisonButler.Diagnostic("buildingJs add available: No buildings detected");
+                if (Debug)
+                    GarrisonButler.Diagnostic("buildingJs add available: No buildings detected");
             }
-            GarrisonButler.Diagnostic("buildingJs add available");
+            if (Debug)
+                GarrisonButler.Diagnostic("buildingJs add available");
             buildingJs.Add(available);
 
             var res = JSON.JsonEncode(buildingJs);
-            GarrisonButler.Diagnostic("Json building: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json building: " + res);
             return res;
         }
 
         public void saveBuildingCanCollectOrder(int id, bool canCollect)
         {
-            GarrisonButler.Diagnostic("Save Value for canCollect, new value={0}", canCollect);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save Value for canCollect, new value={0}", canCollect);
             var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (bSettings == default(BuildingSettings))
                 return;
 
-            GarrisonButler.Diagnostic("Save Value for canCollect, old value={0}", bSettings.CanCollectOrder);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save Value for canCollect, old value={0}", bSettings.CanCollectOrder);
             bSettings.CanCollectOrder = canCollect;
         }
         public void saveBuildingCanStartOrder(int id, bool canStart)
         {
-            GarrisonButler.Diagnostic("Save Value for canStart, new value={0}", canStart);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save Value for canStart, new value={0}", canStart);
             var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (bSettings == default(BuildingSettings))
                 return;
 
-            GarrisonButler.Diagnostic("Save Value for CanStartOrder, old value={0}", bSettings.CanStartOrder);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save Value for CanStartOrder, old value={0}", bSettings.CanStartOrder);
             bSettings.CanStartOrder = canStart;
         }
         public void saveBuildingMaxCanStart(int id, int maxCanStart)
         {
-            GarrisonButler.Diagnostic("Save Value for maxCanStart, new value={0}", maxCanStart);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save Value for maxCanStart, new value={0}", maxCanStart);
             var bSettings = BuildingsSettings.FirstOrDefault(b => b.BuildingIds.Contains(id));
             if (bSettings == default(BuildingSettings))
                 return;
 
-            GarrisonButler.Diagnostic("Save Value for MaxCanStartOrder, old value={0}", bSettings.MaxCanStartOrder);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save Value for MaxCanStartOrder, old value={0}", bSettings.MaxCanStartOrder);
             bSettings.MaxCanStartOrder = maxCanStart;
         }
 
         public string getDailyCdJs()
         {
-            GarrisonButler.Diagnostic("Sending Daily CDs to interface.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Sending Daily CDs to interface.");
             var dailiesJs = new ArrayList();
 
             for (int i = 0; i < DailySettings.Count; i++)
@@ -204,7 +226,8 @@ namespace GarrisonButler.Config
                 dailiesJs.Add(DailySettings[i].ItemId);
             }
             var res = JSON.JsonEncode(dailiesJs);
-            GarrisonButler.Diagnostic("Json dailies: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json dailies: " + res);
             return res;
         }
 
@@ -221,7 +244,8 @@ namespace GarrisonButler.Config
             dailyJs.Add(dailySettings.Activated);
 
             var res = JSON.JsonEncode(dailyJs);
-            GarrisonButler.Diagnostic("Json daily: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json daily: " + res);
             return res;
         }
 
@@ -230,10 +254,12 @@ namespace GarrisonButler.Config
             var cdSettings = DailySettings.FirstOrDefault(d => d.ItemId == itemId);
             if (cdSettings == default(DailyProfession))
             {
-                GarrisonButler.Diagnostic("Could not find settings for {0}.", itemId);
+                if (Debug)
+                    GarrisonButler.Diagnostic("Could not find settings for {0}.", itemId);
                 return;
             }
-            GarrisonButler.Diagnostic("Save dailyCD {0}, old={1}, new={2}", itemId, cdSettings.Activated, activated);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save dailyCD {0}, old={1}, new={2}", itemId, cdSettings.Activated, activated);
             cdSettings.Activated = activated;
         }
 
@@ -243,7 +269,8 @@ namespace GarrisonButler.Config
 
         public string getMillingJs()
         {
-            GarrisonButler.Diagnostic("Sending Milling items to interface.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Sending Milling items to interface.");
             var millingJs = new ArrayList();
 
             for (int i = 0; i < Pigments.FirstOrDefault().MilledFrom.Count; i++)
@@ -251,7 +278,8 @@ namespace GarrisonButler.Config
                 millingJs.Add(Pigments.FirstOrDefault().MilledFrom[i].ItemId);
             }
             var res = JSON.JsonEncode(millingJs);
-            GarrisonButler.Diagnostic("Json milling: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json milling: " + res);
             return res;
         }
 
@@ -267,7 +295,8 @@ namespace GarrisonButler.Config
             millingJs.Add(millingSetting.Activated);
 
             var res = JSON.JsonEncode(millingJs);
-            GarrisonButler.Diagnostic("Json milling item: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json milling item: " + res);
             return res;
         }
 
@@ -276,10 +305,12 @@ namespace GarrisonButler.Config
             var millingSettings = Pigments.FirstOrDefault().MilledFrom.FirstOrDefault(d => d.ItemId == itemId);
             if (millingSettings == default(SourcePigment))
             {
-                GarrisonButler.Diagnostic("Could not find settings for milling item {0}.", itemId);
+                if (Debug)
+                    GarrisonButler.Diagnostic("Could not find settings for milling item {0}.", itemId);
                 return;
             }
-            GarrisonButler.Diagnostic("Save milling item {0}, old={1}, new={2}", itemId, millingSettings.Activated, activated);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save milling item {0}, old={1}, new={2}", itemId, millingSettings.Activated, activated);
             millingSettings.Activated = activated;
         }
 
@@ -287,7 +318,8 @@ namespace GarrisonButler.Config
 
         public string getTPJs()
         {
-            GarrisonButler.Diagnostic("Sending TP items to interface.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Sending TP items to interface.");
             var tpJs = new ArrayList();
 
             for (int i = 0; i < TradingPostReagentsSettings.Count; i++)
@@ -295,7 +327,8 @@ namespace GarrisonButler.Config
                 tpJs.Add(TradingPostReagentsSettings[i].ItemId);
             }
             var res = JSON.JsonEncode(tpJs);
-            GarrisonButler.Diagnostic("Json tp: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json tp: " + res);
             return res;
         }
 
@@ -311,7 +344,8 @@ namespace GarrisonButler.Config
             tpJs.Add(tpSettings.Activated);
 
             var res = JSON.JsonEncode(tpJs);
-            GarrisonButler.Diagnostic("Json tp item: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json tp item: " + res);
             return res;
         }
 
@@ -323,14 +357,16 @@ namespace GarrisonButler.Config
                 GarrisonButler.Diagnostic("Could not find settings for tp item {0}.", itemId);
                 return;
             }
-            GarrisonButler.Diagnostic("Save tp item {0}, old={1}, new={2}", itemId, tpSettings.Activated, activated);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save tp item {0}, old={1}, new={2}", itemId, tpSettings.Activated, activated);
             tpSettings.Activated = activated;
         }
 
 
         public string getMailsJs()
         {
-            GarrisonButler.Diagnostic("Sending mail items to interface.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Sending mail items to interface.");
             var mailsJs = new ArrayList();
 
             for (int i = 0; i < MailItems.Count; i++)
@@ -338,14 +374,16 @@ namespace GarrisonButler.Config
                 mailsJs.Add(MailItems[i].ItemId);
             }
             var res = JSON.JsonEncode(mailsJs);
-            GarrisonButler.Diagnostic("Json mail computed.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Json mail computed.");
             return res;
         }
 
 
         public string getMailConditions()
         {
-            GarrisonButler.Diagnostic("Sending mail conditions to interface.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Sending mail conditions to interface.");
             var conditionsJs = new ArrayList();
             var conditions = MailCondition.GetAllPossibleConditions();
             for (int i = 0; i < conditions.Count; i++)
@@ -353,7 +391,8 @@ namespace GarrisonButler.Config
                 conditionsJs.Add(conditions[i].ToString());
             }
             var res = JSON.JsonEncode(conditionsJs);
-            GarrisonButler.Diagnostic("Json mail conditions: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json mail conditions: " + res);
             return res;
         }
 
@@ -371,7 +410,8 @@ namespace GarrisonButler.Config
             mailJs.Add(mailSettings.Comment);
 
             var res = JSON.JsonEncode(mailJs);
-            GarrisonButler.Diagnostic("Json mail item: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json mail item: " + res);
             return res;
         }
 
@@ -387,11 +427,13 @@ namespace GarrisonButler.Config
 
         public void saveMail(string mailJson)
         {
-            GarrisonButler.Diagnostic("Save mail element: " + mailJson);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save mail element: " + mailJson);
             try
             {
                 ArrayList mail = JSON.JsonDecode(mailJson) as ArrayList;
-                GarrisonButler.Diagnostic("Save mail element decoded: ");
+                if (Debug)
+                    GarrisonButler.Diagnostic("Save mail element decoded: ");
                 ObjectDumper.WriteToHb(mail,3);
 
                 var condition = MailCondition.GetAllPossibleConditions().FirstOrDefault(c => c.Name == mail[2].ToString());
@@ -406,8 +448,10 @@ namespace GarrisonButler.Config
                 var current = MailItems.FirstOrDefault(m => m.ItemId == mailItem.ItemId);
                 if (current != null)
                 {
-                    GarrisonButler.Diagnostic("Updating mail element from: " + current.ToString());
-                    GarrisonButler.Diagnostic("Updating mail element to: " + mailItem.ToString());
+                    if (Debug)
+                        GarrisonButler.Diagnostic("Updating mail element from: " + current.ToString());
+                    if (Debug)
+                        GarrisonButler.Diagnostic("Updating mail element to: " + mailItem.ToString());
                     current.ItemId = mailItem.ItemId;
                     current.Condition = mailItem.Condition;
                     current.Recipient = mailItem.Recipient;
@@ -416,7 +460,8 @@ namespace GarrisonButler.Config
                 }
                 else
                 {
-                    GarrisonButler.Diagnostic("Adding mail element: " + mailItem.ToString());
+                    if (Debug)
+                        GarrisonButler.Diagnostic("Adding mail element: " + mailItem.ToString());
                     MailItems.Add(mailItem);
                 }
             }
@@ -431,7 +476,8 @@ namespace GarrisonButler.Config
 
         public string getRewardsJs()
         {
-            GarrisonButler.Diagnostic("Sending rewards to interface.");
+            if (Debug)
+                GarrisonButler.Diagnostic("Sending rewards to interface.");
             var RewardsJs = new ArrayList();
 
             for (int i = 0; i < MissionRewardSettings.Count; i++)
@@ -439,7 +485,8 @@ namespace GarrisonButler.Config
                 RewardsJs.Add(MissionRewardSettings[i].Id);
             }
             var res = JSON.JsonEncode(RewardsJs);
-            GarrisonButler.Diagnostic("Json rewards: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json rewards: " + res);
             return res;
         }
 
@@ -461,33 +508,39 @@ namespace GarrisonButler.Config
             rewardJs.Add(rewardSettings.IsCategoryReward);
 
             var res = JSON.JsonEncode(rewardJs);
-            GarrisonButler.Diagnostic("Json reward: " + res);
+            if (Debug)
+                GarrisonButler.Diagnostic("Json reward: " + res);
             return res;
         }
 
         public void updateRewardById(int rewardId, string rewardJson)
         {
-            GarrisonButler.Diagnostic("Save reward element: " + rewardJson);
+            if (Debug)
+                GarrisonButler.Diagnostic("Save reward element: " + rewardJson);
             try
             {
                 ArrayList reward = JSON.JsonDecode(rewardJson) as ArrayList;
-                GarrisonButler.Diagnostic("Save reward element decoded: ");
+                if (Debug)
+                    GarrisonButler.Diagnostic("Save reward element decoded: ");
                 ObjectDumper.WriteToHb(reward, 3);
                 if (reward == null)
                 {
-                    GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " null");
+                    if (Debug)
+                        GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " null");
                     return;
                 }
                 if (reward.Count < 5)
                 {
-                    GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " missing elements. count:" + reward.Count);
+                    if (Debug)
+                        GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " missing elements. count:" + reward.Count);
                     return;
                 }
 
                 var current = MissionRewardSettings.FirstOrDefault(m => m.Id == rewardId);
                 if (current != null)
                 {
-                    GarrisonButler.Diagnostic("Updating reward element: " + current.ToString());
+                    if (Debug)
+                        GarrisonButler.Diagnostic("Updating reward element: " + current.ToString());
                     current.DisallowMissionsWithThisReward = (reward[0] != null) && reward[0].ToString().ToBoolean();
                     current.IndividualSuccessChanceEnabled = (reward[1] != null) && reward[1].ToString().ToBoolean();
                     current.RequiredSuccessChance = (reward[2] != null) ? reward[2].ToString().ToInt32() : 100;
@@ -496,7 +549,8 @@ namespace GarrisonButler.Config
                 }
                 else
                 {
-                    GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId);
+                    if (Debug)
+                        GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId);
                 }
             }
             catch (Exception e)
@@ -509,11 +563,13 @@ namespace GarrisonButler.Config
         {
 
             ArrayList rewardsOrderById = JSON.JsonDecode(rewardsJson) as ArrayList;
-            GarrisonButler.Diagnostic("Update rewards order decoded: ");
+            if (Debug)
+                GarrisonButler.Diagnostic("Update rewards order decoded: ");
             ObjectDumper.WriteToHb(rewardsOrderById, 3);
             if (rewardsOrderById == null)
             {
-                GarrisonButler.Diagnostic("Update rewards order failed, id: " + " null");
+                if (Debug)
+                    GarrisonButler.Diagnostic("Update rewards order failed, id: " + " null");
                 return;
             }
 
@@ -526,7 +582,8 @@ namespace GarrisonButler.Config
                 var reward = MissionRewardSettings.FirstOrDefault(r => r.Id == rewardId);
                 if (reward == null)
                 {
-                    GarrisonButler.Diagnostic("Faile to update order for rewards with id: " + rewardId + ", reward null");
+                    if (Debug)
+                        GarrisonButler.Diagnostic("Faile to update order for rewards with id: " + rewardId + ", reward null");
                     continue;
                 }
 
@@ -542,7 +599,8 @@ namespace GarrisonButler.Config
 
         public void diagnosticJs(string message)
         {
-            GarrisonButler.Diagnostic("[UI] " + message);
+            if (Debug)
+                GarrisonButler.Diagnostic("[UI] " + message);
         }
 
             #endregion

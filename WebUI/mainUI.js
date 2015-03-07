@@ -175,7 +175,7 @@ angular.module('GarrisonButlerApp').controller('MainController', function ($scop
 
 
     $scope.GBDiagnostic = function (msg) {
-        window.external.diagnosticJs(msg);
+        //window.external.diagnosticJs(msg);
     };
     $scope.VersionNumber = function() {
         return window.external.GetVersionNumber();

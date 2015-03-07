@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,7 @@ using TextBox = System.Windows.Controls.TextBox;
 using WebBrowser = System.Windows.Forms.WebBrowser;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 #endregion
@@ -71,6 +73,7 @@ namespace GarrisonButler.Config
             webBrowser1.WebBrowserShortcutsEnabled = false;
             webBrowser1.ObjectForScripting = GaBSettings.Get();
             webBrowser1.DocumentText = html;
+
 
             //var window = webBrowser1.Document.Window;
             //return window.GetType().InvokeMember(propertyName, BindingFlags.GetProperty, null, window, null);
