@@ -330,6 +330,7 @@ namespace GarrisonButler.ButlerCoroutines
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Task<Result>> CanStartShipmentGeneration(Building building)
         {
+            RefreshBuildings();
             return async () =>
             {
                 if (building == null)
@@ -427,6 +428,7 @@ namespace GarrisonButler.ButlerCoroutines
         [SuppressMessage("ReSharper", "InvertIf")]
         internal static Func<Task<Result>> CanPickUpShipmentGeneration(Building building)
         {
+            RefreshBuildings();
             return async () =>
             {
                 if (building == null)
