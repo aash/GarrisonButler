@@ -98,7 +98,7 @@ namespace GarrisonButler.ButlerCoroutines
                 Condition = condition;
                 ResCondition = default(Result);
                 WaitTimerAction = new WaitTimer(TimeSpan.FromMilliseconds(20000));
-                WaitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(10000));
+                WaitTimerCondition = new WaitTimer(TimeSpan.FromMilliseconds(15000));
                 WaitTimerAntiSpamRunning = new WaitTimer(TimeSpan.FromMilliseconds(1.0/15.0));
                 LastResult = new Result(ActionResult.Init);
                 PreActions = preAction;
