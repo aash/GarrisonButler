@@ -7,7 +7,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
 
     .controller('missionsListController', function ($scope) {
         // Represents a missionSetting
-        $scope.MissionSetting = function(rewardId, rewardName, rewardCategory, disallowReward, individualSuccessEnabled, successChance, missionLevel, playerLevel) {
+        $scope.MissionSetting = function(rewardId, rewardName, rewardCategory, disallowReward, individualSuccessEnabled, successChance, missionLevel, playerLevel, isCategory) {
             this.rewardId = rewardId;
             this.rewardName = rewardName;
             this.rewardCategory = rewardCategory;
@@ -16,6 +16,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
             this.successChance = successChance;
             this.missionLevel = missionLevel;
             this.playerLevel = playerLevel;
+            this.isCategory = isCategory;
         };
 
         $scope.checkEmpty = function(data) {
@@ -26,6 +27,28 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
         };
 
 
+        $scope.canWowhead = function(reward)
+        {
+            if(reward.isCategory)
+            {
+                return false;
+            }
+
+            var cat = reward.rewardCategory;
+            if(
+                cat === "PlayerGear" ||
+                cat === "FollowerContract" ||
+                cat === "FollowerGear" ||
+                cat === "FollowerItem" ||
+                cat === "ReputationToken" ||
+                cat === "VanityItem" ||
+                cat === "Profession" ||
+                cat === "MiscItem")
+            {
+                return true;
+            }
+            return false;
+        }
         $scope.updateReward = function(reward) {
             $scope.updateRewardById(reward.rewardId, reward);
         };
@@ -62,7 +85,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
                 $scope.GBDiagnostic("Request for reward: " + rewardId);
                 var reward = JSON.parse($scope.loadRewardById(rewardId));
                 $scope.GBDiagnostic("Parsed: " + reward);
-                $scope.MissionRewards[i] = new $scope.MissionSetting(rewardId, reward[0], reward[1], Boolean(reward[2]), Boolean(reward[3]), parseInt(reward[4]), parseInt(reward[5]), parseInt(reward[6]));
+                $scope.MissionRewards[i] = new $scope.MissionSetting(rewardId, reward[0], reward[1], Boolean(reward[2]), Boolean(reward[3]), parseInt(reward[4]), parseInt(reward[5]), parseInt(reward[6]), Boolean(reward[7]));
             }
         }
         catch(e) {
@@ -81,6 +104,81 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
                     new $scope.MissionSetting("2", "Gold", "Gold", false, false, 85, 90, 90, 3)
                 ];
             }
+        }
+
+
+
+
+
+        $scope.$watch(
+            'startMissions',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpBool("StartMissions", newValue);
+            }
+        );
+
+        $scope.$watch(
+            'completedMissions',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpBool("CompletedMissions", newValue);
+            }
+        );
+
+        $scope.$watch(
+            'AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpBool("AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers", newValue);
+            }
+        );
+
+        $scope.$watch(
+            'DefaultMissionSuccessChance',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpInt("DefaultMissionSuccessChance", newValue);
+            }
+        );
+
+        $scope.$watch(
+            'UseEpicMaxLevelFollowersToBoostLowerFollowers',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpBool("UseEpicMaxLevelFollowersToBoostLowerFollowers", newValue);
+            }
+        );
+
+        $scope.$watch(
+            'MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpInt("MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting", newValue);
+            }
+        );
+
+        $scope.$watch(
+            'MinimumMissionLevel',
+            function (newValue, oldValue)
+            {
+                $scope.saveCSharpInt("MinimumMissionLevel", newValue);
+            }
+        );
+
+        try
+        {
+            $scope.startMissions = $scope.loadCSharpBool("StartMissions");
+            $scope.completedMissions = $scope.loadCSharpBool("CompletedMissions");
+            $scope.AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers = $scope.loadCSharpBool("AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers");
+            $scope.DefaultMissionSuccessChance = $scope.loadCSharpInt("DefaultMissionSuccessChance");
+            $scope.UseEpicMaxLevelFollowersToBoostLowerFollowers = $scope.loadCSharpBool("UseEpicMaxLevelFollowersToBoostLowerFollowers");
+            $scope.MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = $scope.loadCSharpInt("MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting");
+            $scope.MinimumMissionLevel = $scope.loadCSharpInt("MinimumMissionLevel");
+
+        }
+        catch (e)
+        {
         }
 
     })

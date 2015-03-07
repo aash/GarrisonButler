@@ -24,6 +24,17 @@ angular.module('GarrisonButlerApp').controller('MainController', function ($scop
         return res;
     };
 
+    // Save boolean from js value in c# code
+    $scope.saveCSharpInt = function (propertyName, value) {
+        window.external.UpdateIntValue(propertyName, value);
+    };
+
+    // Load boolean in js value from c# code
+    $scope.loadCSharpInt = function (propertyName) {
+        var res = window.external.GetIntValue(propertyName);
+        return res;
+    };
+
 
 
     // Load buildings id in js value from c# code

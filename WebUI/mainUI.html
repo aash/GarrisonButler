@@ -20,6 +20,7 @@
 
     <script src="https://rawgithub.com/angular-ui/ui-sortable/master/src/sortable.js"></script>
 
+
     <script src="./Libraries/SmartTable/smart-table.min.js"></script>
     <script src="./Libraries/slider/slider.js"></script>
     <script src="./Libraries/angular-xeditable/js/xeditable.min.js"></script>
@@ -40,9 +41,16 @@
 
     <link rel="stylesheet" href="./Libraries/angular-xeditable/css/xeditable.css" />
     <link rel="stylesheet" href="./mainUI.css" />
+
+
+    <script type="text/javascript" src="http://static.wowhead.com/widgets/power.js"></script>
+    <script>var wowhead_tooltips = { "colorlinks": true, "iconizelinks": true, "renamelinks": true }</script>
+
 </head>
 <body>
 <div ng-controller="MainController">
+
+
     <tabset>
 
         <tab heading="GarrisonButler">
@@ -247,7 +255,9 @@
                             </div>
                         </td>
                         <td>{{row.profession}}</td>
-                        <td>{{row.name}}</td>
+                        <td>
+                            <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}'>{{ row.itemId || "empty" }}</a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -315,7 +325,7 @@
                         <td>
                             <!-- editable itemId (text with validation) -->
                             <span editable-text="row.itemId" e-name="itemId" e-form="rowform" onbeforesave="checkItemId($data, row)" e-required>
-                              {{ row.itemId || 'empty' }}
+                                <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}'>{{ row.itemId || "empty" }}</a>
                             </span>
                         </td>
                         <td>
@@ -385,7 +395,9 @@
                                 <switch id="enabled" name="enabled" ng-model="row.activated" class="green"></switch>
                             </div>
                         </td>
-                        <td>{{row.itemName}}</td>
+                        <td>
+                            <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}' class="q3"></a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -412,7 +424,9 @@
                                 <switch id="enabled" name="enabled" ng-model="row.activated" class="green"></switch>
                             </div>
                         </td>
-                        <td>{{row.itemName}}</td>
+                        <td>
+                            <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}' class="q3"></a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -424,48 +438,81 @@
         <tab heading="Missions">
         <div ng-controller="missionsListController">
         <div class="tab-intro">
-        <h2>Missions Engine</h2>
+        <h1>Missions Engine</h1>
         </div>
 
 
+            <table st-table="MissionRewards" class="table">
+                <thead>
+                <tr>
+                    <th><h2>Default settings</h2></th>
+                    <th><h2>Value</h2></th>
+                </tr>
+                </thead>
+                <tr>
+                    <td>
+                        <b>Start Missions</b>
+                    </td>
+                    <td>
+                        <switch id="enabled" name="enabled" ng-model="startMissions" class="green"></switch>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Collect Completed Missions</b>
+                    </td>
+                    <td>
+                        <switch id="enabled" name="enabled" ng-model="completedMissions" class="green"></switch>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Minimum Success Chance</b>
+                    </td>
+                    <td>
+                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
+                                ng-model="DefaultMissionSuccessChance"></slider>
+                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
+                               ng-model="DefaultMissionSuccessChance" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
+                               min="0" max="100">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers</b>
+                    </td>
+                    <td>
+                        <switch id="enabled" name="enabled" ng-model="AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers" class="green"></switch>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting</b>
+                    </td>
+                    <td>
+                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
+                                ng-model="MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting"></slider>
+                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
+                               ng-model="MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
+                               min="0" max="100">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>MinimumMissionLevel</b>
+                    </td>
+                    <td>
+                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
+                                ng-model="MinimumMissionLevel"></slider>
+                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
+                               ng-model="MinimumMissionLevel" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
+                               min="0" max="100">
+                    </td>
+                </tr>
+            </table>
 
-        <div layout="row" class="general-option-header">
-        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
-        <div class="md-tile-content general-item-title">
-        <h3>
-        <b>Start Missions</b>
-        </h3>
-        </div>
-        </div>
 
-
-        <div layout="row" class="general-option-header">
-        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
-        <div class="md-tile-content general-item-title">
-        <h3>
-        <b>Collect Completed Missions</b>
-        </h3>
-        </div>
-        </div>
-
-        <div layout="row" style="width: 500px;">
-        <h3 style="margin-left: 4px;">Default Minimum Success Chance: </h3>
-        <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1" precision="1"
-        ng-model="building.maxCanStartOrder"></slider>
-        <input style="width:62px;height: 35px" ng-init="$scope.$apply();" type="number"
-        ng-model="building.maxCanStartOrder" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
-        min="0" max="50">
-        </div>
-
-
-        <div class="floatleft" style="margin-left: 20px;">
-        <ul class="list logList">
-        <li ng-repeat="entry in sortingLog track by $index" class="logItem">
-        {{entry}}
-        </li>
-        </ul>
-        </div>
-
+            <h2>Detailed settings</h2>
         <table st-table="MissionRewards" class="table">
         <thead>
         <tr>
@@ -481,11 +528,12 @@
         <tr ng-repeat="row in MissionRewards" class="item" style="cursor: move;">
         <td>
         <div ng-controller="RewardController" ng-init="init(row)">
-        {{row.name}}
+            <a ng-if="canWowhead(row)" ng-href='http://www.wowhead.com/item={{ row.rewardId || "empty" }}' class="q2"></a>
+            <p ng-if="!canWowhead(row)">{{row.rewardName}}</p>
         </div>
         </td>
         <td>
-        {{row.category}}
+        {{row.rewardCategory}}
         </td>
         <td>
         <switch id="enabled" name="enabled" ng-model="row.disallowReward" class="green"></switch>

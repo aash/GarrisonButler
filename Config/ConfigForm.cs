@@ -65,6 +65,7 @@ namespace GarrisonButler.Config
             
             webBrowser1.ScriptErrorsSuppressed = false;
             webBrowser1.AllowWebBrowserDrop = false;
+            webBrowser1.AllowNavigation = false;
             
             webBrowser1.IsWebBrowserContextMenuEnabled = false;
             webBrowser1.WebBrowserShortcutsEnabled = false;

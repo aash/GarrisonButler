@@ -41,18 +41,31 @@ namespace GarrisonButler.Config
         #region interface
 
         [ComVisible(true)]
-        public void UpdateBooleanValue(string propertyName, bool value)
-        {
-            var prop = GetType().GetProperty(propertyName);
-            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
-            prop.SetValue(this, value);
-        }
         public bool GetBooleanValue(string propertyName)
         {
             var prop = GetType().GetProperty(propertyName);
             GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
             return (bool)prop.GetValue(this);
         }
+        public void UpdateBooleanValue(string propertyName, bool value)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            prop.SetValue(this, value);
+        }
+        public int GetIntValue(string propertyName)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            return (int)prop.GetValue(this);
+        }
+        public void UpdateIntValue(string propertyName, int value)
+        {
+            var prop = GetType().GetProperty(propertyName);
+            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            prop.SetValue(this, value);
+        }
+
         public void UpdateGreenToCharRecipient(string value)
         {
             GreensToChar.Value = value;
@@ -61,6 +74,8 @@ namespace GarrisonButler.Config
         {
             return GreensToChar.Value;
         }
+
+
 
 
         public bool IsIceVersion()
@@ -437,12 +452,13 @@ namespace GarrisonButler.Config
                 return "";
 
             rewardJs.Add(rewardSettings.Name);
-            rewardJs.Add(rewardSettings.Category);
+            rewardJs.Add(Enum.GetName(rewardSettings.Category.GetType(), rewardSettings.Category));
             rewardJs.Add(rewardSettings.DisallowMissionsWithThisReward);
             rewardJs.Add(rewardSettings.IndividualSuccessChanceEnabled);
             rewardJs.Add(rewardSettings.RequiredSuccessChance);
             rewardJs.Add(rewardSettings.RequiredMissionLevel);
             rewardJs.Add(rewardSettings.RequiredPlayerLevel);
+            rewardJs.Add(rewardSettings.IsCategoryReward);
 
             var res = JSON.JsonEncode(rewardJs);
             GarrisonButler.Diagnostic("Json reward: " + res);

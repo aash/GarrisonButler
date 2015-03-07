@@ -229,9 +229,18 @@ li {
     padding: 2px;
     width: 50px;
     height: 50px;
-    border: 1px solid #333;
-    background: #EEE;
+    border: 1px solid #bfbfbf;
+    background: #e1e3f1;
 }
 .placeholder {
-    background: #AEF;
+    background: #72a0ab;
 }
+
+.qundefined
+{
+    display: none;
+}
+
+.table {
+    background-color: rgba(200, 200, 200, 1);
+    border: 1px solid black;}
