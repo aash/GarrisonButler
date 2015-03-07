@@ -11,6 +11,9 @@ namespace GarrisonButler
 {
     public class Follower : IEquatable<Follower>, IComparable<Follower>
     {
+        public const int ScavengerAbilityId = 79;
+        public const int TreasureHunterAbilityId = 256;
+        public const int EpicMountAbilityId = 221;
         public bool Equals(Follower other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -80,6 +83,10 @@ namespace GarrisonButler
         public readonly String Status;
         public readonly int Xp;
         public readonly List<int> Abilities;
+
+        public bool HasScavenger { get { return Abilities.Contains(Follower.ScavengerAbilityId); } }
+        public bool HasTreasureHunter { get { return Abilities.Contains(Follower.TreasureHunterAbilityId); } }
+        public bool HasEpicMount { get { return Abilities.Contains(Follower.EpicMountAbilityId); } }
 
         public bool IsMaxLevelEpic { get { return Quality.ToInt32() > 3 && Level >= 100; } }
 

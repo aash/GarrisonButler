@@ -632,6 +632,12 @@ namespace GarrisonButler.Config
             set { _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = value; }
         }
         public int MinimumMissionLevel { get; set; }
+        public int MinimumGarrisonResourcesToStartMissions { get; set; }
+        public bool PreferFollowersWithScavengerForGarrisonResourcesReward { get; set; }
+        public bool PreferFollowersWithTreasureHunterForGoldReward { get; set; }
+        public bool DisallowScavengerOnNonGarrisonResourcesMissions { get; set; }
+        public bool DisallowTreasureHunterOnNonGoldMissions { get; set; }
+        public bool DisallowRushOrderRewardIfBuildingDoesntExist { get; set; }
 
         [XmlArrayItem("Reward", typeof(MissionReward))]
         [XmlArray("MissionRewardSettings")]

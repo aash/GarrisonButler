@@ -75,6 +75,10 @@ namespace GarrisonButler.Objects
         // Set by the user with the slider for this reward
         [XmlAttribute("RequiredSuccessChance")]
         public int RequiredSuccessChance { get; set; }
+        [XmlAttribute("MinimumFollowerItemLevel")]
+        public int MinimumFollowerItemLevel { get; set; }
+        [XmlAttribute("MinimumCharacterItemLevel")]
+        public int MinimumCharacterItemLevel { get; set; }
         [XmlIgnore]
         public ItemInfo _ItemInfo { get; set; }
         [XmlIgnore]
@@ -378,6 +382,104 @@ namespace GarrisonButler.Objects
         public bool IsGold
         {
             get { return Category == MissionRewardCategory.Gold; }
+        }
+
+        public const int GarrisonResourcesId = 824;
+
+        [XmlIgnore]
+        public bool IsGarrisonResources
+        {
+            get { return Id == GarrisonResourcesId; }
+        }
+
+        public enum RushOrderIds
+        {
+            None = 0,
+            Forge = 122595, // Profession - PATCH 6.1 - Rush Order: The Forge - http://ptr.wowhead.com/item=122595/rush-order-the-forge
+            Tannery = 122596, // Profession - PATCH 6.1 - Rush Order: The Tannery - http://ptr.wowhead.com/item=122596/rush-order-the-tannery
+            EnchanterStudy = 122590, // Profession - PATCH 6.1 - Rush Order: Enchanter's Study - http://ptr.wowhead.com/item=122590/rush-order-enchanters-study
+            EngineeringWorks = 122591, // Profession - PATCH 6.1 - Rush Order: Engineering Works - http://ptr.wowhead.com/item=122591/rush-order-engineering-works
+            TailoringEmporium = 122594, // Profession - PATCH 6.1 - Rush Order: Tailoring Emporium - http://ptr.wowhead.com/item=122594/rush-order-tailoring-emporium
+            GemBoutique = 122592, // Profession - PATCH 6.1 - Rush Order: Gem Boutique - http://ptr.wowhead.com/item=122592/rush-order-gem-boutique
+            ScribeQuarter = 122593, // Profession - PATCH 6.1 - Rush Order: Scribe's Quarters - http://ptr.wowhead.com/item=122593/rush-order-scribes-quarters
+            AlchemyLab = 122576 // Profession - PATCH 6.1 - Rush Order: Alchemy Lab - http://ptr.wowhead.com/item=122576/rush-order-alchemy-lab
+        }
+
+        [XmlIgnore]
+        public bool IsRushOrder
+        {      
+            get
+            {
+                return Id == (int)RushOrderIds.Forge
+                    || Id == (int)RushOrderIds.Tannery
+                    || Id == (int)RushOrderIds.EnchanterStudy
+                    || Id == (int)RushOrderIds.EngineeringWorks
+                    || Id == (int)RushOrderIds.TailoringEmporium
+                    || Id == (int)RushOrderIds.GemBoutique
+                    || Id == (int)RushOrderIds.ScribeQuarter
+                    || Id == (int)RushOrderIds.AlchemyLab;
+            }
+        }
+
+        [XmlIgnore]
+        public bool RushOrderBuildingExists
+        {
+            get
+            {
+                var buildingIdsToSearch = new List<int>();
+                switch (Id)
+                {
+                    case (int)RushOrderIds.Forge:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TheForgeLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TheForgeLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TheForgeLvl3);
+                        break;
+
+                    case (int)RushOrderIds.Tannery:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TheTanneryLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TheTanneryLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TheTanneryLvl3);
+                        break;
+
+                    case (int)RushOrderIds.EnchanterStudy:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.EnchanterStudyLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.EnchanterStudyLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.EnchanterStudyLvl3);
+                        break;
+
+                    case (int)RushOrderIds.EngineeringWorks:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.EngineeringWorksLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.EngineeringWorksLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.EngineeringWorksLvl3);
+                        break;
+
+                    case (int)RushOrderIds.TailoringEmporium:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TailoringEmporiumLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TailoringEmporiumLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.TailoringEmporiumLvl3);
+                        break;
+
+                    case (int)RushOrderIds.GemBoutique:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.GemBoutiqueLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.GemBoutiqueLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.GemBoutiqueLvl3);
+                        break;
+
+                    case (int)RushOrderIds.ScribeQuarter:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.ScribeQuartersLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.ScribeQuartersLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.ScribeQuartersLvl3);
+                        break;
+
+                    case (int)RushOrderIds.AlchemyLab:
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.AlchemyLabLvl1);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.AlchemyLabLvl2);
+                        buildingIdsToSearch.Add((int)global::GarrisonButler.Buildings.AlchemyLabLvl3);
+                        break;
+                }
+
+                return ButlerCoroutines.ButlerCoroutine._buildings.Any(b => buildingIdsToSearch.Contains(b.Id));
+            }
         }
 
         /// <summary>
