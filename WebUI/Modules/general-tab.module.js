@@ -92,18 +92,6 @@ angular.module('GarrisonButlerApp.general-tab', ['ngMaterial', 'uiSwitch'])
                 'http://wow.zamimg.com/images/wow/icons/medium/inv_crate_01.jpg'),
 
             new $scope.Entry(
-                'StartMissions',
-                'Start Missions',
-                'Enable to start missions.',
-                'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_map07.jpg'),
-
-            new $scope.Entry(
-                'CompletedMissions',
-                'Complete Missions',
-                'Enable to pick up rewards from missions.',
-                'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_map_01.jpg'),
-
-            new $scope.Entry(
                 'DisableLastRoundCheck',
                 'Disable Last Round',
                 'Check to disable the last round check.',
