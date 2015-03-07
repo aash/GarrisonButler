@@ -202,6 +202,37 @@ namespace GarrisonButler.ButlerCoroutines
             // Only consider followers that are available (0) or in party (1)
             followers.RemoveAll(f => f.Status.ToInt32() > 1);
 
+            // Filter rewards based on user settings
+            if (GaBSettings.Get().DisallowRushOrderRewardIfBuildingDoesntExist)
+            {
+                rewards.RemoveAll(r => r.IsRushOrder && !r.RushOrderBuildingExists);
+            }
+
+            // Make sure player meets minimum item level requirements
+            foreach (var r in rewards)
+            {
+                if (Me.AverageItemLevelEquipped < (float)r.MinimumCharacterItemLevel)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward.",
+                        r.Id, r.Name, Me.AverageItemLevelEquipped, r.MinimumCharacterItemLevel);
+                    rewards.Remove(r);
+                    continue;
+                }
+
+                var category = rewards.FirstOrDefault(s => s.IsCategoryReward && s.Category == r.Category);
+
+                if (category == null)
+                    continue;
+
+                if (Me.AverageItemLevelEquipped < (float)category.MinimumCharacterItemLevel)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward's category ({4}).",
+                        r.Id, r.Name, Me.AverageItemLevelEquipped, r.MinimumCharacterItemLevel, r.Category);
+                    rewards.Remove(r);
+                    continue;
+                }
+            }
+
             // Get the current top of the list reward
             foreach (var reward in rewards)
             {
@@ -255,6 +286,8 @@ namespace GarrisonButler.ButlerCoroutines
                 var missionsThatMeetRequirement = missionsWithCurrentReward
                     // Make sure the mission level meets minimum required by global settings OR reward settings
                     .Where(m => reward.IndividualMissionLevelEnabled ? m.Level >= reward.RequiredMissionLevel : m.Level >= GaBSettings.Get().MinimumMissionLevel )
+                    // Make sure we have enough garrison resources
+                    .Where(m => m.Cost >= GaBSettings.Get().MinimumGarrisonResourcesToStartMissions)
                     .Where(m => m.Rewards
                         .Where(mr => mr.Id == reward.Id
                             // Handle the case where we are looking at a category of rewards instead of individual rewards
@@ -308,6 +341,8 @@ namespace GarrisonButler.ButlerCoroutines
                     GarrisonButler.Diagnostic("Using full followers list");
                     followersToConsider = followers;
                 }
+
+                followersToConsider.RemoveAll(f => f.ItemLevel < reward.MinimumFollowerItemLevel);
 
                 // For some reason this code isn't working properly
                 //var followersToConsider =
@@ -410,7 +445,29 @@ namespace GarrisonButler.ButlerCoroutines
         public static void RemoveAddedMaxLevelFollowers(List<Follower> followersToConsider,
             List<Follower> followersToRemoveIfFailure)
         {
+            if (followersToRemoveIfFailure.Count <= 0)
+            {
+                GarrisonButler.Diagnostic("[Missions] Can't RemoveAddedMaxLevelFollowers: there's none to remove");
+                return;
+            }
+            GarrisonButler.Diagnostic("[Missions] Removing added followers: ");
+            followersToRemoveIfFailure.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
             followersToConsider.RemoveAll(f => followersToRemoveIfFailure.Any(fr => fr.FollowerId == f.FollowerId));
+            GarrisonButler.Diagnostic("[Missions] Followers after removing: {0}", followersToConsider.Count);
+        }
+
+        public static void AddExcludedFollowers(List<Follower> followersToConsider,
+            List<Follower> excludedFollowers)
+        {
+            if (excludedFollowers.Count <= 0)
+            {
+                GarrisonButler.Diagnostic("[Missions] Can't AddExcludedFollowers: there's none to add");
+                return;
+            }
+            GarrisonButler.Diagnostic("[Missions] Re-adding {0} excluded followers: ", excludedFollowers.Count);
+            excludedFollowers.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
+            followersToConsider.AddRange(excludedFollowers);
+            GarrisonButler.Diagnostic("[Missions] Followers after re-adding: {0}", followersToConsider.Count);
         }
 
         // Returns list mission/followers combos with combosTried, acceptedCombos, totalSuccessChance
@@ -421,6 +478,7 @@ namespace GarrisonButler.ButlerCoroutines
             double totalSuccessChance = 0;
             var toStart = new List<Tuple<Mission, Follower[]>>();
             var followersToRemoveIfFailure = new List<Follower>();
+            var excludedFollowers = new List<Follower>();
 
             foreach (var mission in missionsThatMeetRequirement)
             {
@@ -475,6 +533,45 @@ namespace GarrisonButler.ButlerCoroutines
                         continue;
                     }
                 }
+
+                // Garrison Resources
+                if (mission.Rewards.Any(r => r.IsGarrisonResources))
+                {
+                    if (GaBSettings.Get().PreferFollowersWithScavengerForGarrisonResourcesReward)
+                    {
+                        GarrisonButler.Diagnostic("[Missions] Mission reward is GARRISON RESOURCES and user settings indicate to prefer followers with Scavenger trait.  {0} followers have Scavenger",
+                            followersToConsider.Count(f => f.HasScavenger));
+                        followersToConsider = followersToConsider.OrderByDescending(f => f.HasScavenger).ToList();
+                    }
+                }
+                // NOT Garrison Resources & user wants to disallow followers with Scavenger on these missions
+                else if (GaBSettings.Get().DisallowScavengerOnNonGarrisonResourcesMissions)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Mission reward is ***NOT*** GARRISON RESOURCES and user settings indicate to NOT allow followers with Scavenger.  {0} followers have Scavenger",
+                            followersToConsider.Count(f => f.HasScavenger));
+                    excludedFollowers = followersToConsider.Where(f => f.HasScavenger).ToList();
+                    followersToConsider.RemoveAll(f => excludedFollowers.Any(e => e.FollowerId == f.FollowerId));
+                }
+
+                // Gold
+                if (mission.Rewards.Any(r => r.IsGold))
+                {
+                    if (GaBSettings.Get().PreferFollowersWithTreasureHunterForGoldReward)
+                    {
+                        GarrisonButler.Diagnostic("[Missions] Mission reward is GOLD and user settings indicate to prefer followers with Treasure Hunter trait.  {0} followers have Treasure Hunter",
+                            followersToConsider.Count(f => f.HasTreasureHunter));
+                        followersToConsider = followersToConsider.OrderByDescending(f => f.HasTreasureHunter).ToList();
+                    }
+                }
+                // NOTGold & user wants to disallow followers with Treasure Hunter on these missions
+                else if (GaBSettings.Get().DisallowTreasureHunterOnNonGoldMissions)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Mission reward is ***NOT*** GOLD and user settings indicate to NOT allow followers with Treasure Hunter.  {0} followers have Treasure Hunter",
+                        followersToConsider.Count(f => f.HasTreasureHunter));
+                    excludedFollowers = followersToConsider.Where(f => f.HasTreasureHunter).ToList();
+                    followersToConsider.RemoveAll(f => excludedFollowers.Any(e => e.FollowerId == f.FollowerId));
+                }
+
                 DateTime startedAt = DateTime.Now;
                 Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
                 MissionCalc.mission = mission;
@@ -528,6 +625,7 @@ namespace GarrisonButler.ButlerCoroutines
                             GarrisonButler.Diagnostic("Best combo doesn't meet minimum success chance requirements!  Need {0}% and only have {1}%", sucChanceToCompareAgainst, Convert.ToInt32(bestSuccess));
                             bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
                             RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
+                            AddExcludedFollowers(followersToConsider, excludedFollowers);
                             GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
                             continue;
                         }
@@ -536,6 +634,7 @@ namespace GarrisonButler.ButlerCoroutines
                     {
                         GarrisonButler.Diagnostic("Error retrieving success chance for best combo: bestCombo.Count={0}, successChances.Count={1}", bestCombo.GetEmptyIfNull().Count(), successChances.GetEmptyIfNull().Count());
                         RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
+                        AddExcludedFollowers(followersToConsider, excludedFollowers);
                         GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
                         continue;
                     }
@@ -546,11 +645,12 @@ namespace GarrisonButler.ButlerCoroutines
                     {
                         GarrisonButler.Diagnostic("[Missions] No best combo found for mission {0}", mission.Name);
                         RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
+                        AddExcludedFollowers(followersToConsider, excludedFollowers);
                         GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
                         continue;
                     }
                     acceptedCombos++;
-                    GarrisonButler.Diagnostic("Best Combination with success=" + bestSuccess + "% for Mission=" + mission.Name + " is ");
+                    GarrisonButler.Diagnostic("[Missions] Best Combination with success=" + bestSuccess + "% for Mission=" + mission.Name + " is ");
                     bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
                     //successChances.ForEach(c =>
                     //{
@@ -558,13 +658,14 @@ namespace GarrisonButler.ButlerCoroutines
                     //});
                     totalSuccessChance += bestSuccess;
                     toStart.Add(new Tuple<Mission, Follower[]>(mission, bestCombo.ToArray()));
-                    GarrisonButler.Diagnostic("Followers before removal: " + followersToConsider.Count);
+                    GarrisonButler.Diagnostic("[Missions] Followers before removal: " + followersToConsider.Count);
                     bestCombo.ForEach(c =>
                     {
                         followersToConsider.RemoveAll(f => f.FollowerId == c.FollowerId);
                         followers.RemoveAll(f => f.FollowerId == c.FollowerId);
                     });
                     GarrisonButler.Diagnostic("Followers after removal: " + followersToConsider.Count);
+                    AddExcludedFollowers(followersToConsider, excludedFollowers);
                 } // if (bestCombo != null)
 
                 GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
