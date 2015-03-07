@@ -7,7 +7,7 @@
         'GarrisonButlerApp.milling-tab',
         'GarrisonButlerApp.mailing-tab',
         'GarrisonButlerApp.trading-post-tab',
-        'GarrisonButlerApp.missions-tab',
+        'GarrisonButlerApp.missions-tab'
     ]);
 
 angular.module('GarrisonButlerApp').controller('MainController', function ($scope, $window) {
@@ -132,6 +132,37 @@ angular.module('GarrisonButlerApp').controller('MainController', function ($scop
     };
 
 
+
+    $scope.loadRewards = function () {
+        var res = window.external.getRewardsJs();
+        return res;
+    };
+
+    // Load daily by id in js value from c# code
+    $scope.loadRewardById = function (Id) {
+        var res = window.external.getRewardsById(Id);
+        return res;
+    };
+
+    $scope.updateRewardById = function (id, reward) {
+        var rewardJson = [];
+        rewardJson[0] = reward.disallowReward;
+        rewardJson[1] = reward.individualSuccessEnabled;
+        rewardJson[2] = reward.successChance;
+        rewardJson[3] = reward.missionLevel;
+        rewardJson[4] = reward.playerLevel;
+        var json = JSON.stringify(rewardJson);
+        window.external.updateRewardById(id, json);
+    };
+    $scope.updateRewardsOrder = function (listIds) {
+        var json = JSON.stringify(listIds);
+        window.external.updateRewardsOrder(json);
+    };
+
+
+
+
+
     $scope.GBDiagnostic = function (msg) {
         window.external.diagnosticJs(msg);
     };
@@ -143,5 +174,9 @@ angular.module('GarrisonButlerApp').controller('MainController', function ($scop
     $scope.isIceVersion = function() {
         return window.external.IsIceVersion();
     };
+
+
+
+
 
 });

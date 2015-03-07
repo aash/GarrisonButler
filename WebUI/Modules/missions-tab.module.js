@@ -1,16 +1,16 @@
-/**
- * Created by Mickaël on 3/1/2015.
- */
-
+///**
+// * Created by Mickaël on 3/1/2015.
+// */
+//
 // General Tab
 angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', 'ngAria', 'smart-table', 'xeditable'])
 
     .controller('missionsListController', function ($scope) {
         // Represents a missionSetting
-        $scope.MissionSetting = function(id, name, category, disallowReward, individualSuccessEnabled, successChance, missionLevel, playerLevel, positionInList) {
-            this.id = id;
-            this.name = name;
-            this.category = category;
+        $scope.MissionSetting = function(rewardId, rewardName, rewardCategory, disallowReward, individualSuccessEnabled, successChance, missionLevel, playerLevel) {
+            this.rewardId = rewardId;
+            this.rewardName = rewardName;
+            this.rewardCategory = rewardCategory;
             this.disallowReward = disallowReward;
             this.individualSuccessEnabled = individualSuccessEnabled;
             this.successChance = successChance;
@@ -25,12 +25,17 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
             }
         };
 
+
+        $scope.updateReward = function(reward) {
+            $scope.updateRewardById(reward.rewardId, reward);
+        };
+
         $scope.sortingLog = [];
 
         $scope.sortableOptions = {
             update: function(e, ui) {
                 var logEntry = $scope.MissionRewards.map(function(i){
-                    return i.id;
+                    return i.rewardId;
                 }).join(', ');
                 $scope.sortingLog.push('Update: ' + logEntry);
                 console.debug("test update");
@@ -38,25 +43,26 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
             stop: function(e, ui) {
                 // this callback has the changed model
                 var logEntry = $scope.MissionRewards.map(function(i){
-                    return i.id;
-                }).join(', ');
+                    return i.rewardId;
+                });
                 $scope.sortingLog.push('Stop: ' + logEntry);
                 console.debug("test stop");
+                $scope.updateRewardsOrder(logEntry);
             }
         };
 
         try
         {
-            var missions = JSON.parse($scope.loadMissions());
-            $scope.GBDiagnostic("Received: " + missions);
+            var rewards = JSON.parse($scope.loadRewards());
+            $scope.GBDiagnostic("Received: " + rewards);
             $scope.MissionRewards = [];
-            for (var i = 0; i < missions.length; i++)
+            for (var i = 0; i < rewards.length; i++)
             {
-                var missionId = missions[i];
-                $scope.GBDiagnostic("Request for missions rewards: " + missionId);
-                var mission = JSON.parse($scope.loadBuildingById(missionId));
-                $scope.GBDiagnostic("Parsed: " + mission);
-                $scope.MissionRewards[i] = new $scope.MissionSetting(missionId, mission[0], mission[1], parseInt(mission[2]), parseInt(mission[3]), Boolean(mission[4]), Boolean(mission[5]), parseInt(mission[6]));
+                var rewardId = rewards[i];
+                $scope.GBDiagnostic("Request for reward: " + rewardId);
+                var reward = JSON.parse($scope.loadRewardById(rewardId));
+                $scope.GBDiagnostic("Parsed: " + reward);
+                $scope.MissionRewards[i] = new $scope.MissionSetting(rewardId, reward[0], reward[1], Boolean(reward[2]), Boolean(reward[3]), parseInt(reward[4]), parseInt(reward[5]), parseInt(reward[6]));
             }
         }
         catch(e) {
@@ -68,7 +74,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
             {
                 $scope.MissionRewards = [
                     // Mine / Garden
-                    new $scope.MissionSetting("1", "FollowerExperience", "FollowerExperience", false, true, 10, 15, 20, 0),
+                    new $scope.MissionSetting("1", "FollowerExperience", "FollowerExperience", false, true, 10, 15, 20),
                     new $scope.MissionSetting("1", "adada", "FollowerExperience", false, true, 10, 15, 20, 10),
                     new $scope.MissionSetting("1", "fefefef", "fcesrf", false, true, 10, 15, 20, 1),
                     new $scope.MissionSetting("1", "gtghrthsht", "FollowerExperience", false, true, 10, 15, 20, 2),
@@ -76,7 +82,6 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
                 ];
             }
         }
-        $scope.MissionRewards = $scope.MissionRewards.sort(function(a, b) { return a.positionInList > b.positionInList; });
 
     })
     .controller('RewardController', function ($scope) {
@@ -84,18 +89,13 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ui.sortable', '
             $scope.missionReward = item;
         };
 
+
         $scope.$watch(
-            'missionReward.disallowed',
+            'missionReward',
             function (newValue, oldValue)
             {
-                $scope.saveRewardDisallowed($scope.missionReward.disallowed, newValue);
-            }
-        );
-        $scope.$watch(
-            'missionReward.individualSuccessEnabled',
-            function (newValue, oldValue)
-            {
-                $scope.saveRewardCustomChanceEnabled($scope.missionReward.individualSuccessEnabled, newValue);
-            }
+                $scope.updateReward(newValue);
+            },
+            true
         );
     });

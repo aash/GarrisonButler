@@ -41,33 +41,28 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
         }
         catch(e)
         {
-            try {
-                $scope.GBDiagnostic("Request for buildings error: " + e);
-
-            }
-            catch(e){
-                $scope.butlerSettings.Buildings = [
-                    // Mine / Garden
-                    new $scope.Building("Building id", "Error Loading", "http://wow.zamimg.com/images/wow/icons/medium/trade_mining.jpg", "CanStartOrder", 10, "CanCollectOrder", false),
-                    new $scope.Building("Building id", "Garden", "http://wow.zamimg.com/images/wow/icons/medium/inv_misc_herb_sansamroot.jpg", "CanStartOrder", 23, "CanCollectOrder", "Available"),
-                    // Small Buildings
-                    new $scope.Building("Building id", "Alchemy Lab", "http://wow.zamimg.com/images/wow/icons/medium/trade_alchemy.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Enchanter's Study", "http://wow.zamimg.com/images/wow/icons/medium/trade_engraving.jpg", "CanStartOrder", 30, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Engineering Works", "http://wow.zamimg.com/images/wow/icons/medium/trade_engineering.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Gem Boutique", "http://wow.zamimg.com/images/wow/icons/medium/inv_misc_gem_01.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Salvage Yard", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_salvageyard.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Scribe's Quarter", "http://wow.zamimg.com/images/wow/icons/medium/inv_inscription_tradeskill01.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Storehouse", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_storehouse.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Tailoring Emporium", "http://wow.zamimg.com/images/wow/icons/medium/trade_tailoring.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    // Medium Buildings
-                    new $scope.Building("Building id", "Barn", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_barn.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Gladiator's Sanctum", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_sparringarena.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Lumber Mill", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_lumbermill.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    new $scope.Building("Building id", "Trading Post", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_tradingpost.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
-                    // Large Buildings
-                    new $scope.Building("Building id", "Dwarven Bunker / War Mill", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_armory.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available")
-                ];
-            }
+            $scope.GBDiagnostic("Request for buildings error: " + e);
+            $scope.butlerSettings.Buildings = [
+                // Mine / Garden
+                new $scope.Building("Building id", "Mine", "http://wow.zamimg.com/images/wow/icons/medium/trade_mining.jpg", "CanStartOrder", 10, "CanCollectOrder", false),
+                new $scope.Building("Building id", "Garden", "http://wow.zamimg.com/images/wow/icons/medium/inv_misc_herb_sansamroot.jpg", "CanStartOrder", 23, "CanCollectOrder", "Available"),
+                // Small Buildings
+                new $scope.Building("Building id", "Alchemy Lab", "http://wow.zamimg.com/images/wow/icons/medium/trade_alchemy.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Enchanter's Study", "http://wow.zamimg.com/images/wow/icons/medium/trade_engraving.jpg", "CanStartOrder", 30, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Engineering Works", "http://wow.zamimg.com/images/wow/icons/medium/trade_engineering.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Gem Boutique", "http://wow.zamimg.com/images/wow/icons/medium/inv_misc_gem_01.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Salvage Yard", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_salvageyard.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Scribe's Quarter", "http://wow.zamimg.com/images/wow/icons/medium/inv_inscription_tradeskill01.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Storehouse", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_storehouse.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Tailoring Emporium", "http://wow.zamimg.com/images/wow/icons/medium/trade_tailoring.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                // Medium Buildings
+                new $scope.Building("Building id", "Barn", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_barn.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Gladiator's Sanctum", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_sparringarena.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Lumber Mill", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_lumbermill.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                new $scope.Building("Building id", "Trading Post", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_tradingpost.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available"),
+                // Large Buildings
+                new $scope.Building("Building id", "Dwarven Bunker / War Mill", "http://wow.zamimg.com/images/wow/icons/medium/garrison_building_armory.jpg", "CanStartOrder", 0, "CanCollectOrder", "Available")
+            ];
             $scope.butlerSettings.Buildings = $scope.butlerSettings.Buildings.sort(function(a, b) { return a.name.localeCompare(b.name); });
         }
 
@@ -150,10 +145,6 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
                     $scope.saveBuildingMaxStart($scope.building.id, newValue);
                 }
             );
-            var temp = $scope.building.maxCanStartOrder;
-            $scope.building.maxCanStartOrder = 0;
-            $scope.building.maxCanStartOrder = temp;
-
         };
     });
 

@@ -118,6 +118,8 @@ md-checkbox{
 
 
 
+
+
 /* line 2, slider.scss */
 slider, [slider] {
     display: inline-block;
@@ -221,11 +223,12 @@ li {
 
 .thumbnail[data-drag="false"] { background: green; }
 
+/* Missions */
 
 .item, .placeholder {
     padding: 2px;
     width: 50px;
-    height: 75px;
+    height: 50px;
     border: 1px solid #333;
     background: #EEE;
 }

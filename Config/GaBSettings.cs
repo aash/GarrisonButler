@@ -411,17 +411,116 @@ namespace GarrisonButler.Config
             }
         }
 
-        //public void saveTPItem(int itemId, bool activated)
-        //{
-        //    var tpSettings = TradingPostReagentsSettings.FirstOrDefault(d => d.ItemId == itemId);
-        //    if (tpSettings == default(BItem))
-        //    {
-        //        GarrisonButler.Diagnostic("Could not find settings for tp item {0}.", itemId);
-        //        return;
-        //    }
-        //    GarrisonButler.Diagnostic("Save tp item {0}, old={1}, new={2}", itemId, tpSettings.Activated, activated);
-        //    tpSettings.Activated = activated;
-        //}
+        #region Missions
+
+
+        public string getRewardsJs()
+        {
+            GarrisonButler.Diagnostic("Sending rewards to interface.");
+            var RewardsJs = new ArrayList();
+
+            for (int i = 0; i < MissionRewardSettings.Count; i++)
+            {
+                RewardsJs.Add(MissionRewardSettings[i].Id);
+            }
+            var res = JSON.JsonEncode(RewardsJs);
+            GarrisonButler.Diagnostic("Json rewards: " + res);
+            return res;
+        }
+
+        public string getRewardsById(string idAsString)
+        {
+            var id = idAsString.ToInt32();
+            var rewardJs = new ArrayList();
+            var rewardSettings = MissionRewardSettings.FirstOrDefault(d => d.Id == id);
+            if (rewardSettings == default(MissionReward))
+                return "";
+
+            rewardJs.Add(rewardSettings.Name);
+            rewardJs.Add(rewardSettings.Category);
+            rewardJs.Add(rewardSettings.DisallowMissionsWithThisReward);
+            rewardJs.Add(rewardSettings.IndividualSuccessChanceEnabled);
+            rewardJs.Add(rewardSettings.RequiredSuccessChance);
+            rewardJs.Add(rewardSettings.RequiredMissionLevel);
+            rewardJs.Add(rewardSettings.RequiredPlayerLevel);
+
+            var res = JSON.JsonEncode(rewardJs);
+            GarrisonButler.Diagnostic("Json reward: " + res);
+            return res;
+        }
+
+        public void updateRewardById(int rewardId, string rewardJson)
+        {
+            GarrisonButler.Diagnostic("Save reward element: " + rewardJson);
+            try
+            {
+                ArrayList reward = JSON.JsonDecode(rewardJson) as ArrayList;
+                GarrisonButler.Diagnostic("Save reward element decoded: ");
+                ObjectDumper.WriteToHb(reward, 3);
+                if (reward == null)
+                {
+                    GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " null");
+                    return;
+                }
+                if (reward.Count < 5)
+                {
+                    GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " missing elements. count:" + reward.Count);
+                    return;
+                }
+
+                var current = MissionRewardSettings.FirstOrDefault(m => m.Id == rewardId);
+                if (current != null)
+                {
+                    GarrisonButler.Diagnostic("Updating reward element: " + current.ToString());
+                    current.DisallowMissionsWithThisReward = (reward[0] != null) && reward[0].ToString().ToBoolean();
+                    current.IndividualSuccessChanceEnabled = (reward[1] != null) && reward[1].ToString().ToBoolean();
+                    current.RequiredSuccessChance = (reward[2] != null) ? reward[2].ToString().ToInt32() : 100;
+                    current.RequiredMissionLevel = (reward[3] != null) ? reward[3].ToString().ToInt32() : 90;
+                    current.RequiredPlayerLevel = (reward[4] != null) ? reward[4].ToString().ToInt32() : 90;
+                }
+                else
+                {
+                    GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId);
+                }
+            }
+            catch (Exception e)
+            {
+                GarrisonButler.Diagnostic(e.ToString());
+            }
+        }
+
+        public void updateRewardsOrder(string rewardsJson)
+        {
+
+            ArrayList rewardsOrderById = JSON.JsonDecode(rewardsJson) as ArrayList;
+            GarrisonButler.Diagnostic("Update rewards order decoded: ");
+            ObjectDumper.WriteToHb(rewardsOrderById, 3);
+            if (rewardsOrderById == null)
+            {
+                GarrisonButler.Diagnostic("Update rewards order failed, id: " + " null");
+                return;
+            }
+
+            var newMissionRewardsList = new List<MissionReward>();
+
+            foreach (var rewardsIdObject in rewardsOrderById)
+            {
+                var rewardId = rewardsIdObject.ToString().ToInt32();
+
+                var reward = MissionRewardSettings.FirstOrDefault(r => r.Id == rewardId);
+                if (reward == null)
+                {
+                    GarrisonButler.Diagnostic("Faile to update order for rewards with id: " + rewardId + ", reward null");
+                    continue;
+                }
+
+                newMissionRewardsList.Add(reward);
+            }
+
+            MissionRewardSettings = newMissionRewardsList;
+        }
+
+        #endregion
 
 
 
