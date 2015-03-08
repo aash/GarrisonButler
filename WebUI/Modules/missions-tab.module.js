@@ -69,41 +69,15 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
                 }
             }
 
-
-            //for (var i = 0; i< $scope.MissionRewards.length; i++)
-            //{
-            //    if( $scope.MissionRewards[i].rewardId == newRowValue.rewardId
-            //        &&  $scope.MissionRewards[i].category == newRowValue.category)
-            //    {
-            //        $scope.Diagnostic("Element " + $scope.MissionRewards[i].rewardId + " priority: " + $scope.MissionRewards[i].priorityList);
-            //        $scope.Diagnostic("Element" + $scope.MissionRewards[i].rewardId + " position: " + i);
-            //    }
-            //}
-            //$scope.Diagnostic($scope.MissionRewards.map(function(reward) {return reward.priorityList}).toLocaleString());
-
             $scope.MissionRewards = $scope.MissionRewards.sort(function(a, b) {
-                //$scope.Diagnostic(b.priorityList + " < " + a.priorityList);
-                return a.priorityList - b.priorityList; });
+                    //$scope.Diagnostic(b.priorityList + " < " + a.priorityList);
+                    return a.priorityList - b.priorityList -1 ; });
 
-            //$scope.Diagnostic($scope.MissionRewards.map(function(reward) {return reward.priorityList}).toLocaleString());
-            //
-            //for (var i = 0; i< $scope.MissionRewards.length; i++)
-            //{
-            //    if( $scope.MissionRewards[i].rewardId == newRowValue.rewardId
-            //        &&  $scope.MissionRewards[i].category == newRowValue.category)
-            //    {
-            //        $scope.Diagnostic("Element " + $scope.MissionRewards[i].rewardId + " priority: " + $scope.MissionRewards[i].priorityList);
-            //        $scope.Diagnostic("Element" + $scope.MissionRewards[i].rewardId + " position: " + i);
-            //    }
-            //}
-            //
             for (var i = 0; i< $scope.MissionRewards.length; i++)
             {
                 $scope.MissionRewards[i].priorityList = i;
             }
-            //$scope.displayedCollection = [].concat($scope.MissionRewards);
-            //
-            //$scope.MissionRewards = tempList;
+
             var listId = $scope.MissionRewards.map(function(elem){return elem.rewardId;});
             try{
                 $scope.updateRewardsOrder(listId);
