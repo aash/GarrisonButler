@@ -2,15 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7443e50e-58f6-46dc-8fd7-8689ddac8996" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Config/ConfigForm.cs" afterPath="$PROJECT_DIR$/../Config/ConfigForm.cs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Libraries/drag/dragdrop.min.js" afterPath="$PROJECT_DIR$/Libraries/drag/dragdrop.min.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/mailing-tab.module.js" afterPath="$PROJECT_DIR$/Modules/mailing-tab.module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.html" afterPath="$PROJECT_DIR$/mainUI.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/milling-tab.module.js" afterPath="$PROJECT_DIR$/Modules/milling-tab.module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/profession-tab.module.js" afterPath="$PROJECT_DIR$/Modules/profession-tab.module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Libraries/slider/slider.js" afterPath="$PROJECT_DIR$/Libraries/slider/slider.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/trading-post.module.js" afterPath="$PROJECT_DIR$/Modules/trading-post.module.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GarrisonButler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,8 +34,8 @@
       <file leaf-file-name="mainUI.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mainUI.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6326291" vertical-offset="7077" max-vertical-offset="11441">
-              <caret line="448" column="119" selection-start-line="448" selection-start-column="119" selection-end-line="448" selection-end-column="119" />
+            <state vertical-scroll-proportion="0.3028169" vertical-offset="2513" max-vertical-offset="11662">
+              <caret line="163" column="44" selection-start-line="163" selection-start-column="44" selection-end-line="163" selection-end-column="44" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#div#0;n#md-card-content#0;n#md-card#0;n#md-content#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#h1#0;n#div#0;n#md-card-content#0;n#md-card#0;n#md-content#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -830,14 +827,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mainUI.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1867" max-vertical-offset="4114">
-          <caret line="209" column="11" selection-start-line="209" selection-start-column="11" selection-end-line="209" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mainUI.css">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="3528" max-vertical-offset="4403">
@@ -862,10 +851,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/mainUI.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1867" max-vertical-offset="4114">
+          <caret line="209" column="11" selection-start-line="209" selection-start-column="11" selection-end-line="209" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mainUI.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6326291" vertical-offset="7077" max-vertical-offset="11441">
-          <caret line="448" column="119" selection-start-line="448" selection-start-column="119" selection-end-line="448" selection-end-column="119" />
+        <state vertical-scroll-proportion="0.3028169" vertical-offset="2513" max-vertical-offset="11662">
+          <caret line="163" column="44" selection-start-line="163" selection-start-column="44" selection-end-line="163" selection-end-column="44" />
           <folding>
             <element signature="n#style#0;n#div#0;n#div#0;n#md-card-content#0;n#md-card#0;n#md-content#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#h1#0;n#div#0;n#md-card-content#0;n#md-card#0;n#md-content#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
