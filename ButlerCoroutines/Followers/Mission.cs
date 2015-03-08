@@ -172,7 +172,7 @@ namespace GarrisonButler.ButlerCoroutines
                 return toStart;
             }
 
-            if (numFollowers == 0)
+            if (numFollowers == 0 || numFollowers > 20)
             {
                 GarrisonButler.Diagnostic("returning from GetAllFollowers(): # followers = 0");
                 return toStart;
