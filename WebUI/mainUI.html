@@ -699,10 +699,12 @@
 
             <td>
             <div>
-                <p ng-if="row.isCategory"><b>Category</b> - </p>
-                <a ng-if="canWowheadItem(row)" ng-href='http://www.wowhead.com/item={{ row.rewardId || "empty" }}' class="q2"></a>
-                <a ng-if="canWowheadCurrency(row)" ng-href='http://www.wowhead.com/currency={{ row.rewardId || "empty" }}' class="icontiny q1"></a>
-                <p ng-if="!canWowhead(row)">{{row.rewardName}}</p>
+                <p ng-if="row.isCategory"><b>Category</b> - {{row.rewardName}}</p>
+                <div ng-if="!row.isCategory">
+                    <a ng-if="canWowheadItem(row)" ng-href='http://www.wowhead.com/item={{ row.rewardId || "empty" }}' class="q2"></a>
+                    <a ng-if="canWowheadCurrency(row)" ng-href='http://www.wowhead.com/currency={{ row.rewardId || "empty" }}' class="icontiny q1"></a>
+                    <p ng-if="!canWowhead(row)">{{row.rewardName}}</p>
+                </div>
             </div>
             </td>
 
@@ -740,13 +742,6 @@
             </td>
         </tr>
         </tbody>
-            <!--<tfoot>-->
-            <!--<tr>-->
-                <!--<td colspan="5" class="text-center">-->
-                    <!--<div st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>-->
-                <!--</td>-->
-            <!--</tr>-->
-            <!--</tfoot>-->
         </table>
         </div>
 

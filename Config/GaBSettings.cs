@@ -106,7 +106,7 @@ namespace GarrisonButler.Config
         //    return "";
         //}
 
-        private const bool Debug = true;
+        private const bool Debug = false;
 
         public string getBuildingsJs()
         {

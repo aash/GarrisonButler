@@ -191,8 +191,13 @@ angular.module('GarrisonButlerApp').controller('MainController', function ($scop
 
 
         $scope.isIceVersion = function () {
-            return window.external.IsIceVersion();
-        };
+            try {
+                return window.external.IsIceVersion();
+            }
+        catch(e)
+        {
+            return true;
+        }};
     }
     catch(e)
     {
