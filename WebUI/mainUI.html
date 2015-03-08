@@ -151,9 +151,14 @@
             </p>
             <div style="padding-left: 20px;">
                 <h3>Change Log</h3>
-                <h2>Version 2.1.17.0</h2>
+                <h2>Version 2.2.0.0</h2>
                 <lu>
-                    <li>Added fix for work orders settings not loading correctly</li>
+                    <li>Added options in Missions settings. Check them out! :D</li>
+                    <li>Added description for default settings in Missions</li>
+                    <li>Replaced drag and drop to set the priority of rewards, will now have to fill a text box with the number.</li>
+                    <li>Fix incorrect work order getting stuckbug</li>
+                    <li>Upped timer time for cached action to 15 seconds from 10seconds to fix yoyo bug in mine between ores and carts.</li>
+                    <li>Added UI design enhancements</li>
                 </lu>
                 <h2>Version 2.1.17.0</h2>
                 <lu>
@@ -575,7 +580,14 @@
             </table>
 
 
-            <h2>Detailed settings</h2>
+            <h1>Detailed settings</h1>
+            <ul>Here you can decide the priority of categories and specific items.
+                <li><b>Priority:</b> The priority with which to treat rewards. 0 is better than 10.</li>
+                <li><b>Disallowed:</b> Will not allow a mission with this reward to be started EVER. </li>
+                <li><b>Player level:</b> The minimum lvl of character to consider this reward. </li>
+                <li><b>Mission level:</b> The minimum lvl of the mission to consider this reward. </li>
+                <li><b>Custom Success chances:</b> If enabled, this will override for this reward the success chance set by default.</li>
+            </ul>
         <table st-table="MissionRewards" class="table">
         <thead>
         <tr>

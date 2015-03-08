@@ -4,15 +4,11 @@
     <list default="true" id="7443e50e-58f6-46dc-8fd7-8689ddac8996" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Libraries/drag/dragdrop.min.js" afterPath="$PROJECT_DIR$/Libraries/drag/dragdrop.min.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/mailing-tab.module.js" afterPath="$PROJECT_DIR$/Modules/mailing-tab.module.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.css" afterPath="$PROJECT_DIR$/mainUI.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.html" afterPath="$PROJECT_DIR$/mainUI.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainUI.js" afterPath="$PROJECT_DIR$/mainUI.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/milling-tab.module.js" afterPath="$PROJECT_DIR$/Modules/milling-tab.module.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/missions-tab.module.js" afterPath="$PROJECT_DIR$/Modules/missions-tab.module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/profession-tab.module.js" afterPath="$PROJECT_DIR$/Modules/profession-tab.module.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Libraries/slider/slider.js" afterPath="$PROJECT_DIR$/Libraries/slider/slider.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Modules/trading-post.module.js" afterPath="$PROJECT_DIR$/Modules/trading-post.module.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Libraries/angular-xeditable/css/xeditable.css" afterPath="$PROJECT_DIR$/Libraries/angular-xeditable/css/xeditable.css" />
     </list>
     <ignored path="GarrisonButler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -38,8 +34,8 @@
             <file leaf-file-name="mainUI.html" pinned="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/mainUI.html">
                 <provider selected="true" editor-type-id="text-editor">
-                  <state vertical-scroll-proportion="0.88487583" vertical-offset="1868" max-vertical-offset="11169">
-                    <caret line="156" column="21" selection-start-line="156" selection-start-column="21" selection-end-line="156" selection-end-column="21" />
+                  <state vertical-scroll-proportion="0.6839729" vertical-offset="9390" max-vertical-offset="11373">
+                    <caret line="588" column="45" selection-start-line="588" selection-start-column="45" selection-end-line="588" selection-end-column="45" />
                     <folding>
                       <element signature="n#style#0;n#div#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                       <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -824,8 +820,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mainUI.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.88487583" vertical-offset="1868" max-vertical-offset="11169">
-          <caret line="156" column="21" selection-start-line="156" selection-start-column="21" selection-end-line="156" selection-end-column="21" />
+        <state vertical-scroll-proportion="0.6839729" vertical-offset="9390" max-vertical-offset="11373">
+          <caret line="588" column="45" selection-start-line="588" selection-start-column="45" selection-end-line="588" selection-end-column="45" />
           <folding>
             <element signature="n#style#0;n#div#0;n#tab#0;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#h3#0;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#md-item-content#0;n#md-item#0;n#md-list#0;n#md-content#0;n#div#0;n#tab#2;n#tabset#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
