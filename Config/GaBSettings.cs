@@ -543,9 +543,9 @@ namespace GarrisonButler.Config
                         GarrisonButler.Diagnostic("Updating reward element: " + current.ToString());
                     current.DisallowMissionsWithThisReward = (reward[0] != null) && reward[0].ToString().ToBoolean();
                     current.IndividualSuccessChanceEnabled = (reward[1] != null) && reward[1].ToString().ToBoolean();
-                    current.RequiredSuccessChance = (reward[2] != null) ? reward[2].ToString().ToInt32() : 100;
-                    current.RequiredMissionLevel = (reward[3] != null) ? reward[3].ToString().ToInt32() : 90;
-                    current.RequiredPlayerLevel = (reward[4] != null) ? reward[4].ToString().ToInt32() : 90;
+                    current.RequiredSuccessChance = (reward[2] != null) ? reward[2].ToString().ToInt32() : 0;
+                    current.RequiredMissionLevel = (reward[3] != null) ? reward[3].ToString().ToInt32() : 0;
+                    current.RequiredPlayerLevel = (reward[4] != null) ? reward[4].ToString().ToInt32() : 0;
                 }
                 else
                 {

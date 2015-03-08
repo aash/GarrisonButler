@@ -1,7 +1,7 @@
 ﻿/* TABS */
 
 .nav-tabs{
-    background-color: rgb(33,150,243);
+    background-color: rgb(255, 163, 74);
 }
 .ng-isolate-scope a{
     color: #ffffff;
@@ -11,14 +11,14 @@
 }
 
 .sectionBackground {
-    background: rgba(26, 76, 84, 0.16);
+    background: rgba(0, 22, 249, 0.27);
     border-radius: 3px;
     margin: 1em;
     padding-bottom: 0px;
     width: 250px!important;
 }
 .sectionBackground-work-order {
-     background: rgba(26, 76, 84, 0.16);
+    background: rgba(30, 152, 157, 0.46);
      border-radius: 3px;
      margin: 1em;
      padding-bottom: 0px;
@@ -61,8 +61,8 @@ md-switch.md-default-theme.md-checked .md-bar{
 }
 
 .switch {
-    background: #941012;
-    border: 1px solid #941012;
+    background: #FF0004;
+    border: 2px solid #000000;
     position: relative;
     display: inline-block;
     box-sizing: content-box;
@@ -91,8 +91,8 @@ md-switch.md-default-theme.md-checked .md-bar{
     -webkit-transition: 0.3s ease-out all;
 }
 .switch.checked {
-    background: rgb(100, 189, 99);
-    border-color: rgb(100, 189, 99);
+    background: rgb(3, 255, 0);
+    border-color: rgb(255, 255, 255);
 }
 .switch.checked small {
     left: 22px;
@@ -242,9 +242,13 @@ li {
 }
 
 .table {
-    background-color: rgba(200, 200, 200, 1);
+    background-color: rgba(0, 0, 0, 0.38);
     border: 1px solid black;}
 
 .column{
     width: 450px;
+}
+
+tr {
+    font-size: larger;
 }

@@ -42,6 +42,104 @@
 </head>
 <body>
 <div ng-controller="MainController">
+    <!--
+            BEGIN: App-Loading Screen.
+            --
+            Until the AngularJS application code is loaded and bootstrapped, this is just
+            "static HTML." Meaning, the [class-based] directive, "mAppLoading", won't
+            actually do anything until the application is initialized. As such, we'll give
+            it just enough CSS to "fail open"; then, when the AngularJS app loads, the
+            directive will run and we'll remove this loading screen.
+
+            NOTES ON ANIMATION:
+
+            When the AngularJS application is loaded and starts bootstrapping, all
+            animations are disabled until all the routing information and templating
+            information is loaded AND at least two digests have run (in order to prevent
+            a flurry of animation activity). As such, we can't animate the root of the
+            directive. Instead, we have to add "ngAnimateChildren" to the root element
+            and then animate the inner container. The "ngAnimateChildren" directive allows
+            us to override the animation-blocking within the bounds of our directive, which
+            is fine since it only runs once.
+        -->
+    <div class="m-app-loading" ng-animate-children>
+
+        <!--
+            HACKY CODE WARNING: I'm putting Style block inside directive so that it
+            will be removed from the DOM when we remove the directive container.
+        -->
+        <style type="text/css">
+
+            div.m-app-loading {
+                position: fixed ;
+            }
+
+            div.m-app-loading div.animated-container {
+
+                background-color: #333333 ;
+                bottom: 0px ;
+                left: 0px ;
+                opacity: 1.0 ;
+                position: fixed ;
+                right: 0px ;
+                top: 0px ;
+                z-index: 999999 ;
+            }
+
+            /* Used to initialize the ng-leave animation state. */
+            div.m-app-loading div.animated-container.ng-leave {
+                opacity: 1.0 ;
+                transition: all linear 200ms ;
+                -webkit-transition: all linear 200ms ;
+            }
+
+            /* Used to set the end properties of the ng-leave animation state. */
+            div.m-app-loading div.animated-container.ng-leave-active {
+                opacity: 0 ;
+            }
+
+            div.m-app-loading div.messaging {
+                color: #FFFFFF ;
+                font-family: monospace ;
+                left: 0px ;
+                margin-top: -37px ;
+                position: absolute ;
+                right: 0px ;
+                text-align: center ;
+                top: 50% ;
+            }
+
+            div.m-app-loading h1 {
+                font-size: 26px ;
+                line-height: 35px ;
+                margin: 0px 0px 20px 0px ;
+            }
+
+            div.m-app-loading p {
+                font-size: 18px ;
+                line-height: 14px ;
+                margin: 0px 0px 0px 0px ;
+            }
+
+        </style>
+
+
+        <!-- BEGIN: Actual animated container. -->
+        <div class="animated-container">
+
+            <div class="messaging">
+
+                <h1>
+                    GarrisonButler is loading...
+                </h1>
+
+            </div>
+
+        </div>
+        <!-- END: Actual animated container. -->
+
+    </div>
+    <!-- END: App-Loading Screen. -->
 
 
     <tabset>
@@ -53,6 +151,10 @@
             </p>
             <div style="padding-left: 20px;">
                 <h3>Change Log</h3>
+                <h2>Version 2.1.17.0</h2>
+                <lu>
+                    <li>Added fix for work orders settings not loading correctly</li>
+                </lu>
                 <h2>Version 2.1.17.0</h2>
                 <lu>
                     <li>Added fix for work orders settings not loading correctly</li>
@@ -442,117 +544,33 @@
                     <th><h2>Value</h2></th>
                 </tr>
                 </thead>
-                <tr>
+
+                <tr ng-repeat="row in MissionGeneralOptions">
                     <td>
-                        <b>Start Missions</b>
+                        <div ng-controller="MissionOptionController" ng-init="init(row)">
+                            <accordion close-others="oneAtATime">
+                                <accordion-group is-open="status.open">
+                                    <accordion-heading>
+                                        {{ row.label }}
+                                        <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                    </accordion-heading>
+                                    <p>
+                                        {{row.description}}
+                                    </p>
+                                </accordion-group>
+                            </accordion>
+                        </div>
                     </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="startMissions" class="green"></switch>
+                    <td ng-if="row.variableType === 'bool'">
+                        <switch id="enabled" name="enabled" ng-model="row.val" class="green"></switch>
                     </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Collect Completed Missions</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="completedMissions" class="green"></switch>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Minimum Success Chance</b>
-                    </td>
-                    <td>
-                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
-                                ng-model="DefaultMissionSuccessChance"></slider>
-                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
-                               ng-model="DefaultMissionSuccessChance" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
-                               min="0" max="100">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers" class="green"></switch>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting</b>
-                    </td>
-                    <td>
-                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
-                                ng-model="MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting"></slider>
-                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
-                               ng-model="MaxNumberOfEpicMaxLevelFollowersToUseWhenBoosting" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
-                               min="0" max="100">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>MinimumMissionLevel</b>
-                    </td>
-                    <td>
-                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
-                                ng-model="MinimumMissionLevel"></slider>
-                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
-                               ng-model="MinimumMissionLevel" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
-                               min="0" max="100">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>MinimumGarrisonResourcesToStartMissions</b>
-                    </td>
-                    <td>
-                        <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
-                                ng-model="MinimumGarrisonResourcesToStartMissions"></slider>
-                        <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
-                               ng-model="MinimumGarrisonResourcesToStartMissions" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
-                               min="0" max="10000">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>PreferFollowersWithScavengerForGarrisonResourcesReward</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="PreferFollowersWithScavengerForGarrisonResourcesReward" class="green"></switch>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>PreferFollowersWithTreasureHunterForGoldReward</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="PreferFollowersWithTreasureHunterForGoldReward" class="green"></switch>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>DisallowScavengerOnNonGarrisonResourcesMissions</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="DisallowScavengerOnNonGarrisonResourcesMissions" class="green"></switch>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>DisallowTreasureHunterOnNonGoldMissions</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="DisallowTreasureHunterOnNonGoldMissions" class="green"></switch>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>DisallowRushOrderRewardIfBuildingDoesntExist</b>
-                    </td>
-                    <td>
-                        <switch id="enabled" name="enabled" ng-model="DisallowRushOrderRewardIfBuildingDoesntExist" class="green"></switch>
-                    </td>
+                <td ng-if="row.variableType === 'int'">
+                    <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
+                            ng-model="row.val"></slider>
+                    <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
+                           ng-model="row.val" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
+                           min="0" max="100">
+                </td>
                 </tr>
             </table>
 
@@ -583,6 +601,7 @@
 
             <td>
             <div>
+                <p ng-if="row.isCategory"><b>Category</b> - </p>
                 <a ng-if="canWowhead(row)" ng-href='http://www.wowhead.com/item={{ row.rewardId || "empty" }}' class="q2"></a>
                 <p ng-if="!canWowhead(row)">{{row.rewardName}}</p>
             </div>
@@ -599,14 +618,14 @@
             <td>
                 <!-- editable value (text with validation) -->
                 <span editable-text="row.playerLevel">
-                {{ row.playerLevel || 'empty' }}
+                {{ row.playerLevel }}
                 </span>
             </td>
 
             <td>
                 <!-- editable value (text with validation) -->
                 <span editable-text="row.missionLevel">
-                {{ row.missionLevel || 'empty' }}
+                {{ row.missionLevel }}
                 </span>
             </td>
 
