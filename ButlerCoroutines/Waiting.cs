@@ -74,6 +74,7 @@ namespace GarrisonButler.ButlerCoroutines
             {
                 if (_hbRelogSkipped == false)
                 {
+                    GaBSettings.Save();
                     GarrisonButler.Log("[HBRelogMode] Skipping current task.");
                     hbRelogApi.SkipCurrentTask(hbRelogApi.CurrentProfileName);
                     _hbRelogSkipped = true;
