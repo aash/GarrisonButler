@@ -58,47 +58,42 @@ namespace GarrisonButler.ButlerCoroutines
         public static bool IsMissionDisallowed(Mission mission)
         {
             var disallowedRewardSettings = GaBSettings.Get().MissionRewardSettings.Where(mrs => mrs.DisallowMissionsWithThisReward);
-            var returnValue = disallowedRewardSettings.Any(drs =>
+            var disallowed = disallowedRewardSettings.Any(drs =>
                 drs.IsCategoryReward
                     ? mission.Rewards.Any(r => r.Category == drs.Category)
                     : mission.Rewards.Any(r => r.Id == drs.Id));
-            //var returnValue = false;
 
-            //foreach (var drs in disallowedRewardSettings)
-            //{
-            //    if (drs.IsCategoryReward)
-            //    {
-            //        foreach (var reward in mission.Rewards)
-            //        {
-            //            if (reward.Category == drs.Category)
-            //            {
-            //                returnValue = true;
-            //                break;
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        foreach (var r in mission.Rewards)
-            //        {
-            //            if (r.Category == drs.Category)
-            //            {
-            //                returnValue = true;
-            //                break;
-            //            }
-            //        }
-            //    }
+            if (!disallowed)
+            {
+                var missionRewardWithGarrisonResources
+                    = mission.Rewards.FirstOrDefault(r => r.IsGarrisonResources);
 
-            //    if (returnValue == true)
-            //        break;
-            //}
+                if (missionRewardWithGarrisonResources != null)
+                {
+                    var garrsionResourcesCurrency = WoWCurrency.GetCurrencyById(824);
+
+                    if (garrsionResourcesCurrency != null)
+                    {
+                        var cap = garrsionResourcesCurrency.TotalMax;
+                        var missionAmt = missionRewardWithGarrisonResources.Quantity;
+                        var playerAmt = garrsionResourcesCurrency.Amount;
+
+                        disallowed = (playerAmt + missionAmt) > cap;
+
+                        GarrisonButler.Diagnostic(
+                            "[Missions] Garrison Resources = {0} for mission ({1}) {2}.  Player has {3} Garrison Resources.  Total max is {4}.  {5} + {6} > {7}?  {8}",
+                            missionAmt, mission.MissionId, mission.Name, playerAmt, cap, missionAmt, playerAmt, cap,
+                            disallowed);
+                    }
+                }
+            }
 
             GarrisonButler.Diagnostic(
-                returnValue
+                disallowed
                     ? "[Missions] Mission is DISALLOWED id: {0} name: {1}"
                     : "[Missions] Mission is enabled id: {0} name: {1}", mission.MissionId, mission.Name);
 
-            return returnValue;
+            return disallowed;
         }
 
         public static List<Tuple<Mission, Follower[]>> NewMissionStubCode(List<Follower> followers)
@@ -257,6 +252,9 @@ namespace GarrisonButler.ButlerCoroutines
                     missions.RemoveAll(m => m.Rewards.Any(mr => mr.Id == reward.Id));
                     continue;
                 }
+
+                // Remove all missions that are disallowed (perhaps by Garrison Resource limit)
+                missions.RemoveAll(IsMissionDisallowed);
 
                 var missionsWithCurrentReward = missions
                     // Pick the missions off the list matching the current reward
