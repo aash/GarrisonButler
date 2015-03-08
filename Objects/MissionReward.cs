@@ -544,6 +544,7 @@ namespace GarrisonButler.Objects
                 // Special Items
                 new MissionReward((int)MissionRewardCategory.FollowerExperience, MissionRewardCategory.FollowerExperience),
                 new MissionReward((int)MissionRewardCategory.Gold, MissionRewardCategory.Gold),
+                new MissionReward((int)MissionRewardCategory.Currency, MissionRewardCategory.Currency),
                 new MissionReward((int)MissionRewardCategory.FollowerGear, MissionRewardCategory.FollowerGear),
                 new MissionReward((int)MissionRewardCategory.FollowerItem, MissionRewardCategory.FollowerItem),
                 new MissionReward((int)MissionRewardCategory.LegendaryQuestItem, MissionRewardCategory.LegendaryQuestItem),
@@ -552,6 +553,7 @@ namespace GarrisonButler.Objects
                 new MissionReward((int)MissionRewardCategory.Profession, MissionRewardCategory.Profession),
                 new MissionReward((int)MissionRewardCategory.ReputationToken, MissionRewardCategory.ReputationToken),
                 new MissionReward((int)MissionRewardCategory.VanityItem, MissionRewardCategory.VanityItem),
+                new MissionReward((int)MissionRewardCategory.FollowerContract, MissionRewardCategory.FollowerContract),
                 // Currency - http://www.wowhead.com/guides/garrisons/warlords-of-draenor-garrison-missions-guide#rewards
                 new MissionReward(823, MissionRewardCategory.Currency),             // Currency - Apexis Crystal - http://www.wowhead.com/currency=823/apexis-crystal
                 new MissionReward(824, MissionRewardCategory.Currency),             // Currency - Garrison Resources - http://www.wowhead.com/currency=824/garrison-resources
