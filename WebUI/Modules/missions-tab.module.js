@@ -37,12 +37,12 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
         };
 
         $scope.updateList = function() {
-            var temp = $scope.MissionRewards.sort(function(a, b) { return a.priorityList > b.priorityList; });
-            for (var i = 0; i < temp.length; i++)
+            $scope.MissionRewards = $scope.MissionRewards.sort(function(a, b) { return a.priorityList >= b.priorityList; });
+
+            for (var i = 0; i < $scope.MissionRewards.length; i++)
             {
-                temp[i].priorityList = i;
+                $scope.MissionRewards[i].priorityList = i;
             }
-            $scope.MissionRewards = temp;
         };
 
 
