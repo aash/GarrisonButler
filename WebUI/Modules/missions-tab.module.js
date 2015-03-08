@@ -36,7 +36,8 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             }
         };
 
-        $scope.updateList = function() {
+        $scope.updateList = function () {
+            $scope.GBDiagnostic("updateList");
             $scope.MissionRewards = $scope.MissionRewards.sort(function(a, b) { return a.priorityList >= b.priorityList; });
 
             for (var i = 0; i < $scope.MissionRewards.length; i++)
@@ -45,8 +46,29 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             }
         };
 
+        $scope.canWowhead = function (reward)
+        {
+            return $scope.canWowheadItem(reward) || $scope.canWowheadCurrency(reward);
+        };
 
-        $scope.canWowhead = function(reward)
+        $scope.canWowheadCurrency = function (reward)
+        {
+            if (reward.isCategory)
+            {
+                return false;
+            }
+
+            var cat = reward.rewardCategory;
+            if (cat === "Currency")
+            {
+                return true;
+            }
+
+            return false;
+        };
+
+
+        $scope.canWowheadItem = function(reward)
         {
             if(reward.isCategory)
             {
@@ -56,6 +78,8 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             var cat = reward.rewardCategory;
             if(
                 cat === "PlayerGear" ||
+                cat === "PlayerExperience" ||
+                cat === "LegendaryQuestItem" ||
                 cat === "FollowerContract" ||
                 cat === "FollowerGear" ||
                 cat === "FollowerItem" ||
@@ -181,7 +205,8 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             }
 
 
-            $scope.updateReward = function(reward) {
+            $scope.updateReward = function (reward) {
+                $scope.GBDiagnostic("updateReward: " + reward.rewardId);
                 $scope.updateRewardById(reward.rewardId, reward);
             };
             var rewards = JSON.parse($scope.loadRewards());

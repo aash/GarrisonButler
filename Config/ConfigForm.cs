@@ -38,17 +38,24 @@ namespace GarrisonButler.Config
     public partial class ConfigForm : Form
     {
         private static MyWindow _myWindow;
+        private static SplashWindow _splashWindow;
         private static List<CheckBox> _collectCheckBoxes;
         private static List<CheckBox> _startCheckBoxes;
         public string firstName = "Manas";
         public ConfigForm()
         {
+            //if(_splashWindow == null)
+            //    _splashWindow = new SplashWindow();
+
+            //_splashWindow.Activate();
+            //_splashWindow.Show();
             InitializeComponent();
+            //_splashWindow.Hide();
 
             ////Close();
             //if (_myWindow == null)
             //    _myWindow = new MyWindow();
-            
+
             //_myWindow.Activate();
             //_myWindow.Show();
         }
@@ -205,7 +212,49 @@ namespace GarrisonButler.Config
 
 
 
+        public class SplashWindow : Window
+        {
+            public SplashWindow()
+            {
+                Width = 600;
+                Height = 400;
+                Title = GarrisonButler.NameStatic + " v" + GarrisonButler.Version + " (Loading...)";
+                var tabControl = new TabControl { Height = double.NaN, Width = double.NaN };
 
+                //Splash screen
+                var splashTabItem = new TabItem { Header = "Welcome", Content = ContentTabSplash() };
+                tabControl.Items.Add(splashTabItem);
+
+                Content = tabControl;
+            }
+
+            private static object ContentTabSplash()
+            {
+                var mainFrame = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+
+                var mainWrapPanel = new WrapPanel { Orientation = Orientation.Vertical, Width = double.NaN };
+
+                var splashBrush = new ImageBrush();
+                var myImage = new BitmapImage();
+                var myMemStream = new MemoryStream();
+                var garrisonButlerSplashImage =
+                    GarrisonButler.IsIceVersion()
+                        ? GarrisonButlerImages.GarrisonButlerICESplashImage
+                        : GarrisonButlerImages.GarrisonButlerLiteSplashImage;
+                garrisonButlerSplashImage.Save(myMemStream, garrisonButlerSplashImage.RawFormat);
+                myMemStream.Seek(0, SeekOrigin.Begin);
+
+                myImage.BeginInit();
+                myImage.StreamSource = myMemStream;
+                myImage.EndInit();
+
+                splashBrush.ImageSource = myImage;
+                mainWrapPanel.Background = splashBrush;
+
+                mainFrame.Content = mainWrapPanel;
+                return mainFrame;
+            }
+        }
 
 
 
