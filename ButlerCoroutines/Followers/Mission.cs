@@ -175,7 +175,7 @@ namespace GarrisonButler.ButlerCoroutines
             // Status 5 is INACTIVE
             // Make sure there's at least 1 follower
             // and make sure the number of active followers is less than 20
-            if (numFollowers == 0 || followers.Count(f => f.Status.ToInt32() != 5) <= 20)
+            if (numFollowers == 0 || followers.Count(f => f.Status.ToInt32() != 5) <= (_buildings.Any(b => b.Id == (int) global::GarrisonButler.Buildings.BarracksLvl3) ? 25 : 20))
             {
                 GarrisonButler.Diagnostic("returning from GetAllFollowers(): # followers = {0}", followers.Count);
                 return toStart;
