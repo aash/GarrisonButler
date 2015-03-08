@@ -68,7 +68,7 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             }
             catch(e)
             {
-
+                $scope.Diagnostic(e);
             }
         };
 
@@ -109,7 +109,13 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             'retrieveMail',
             function (newValue, oldValue)
             {
-                $scope.saveCSharpBool("RetrieveMail", newValue);
+                try {
+                    $scope.saveCSharpBool("RetrieveMail", newValue);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
             }
         );
 
@@ -117,7 +123,13 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             'sendMail',
             function (newValue, oldValue)
             {
-                $scope.saveCSharpBool("SendMail", newValue);
+                try {
+                    $scope.saveCSharpBool("SendMail", newValue);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
             }
         );
 
@@ -125,7 +137,13 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             'sendGreen',
             function (newValue, oldValue)
             {
-                $scope.saveCSharpBool("SendDisenchantableGreens", newValue);
+                try{
+                    $scope.saveCSharpBool("SendDisenchantableGreens", newValue);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
             }
         );
 
@@ -133,7 +151,13 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             'recipientGreen',
             function (newValue, oldValue)
             {
-                window.external.UpdateGreenToCharRecipient(newValue);
+                try{
+                    window.external.UpdateGreenToCharRecipient(newValue);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
             }
         );
 
@@ -144,9 +168,9 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             $scope.sendGreen = $scope.loadCSharpBool("SendDisenchantableGreens")
             $scope.recipientGreen = window.external.GetGreenToCharRecipient();
         }
-        catch (e)
+        catch(e)
         {
+            $scope.Diagnostic(e);
         }
-
     });
 

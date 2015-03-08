@@ -119,7 +119,14 @@ angular.module('GarrisonButlerApp.general-tab', ['ngMaterial', 'uiSwitch'])
                 'item.value',
                 function (newValue, oldValue)
                 {
-                    $scope.saveCSharpBool($scope.propertyName, newValue);
+
+                    try {
+                        $scope.saveCSharpBool($scope.propertyName, newValue);
+                    }
+                    catch(e)
+                    {
+                        $scope.Diagnostic(e);
+                    }
                 }
             );
 
@@ -129,6 +136,7 @@ angular.module('GarrisonButlerApp.general-tab', ['ngMaterial', 'uiSwitch'])
             }
             catch (e)
             {
+                $scope.Diagnostic(e);
             }
         };
     });

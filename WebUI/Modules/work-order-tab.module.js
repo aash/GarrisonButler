@@ -10,7 +10,13 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
 
         // Load buildings in js value from c# code
         $scope.loadBuildings = function () {
-            var res = window.external.getBuildingsJs();
+            try{
+                var res = window.external.getBuildingsJs();
+            }
+            catch(e)
+            {
+                $scope.Diagnostic(e);
+            }
             return res;
         };
         // Represents a building
@@ -27,21 +33,21 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
         try
         {
             var buildings = JSON.parse($scope.loadBuildings());
-            $scope.GBDiagnostic("Received: " + buildings);
+            $scope.Diagnostic("Received: " + buildings);
             $scope.butlerSettings.Buildings = [];
             for (var i = 0; i < buildings.length; i++)
             {
                 var buildingId = buildings[i];
-                $scope.GBDiagnostic("Request for building: " + buildingId);
+                $scope.Diagnostic("Request for building: " + buildingId);
                 var building = JSON.parse($scope.loadBuildingById(buildingId));
-                $scope.GBDiagnostic("Parsed: " + building);
+                $scope.Diagnostic("Parsed: " + building);
                 $scope.butlerSettings.Buildings[i] = new $scope.Building(buildingId, building[0], "", Boolean(building[1]), parseInt(building[2]), Boolean(building[3]), Boolean(building[4]));
             }
             $scope.butlerSettings.Buildings = $scope.butlerSettings.Buildings.sort(function(a, b) { return a.name.localeCompare(b.name); });
         }
         catch(e)
         {
-            $scope.GBDiagnostic("Request for buildings error: " + e);
+            $scope.Diagnostic("Request for buildings error: " + e);
             $scope.butlerSettings.Buildings = [
                 // Mine / Garden
                 new $scope.Building("Building id", "Mine", "http://wow.zamimg.com/images/wow/icons/medium/trade_mining.jpg", "CanStartOrder", 10, "CanCollectOrder", false),
@@ -126,7 +132,13 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
                 'building.canCollectOrder',
                 function (newValue, oldValue)
                 {
-                    $scope.saveBuildingCanCollect($scope.building.id, newValue);
+                    try{
+                        $scope.saveBuildingCanCollect($scope.building.id, newValue);
+                    }
+                    catch(e)
+                    {
+                        $scope.Diagnostic(e);
+                    }
                 }
             );
 
@@ -134,7 +146,13 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
                 'building.canStartOrder',
                 function (newValue, oldValue)
                 {
-                    $scope.saveBuildingCanStart($scope.building.id, newValue);
+                    try {
+                        $scope.saveBuildingCanStart($scope.building.id, newValue);
+                    }
+                    catch(e)
+                    {
+                        $scope.Diagnostic(e);
+                    }
                 }
             );
 
@@ -142,7 +160,13 @@ angular.module('GarrisonButlerApp.work-order-tab', ['ngMaterial', 'ngAria','smar
                 'building.maxCanStartOrder',
                 function (newValue, oldValue)
                 {
-                    $scope.saveBuildingMaxStart($scope.building.id, newValue);
+                    try {
+                        $scope.saveBuildingMaxStart($scope.building.id, newValue);
+                    }
+                    catch(e)
+                    {
+                        $scope.Diagnostic(e);
+                    }
                 }
             );
         };

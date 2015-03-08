@@ -141,7 +141,6 @@
     </div>
     <!-- END: App-Loading Screen. -->
 
-
     <tabset>
 
         <tab heading="GarrisonButler">
@@ -607,7 +606,9 @@
 
 
             <h1>Detailed settings</h1>
-            <ul>Here you can decide the priority of categories and specific items.
+            <p>Here you can decide the priority of categories and specific items.</p>
+            <p>You can sort the data by clicking on the columns' headers.</p>
+            <ul>
                 <li><b>Priority:</b> The priority with which to treat rewards. 0 is better than 10.</li>
                 <li><b>Disallowed:</b> Will not allow a mission with this reward to be started EVER. </li>
                 <li><b>Player level:</b> The minimum lvl of character to consider this reward. </li>
@@ -618,24 +619,22 @@
         <thead>
         <tr>
             <th>Priority</th>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Disallowed</th>
-        <th>Player Level</th>
-        <th>Mission Level</th>
-        <th>Custom Success chances</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Disallowed</th>
+            <th>Player Level</th>
+            <th>Mission Level</th>
+            <th>Custom Success chances</th>
         </tr>
         </thead>
-        <tbody ng-model="MissionRewards">
-        <tr ng-repeat="row in MissionRewards">
-
-            <div ng-controller="RewardController" ng-init="init(row)">
+        <tbody>
+        <tr ng-repeat="row in MissionRewards" ng-controller="missionRewardController"  ng-init="init(row)">
                 <td>
-                    <span editable-text="row.priorityList" onaftersave="updateList()">
+
+                    <span editable-text="row.priorityList" onbeforesave="prepUpdateList(row)" onaftersave="updateList(row)">
                     {{ row.priorityList }}
                     </span>
                 </td>
-            </div>
 
             <td>
             <div>
@@ -650,19 +649,20 @@
             </td>
 
             <td>
+
                 <switch id="enabled" name="enabled" ng-model="row.disallowReward" class="green"></switch>
             </td>
 
             <td>
                 <!-- editable value (text with validation) -->
-                <span editable-text="row.playerLevel">
+                <span editable-text="row.playerLevel"  onaftersave="updateReward(row)">
                 {{ row.playerLevel }}
                 </span>
             </td>
 
             <td>
                 <!-- editable value (text with validation) -->
-                <span editable-text="row.missionLevel">
+                <span editable-text="row.missionLevel"  onaftersave="updateReward(row)">
                 {{ row.missionLevel }}
                 </span>
             </td>
@@ -678,6 +678,13 @@
             </td>
         </tr>
         </tbody>
+            <!--<tfoot>-->
+            <!--<tr>-->
+                <!--<td colspan="5" class="text-center">-->
+                    <!--<div st-pagination="" st-items-by-page="10" st-displayed-pages="7"></div>-->
+                <!--</td>-->
+            <!--</tr>-->
+            <!--</tfoot>-->
         </table>
         </div>
 
@@ -685,6 +692,8 @@
         </tab>
 
     </tabset>
+
+    <div>{{lastError}}</div>
 </div>
 </body>
 </html>

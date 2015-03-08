@@ -44,25 +44,25 @@ namespace GarrisonButler.Config
         public bool GetBooleanValue(string propertyName)
         {
             var prop = GetType().GetProperty(propertyName);
-            //GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
             return (bool)prop.GetValue(this);
         }
         public void UpdateBooleanValue(string propertyName, bool value)
         {
             var prop = GetType().GetProperty(propertyName);
-            //GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
             prop.SetValue(this, value);
         }
         public int GetIntValue(string propertyName)
         {
             var prop = GetType().GetProperty(propertyName);
-            //GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
+            GarrisonButler.Diagnostic("GetValue called for {0}, old value={1}", propertyName, prop.GetValue(this));
             return (int)prop.GetValue(this);
         }
         public void UpdateIntValue(string propertyName, int value)
         {
             var prop = GetType().GetProperty(propertyName);
-            //GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
+            GarrisonButler.Diagnostic("Update called for {0}, old value={1}, new value={2}", propertyName, prop.GetValue(this), value);
             prop.SetValue(this, value);
         }
 
@@ -106,7 +106,7 @@ namespace GarrisonButler.Config
         //    return "";
         //}
 
-        private const bool Debug = false;
+        private const bool Debug = true;
 
         public string getBuildingsJs()
         {
@@ -513,7 +513,7 @@ namespace GarrisonButler.Config
             return res;
         }
 
-        public void updateRewardById(int rewardId, string rewardJson)
+        public void updateRewardById(string rewardJson)
         {
             if (Debug)
                 GarrisonButler.Diagnostic("Save reward element: " + rewardJson);
@@ -526,16 +526,23 @@ namespace GarrisonButler.Config
                 if (reward == null)
                 {
                     if (Debug)
-                        GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " null");
+                        GarrisonButler.Diagnostic("updating reward failed, null");
                     return;
                 }
-                if (reward.Count < 5)
+                if (reward.Count < 6)
                 {
                     if (Debug)
-                        GarrisonButler.Diagnostic("updating reward failed, id: " + rewardId + " missing elements. count:" + reward.Count);
+                        GarrisonButler.Diagnostic("updating reward failed, missing elements. count:" + reward.Count);
+                    return;
+                }
+                if (reward[5] == null)
+                {
+                    if (Debug)
+                        GarrisonButler.Diagnostic("updating reward failed, rewardId null");
                     return;
                 }
 
+                var rewardId =  reward[5].ToString().ToInt32();
                 var current = MissionRewardSettings.FirstOrDefault(m => m.Id == rewardId);
                 if (current != null)
                 {
@@ -545,6 +552,7 @@ namespace GarrisonButler.Config
                     current.IndividualSuccessChanceEnabled = (reward[1] != null) && reward[1].ToString().ToBoolean();
                     current.RequiredSuccessChance = (reward[2] != null) ? reward[2].ToString().ToInt32() : 0;
                     current.RequiredMissionLevel = (reward[3] != null) ? reward[3].ToString().ToInt32() : 0;
+                    current.RequiredPlayerLevel = (reward[4] != null) ? reward[4].ToString().ToInt32() : 0;
                     current.RequiredPlayerLevel = (reward[4] != null) ? reward[4].ToString().ToInt32() : 0;
                 }
                 else
@@ -599,7 +607,6 @@ namespace GarrisonButler.Config
 
         public void diagnosticJs(string message)
         {
-            if (Debug)
                 GarrisonButler.Diagnostic("[UI] " + message);
         }
 

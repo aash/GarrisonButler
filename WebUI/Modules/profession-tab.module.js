@@ -22,17 +22,13 @@ angular.module('GarrisonButlerApp.profession-tab', ['ngMaterial', 'ngAria', 'sma
             {
                 var dailyId = dailies[i];
                 var dailyCd = JSON.parse($scope.loadDailyById(dailyId));
-                $scope.GBDiagnostic(dailyCd);
+                $scope.Diagnostic(dailyCd);
                 $scope.Professions[i] = new $scope.Daily(dailyId, dailyCd[0], dailyCd[1], Boolean(dailyCd[2]));
             }
             $scope.Professions = $scope.Professions.sort(function(a, b) { return a.name.localeCompare(b.name); });
         }
         catch(e) {
-            try
-            {
-                $scope.GBDiagnostic(e);
-            }
-            catch(e2){}
+            $scope.Diagnostic(e);
             $scope.Professions = [
                 new $scope.Daily(108996, "Alchemical Catalyst", "Alchemy", true),
                 new $scope.Daily(118700, "Secrets of Draenor Alchemy", "Alchemy", false),
@@ -62,7 +58,12 @@ angular.module('GarrisonButlerApp.profession-tab', ['ngMaterial', 'ngAria', 'sma
             'daily.activated',
             function (newValue, oldValue)
             {
-                $scope.saveDailyCd($scope.daily.itemId, newValue);
+                try{
+                    $scope.saveDailyCd($scope.daily.itemId, newValue);
+                }
+                catch(e) {
+                    $scope.Diagnostic(e);
+                }
             }
         );
     })

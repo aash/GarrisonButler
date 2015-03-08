@@ -6,8 +6,6 @@
 angular.module('GarrisonButlerApp.milling-tab', ['ngMaterial', 'ngAria', 'smart-table'])
 
     .controller('millingListController', function ($scope) {
-
-        console.log("test00");
         // Represents a Item
         $scope.MillingItem = function(itemId, name, activated) {
             this.itemId = itemId;
@@ -17,25 +15,21 @@ angular.module('GarrisonButlerApp.milling-tab', ['ngMaterial', 'ngAria', 'smart-
 
         try
         {
-            console.log("test0");
-
             var millingItems = JSON.parse($scope.loadMilling());
             $scope.MillingItems = [];
             for (var i = 0; i < millingItems.length; i++)
             {
                 var itemId = millingItems[i];
                 var millingItem = JSON.parse($scope.loadMillingById(itemId));
-                $scope.GBDiagnostic(millingItem);
+                $scope.Diagnostic(millingItem);
                 $scope.MillingItems[i] = new $scope.MillingItem(itemId, millingItem[0], Boolean(millingItem[1]));
             }
             $scope.MillingItems = $scope.MillingItems.sort(function(a, b) { return a.itemName.localeCompare(b.itemName); });
         }
-        catch(e) {
-            try {
-                $scope.GBDiagnostic(e);
-            }
-            catch(e2){}
-            console.log("test1");
+
+        catch(e)
+        {
+            $scope.Diagnostic(e);
             $scope.MillingItems = [
                 new $scope.MillingItem(0, "Fireweed", true),
                 new $scope.MillingItem(0, "Frostweed", true),
@@ -63,7 +57,13 @@ angular.module('GarrisonButlerApp.milling-tab', ['ngMaterial', 'ngAria', 'smart-
             'millingItem.activated',
             function (newValue, oldValue)
             {
-                $scope.saveMillingItem($scope.millingItem.itemId, newValue);
+                try{
+                    $scope.saveMillingItem($scope.millingItem.itemId, newValue);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
             }
         );
     });

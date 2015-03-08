@@ -21,16 +21,13 @@ angular.module('GarrisonButlerApp.trading-post-tab', ['ngMaterial', 'ngAria', 's
             {
                 var itemId = tradingItems[i];
                 var tpItem = JSON.parse($scope.loadTPById(itemId));
-                $scope.GBDiagnostic(tpItem);
+                $scope.Diagnostic(tpItem);
                 $scope.TradingReagents[i] = new $scope.TPItem(itemId, tpItem[0], Boolean(tpItem[1]));
             }
             $scope.TradingReagents = $scope.TradingReagents.sort(function(a, b) { return a.itemName.localeCompare(b.itemName); });
         }
         catch(e) {
-            try {
-                $scope.GBDiagnostic(e);
-            }
-            catch(e2){}
+            $scope.Diagnostic(e);
             $scope.TradingReagents = [
                 new $scope.TPItem(0, "Fireweed", true),
                 new $scope.TPItem(0, "Frostweed", true),
@@ -58,7 +55,12 @@ angular.module('GarrisonButlerApp.trading-post-tab', ['ngMaterial', 'ngAria', 's
             'tradingItem.activated',
             function (newValue, oldValue)
             {
-                $scope.saveTPItem($scope.tradingItem.itemId, newValue);
+                try{
+                    $scope.saveTPItem($scope.tradingItem.itemId, newValue);
+                }
+                catch(e) {
+                    $scope.Diagnostic(e);
+                }
             }
         );
     });

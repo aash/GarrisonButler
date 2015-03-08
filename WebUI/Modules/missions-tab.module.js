@@ -36,12 +36,81 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             }
         };
 
-        $scope.updateList = function() {
-            $scope.MissionRewards = $scope.MissionRewards.sort(function(a, b) { return a.priorityList >= b.priorityList; });
+        $scope.MissionRewardPriorityOld = 0;
 
-            for (var i = 0; i < $scope.MissionRewards.length; i++)
+        $scope.prepUpdateList = function(oldRowValue) {
+            $scope.MissionRewardPriorityOld = oldRowValue.priorityList;
+        };
+
+
+        $scope.updateList = function(newRowValue) {
+            var newPriority = newRowValue.priorityList;
+            var oldPriority = $scope.MissionRewardPriorityOld;
+
+            $scope.Diagnostic("Update list, oldprio: " + oldPriority + " new prio: " + newPriority);
+            // if still at old position and not modified
+            if($scope.MissionRewards[oldPriority].rewardId === newRowValue.rewardId)
+            {
+                if($scope.MissionRewards[oldPriority].priorityList !== newPriority)
+                {
+                    $scope.MissionRewards[oldPriority].priorityList = parseInt(newPriority);
+                }
+            }
+
+            for (var i = 0; i< $scope.MissionRewards.length; i++)
+            {
+                if( $scope.MissionRewards[i].rewardId == newRowValue.rewardId
+                    &&  $scope.MissionRewards[i].category == newRowValue.category)
+                {
+                    $scope.Diagnostic("Updated element " + $scope.MissionRewards[i].rewardId + " pos: " + i + ", oldprio: " + oldPriority + " new prio: " + newPriority);
+                    $scope.Diagnostic("Updated element " + $scope.MissionRewards[i].rewardId + " before: " + $scope.MissionRewards[i].priorityList);
+                    $scope.MissionRewards[i].priorityList = newPriority;
+                    $scope.Diagnostic("Updated element " + $scope.MissionRewards[i].rewardId + " after: " + $scope.MissionRewards[i].priorityList);
+                }
+            }
+
+
+            //for (var i = 0; i< $scope.MissionRewards.length; i++)
+            //{
+            //    if( $scope.MissionRewards[i].rewardId == newRowValue.rewardId
+            //        &&  $scope.MissionRewards[i].category == newRowValue.category)
+            //    {
+            //        $scope.Diagnostic("Element " + $scope.MissionRewards[i].rewardId + " priority: " + $scope.MissionRewards[i].priorityList);
+            //        $scope.Diagnostic("Element" + $scope.MissionRewards[i].rewardId + " position: " + i);
+            //    }
+            //}
+            //$scope.Diagnostic($scope.MissionRewards.map(function(reward) {return reward.priorityList}).toLocaleString());
+
+            $scope.MissionRewards = $scope.MissionRewards.sort(function(a, b) {
+                //$scope.Diagnostic(b.priorityList + " < " + a.priorityList);
+                return a.priorityList - b.priorityList; });
+
+            //$scope.Diagnostic($scope.MissionRewards.map(function(reward) {return reward.priorityList}).toLocaleString());
+            //
+            //for (var i = 0; i< $scope.MissionRewards.length; i++)
+            //{
+            //    if( $scope.MissionRewards[i].rewardId == newRowValue.rewardId
+            //        &&  $scope.MissionRewards[i].category == newRowValue.category)
+            //    {
+            //        $scope.Diagnostic("Element " + $scope.MissionRewards[i].rewardId + " priority: " + $scope.MissionRewards[i].priorityList);
+            //        $scope.Diagnostic("Element" + $scope.MissionRewards[i].rewardId + " position: " + i);
+            //    }
+            //}
+            //
+            for (var i = 0; i< $scope.MissionRewards.length; i++)
             {
                 $scope.MissionRewards[i].priorityList = i;
+            }
+            //$scope.displayedCollection = [].concat($scope.MissionRewards);
+            //
+            //$scope.MissionRewards = tempList;
+            var listId = $scope.MissionRewards.map(function(elem){return elem.rewardId;});
+            try{
+                $scope.updateRewardsOrder(listId);
+            }
+            catch(e)
+            {
+                $scope.Diagnostic(e);
             }
         };
 
@@ -69,9 +138,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             return false;
         };
 
-        $scope.MissionRewards = [];
         $scope.MissionGeneralOptions = [];
-
         $scope.MissionGeneralOptions = [
             new $scope.MissionEntry(
                 'StartMissions',
@@ -149,6 +216,10 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
                 'Minimum required Garrison Resources to start a mission.')
         ];
 
+
+
+        $scope.MissionRewards = [];
+
         try
         {
 
@@ -165,6 +236,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
                     }
                     catch(e)
                     {
+                        $scope.Diagnostic(e);
                         option.val = false;
                     }
                 }
@@ -175,36 +247,34 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
                     }
                     catch(e)
                     {
+                        $scope.Diagnostic(e);
                         option.val = 0;
                     }
                 }
             }
 
-
-            $scope.updateReward = function(reward) {
-                $scope.updateRewardById(reward.rewardId, reward);
-            };
             var rewards = JSON.parse($scope.loadRewards());
-            $scope.GBDiagnostic("Received: " + rewards);
+            $scope.Diagnostic("Received: " + rewards);
             for (var i = 0; i < rewards.length; i++)
             {
                 var rewardId = rewards[i];
-                $scope.GBDiagnostic("Request for reward: " + rewardId);
-                var reward = JSON.parse($scope.loadRewardById(rewardId));
-                $scope.GBDiagnostic("Parsed: " + reward);
+                $scope.Diagnostic("Request for reward: " + rewardId);
+                var reward = JSON.parse($scope.loadRewardById(rewardId));                console.log("test3");
+
+                $scope.Diagnostic("Parsed: " + reward);
                 $scope.MissionRewards[i] = new $scope.MissionSetting(rewardId, reward[0], reward[1], Boolean(reward[2]), Boolean(reward[3]), parseInt(reward[4]), parseInt(reward[5]), parseInt(reward[6]), Boolean(reward[7]), i);
             }
         }
         catch(e) {
             try
             {
-                $scope.GBDiagnostic("Request for missions rewards error: " + e);
+                $scope.Diagnostic("Request for missions rewards error: " + e);
                 $scope.MissionRewards = [
                     // Mine / Garden
                     new $scope.MissionSetting("1", "FollowerExperience", "FollowerExperience", false, true, 10, 15, 20, true, 1),
                     new $scope.MissionSetting("1", "adada", "FollowerExperience", false, true, 10, 15, 20, false, 2),
                     new $scope.MissionSetting("1", "fefefef", "fcesrf", false, true, 10, 15, 20, false, 3),
-                    new $scope.MissionSetting("1", "gtghrthsht", "FollowerExperience", false, true, 10, 15, 20, false, 4),
+                    new $scope.MissionSetting("115493", "gtghrthsht", "FollowerItem", false, true, 10, 15, 20, false, 4),
                     new $scope.MissionSetting("2", "Gold", "Gold", false, false, 85, 90, 90, true, 5)
                 ];
             }
@@ -221,7 +291,14 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             }
         }
 
-
+        $scope.saveReward = function(reward){
+            //try{
+            //    $scope.updateRewardById(newValue);
+            //}
+            //catch(e) {
+            //    $scope.Diagnostic(e);
+            //}
+        };
     })
     .controller('MissionOptionController', function ($scope) {
         $scope.init = function (item) {
@@ -232,29 +309,39 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             'option',
             function (newValue, oldValue)
             {
-                if(newValue.variableType === "bool")
-                    $scope.saveCSharpBool(newValue.variableName, newValue.val);
-                else if(newValue.variableType === "int")
-                    $scope.saveCSharpInt(newValue.variableName, newValue.val);
+                try {
+                    if (newValue.variableType === "bool")
+                        $scope.saveCSharpBool(newValue.variableName, newValue.val);
+                    else if (newValue.variableType === "int")
+                        $scope.saveCSharpInt(newValue.variableName, newValue.val);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
             },
             true
         );
     })
 
-    .controller('RewardController', function ($scope) {
+    .controller('missionRewardController', function ($scope) {
         $scope.init = function (item) {
             $scope.missionReward = item;
+
+            $scope.$watch(
+                'missionReward',
+                function (newValue, oldValue)
+                {
+                    try{
+                        $scope.updateReward(newValue);
+                    }
+                    catch(e) {
+                        $scope.Diagnostic(e);
+                    }
+                },
+                true
+            );
         };
-
-
-        $scope.$watch(
-            'missionReward',
-            function (newValue, oldValue)
-            {
-                $scope.updateReward(newValue);
-            },
-            true
-        );
     });
 
 
