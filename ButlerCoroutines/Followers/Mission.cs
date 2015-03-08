@@ -284,8 +284,6 @@ namespace GarrisonButler.ButlerCoroutines
                 var missionsThatMeetRequirement = missionsWithCurrentReward
                     // Make sure the mission level meets minimum required by global settings OR reward settings
                     .Where(m => reward.IndividualMissionLevelEnabled ? m.Level >= reward.RequiredMissionLevel : m.Level >= GaBSettings.Get().MinimumMissionLevel )
-                    // Make sure we have enough garrison resources
-                    .Where(m => m.Cost >= GaBSettings.Get().MinimumGarrisonResourcesToStartMissions)
                     .Where(m => m.Rewards
                         .Where(mr => mr.Id == reward.Id
                             // Handle the case where we are looking at a category of rewards instead of individual rewards
@@ -296,6 +294,9 @@ namespace GarrisonButler.ButlerCoroutines
                             && (reward.ConditionForPlayer == null || reward.ConditionForPlayer.GetCondition(mr))
                         )
                     )
+                    // Make sure we have enough garrison resources
+                    // Missions that reward Garrison Resources require none to start
+                    .Where(m => reward.IsGarrisonResources || m.Cost >= GaBSettings.Get().MinimumGarrisonResourcesToStartMissions)
                     .ToList();
 
                 if (!missionsThatMeetRequirement.Any())
