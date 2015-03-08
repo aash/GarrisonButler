@@ -38,19 +38,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\ButlerLua.cs" />
-    <Compile Include="Config\GarrisonButlerImages.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GarrisonButlerImages.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Config\MillingTab.cs" />
     <Compile Include="Config\OldSettings\DailyProfession.cs" />
     <Compile Include="Config\OldSettings\GaBSettings.Building.cs" />
     <Compile Include="Config\OldSettings\GabSettings.cs" />
     <Compile Include="Config\OldSettings\MailCondition.cs" />
     <Compile Include="Config\OldSettings\MailItem.cs" />
     <Compile Include="Config\OldSettings\ModuleVersion.cs" />
-    <Compile Include="Config\TradingPostTab.cs" />
     <Compile Include="Libraries\Combinatorics\Combinations.cs" />
     <Compile Include="Libraries\Combinatorics\GenerateOption.cs" />
     <Compile Include="Libraries\Combinatorics\IMetaCollection.cs" />
@@ -96,7 +89,6 @@
     </Compile>
     <Compile Include="Config\GaBSettings.Building.cs" />
     <Compile Include="Config\GaBSettings.cs" />
-    <Compile Include="Config\MailingTab.cs" />
     <Compile Include="ButlerCoroutines\ActionHelpers.cs" />
     <Compile Include="ButlerCoroutines\Buildings\Shipments.cs" />
     <Compile Include="ButlerCoroutines\Buildings\Cache.cs" />
@@ -176,15 +168,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Config\ConfigForm2.resources" />
     <EmbeddedResource Include="Config\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Config\GarrisonButlerImages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>GarrisonButlerImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

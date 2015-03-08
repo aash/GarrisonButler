@@ -100,6 +100,24 @@ angular.module('GarrisonButlerApp.general-tab', ['ngMaterial', 'uiSwitch'])
 
         $scope.items = $scope.butlerSettings.general;
 
+
+
+        $scope.itemsLite = [ // variable name in c#, Title, Description
+
+            new $scope.Entry(
+                'StartMissions',
+                'Start Missions',
+                'Enable to let the Butler start missions based on an all countered and 100% success method (optimized mission engine available in Ice Edition).',
+                'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_rune_01.jpg'),
+
+            new $scope.Entry(
+                'CompletedMissions',
+                'Collect Rewards',
+                'Enable to let the Butler collect rewards from missions (optimized reward engine available in Ice Edition).',
+                'http://wow.zamimg.com/images/wow/icons/medium/inv_misc_bag_10_red.jpg')
+        ];
+
+
         $scope.selectAll = function(val)
         {
             for (var i = 0; i < $scope.items.length; i++)

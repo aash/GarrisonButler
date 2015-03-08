@@ -160,6 +160,25 @@
 
                    <md-card>
                        <md-card-content>
+                           <h2>Version 2.4.6.0</h2>
+                           <lu>
+                               <li>Fix active follower count <= 20</li>
+                           </lu>
+                       </md-card-content>
+                   </md-card>
+
+                   <md-card>
+                       <md-card-content>
+                           <h2>Version 2.4.5.0</h2>
+                           <lu>
+                               <li>Added fix for UI not refreshing priorities order.</li>
+                               <li>Save settings before HBRelog skip</li>
+                               <li>Refresh building in shipment routine because it was using stale values.  Fixes bug where work orders weren't getting started</li>
+                           </lu>
+                       </md-card-content>
+                   </md-card>
+                   <md-card>
+                       <md-card-content>
                            <h2>Version 2.4.2.0</h2>
                            <lu>
                                <li>Added fix for UI not refreshing priorities for missions' rewards.</li>
@@ -279,6 +298,30 @@
                                         {{item.description}}
                                     </p>
                                 </accordion-group>
+                                </accordion>
+                            </md-item-content>
+                        </md-item>
+
+                        <md-item ng-if="!isIceVersion()" ng-repeat="item in itemsLite" ng-controller="switchController" ng-init="init(item)">
+                            <md-item-content flex="30">
+                                <accordion class="sectionBackground" close-others="oneAtATime">
+                                    <div layout="row" class="general-option-header">
+                                        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
+                                        <div class="md-tile-content general-item-title">
+                                            <h3>
+                                                <b>{{item.label}}</b>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <accordion-group is-open="status.open">
+                                        <accordion-heading>
+                                            More info
+                                            <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                        </accordion-heading>
+                                        <p>
+                                            {{item.description}}
+                                        </p>
+                                    </accordion-group>
                                 </accordion>
                             </md-item-content>
                         </md-item>
@@ -407,7 +450,7 @@
             </div>
         </tab>
 
-        <tab heading="Mailing">
+        <tab heading="Mailing" ng-if="isIceVersion()">
             <div ng-controller="mailingListController">
                 <div class="tab-intro">
                     <h2>Mailing Engine</h2>
@@ -517,7 +560,7 @@
         </tab>
 
 
-        <tab heading="Milling">
+        <tab heading="Milling"  ng-if="isIceVersion()">
             <div ng-controller="millingListController">
                 <div class="tab-intro">
                     <h2>Milling Engine</h2>
@@ -578,7 +621,7 @@
 
 
          <!--Missions rewards tab-->
-        <tab heading="Missions">
+        <tab heading="Missions"  ng-if="isIceVersion()">
         <div ng-controller="missionsListController">
         <div class="tab-intro">
         <h1>Missions Engine</h1>

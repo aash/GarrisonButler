@@ -24,7 +24,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(2, 4, 2, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(2, 4, 6, 0);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
@@ -39,7 +39,7 @@ namespace GarrisonButler
 
         public static string NameStatic
         {
-            get { return "GarrisonButler ICE"; }
+            get { return "GarrisonButler Ice"; }
         }
 
         // internal AutoAnglerProfile Profile { get; private set; }
