@@ -340,7 +340,7 @@ namespace GarrisonButler.ButlerCoroutines
                     return new Result(ActionResult.Failed);
                 }
 
-                //building.Refresh();
+                building.Refresh();
                 var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.Id);
                 if (buildingsettings == null)
                     return new Result(ActionResult.Failed);
@@ -438,7 +438,7 @@ namespace GarrisonButler.ButlerCoroutines
                     return new Result(ActionResult.Failed);
                 }
 
-                //building.Refresh();
+                building.Refresh();
 
                 // No Shipment ready
                 if (building.ShipmentsReady <= 0)
