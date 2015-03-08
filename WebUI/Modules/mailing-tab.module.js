@@ -53,6 +53,13 @@ angular.module('GarrisonButlerApp.mailing-tab', ['ngMaterial', 'ngAria', 'smart-
             }
         };
 
+        $scope.checkEmptyInt = function(data) {
+            if (!data || typeof data == 'undefined' || data == '' || data == "empty")
+            {
+                data = 0;
+            }
+        };
+
 
         $scope.saveMailToCSharp = function(data) {
             console.log("Current data:" + data);

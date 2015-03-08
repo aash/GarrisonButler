@@ -68,12 +68,10 @@ namespace GarrisonButler.Config
             webBrowser1.ScriptErrorsSuppressed = false;
             webBrowser1.AllowWebBrowserDrop = false;
             webBrowser1.AllowNavigation = false;
-            
             webBrowser1.IsWebBrowserContextMenuEnabled = false;
-            webBrowser1.WebBrowserShortcutsEnabled = false;
+            webBrowser1.WebBrowserShortcutsEnabled = true;
             webBrowser1.ObjectForScripting = GaBSettings.Get();
             webBrowser1.DocumentText = html;
-
 
             //var window = webBrowser1.Document.Window;
             //return window.GetType().InvokeMember(propertyName, BindingFlags.GetProperty, null, window, null);
