@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Reflection;
+using System.Windows;
 
 namespace GarrisonButler.Config
 {
@@ -49,7 +52,6 @@ namespace GarrisonButler.Config
             this.Name = "ConfigForm";
             this.Load += new System.EventHandler(this.ConfigForm_Load_1);
             this.ResumeLayout(false);
-
         }
 
         #endregion

@@ -76,7 +76,7 @@ namespace GarrisonButler.ButlerCoroutines
                             UseItemInbags,
                             async () =>
                             {
-                                var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 1)();
+                                var canUse = CanUseItemInBags(MinersCofeeItemId, MinersCofeeAura, 5)();
                                 return
                                     new Result(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee
                                         ? ActionResult.Running

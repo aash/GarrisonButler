@@ -639,7 +639,8 @@
             <td>
             <div>
                 <p ng-if="row.isCategory"><b>Category</b> - </p>
-                <a ng-if="canWowhead(row)" ng-href='http://www.wowhead.com/item={{ row.rewardId || "empty" }}' class="q2"></a>
+                <a ng-if="canWowheadItem(row)" ng-href='http://www.wowhead.com/item={{ row.rewardId || "empty" }}' class="q2"></a>
+                <a ng-if="canWowheadCurrency(row)" ng-href='http://www.wowhead.com/currency={{ row.rewardId || "empty" }}' class="icontiny q1"></a>
                 <p ng-if="!canWowhead(row)">{{row.rewardName}}</p>
             </div>
             </td>

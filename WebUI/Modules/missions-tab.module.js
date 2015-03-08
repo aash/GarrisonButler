@@ -114,8 +114,29 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             }
         };
 
+        $scope.canWowhead = function (reward)
+        {
+            return $scope.canWowheadItem(reward) || $scope.canWowheadCurrency(reward);
+        };
 
-        $scope.canWowhead = function(reward)
+        $scope.canWowheadCurrency = function (reward)
+        {
+            if (reward.isCategory)
+            {
+                return false;
+            }
+
+            var cat = reward.rewardCategory;
+            if (cat === "Currency")
+            {
+                return true;
+            }
+
+            return false;
+        };
+
+
+        $scope.canWowheadItem = function(reward)
         {
             if(reward.isCategory)
             {
@@ -125,6 +146,8 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             var cat = reward.rewardCategory;
             if(
                 cat === "PlayerGear" ||
+                cat === "PlayerExperience" ||
+                cat === "LegendaryQuestItem" ||
                 cat === "FollowerContract" ||
                 cat === "FollowerGear" ||
                 cat === "FollowerItem" ||
@@ -311,9 +334,9 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             {
                 try {
                     if (newValue.variableType === "bool")
-                        $scope.saveCSharpBool(newValue.variableName, newValue.val);
+                    $scope.saveCSharpBool(newValue.variableName, newValue.val);
                     else if (newValue.variableType === "int")
-                        $scope.saveCSharpInt(newValue.variableName, newValue.val);
+                    $scope.saveCSharpInt(newValue.variableName, newValue.val);
                 }
                 catch(e)
                 {
@@ -328,19 +351,19 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
         $scope.init = function (item) {
             $scope.missionReward = item;
 
-            $scope.$watch(
-                'missionReward',
-                function (newValue, oldValue)
-                {
+        $scope.$watch(
+            'missionReward',
+            function (newValue, oldValue)
+            {
                     try{
-                        $scope.updateReward(newValue);
+                $scope.updateReward(newValue);
                     }
                     catch(e) {
                         $scope.Diagnostic(e);
                     }
-                },
-                true
-            );
+            },
+            true
+        );
         };
     });
 
