@@ -61,6 +61,79 @@ namespace GarrisonButler {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /*
+        /// AngularJS v1.3.6
+        /// (c) 2010-2014 Google, Inc. http://angularjs.org
+        /// License: MIT
+        /// */
+        ///(function(N,f,W){&apos;use strict&apos;;f.module(&quot;ngAnimate&quot;,[&quot;ng&quot;]).directive(&quot;ngAnimateChildren&quot;,function(){return function(X,C,g){g=g.ngAnimateChildren;f.isString(g)&amp;&amp;0===g.length?C.data(&quot;$$ngAnimateChildren&quot;,!0):X.$watch(g,function(f){C.data(&quot;$$ngAnimateChildren&quot;,!!f)})}}).factory(&quot;$$animateReflow&quot;,[&quot;$$rAF&quot;,&quot;$document&quot;,function(f,C){return function(g){return f(function(){g()})}}]).config([&quot;$provide&quot;,&quot;$animateProvider&quot;,fun [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string angular_animate_min {
+            get {
+                return ResourceManager.GetString("angular_animate_min", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        /// AngularJS v1.3.6
+        /// (c) 2010-2014 Google, Inc. http://angularjs.org
+        /// License: MIT
+        /// */
+        ///(function(p,k,q){&apos;use strict&apos;;k.module(&quot;ngAria&quot;,[&quot;ng&quot;]).provider(&quot;$aria&quot;,function(){function a(a,e,b){return function(f,d,h){var l=h.$normalize(e);c[l]&amp;&amp;!h[l]&amp;&amp;f.$watch(h[a],function(a){b&amp;&amp;(a=!a);d.attr(e,a)})}}var c={ariaHidden:!0,ariaChecked:!0,ariaDisabled:!0,ariaRequired:!0,ariaInvalid:!0,ariaMultiline:!0,ariaValue:!0,tabindex:!0,bindKeypress:!0};this.config=function(a){c=k.extend(c,a)};this.$get=function(){retu [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string angular_aria_min {
+            get {
+                return ResourceManager.GetString("angular_aria_min", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*!
+        /// * Angular Material Design
+        /// * https://github.com/angular/material
+        /// * @license MIT
+        /// * v0.7.0
+        /// */
+        ///function mdMediaFactory(e,t,n,r){function o(e){var t=d.get(e);angular.isUndefined(t)&amp;&amp;(t=d.put(e,a(e)));var n=l.get(t);return angular.isUndefined(n)&amp;&amp;(n=i(t)),n}function a(t){return e.MEDIA[t]||(&quot;(&quot;!==t.charAt(0)?&quot;(&quot;+t+&quot;)&quot;:t)}function i(e){return l.put(e,!!r.matchMedia(e).matches)}function c(){var e=l.keys(),t=e.length;if(t){for(var r=0;t&gt;r;r++)i(e[r]);n.$evalAsync()}}var d=t.cacheFactory(&quot;$mdMedia:quer [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string angular_material_min_js {
+            get {
+                return ResourceManager.GetString("angular_material_min_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        /// AngularJS v1.3.6
+        /// (c) 2010-2014 Google, Inc. http://angularjs.org
+        /// License: MIT
+        /// */
+        ///(function(U,X,u){&apos;use strict&apos;;function A(b){return function(){var a=arguments[0],c;c=&quot;[&quot;+(b?b+&quot;:&quot;:&quot;&quot;)+a+&quot;] http://errors.angularjs.org/1.3.6/&quot;+(b?b+&quot;/&quot;:&quot;&quot;)+a;for(a=1;a&lt;arguments.length;a++){c=c+(1==a?&quot;?&quot;:&quot;&amp;&quot;)+&quot;p&quot;+(a-1)+&quot;=&quot;;var d=encodeURIComponent,e;e=arguments[a];e=&quot;function&quot;==typeof e?e.toString().replace(/ \{[\s\S]*$/,&quot;&quot;):&quot;undefined&quot;==typeof e?&quot;undefined&quot;:&quot;string&quot;!=typeof e?JSON.stringify(e):e;c+=d(e)}return Erro [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string angular_min {
+            get {
+                return ResourceManager.GetString("angular_min", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        /// * angular-ui-bootstrap
+        /// * http://angular-ui.github.io/bootstrap/
+        ///
+        /// * Version: 0.12.0 - 2014-11-16
+        /// * License: MIT
+        /// */
+        ///angular.module(&quot;ui.bootstrap&quot;, [&quot;ui.bootstrap.tpls&quot;, &quot;ui.bootstrap.transition&quot;,&quot;ui.bootstrap.collapse&quot;,&quot;ui.bootstrap.accordion&quot;,&quot;ui.bootstrap.alert&quot;,&quot;ui.bootstrap.bindHtml&quot;,&quot;ui.bootstrap.buttons&quot;,&quot;ui.bootstrap.carousel&quot;,&quot;ui.bootstrap.dateparser&quot;,&quot;ui.bootstrap.position&quot;,&quot;ui.bootstrap.datepicker&quot;,&quot;ui.bootstrap.dropdown&quot;,&quot;ui.bootstrap.modal&quot;,&quot;ui.bootstrap.pagination&quot;,&quot;ui.bootstrap.to [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string bootstrap_js {
+            get {
+                return ResourceManager.GetString("bootstrap_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to var g_garrison_followers = {
         ///    &quot;32&quot;: {
         ///        &quot;id&quot;: 32,
@@ -99,15 +172,32 @@ namespace GarrisonButler {
         ///    .controller(&apos;GeneralOptionsController&apos;, function ($scope) {
         ///
         ///        // Represents a variable name, a title and a description
-        ///        $scope.Entry = function Entry(variableName, label, description, displayicon) {
+        ///        $scope.Entry = function Entry(variableName, label, description) {
         ///            this.variableName = variableName;
         ///            this.value = false;
         ///            this.label = label;
-        ///            this.description = desc [rest of string was truncated]&quot;;.
+        ///            this.description = description;
+        ///        };
+        ///
+        ///       [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string general_tab_module_js {
             get {
                 return ResourceManager.GetString("general_tab_module_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*! Hammer.JS - v2.0.4 - 2014-09-28
+        /// * http://hammerjs.github.io/
+        /// *
+        /// * Copyright (c) 2014 Jorik Tangelder;
+        /// * Licensed under the MIT license */
+        ///!function(a,b,c,d){&quot;use strict&quot;;function e(a,b,c){return setTimeout(k(a,c),b)}function f(a,b,c){return Array.isArray(a)?(g(a,c[b],c),!0):!1}function g(a,b,c){var e;if(a)if(a.forEach)a.forEach(b,c);else if(a.length!==d)for(e=0;e&lt;a.length;)b.call(c,a[e],e,a),e++;else for(e in a)a.hasOwnProperty(e)&amp;&amp;b.call(c,a[e],e,a)}function h(a,b,c){for(var e=Object.keys(b),f= [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string hammer_min_js {
+            get {
+                return ResourceManager.GetString("hammer_min_js", resourceCulture);
             }
         }
         
@@ -127,7 +217,7 @@ namespace GarrisonButler {
         ///            this.recipient = recipient;
         ///            this.condition = condition;
         ///            this.value = value;
-        ///           [rest of string was truncated]&quot;;.
+        ///            this.comment  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mailing_tab_module_js {
             get {
@@ -139,7 +229,7 @@ namespace GarrisonButler {
         ///   Looks up a localized string similar to /* TABS */
         ///
         ///.nav-tabs{
-        ///    background-color: rgb(33,150,243);
+        ///    background-color: rgb(255, 163, 74);
         ///}
         ///.ng-isolate-scope a{
         ///    color: #ffffff;
@@ -149,19 +239,22 @@ namespace GarrisonButler {
         ///}
         ///
         ///.sectionBackground {
-        ///    background: rgba(26, 76, 84, 0.16);
+        ///    background: rgba(0, 22, 249, 0.27);
         ///    border-radius: 3px;
         ///    margin: 1em;
         ///    padding-bottom: 0px;
         ///    width: 250px!important;
         ///}
         ///.sectionBackground-work-order {
-        ///     background: rgba(26, 76, 84, 0.16);
+        ///    background: rgba(30, 152, 157, 0.46);
         ///     border-radius: 3px;
         ///     margin: 1em;
         ///     padding-bottom: 0px;
         ///     width: 320px!important;
-        /// } [rest of string was truncated]&quot;;.
+        /// }
+        ///
+        ///.panel-group{
+        ///    ma [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mainUI_css {
             get {
@@ -180,7 +273,8 @@ namespace GarrisonButler {
         ///    &lt;meta name=&quot;viewport&quot; content=&quot;user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui&quot; /&gt;
         ///    &lt;meta name=&quot;apple-mobile-web-app-status-bar-style&quot; content=&quot;yes&quot; /&gt;
         ///
-        ///    &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/ [rest of string was truncated]&quot;;.
+        ///    &lt;script src=&quot;./Libraries/Angular/angular.min.js&quot;&gt;&lt;/script&gt;
+        ///    &lt;sc [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mainUI_html {
             get {
@@ -198,11 +292,13 @@ namespace GarrisonButler {
         ///        &apos;GarrisonButlerApp.milling-tab&apos;,
         ///        &apos;GarrisonButlerApp.mailing-tab&apos;,
         ///        &apos;GarrisonButlerApp.trading-post-tab&apos;,
-        ///        &apos;GarrisonButlerApp.missions-tab&apos;,
+        ///        &apos;GarrisonButlerApp.missions-tab&apos;
         ///    ]);
         ///
         ///angular.module(&apos;GarrisonButlerApp&apos;).controller(&apos;MainController&apos;, function ($scope, $window) {
-        ///    $scope.butlerSettings = {}; [rest of string was truncated]&quot;;.
+        ///
+        ///    $scope.lastErrorArray = [];
+        ///    $scope.l [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mainUI_js {
             get {
@@ -219,8 +315,6 @@ namespace GarrisonButler {
         ///angular.module(&apos;GarrisonButlerApp.milling-tab&apos;, [&apos;ngMaterial&apos;, &apos;ngAria&apos;, &apos;smart-table&apos;])
         ///
         ///    .controller(&apos;millingListController&apos;, function ($scope) {
-        ///
-        ///        console.log(&quot;test00&quot;);
         ///        // Represents a Item
         ///        $scope.MillingItem = function(itemId, name, activated) {
         ///            this.itemId = itemId;
@@ -230,7 +324,8 @@ namespace GarrisonButler {
         ///
         ///        try
         ///        {
-        ///            con [rest of string was truncated]&quot;;.
+        ///            var millingItems = JSON.parse($scope.loadMilling());
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string milling_tab_module_js {
             get {
@@ -261,23 +356,18 @@ namespace GarrisonButler {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /**
-        /// * Created by Mickaël on 3/1/2015.
-        /// */
-        ///
+        ///   Looks up a localized string similar to ///**
+        ///// * Created by Mickaël on 3/1/2015.
+        ///// */
+        /////
         ///// General Tab
-        ///angular.module(&apos;GarrisonButlerApp.missions-tab&apos;, [&apos;ngMaterial&apos;, &apos;ngAria&apos;, &apos;smart-table&apos;])
+        ///angular.module(&apos;GarrisonButlerApp.missions-tab&apos;, [&apos;ngMaterial&apos;, &apos;ngAria&apos;, &apos;smart-table&apos;, &apos;xeditable&apos;])
         ///
         ///    .controller(&apos;missionsListController&apos;, function ($scope) {
-        ///        // Represents a Item
-        ///        $scope.missionSetting = function(itemId, name, activated) {
-        ///            this.itemId = itemId;
-        ///            this.itemName = name;
-        ///            this.activated = activated;
-        ///        };
-        ///
-        ///        $scope.color = {
-        ///            red: Math.floor(Math.random()  [rest of string was truncated]&quot;;.
+        ///        // Represents a missionSetting
+        ///        $scope.MissionSetting = function(rewardId, rewardName, rewardCategory, disallowReward, individualSuccessEnabled, successChance, missionLevel, playerLevel, isCategory, priorityList) {
+        ///            this.rewardId = rewardId;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string missions_tab_module_js {
             get {
@@ -302,7 +392,9 @@ namespace GarrisonButler {
         ///            this.profession = profession;
         ///            this.activated = activated;
         ///        };
-        ///        try        /// [rest of string was truncated]&quot;;.
+        ///        try
+        ///        {
+        ///       [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string profession_tab_module_js {
             get {
@@ -327,7 +419,8 @@ namespace GarrisonButler {
         ///        return &quot;&quot; + position + &quot;px&quot;;
         ///    };
         ///
-        ///    hide = function(elemen [rest of string was truncated]&quot;;.
+        ///    hide = function(element) {
+        ///        ret [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string slider_js {
             get {
@@ -370,7 +463,8 @@ namespace GarrisonButler {
         ///
         ///        try
         ///        {
-        ///            var tradingItems = JSON.parse($s [rest of string was truncated]&quot;;.
+        ///            var tradingItems = JSON.parse($scope.loadTP());
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string trading_post_module {
             get {
@@ -391,11 +485,14 @@ namespace GarrisonButler {
         ///
         ///        // Load buildings in js value from c# code
         ///        $scope.loadBuildings = function () {
-        ///            var res = window.external.getBuildingsJs();
-        ///            return res;
-        ///        };
-        ///        // Represents a building
-        ///        $scope.Building = function Building(id, [rest of string was truncated]&quot;;.
+        ///            try{
+        ///                var res = window.external.getBuildingsJs();
+        ///            }
+        ///            catch(e)
+        ///            {
+        ///                $scope.Diagnostic(e);
+        ///            }
+        ///          [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string work_order_tab_module_js {
             get {
@@ -410,7 +507,26 @@ namespace GarrisonButler {
         ///Build date: 2014-01-10 
         ///*/
         ///
-        ///.editable-wrap{display:inline-block;white-space:nowrap;margin:0}.editable-wrap .editable-controls,.editable-wrap .editable-error{margin-bottom:0}.editable-wrap .editable-controls&gt;input,.editable-wrap .editable-controls&gt;select,.editable-wrap .editable-controls&gt;textarea{margin-bottom:0}.editable-wrap .editable-input{display:inline-block}.editable-buttons{display:inline-block;vertical-align:top}.editable-buttons button{margi [rest of string was truncated]&quot;;.
+        ///.editable-wrap {
+        ///    display: inline-block;
+        ///    white-space: nowrap;
+        ///    margin: 0
+        ///}
+        ///
+        ///.editable-wrap .editable-controls, .editable-wrap .editable-error {
+        ///    margin-bottom: 0
+        ///}
+        ///
+        ///.editable-wrap .editable-controls &gt; input, .editable-wrap .editable-controls &gt; select, .editable-wrap .editable-controls &gt; textarea {
+        ///    margin-bottom: 0
+        ///}
+        ///
+        ///.editable-wrap .editable-input {
+        ///    display: inline-block
+        ///}
+        ///
+        ///.editable-buttons {
+        ///    dis [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string xeditable_css {
             get {

@@ -256,7 +256,7 @@ angular.module('GarrisonButlerApp.missions-tab', ['ngMaterial', 'ngAria', 'smart
             {
                 var rewardId = rewards[i];
                 $scope.Diagnostic("Request for reward: " + rewardId);
-                var reward = JSON.parse($scope.loadRewardById(rewardId));                console.log("test3");
+                var reward = JSON.parse($scope.loadRewardById(rewardId));
 
                 $scope.Diagnostic("Parsed: " + reward);
                 $scope.MissionRewards[i] = new $scope.MissionSetting(rewardId, reward[0], reward[1], Boolean(reward[2]), Boolean(reward[3]), parseInt(reward[4]), parseInt(reward[5]), parseInt(reward[6]), Boolean(reward[7]), i);

@@ -86,8 +86,21 @@ namespace GarrisonButler.Config
                 {"<script src=\"./Libraries/SmartTable/smart-table.min.js\"></script>", ResourceWebUI.smart_table_min},
 
                 {"<script src=\"./Libraries/slider/slider.js\"></script>", ResourceWebUI.slider_js},
+                
+                {"<script src=\"./Libraries/angular-xeditable/js/xeditable.min.js\"></script>", ResourceWebUI.xeditable_min_js},
+                
+                {"<script src=\"./Libraries/Angular/angular.min.js\"></script>", ResourceWebUI.angular_min},
 
-                {"<script src=\"./Libraries/angular-xeditable/js/xeditable.min.js\"></script>", ResourceWebUI.xeditable_min_js}
+                {"<script src=\"./Libraries/Angular/angular-animate.min.js\"></script>", ResourceWebUI.angular_animate_min},
+
+                {"<script src=\"./Libraries/Angular/angular-aria.min.js\"></script>", ResourceWebUI.angular_aria_min},
+
+                {"<script src=\"./Libraries/Angular/angular-material.min.js\"></script>", ResourceWebUI.angular_material_min_js},
+
+                {"<script src=\"./Libraries/Angular/hammer.min.js\"></script>", ResourceWebUI.hammer_min_js},
+
+                {"<script src=\"./Libraries/Angular/bootstrap.js\"></script>", ResourceWebUI.bootstrap_js},
+                
      
             };
             Dictionary<string, string> dictCss = new Dictionary<string, string>()
