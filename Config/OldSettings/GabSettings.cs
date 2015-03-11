@@ -40,8 +40,8 @@ namespace GarrisonButler.Config.OldSettings
         public bool HarvestMine { get; set; }
         public bool UseCoffee { get; set; }
         public bool UseMiningPick { get; set; }
-        public bool DeleteCoffee { get; set; }
-        public bool DeleteMiningPick { get; set; }
+        //public bool DeleteCoffee { get; set; }
+        //public bool DeleteMiningPick { get; set; }
         public bool ActivateBuildings { get; set; }
         public bool SalvageCrates { get; set; }
         public bool StartMissions { get; set; }

@@ -613,7 +613,7 @@ namespace GarrisonButler.ButlerCoroutines
             {
                 for (var i = 0; i < maxToStart; i++)
                 {
-                    if (!await CapacitiveDisplayFrame.ClickStartOrderButton(building))
+                    if (!await CapacitiveDisplayFrame.ClickStartOrderButton(building, maxToStart))
                     {
                         if (building.StartWorkOrderTries >= Building.StartWorkOrderMaxTries)
                         {

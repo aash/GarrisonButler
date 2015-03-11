@@ -297,9 +297,6 @@ namespace GarrisonButler.ButlerCoroutines
                             && (reward.ConditionForPlayer == null || reward.ConditionForPlayer.GetCondition(mr))
                         )
                     )
-                    // Make sure we have enough garrison resources
-                    // Missions that reward Garrison Resources require none to start
-                    .Where(m => reward.IsGarrisonResources || m.Cost >= GaBSettings.Get().MinimumGarrisonResourcesToStartMissions)
                     .ToList();
 
                 if (!missionsThatMeetRequirement.Any())
@@ -534,6 +531,22 @@ namespace GarrisonButler.ButlerCoroutines
                             "Breaking mission loop due to followersToConsider < mission.NumFollowers");
                         continue;
                     }
+                }
+
+                // Abort if we don't have enough Garrison Resources
+                var gr = WoWCurrency.GetCurrencyById(824).Amount;
+                var mingr = GaBSettings.Get().MinimumGarrisonResourcesToStartMissions;
+                if (gr < mingr)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Breaking MissionCalc due to Minimum Required Garrison Resources.  Have {0} and need {1}.",
+                        gr, mingr);
+                }
+
+                if (mission.Cost > gr)
+                {
+                    GarrisonButler.Diagnostic("[Missions] Breaking MissionCalc due to insufficient Garrison Resources to start mission ({0}) {1}.  Have {2} and need {3}.",
+                        mission.MissionId, mission.Name, gr, mission.Cost);
+                    break;
                 }
 
                 // Garrison Resources

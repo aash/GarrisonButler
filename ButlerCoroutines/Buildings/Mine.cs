@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CommonBehaviors.Actions;
 using GarrisonButler.API;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
@@ -101,6 +102,28 @@ namespace GarrisonButler.ButlerCoroutines
             return MinesId.Contains(Me.SubZoneId);
         }
 
+        public static int HowMuchOfAura(uint auraId)
+        {
+            var auras = Me.Auras.Where(a => a.Value.SpellId == auraId);
+            var pairs = auras as KeyValuePair<string, WoWAura>[] ?? auras.ToArray();
+            if (auraId != 0 && pairs.Any())
+            {
+                var aura = pairs.First().Value;
+                // ReSharper disable once InvertIf
+                if (aura == null)
+                {
+                    GarrisonButler.Diagnostic("[Item,HowMuchOfAura] Aura null skipping.");
+                    return 0;
+                }
+
+                GarrisonButler.Diagnostic("[Item,HowMuchOfAura] AuraCheck: {0} - current stack {1}", aura.Name, aura.StackCount);
+
+                return (int)aura.StackCount;
+            }
+
+            return 0;
+        }
+
         public static Func<Tuple<bool, WoWItem>> CanUseItemInBags(uint entry, uint auraId = 0, int maxStack = 0)
         {
             return () =>
@@ -148,7 +171,25 @@ namespace GarrisonButler.ButlerCoroutines
             if (!item.IsValid)
                 return new Result(ActionResult.Failed);
 
-            item.Use();
+            // Miner's Coffee
+            if (item.Entry == MinersCofeeItemId)
+            {
+                var currentStackAmt = HowMuchOfAura(MinersCofeeAura);
+                var toUse = (5 >= currentStackAmt) ? (5 - currentStackAmt) : 0;
+
+                GarrisonButler.Diagnostic("[UseItemInBags] Miner's Coffe: current={0} toUse={1}", currentStackAmt, toUse);
+                item.Use();
+
+                toUse--;
+
+                if (toUse > 0)
+                    return new Result(ActionResult.Running);
+            }
+            else
+            {
+                item.Use();
+            }
+
             GarrisonButler.Log("[Item] Using: {0}", item.Name);
             await CommonCoroutines.SleepForLagDuration();
             await Buddy.Coroutines.Coroutine.Wait(20000, () => !Me.IsCasting);

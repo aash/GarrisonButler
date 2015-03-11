@@ -2,6 +2,7 @@
 
 using System.Threading.Tasks;
 using GarrisonButler.API;
+using GarrisonButler.ButlerCoroutines;
 using Styx.WoWInternals;
 
 #endregion
@@ -46,19 +47,32 @@ namespace GarrisonButler.LuaObjects
             Instance = null;
         }
 
-        public static async Task<bool> ClickStartOrderButton(Building building)
+        public static async Task<bool> ClickStartOrderButton(Building building, int maxToStart)
         {
             var currentStarted = building.ShipmentsTotal;
-            var lua = @"
-            local available = GarrisonCapacitiveDisplayFrame.available;
-	        if (available and available > 0) then
-		        C_Garrison.RequestShipmentCreation(available);
-            else
-                C_Garrison.RequestShipmentCreation();
-	        end
-            ";
-            await ButlerLua.DoString(lua);
-            building.StartWorkOrderTries++;
+//            var lua = string.Empty;
+
+//            lua = @"
+//            local available = GarrisonCapacitiveDisplayFrame.available;
+//	        if (available and available > 0) then
+//		        C_Garrison.RequestShipmentCreation(available);
+//            else
+//                C_Garrison.RequestShipmentCreation();
+//	        end
+//            ";
+            //await ButlerLua.DoString(lua);
+            var lua = @"C_Garrison.RequestShipmentCreation();";
+            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            {
+                var max = maxToStart;
+
+                while (max > 0)
+                {
+                    max--;
+                    Lua.DoString(lua);
+                }
+            }
+            building.StartWorkOrderTries += maxToStart;
             if (await Buddy.Coroutines.Coroutine.Wait(10000, () => currentStarted != building.ShipmentsTotal))
             {
                 GarrisonButler.Log("Successfully started a work order at {0}.", building.Name);

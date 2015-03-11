@@ -94,33 +94,7 @@ namespace GarrisonButler.ButlerCoroutines
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick
                                             ? ActionResult.Running
                                             : ActionResult.Failed, canUse.Item2);
-                            }, 10000, 3000),
-                        // Delete Coffee 
-                        new ActionHelpers.ActionOnTimer(
-                            DeleteItemInbags,
-                            async () =>
-                            {
-                                var tooMany =
-                                    TooManyItemInBags(MinersCofeeItemId, 20)();
-                                return
-                                    new Result(
-                                        tooMany.Item1 && GaBSettings.Get().DeleteCoffee
-                                            ? ActionResult.Running
-                                            : ActionResult.Failed, tooMany.Item2);
-                            }, 10000, 3000),
-                        // Delete Mining Pick 
-                        new ActionHelpers.ActionOnTimer(
-                            DeleteItemInbags,
-                            async () =>
-                            {
-                                var tooMany =
-                                    TooManyItemInBags(PreserverdMiningPickItemId, 20)();
-                                return
-                                    new Result(
-                                        tooMany.Item1 && GaBSettings.Get().DeleteMiningPick
-                                            ? ActionResult.Running
-                                            : ActionResult.Failed, tooMany.Item2);
-                            }, 10000, 30000)));
+                            }, 10000, 3000)));
 
                 // Take care of mine shipments
                 buildingsActionsSequence.AddAction(PickUpOrStartSequence(mine));

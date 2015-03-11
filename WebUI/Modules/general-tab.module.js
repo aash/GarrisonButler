@@ -54,19 +54,9 @@ angular.module('GarrisonButlerApp.general-tab', ['ngMaterial', 'uiSwitch'])
                 'Enable to use as a speed boost when in the mine.'),
 
             new $scope.Entry(
-                'DeleteCoffee',
-                'Delete Miner\'s Coffee',
-                'Enable to delete a unit of coffee if at max stack.'),
-
-            new $scope.Entry(
                 'UseMiningPick',
                 'Use Preserved Mining Pick',
                 'Enable to use as a speed boost when harvesting in the mine.'),
-
-            new $scope.Entry(
-                'DeleteMiningPick',
-                'Delete Preserved Mining Pick',
-                'Enable to delete a unit of mining pick if at max stack.'),
 
             new $scope.Entry(
                 'ActivateBuildings',

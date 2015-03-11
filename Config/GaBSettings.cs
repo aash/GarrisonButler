@@ -653,8 +653,8 @@ namespace GarrisonButler.Config
         public bool HarvestMine { get; set; }
         public bool UseCoffee { get; set; }
         public bool UseMiningPick { get; set; }
-        public bool DeleteCoffee { get; set; }
-        public bool DeleteMiningPick { get; set; }
+        //public bool DeleteCoffee { get; set; }
+        //public bool DeleteMiningPick { get; set; }
         public bool ActivateBuildings { get; set; }
         public bool SalvageCrates { get; set; }
         public int TimeMinBetweenRun { get; set; }
@@ -806,8 +806,8 @@ namespace GarrisonButler.Config
             CompletedMissions = oldSettings.CompletedMissions;
             ConfigVersion = oldSettings.ConfigVersion.FromOld();
             DailySettings = oldSettings.DailySettings.Select(d => d.FromOld()).ToList();
-            DeleteCoffee = oldSettings.DeleteCoffee;
-            DeleteMiningPick = oldSettings.DeleteMiningPick;
+            //DeleteCoffee = oldSettings.DeleteCoffee;
+            //DeleteMiningPick = oldSettings.DeleteMiningPick;
             ForceJunkSell = oldSettings.ForceJunkSell;
             GarrisonCache = oldSettings.GarrisonCache;
             HbRelogMode = oldSettings.HBRelogMode;
