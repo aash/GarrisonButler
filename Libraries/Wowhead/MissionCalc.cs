@@ -17,6 +17,7 @@ using Styx.Common;
 using Styx.CommonBot.Coroutines;
 using Styx.CommonBot.Frames;
 using Styx.Helpers;
+using Styx.WoWInternals.Garrison;
 
 namespace GarrisonButler.Libraries.Wowhead
 {
@@ -280,6 +281,41 @@ namespace GarrisonButler.Libraries.Wowhead
                 try
                 {
                     GarrisonButler.Diagnostic("Mission not valid, manually determine success chance");
+                    var hbMission =
+                        GarrisonInfo.Missions.FirstOrDefault(
+                            m => m.Id == mission.MissionId.ToInt32());
+
+                    if (hbMission == null)
+                    {
+                        GarrisonButler.Diagnostic("[Missions] hbMission object is null!");
+                        return returnValue;
+                    }
+
+                    var hbFollowers =
+                        GarrisonInfo.Followers.Where(f => followers.Any(fl => fl.FollowerId.ToInt32() == f.GarrFollowerId));
+
+                    if (!hbFollowers.Any())
+                    {
+                        GarrisonButler.Diagnostic("[Missions] hbFollowers returned NONE!");
+                        return returnValue;
+                    }
+
+                    MissionSimulatorOptions options = new MissionSimulatorOptions(
+                        true,   // computeSuccessChance
+                        false,  // clampSuccessTo100
+                        true,   // computerModifiedDuration
+                        true,   // computeXpBonusModifier
+                        true,   // computerMaterialBonusModifier
+                        true,   // computerBuffsAndEnvironmentCounter
+                        true,   // computeRewards
+                        true,   // computeModifiedRewards
+                        true   // computeGoldBonusModifier
+                        );
+
+                    var result = GarrisonMissionSimulator.Simulate(hbMission, hbFollowers, options);
+                    GarrisonButler.Diagnostic("[Missions] MissonSimulatorResults: \nGold Bonus Mod: {0}\nMaterial Bonus Mod: {1}\nSuccess Chance: {2}", 
+                        result.GoldBonusModifier, result.MaterialBonusModifier, result.SuccessChance);
+                    returnValue = new Tuple<double, double>((double)result.SuccessChance, 0.0d);
                     //var followersToAssign = followers.Take(mission.NumFollowers);
                     //if (!followersToAssign.Any())
                     //    return returnValue;
