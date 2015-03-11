@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
+using Styx;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
@@ -82,7 +83,9 @@ namespace GarrisonButler.Objects
 
         public bool CanMail()
         {
-            return _condition.GetCondition(ItemId);
+            // Make sure we meet the condition & we're not trying to mail this item to the same character that is already logged in
+            return _condition.GetCondition(ItemId)
+                && _recipient.Value != StyxWoW.Me.Name;
         }
 
         public async Task<IEnumerable<WoWItem>> GetItemsToSend()
