@@ -732,8 +732,9 @@ namespace GarrisonButler.ButlerCoroutines
                 var followersTemp = _followers.ToList();
                 foreach (var mission in missions)
                 {
+                    // Make sure that status is Idle or In Party
                     var match =
-                        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status == "nil").ToList());
+                        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status.ToInt32() <= 1).ToList());
                     if (match == null)
                         continue;
                     toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
