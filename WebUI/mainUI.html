@@ -152,15 +152,31 @@
                         </md-card-content>
                     </md-card>
 
-
                    <md-card>
                        <md-card-content>
-                           <h2>Version 2.4.11.0</h2>
+                           <h2>Version 2.4.19.0</h2>
                            <lu>
-                               <li>Removed tooltips and icons which were against BuddyStore rules.</li>
+                               <li>Don't allow to send mail to self</li>
+                               <li>Fix status checking on missions for Lite version</li>
+                               <li>Added alternative simulation for mission in case of error in main engine.</li>
+                               <li>Removed deleting coffee & mining pick</li>
+                               <li>Fixed bug ignoring user settings for starting work orders</li>
+                               <li>Fixed bug not properly honoring Minimum Garrison Resources setting</li>
+                               <li>Removed settings related to Deleteing Coffee / Mining Picks</li>
                            </lu>
                        </md-card-content>
                    </md-card>
+
+                   <md-card>
+                       <md-card-content>
+                           <h2>Version 2.4.12.0</h2>
+                           <lu>
+                               <li>Fixed names in Milling and Trading Post UI</li>
+                           </lu>
+                       </md-card-content>
+                   </md-card>
+
+                   <md-card>
                    <md-card-content>
                        <h2>Version 2.4.9.0</h2>
                        <lu>
@@ -594,7 +610,7 @@
                             </div>
                         </td>
                         <td>
-                            {{row.itemName}}
+                            <p>{{ row.itemName || "empty" }}</p>
                         </td>
                     </tr>
                     </tbody>
@@ -623,7 +639,7 @@
                             </div>
                         </td>
                         <td>
-                            {{row.itemName}}
+                            <p>{{ row.itemName || "empty" }}</p>
                         </td>
                     </tr>
                     </tbody>
