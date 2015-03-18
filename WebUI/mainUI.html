@@ -156,6 +156,15 @@
                        <md-card-content>
                            <h2>Version 2.4.19.0</h2>
                            <lu>
+                               <li>Fixed profession items names not showing</li>
+                           </lu>
+                       </md-card-content>
+                   </md-card>
+
+                   <md-card>
+                       <md-card-content>
+                           <h2>Version 2.4.19.0</h2>
+                           <lu>
                                <li>Don't allow to send mail to self</li>
                                <li>Fix status checking on missions for Lite version</li>
                                <li>Added alternative simulation for mission in case of error in main engine.</li>
@@ -469,9 +478,7 @@
                             </div>
                         </td>
                         <td>{{row.profession}}</td>
-                        <td>
-                            <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}'>{{ row.itemId || "empty" }}</a>
-                        </td>
+                        <td>{{ row.name || "empty" }}</td>
                     </tr>
                     </tbody>
                 </table>
