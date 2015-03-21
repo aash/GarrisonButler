@@ -1,5 +1,6 @@
 ﻿#region
 
+using Styx.Helpers;
 using System.Runtime.CompilerServices;
 using Bots.DungeonBuddy.Helpers;
 using Buddy.Coroutines;
@@ -303,9 +304,9 @@ namespace GarrisonButler.ButlerCoroutines
                 }
             }
             GarrisonButler.Diagnostic("Checking for vendors... Done.");
+
             VendorCheckTimer.Reset();
         }
-
 
         internal static void OnStop()
         {
