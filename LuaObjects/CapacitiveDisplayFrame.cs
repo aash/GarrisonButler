@@ -3,6 +3,7 @@
 using System.Threading.Tasks;
 using GarrisonButler.API;
 using GarrisonButler.ButlerCoroutines;
+using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 
 #endregion
@@ -47,42 +48,54 @@ namespace GarrisonButler.LuaObjects
             Instance = null;
         }
 
-        public static async Task<bool> ClickStartOrderButton(Building building, int maxToStart)
+        public static async Task<bool> ClickStartOrderButton(Building building, bool all = false)
         {
             var currentStarted = building.ShipmentsTotal;
-//            var lua = string.Empty;
-
-//            lua = @"
-//            local available = GarrisonCapacitiveDisplayFrame.available;
-//	        if (available and available > 0) then
-//		        C_Garrison.RequestShipmentCreation(available);
-//            else
-//                C_Garrison.RequestShipmentCreation();
-//	        end
-//            ";
-            //await ButlerLua.DoString(lua);
             var lua = @"C_Garrison.RequestShipmentCreation();";
-            using (var myLock = Styx.StyxWoW.Memory.AcquireFrame())
+            for (int tryCount = 0; tryCount < Building.StartWorkOrderMaxTries; tryCount++)
             {
-                var max = maxToStart;
-
-                while (max > 0)
+                Lua.DoString(lua);
+                await CommonCoroutines.SleepForRandomReactionTime();
+                if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
                 {
-                    max--;
-                    Lua.DoString(lua);
+                    building.Refresh();
+                    return currentStarted != building.ShipmentsTotal;
+                }))
+                {
+                    GarrisonButler.Log("Successfully started a work order at {0}.", building.Name);
+                    return true;
                 }
+
+                GarrisonButler.Warning("Failed to start a work order at {0}, try #{1}/{2}.", building.Name, tryCount,
+                    Building.StartWorkOrderMaxTries);
             }
-            building.StartWorkOrderTries += maxToStart;
-            if (await Buddy.Coroutines.Coroutine.Wait(10000, () => currentStarted != building.ShipmentsTotal))
+            return false;
+        }
+
+
+        public static async Task<bool> ClickStartAllOrderButton(Building building)
+        {
+            var currentStarted = building.ShipmentsTotal;
+            var lua = @"C_Garrison.RequestShipmentCreation(GarrisonCapacitiveDisplayFrame.available);";
+
+            for (int tryCount = 0; tryCount < Building.StartWorkOrderMaxTries; tryCount++)
             {
-                GarrisonButler.Log("Successfully started a work order at {0}.", building.Name);
-                return true;
+                Lua.DoString(lua);
+                await CommonCoroutines.SleepForRandomReactionTime();
+                if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+                {
+                    building.Refresh();
+                    return currentStarted != building.ShipmentsTotal;
+                }))
+                {
+                    GarrisonButler.Log("Successfully started all work orders at {0}.", building.Name);
+                    return true;
+                }
+
+                GarrisonButler.Warning("Failed to start all work order at {0}, try #{1}/{2}.", building.Name, tryCount,
+                    Building.StartWorkOrderMaxTries);
             }
-            else
-            {
-                GarrisonButler.Log("Failed to start a work order at {0}.", building.Name);
-                return false;
-            }
+            return false;
         }
     }
 }

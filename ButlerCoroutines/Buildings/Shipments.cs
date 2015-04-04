@@ -288,19 +288,19 @@ namespace GarrisonButler.ButlerCoroutines
             RefreshBuildings(true);
         }
 
-        private static async Task<Result> ShouldRunPickUpOrStartShipment()
-        {
-            foreach (var building in _buildings)
-            {
-                var canPickUp = await CanPickUpShipmentGeneration(building)();
-                var canStart = await CanStartShipmentGeneration(building)();
-                if (canPickUp.Status == ActionResult.Running)
-                    return new Result(ActionResult.Running);
-                if (canStart.Status == ActionResult.Running)
-                    return new Result(ActionResult.Running);
-            }
-            return new Result(ActionResult.Failed);
-        }
+        //private static async Task<Result> ShouldRunPickUpOrStartShipment()
+        //{
+        //    foreach (var building in _buildings)
+        //    {
+        //        var canPickUp = await CanPickUpShipmentGeneration(building)();
+        //        var canStart = await CanStartShipmentGeneration(building)();
+        //        if (canPickUp.Status == ActionResult.Running)
+        //            return new Result(ActionResult.Running);
+        //        if (canStart.Status == ActionResult.Running)
+        //            return new Result(ActionResult.Running);
+        //    }
+        //    return new Result(ActionResult.Failed);
+        //}
 
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
@@ -481,6 +481,61 @@ namespace GarrisonButler.ButlerCoroutines
             };
         }
 
+        internal static Func<Task<Result>> CanPickUpShipmentHB(Building building)
+        {
+            RefreshBuildings();
+            return async () =>
+            {
+                if (building == null)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[ShipmentPickUp] Building is null, either not built or not properly scanned.");
+                    return new Result(ActionResult.Failed);
+                }
+
+                building.Refresh();
+
+                // No Shipment ready
+                if (building.ShipmentsReady <= 0)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.Name);
+                    return new Result(ActionResult.Failed);
+                }
+                var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.Id);
+                if (buildingsettings == null)
+                    return new Result(ActionResult.Failed);
+
+                // Activated by user ?
+                if (!buildingsettings.CanCollectOrder)
+                {
+                    GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.Name);
+                    return new Result(ActionResult.Failed);
+                }
+
+                // Get the list of the building objects
+                var buildingAsObject =
+                    ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
+                        .Where(o => building.Displayids.Contains(o.DisplayId))
+                        .OrderBy(o => o.DistanceSqr)
+                        .FirstOrDefault();
+                if (buildingAsObject == default(WoWGameObject))
+                {
+                    GarrisonButler.Diagnostic("[ShipmentPickUp] Building could not be found in the area: {0}",
+                        building.Name);
+                    foreach (var id in building.Displayids)
+                    {
+                        GarrisonButler.Diagnostic("[ShipmentPickUp]     ID {0}", id);
+                    }
+                    return new Result(ActionResult.Failed);
+                }
+
+                GarrisonButler.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}",
+                    building.ShipmentsReady,
+                    building.Name);
+                return new Result(ActionResult.Running, buildingAsObject);
+            };
+        }
+
         internal static async Task<Result> MoveToAndOpenCapacitiveFrame(Building building)
         {
             var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
@@ -582,6 +637,8 @@ namespace GarrisonButler.ButlerCoroutines
             return new Result(ActionResult.Done);
         }
 
+        // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
+        // bag update delayed is the last fired event when adding a work order.  
         private static async Task<Result> StartShipment(object obj)
         {
             var building = obj as Building;
@@ -591,8 +648,9 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic("[StartShipment] ERROR - Building passed in to StartShipment() was null");
                 return new Result(ActionResult.Failed);
             }
-
+            
             int maxToStart = 0;
+
             var resCheckMax = await GetMaxShipmentToStart(building);
 
             if (resCheckMax.Status == ActionResult.Done)
@@ -604,48 +662,32 @@ namespace GarrisonButler.ButlerCoroutines
 
             if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
                 return new Result(ActionResult.Running);
-
-
-            // Interesting events to check out : Shipment crafter opened/closed, shipment crafter info, gossip show, gossip closed, 
-            // bag update delayed is the last fired event when adding a work order.  
-
-            using (var myLock = StyxWoW.Memory.AcquireFrame())
+            
+            // if we are in a situation where we can use the create all button
+            if (await IsCreateAllOrders(building))
             {
-                for (var i = 0; i < maxToStart; i++)
+                await CapacitiveDisplayFrame.ClickStartAllOrderButton(building);
+            }
+            // Otherwise we create one by one
+            else
+            {
+                using (var myLock = StyxWoW.Memory.AcquireFrame())
                 {
-                    if (!await CapacitiveDisplayFrame.ClickStartOrderButton(building, maxToStart))
+                    for (var i = 0; i < maxToStart; i++)
                     {
-                        if (building.StartWorkOrderTries >= Building.StartWorkOrderMaxTries)
+                        if (!await CapacitiveDisplayFrame.ClickStartOrderButton(building))
                         {
-                            GarrisonButler.Diagnostic(
-                                "[ShipmentStart,{0}] Max number of tries ({1}) reached to start shipment at {2}",
-                                building.Id, Building.StartWorkOrderMaxTries, building.Name);
-                            return new Result(ActionResult.Failed);
+                            if (building.StartWorkOrderTries >= Building.StartWorkOrderMaxTries)
+                            {
+                                GarrisonButler.Diagnostic(
+                                    "[ShipmentStart,{0}] Max number of tries ({1}) reached to start shipment at {2}",
+                                    building.Id, Building.StartWorkOrderMaxTries, building.Name);
+                                return new Result(ActionResult.Failed);
+                            }
                         }
                     }
-                    // Reset on success
-                    else
-                    {
-                        building.StartWorkOrderTries = 0;
-                    }
-
-                    // Need to refresh if we used "create all" button
-                    building.Refresh();
-                    resCheckMax = await GetMaxShipmentToStart(building);
-
-                    if (resCheckMax.Status == ActionResult.Done)
-                    {
-                        maxToStart = (int) resCheckMax.Result1;
-                        if (maxToStart <= 0)
-                        {
-                            break;
-                        }
-                    }
-                    //await CommonCoroutines.SleepForLagDuration();
-                    //await Buddy.Coroutines.Coroutine.Yield();
                 }
             }
-
             var timeout = new WaitTimer(TimeSpan.FromMilliseconds(10000));
             while (!timeout.IsFinished)
             {
@@ -691,13 +733,43 @@ namespace GarrisonButler.ButlerCoroutines
 
             int maxCanComplete = 0;
             if (canCompleteOrder.Status == ActionResult.Done)
-                maxCanComplete = (int) canCompleteOrder.Result1;
+                maxCanComplete = (int)canCompleteOrder.Result1;
 
             maxToStart = Math.Min(maxCanComplete, maxToStart);
             GarrisonButler.Diagnostic(
                 "[GetMaxShipmentToStart,{5}]: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
                 maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart, building.Id);
             return new Result(ActionResult.Done, maxToStart);
+        }
+        private static async Task<bool> IsCreateAllOrders(Building building)
+        {
+            var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder;
+            var maxInProgress = maxSettings == 0
+                ? building.ShipmentCapacity
+                : Math.Min(building.ShipmentCapacity, maxSettings);
+            var maxWishedToStart = maxInProgress - building.ShipmentsTotal;
+
+            var canCompleteOrder = await building.CanCompleteOrder();
+            if (canCompleteOrder.Status == ActionResult.Running)
+                return false;
+
+            int maxCanComplete = 0;
+            if (canCompleteOrder.Status == ActionResult.Done)
+                maxCanComplete = (int)canCompleteOrder.Result1;
+
+            var maxToStart = Math.Min(maxCanComplete, maxWishedToStart);
+            GarrisonButler.Diagnostic(
+                "[IsCreateAllOrders,{5}]: maxSettings={0} maxInProgress={1} ShipmentCapacity={2} CanCompleteOrder={3} maxToStart={4}",
+                maxSettings, maxInProgress, building.ShipmentCapacity, maxCanComplete, maxToStart, building.Id);
+
+            if(maxToStart > 0                                                                // Is there anything to start
+                && maxCanComplete > 0                                                        // and Can we start anything
+                && (maxCanComplete == maxToStart                                             // and (Is the number we want to start is the max we can start with our materials ?
+                    || maxToStart == building.ShipmentCapacity - building.ShipmentsTotal))   // Or is it the max the building allow us to start?)
+            {
+                return true;
+            }
+            return false;
         }
 
         private static async Task WorkAroundBugFrame()
