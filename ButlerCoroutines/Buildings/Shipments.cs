@@ -554,26 +554,15 @@ namespace GarrisonButler.ButlerCoroutines
             if ((await MoveToInteract(unit)).Status == ActionResult.Running)
                 return new Result(ActionResult.Running);
 
+            GarrisonButler.Diagnostic("[ShipmentStart,{0}] Interacting with ({1}).",
+                            building.Id, building.PnjId);
+
             unit.Interact();
-
-            await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-            {
-                if (CapacitiveDisplayFrame.Instance == null)
-                {
-                    Navigator.PlayerMover.MoveTowards(unit.Location);
-                }
-                else
-                {
-                    GarrisonButler.Diagnostic(
-                        "[ShipmentStart,{0}] Found GarrisonCapacitiveDisplayFrame, no need to do workaround bug.",
-                        building.Id);
-                }
-                return CapacitiveDisplayFrame.Instance == null;
-            });
-
+            await CommonCoroutines.SleepForLagDuration();
             await CommonCoroutines.SleepForRandomUiInteractionTime();
+            
 
-            if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
+            if (await Buddy.Coroutines.Coroutine.Wait(5000, () =>
             {
                 var gossipFrame = GossipFrame.Instance;
                 // Will try workaround if GossipFrame isn't valid/visible & GarrisonFrame isn't valid
@@ -666,13 +655,18 @@ namespace GarrisonButler.ButlerCoroutines
             // if we are in a situation where we can use the create all button
             if (await IsCreateAllOrders(building))
             {
-                await CapacitiveDisplayFrame.ClickStartAllOrderButton(building);
+                if (!await CapacitiveDisplayFrame.StartAllOrder(building))
+                {
+                    return new Result(ActionResult.Failed);
+                }
+                //return new Result(ActionResult.Done);
+
             }
-            // Otherwise we create one by one
+            // Otherwise we create them one by one
             else
             {
-                using (var myLock = StyxWoW.Memory.AcquireFrame())
-                {
+                //using (var myLock = StyxWoW.Memory.AcquireFrame())
+                //{
                     for (var i = 0; i < maxToStart; i++)
                     {
                         if (!await CapacitiveDisplayFrame.ClickStartOrderButton(building))
@@ -685,17 +679,19 @@ namespace GarrisonButler.ButlerCoroutines
                                 return new Result(ActionResult.Failed);
                             }
                         }
+                        await Buddy.Coroutines.Coroutine.Yield();
                     }
-                }
+                //}
             }
             var timeout = new WaitTimer(TimeSpan.FromMilliseconds(10000));
             while (!timeout.IsFinished)
             {
-                var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
-                if (buildingShipment != null)
-                {
+                //var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
+                //if (buildingShipment != null)
+                //{
                     //await ButlerLua.OpenLandingPage();
                     //buildingShipment.Refresh();
+                    building.Refresh();
                     var resCheck = await GetMaxShipmentToStart(building);
                     var max = resCheck.Status == ActionResult.Done
                         ? (int) resCheck.Result1
@@ -703,16 +699,17 @@ namespace GarrisonButler.ButlerCoroutines
                     if (max == 0)
                     {
                         GarrisonButler.Log("[ShipmentStart{1}] Finished starting work orders at {0}.",
-                            buildingShipment.Name, building.Id);
+                            building.Name, building.Id);
                         //await ButlerLua.CloseLandingPage();
                         return new Result(ActionResult.Done);
                     }
                     GarrisonButler.Diagnostic("[ShipmentStart,{0}] Waiting for shipment to update.", building.Id);
-                }
-                else
-                {
-                    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Building was not found in _buildings!  _buildings.Count={1} - _buildings={2}", building.Id, _buildings.Count, _buildings);
-                }
+                    await CommonCoroutines.SleepForRandomReactionTime();
+                //}
+                //else
+                //{
+                //    GarrisonButler.Diagnostic("[ShipmentStart,{0}] Building was not found in _buildings!  _buildings.Count={1} - _buildings={2}", building.Id, _buildings.Count, _buildings);
+                //}
                 await Buddy.Coroutines.Coroutine.Yield();
             }
             //await ButlerLua.CloseLandingPage();
@@ -722,9 +719,11 @@ namespace GarrisonButler.ButlerCoroutines
         private static async Task<Result> GetMaxShipmentToStart(Building building)
         {
             var maxSettings = GaBSettings.Get().GetBuildingSettings(building.Id).MaxCanStartOrder;
+
             var maxInProgress = maxSettings == 0
                 ? building.ShipmentCapacity
                 : Math.Min(building.ShipmentCapacity, maxSettings);
+
             var maxToStart = maxInProgress - building.ShipmentsTotal;
 
             var canCompleteOrder = await building.CanCompleteOrder();

@@ -72,29 +72,25 @@ namespace GarrisonButler.LuaObjects
             return false;
         }
 
-
-        public static async Task<bool> ClickStartAllOrderButton(Building building)
+        public static async Task<bool> StartAllOrder(Building building)
         {
-            var currentStarted = building.ShipmentsTotal;
             var lua = @"C_Garrison.RequestShipmentCreation(GarrisonCapacitiveDisplayFrame.available);";
 
-            for (int tryCount = 0; tryCount < Building.StartWorkOrderMaxTries; tryCount++)
-            {
-                Lua.DoString(lua);
-                await CommonCoroutines.SleepForRandomReactionTime();
-                if (await Buddy.Coroutines.Coroutine.Wait(2000, () =>
-                {
-                    building.Refresh();
-                    return currentStarted != building.ShipmentsTotal;
-                }))
-                {
-                    GarrisonButler.Log("Successfully started all work orders at {0}.", building.Name);
-                    return true;
-                }
+            Lua.DoString(lua);
+            await CommonCoroutines.SleepForRandomReactionTime();
 
-                GarrisonButler.Warning("Failed to start all work order at {0}, try #{1}/{2}.", building.Name, tryCount,
-                    Building.StartWorkOrderMaxTries);
+            if (await Buddy.Coroutines.Coroutine.Wait(5000, () =>
+            {
+                building.Refresh();
+                return building.ShipmentCapacity != building.ShipmentsTotal;
+            }))
+            {
+                GarrisonButler.Log("Successfully started all work orders at {0}.", building.Name);
+                return true;
             }
+
+            GarrisonButler.Warning("Failed to start all work order at {0}.", building.Name);
+
             return false;
         }
     }

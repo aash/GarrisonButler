@@ -67,11 +67,16 @@ namespace GarrisonButler.ButlerCoroutines
         public static async Task<Result> MoveToInteract(WoWObject woWObject)
         {
             if (!woWObject.WithinInteractRange)
-                return await MoveTo(woWObject.Location, "[Navigation] Moving to interact with " + woWObject.SafeName);
+                return await MoveTo(woWObject.Location, "[MoveToInteract] Moving to interact with " + woWObject.SafeName);
             
-            await CommonCoroutines.StopMoving("[Navigation] MoveResult: ReachedDestination to interact with " +
+            if(Me.IsMoving)
+            {
+                await CommonCoroutines.StopMoving("[MoveToInteract] MoveResult: ReachedDestination to interact with " +
                                       woWObject.SafeName);
+                await CommonCoroutines.SleepForLagDuration();
+            }
 
+            GarrisonButler.Diagnostic("[MoveToInteract] Reached {0}", woWObject.SafeName);
             return new Result(ActionResult.Done);
         }
 
