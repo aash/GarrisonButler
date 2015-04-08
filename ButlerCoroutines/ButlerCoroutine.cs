@@ -173,12 +173,12 @@ namespace GarrisonButler.ButlerCoroutines
                 _mainSequence.AddAction(
                     new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()),
                         ShouldTpToGarrison,
-                        10000, 1000));
+                        5000, 5000));
                 if (GarrisonButler.IsIceVersion())
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails));
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails, 600000));
                 _mainSequence.AddAction(InitializeMineAndGarden());
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(DoDailyCd, CanRunDailies, 15000,
-                    1000));
+                    3000));
                 _mainSequence.AddAction(InitializeBuildingsCoroutines());
                 _mainSequence.AddAction(InitializeMissionsCoroutines());
 

@@ -1140,13 +1140,39 @@ namespace GarrisonButler.ButlerCoroutines
             GarrisonButler.Diagnostic("Initialization Missions coroutines...");
             var missionsActionsSequence = new ActionHelpers.ActionsSequence();
 
+            // Check for tokens and use them is available
+            // Armor : http://www.wowhead.com/item=120301/armor-enhancement-token
+            missionsActionsSequence.AddAction(
+                new ActionHelpers.ActionOnTimer(
+                    UseItemInbags,
+                    async () =>
+                    {
+                        var canUse = CanUseItemInBags(120301)();
+                        return
+                            new Result(canUse.Item1
+                                ? ActionResult.Running
+                                : ActionResult.Failed, canUse.Item2);
+                    }, 0, 0));
+            // Weapon: http://www.wowhead.com/item=120302/weapon-enhancement-token
+            missionsActionsSequence.AddAction(
+                new ActionHelpers.ActionOnTimer(
+                    UseItemInbags,
+                    async () =>
+                    {
+                        var canUse = CanUseItemInBags(120302)();
+                        return
+                            new Result(canUse.Item1
+                                ? ActionResult.Running
+                                : ActionResult.Failed, canUse.Item2);
+                    }, 0, 0));
+
             // DoTurnInCompletedMissions
             missionsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer(DoTurnInCompletedMissions, CanRunTurnInMissions));
+                new ActionHelpers.ActionOnTimer(DoTurnInCompletedMissions, CanRunTurnInMissions, 1000, 1000));
 
             //// StartMissions
             missionsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer(StartMission, CanRunStartMission));
+                new ActionHelpers.ActionOnTimer(StartMission, CanRunStartMission, 3000, 30000));
 
             // Put gear on followers
             //missionsActionsSequence.AddAction(

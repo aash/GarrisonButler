@@ -70,7 +70,7 @@ namespace GarrisonButler.ButlerCoroutines
                         HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
                         5000,
-                        100,
+                        3000,
                         // Drink coffee
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
@@ -81,7 +81,7 @@ namespace GarrisonButler.ButlerCoroutines
                                     new Result(canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseCoffee
                                         ? ActionResult.Running
                                         : ActionResult.Failed, canUse.Item2);
-                            }, 10000, 3000),
+                            }, 5000, 3000),
                         // Use Mining Pick 
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
@@ -94,7 +94,7 @@ namespace GarrisonButler.ButlerCoroutines
                                         canUse.Item1 && MeIsInMine() && GaBSettings.Get().UseMiningPick
                                             ? ActionResult.Running
                                             : ActionResult.Failed, canUse.Item2);
-                            }, 10000, 3000)));
+                            }, 5000, 3000)));
 
                 // Take care of mine shipments
                 buildingsActionsSequence.AddAction(PickUpOrStartSequence(mine));
