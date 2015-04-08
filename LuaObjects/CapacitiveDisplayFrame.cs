@@ -85,7 +85,6 @@ namespace GarrisonButler.LuaObjects
                 return building.ShipmentCapacity != building.ShipmentsTotal;
             }))
             {
-                GarrisonButler.Log("Successfully started all work orders at {0}.", building.Name);
                 return true;
             }
 

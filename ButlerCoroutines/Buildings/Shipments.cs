@@ -288,20 +288,6 @@ namespace GarrisonButler.ButlerCoroutines
             RefreshBuildings(true);
         }
 
-        //private static async Task<Result> ShouldRunPickUpOrStartShipment()
-        //{
-        //    foreach (var building in _buildings)
-        //    {
-        //        var canPickUp = await CanPickUpShipmentGeneration(building)();
-        //        var canStart = await CanStartShipmentGeneration(building)();
-        //        if (canPickUp.Status == ActionResult.Running)
-        //            return new Result(ActionResult.Running);
-        //        if (canStart.Status == ActionResult.Running)
-        //            return new Result(ActionResult.Running);
-        //    }
-        //    return new Result(ActionResult.Failed);
-        //}
-
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequenceAll()
         {
             var sequence = new ActionHelpers.ActionsSequence();
@@ -314,6 +300,12 @@ namespace GarrisonButler.ButlerCoroutines
             }
             return sequence;
         }
+
+
+
+
+
+
 
         internal static ActionHelpers.ActionsSequence PickUpOrStartSequence(Building building)
         {
@@ -480,62 +472,7 @@ namespace GarrisonButler.ButlerCoroutines
                 return new Result(ActionResult.Running, buildingAsObject);
             };
         }
-
-        internal static Func<Task<Result>> CanPickUpShipmentHB(Building building)
-        {
-            RefreshBuildings();
-            return async () =>
-            {
-                if (building == null)
-                {
-                    GarrisonButler.Diagnostic(
-                        "[ShipmentPickUp] Building is null, either not built or not properly scanned.");
-                    return new Result(ActionResult.Failed);
-                }
-
-                building.Refresh();
-
-                // No Shipment ready
-                if (building.ShipmentsReady <= 0)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentPickUp] No shipment left to pickup: {0}", building.Name);
-                    return new Result(ActionResult.Failed);
-                }
-                var buildingsettings = GaBSettings.Get().GetBuildingSettings(building.Id);
-                if (buildingsettings == null)
-                    return new Result(ActionResult.Failed);
-
-                // Activated by user ?
-                if (!buildingsettings.CanCollectOrder)
-                {
-                    GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", building.Name);
-                    return new Result(ActionResult.Failed);
-                }
-
-                // Get the list of the building objects
-                var buildingAsObject =
-                    ObjectManager.GetObjectsOfTypeFast<WoWGameObject>()
-                        .Where(o => building.Displayids.Contains(o.DisplayId))
-                        .OrderBy(o => o.DistanceSqr)
-                        .FirstOrDefault();
-                if (buildingAsObject == default(WoWGameObject))
-                {
-                    GarrisonButler.Diagnostic("[ShipmentPickUp] Building could not be found in the area: {0}",
-                        building.Name);
-                    foreach (var id in building.Displayids)
-                    {
-                        GarrisonButler.Diagnostic("[ShipmentPickUp]     ID {0}", id);
-                    }
-                    return new Result(ActionResult.Failed);
-                }
-
-                GarrisonButler.Diagnostic("[ShipmentPickUp] Found {0} shipments to collect: {1}",
-                    building.ShipmentsReady,
-                    building.Name);
-                return new Result(ActionResult.Running, buildingAsObject);
-            };
-        }
-
+        
         internal static async Task<Result> MoveToAndOpenCapacitiveFrame(Building building)
         {
             var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
@@ -657,8 +594,10 @@ namespace GarrisonButler.ButlerCoroutines
             {
                 if (!await CapacitiveDisplayFrame.StartAllOrder(building))
                 {
+                
                     return new Result(ActionResult.Failed);
                 }
+                GarrisonButler.Log("Successfully started all work orders at {0}.", building.Name);
                 //return new Result(ActionResult.Done);
 
             }
@@ -684,6 +623,8 @@ namespace GarrisonButler.ButlerCoroutines
                 //}
             }
             var timeout = new WaitTimer(TimeSpan.FromMilliseconds(10000));
+            timeout.Reset();
+            
             while (!timeout.IsFinished)
             {
                 //var buildingShipment = _buildings.FirstOrDefault(b => b.Id == building.Id);
