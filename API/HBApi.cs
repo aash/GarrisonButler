@@ -4,11 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Buddy.Coroutines;
 using GarrisonButler.ButlerCoroutines;
 using GarrisonButler.Libraries;
 using GarrisonButler.Objects;
 using Styx;
 using Styx.Common.Helpers;
+using Styx.CommonBot;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
@@ -561,6 +563,36 @@ namespace GarrisonButler.API
                 }
                 ObjectManager.Update();
             }
+        }
+
+        public static async Task<Result> DisenchantItem(WoWItem item)
+        {
+            if (!item.IsDisenchantable())
+            {
+                return new Result(ActionResult.Failed, "[DisenchantItem] IsDisenchant returned falsed for " + item.SafeName + " (ID: " + item.Entry + ").");
+            }
+
+            if (!SpellManager.HasSpell(13262))
+            {
+                return new Result(ActionResult.Failed, "[DisenchantItem] Spell not in spell manager.");
+            }
+
+            await Coroutine.Wait(2500, () => !Me.Looting);
+
+            GarrisonButler.Log("Disenchanting: {0}", item.Name);
+            SpellManager.Cast(13262); // Disenchanting spell
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+            item.UseContainerItem();
+
+            //Lua.DoString("UseItemByName(\"" + item.Name + "\")");
+            await CommonCoroutines.SleepForLagDuration();
+            // Wait for cast to be done
+            await Coroutine.Wait(4000, () => !Me.IsCasting && !Me.Looting);
+            await Coroutine.Yield();
+            await Coroutine.Sleep(1000);
+            await CommonCoroutines.SleepForLagDuration();
+            // We estimate action to be done, but we should find a way to know it for sure! 
+            return new Result(ActionResult.Done, "[DisenchantItem] Item Successfuly disenchanted.");
         }
     }
 }

@@ -83,6 +83,8 @@ namespace GarrisonButler.Config
 
                 {"<script src=\"./Modules/trading-post.module.js\"></script>", ResourceWebUI.trading_post_module},
 
+                {"<script src=\"./Modules/enchanting-tab.module.js\"></script>", ResourceWebUI.enchanting_tab_module_js},
+
                 {"<script src=\"./Libraries/SmartTable/smart-table.min.js\"></script>", ResourceWebUI.smart_table_min},
 
                 {"<script src=\"./Libraries/slider/slider.js\"></script>", ResourceWebUI.slider_js},

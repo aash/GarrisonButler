@@ -28,6 +28,7 @@
     <script src="./Modules/milling-tab.module.js"></script>
     <script src="./Modules/trading-post.module.js"></script>
     <script src="./Modules/missions-tab.module.js"></script>
+    <script src="./Modules/enchanting-tab.module.js"></script>
 
 
     <link rel="stylesheet" href="./Libraries/angular-xeditable/css/xeditable.css" />
@@ -151,6 +152,16 @@
                             </div>
                         </md-card-content>
                     </md-card>
+
+                   <md-card>
+                       <md-card-content>
+                           <h2>Version 2.6.1.0</h2>
+                           <lu>
+                               <li>Added disenchant feature, will now disenchant items if activated. (ICE only)</li>
+                               <li>Added Fix for bot running back and forth between nodes</li>
+                           </lu>
+                       </md-card-content>
+                   </md-card>
 
                    <md-card>
                        <md-card-content>
@@ -810,6 +821,53 @@
         </div>
 
 
+        </tab>
+
+
+        <tab heading="Enchanting"  ng-if="isIceVersion()">
+            <md-content  ng-controller="enchantingListController">
+                <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
+                <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
+                <md-list>
+                    <div layout="row" layout-wrap>
+                        <md-item ng-repeat="item in items" ng-controller="enchantingOptionController" ng-init="init(item)">
+                            <md-item-content flex="30">
+                                <accordion class="sectionBackground" close-others="oneAtATime">
+                                    <div layout="row" class="general-option-header">
+                                        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
+                                        <div class="md-tile-content general-item-title">
+                                            <h3>
+                                                <b>{{item.label}}</b>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <accordion-group is-open="status.open">
+                                        <accordion-heading>
+                                            More info
+                                            <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                        </accordion-heading>
+                                        <p>
+                                            {{item.description}}
+                                        </p>
+                                    </accordion-group>
+                                </accordion>
+                            </md-item-content>
+                        </md-item>
+                    </div>
+                </md-list>
+
+                <div layout="row">
+                    <h3 style="margin-left: 4px;">Maximum Item Level (won't disenchant above this level): </h3>
+                    <input style="width:65px;height:35px;margin-left: 13px;" ng-init="$scope.$apply();" type="number" ng-model="maxItemILVL" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="999">
+                </div>
+                <div layout="row">
+                    <h3 style="margin-left: 4px;">Maximum item quality to disenchant(won't disenchant above this quality): </h3>
+                    <!-- editable status (select-local) -->
+                            <span style="color: black; margin-left: 13px;" editable-select="itemQuality" e-ng-options="s for s in itemQualities"  onaftersave="saveQuality()" e-required>
+                              {{ itemQuality }} ( Click to edit)
+                            </span>
+                </div>
+            </md-content>
         </tab>
 
     </tabset>

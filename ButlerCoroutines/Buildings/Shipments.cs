@@ -397,7 +397,7 @@ namespace GarrisonButler.ButlerCoroutines
                     return new Result(ActionResult.Refresh);
 
                 var maxToStart = maxToStartCheck.Status == ActionResult.Done
-                    ? (int) maxToStartCheck.Result1
+                    ? (int) maxToStartCheck.content
                     : 0;
 
                 if (maxToStart <= 0)
@@ -580,7 +580,7 @@ namespace GarrisonButler.ButlerCoroutines
             var resCheckMax = await GetMaxShipmentToStart(building);
 
             if (resCheckMax.Status == ActionResult.Done)
-                maxToStart = (int) resCheckMax.Result1;
+                maxToStart = (int) resCheckMax.content;
 
             if (building.PrepOrder != null)
                 if ((await building.PrepOrder(maxToStart)).Status == ActionResult.Running)
@@ -635,7 +635,7 @@ namespace GarrisonButler.ButlerCoroutines
                     building.Refresh();
                     var resCheck = await GetMaxShipmentToStart(building);
                     var max = resCheck.Status == ActionResult.Done
-                        ? (int) resCheck.Result1
+                        ? (int) resCheck.content
                         : 0;
                     if (max == 0)
                     {
@@ -673,7 +673,7 @@ namespace GarrisonButler.ButlerCoroutines
 
             int maxCanComplete = 0;
             if (canCompleteOrder.Status == ActionResult.Done)
-                maxCanComplete = (int)canCompleteOrder.Result1;
+                maxCanComplete = (int)canCompleteOrder.content;
 
             maxToStart = Math.Min(maxCanComplete, maxToStart);
             GarrisonButler.Diagnostic(
@@ -695,7 +695,7 @@ namespace GarrisonButler.ButlerCoroutines
 
             int maxCanComplete = 0;
             if (canCompleteOrder.Status == ActionResult.Done)
-                maxCanComplete = (int)canCompleteOrder.Result1;
+                maxCanComplete = (int)canCompleteOrder.content;
 
             var maxToStart = Math.Min(maxCanComplete, maxWishedToStart);
             GarrisonButler.Diagnostic(

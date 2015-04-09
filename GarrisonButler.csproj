@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\ButlerLua.cs" />
+    <Compile Include="ButlerCoroutines\Enchanting.cs" />
     <Compile Include="Config\OldSettings\DailyProfession.cs" />
     <Compile Include="Config\OldSettings\GaBSettings.Building.cs" />
     <Compile Include="Config\OldSettings\GabSettings.cs" />
@@ -210,6 +211,7 @@
     <Content Include="WebUI\mainUI.html" />
     <Content Include="WebUI\mainUI.js" />
     <Content Include="WebUI\Modules\general-tab.module.js" />
+    <Content Include="WebUI\Modules\enchanting-tab.module.js" />
     <Content Include="WebUI\Modules\mailing-tab.module.js" />
     <Content Include="WebUI\Modules\milling-tab.module.js" />
     <None Include="WebUI\Modules\missions-tab.module.js" />

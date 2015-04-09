@@ -165,5 +165,10 @@ namespace GarrisonButler.Libraries
         {
             return await HbApi.MillHerbFromBags(item.Entry);
         }
+        
+        public static async Task<Result> Disenchant(this WoWItem item)
+        {
+            return await HbApi.DisenchantItem(item);
+        }
     }
 }

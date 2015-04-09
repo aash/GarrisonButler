@@ -140,7 +140,7 @@ namespace GarrisonButler.ButlerCoroutines
                             await Buddy.Coroutines.Coroutine.Yield();
                     }
                     // Running action
-                    LastResult = await CustomAction(ResCondition.Result1);
+                    LastResult = await CustomAction(ResCondition.content);
                 }
                 else
                     LastResult.Status = ActionResult.Done;
@@ -203,7 +203,7 @@ namespace GarrisonButler.ButlerCoroutines
                             await Buddy.Coroutines.Coroutine.Yield();
                     }
                     // Running action
-                    LastResult = await CustomAction(ResCondition.Result1);
+                    LastResult = await CustomAction(ResCondition.content);
                 }
                 else
                     LastResult = new Result(ActionResult.Done);
@@ -294,18 +294,18 @@ namespace GarrisonButler.ButlerCoroutines
         public Result(ActionResult status, object result = null)
         {
             Status = status;
-            Result1 = result;
+            content = result;
         }
 
         public Result(Result result)
         {
             Status = result.Status;
-            Result1 = result.Result1;
+            content = result.content;
         }
 
         public ActionResult Status { get; set; }
 
-        public object Result1 { get; set; }
+        public object content { get; set; }
     }
 
     public enum ActionResult

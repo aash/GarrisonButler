@@ -7,7 +7,8 @@
         'GarrisonButlerApp.milling-tab',
         'GarrisonButlerApp.mailing-tab',
         'GarrisonButlerApp.trading-post-tab',
-        'GarrisonButlerApp.missions-tab'
+        'GarrisonButlerApp.missions-tab',
+        'GarrisonButlerApp.enchanting-tab'
     ]);
 
 angular.module('GarrisonButlerApp').controller('MainController', function ($scope, $window) {
@@ -183,6 +184,22 @@ angular.module('GarrisonButlerApp').controller('MainController', function ($scop
         $scope.updateRewardsOrder = function (listIds) {
             var json = JSON.stringify(listIds);
             window.external.updateRewardsOrder(json);
+        };
+
+
+
+        $scope.loadDisenchantQualities = function () {
+            var res = window.external.GetDisenchantQualities();
+            return res;
+        };
+
+        $scope.loadDisenchantQuality = function () {
+            var res = window.external.GetDisenchantQuality();
+            return res;
+        };
+
+        $scope.saveDisenchantQuality = function (quality) {
+            window.external.SaveDisenchantQuality(quality);
         };
 
         $scope.VersionNumber = function () {

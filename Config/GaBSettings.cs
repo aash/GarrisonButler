@@ -17,6 +17,7 @@ using GarrisonButler.Objects;
 using JetBrains.Annotations;
 using Styx.Helpers;
 using GarrisonButler.Libraries.JSON;
+using Styx;
 
 #endregion
 
@@ -31,6 +32,8 @@ namespace GarrisonButler.Config
         private int _defaultMissionSuccessChance = 100;
         private int _maxNumberOfEpicMaxLevelFollowersToUseWhenBoosting = 2;
         private bool _useEpicMaxLevelFollowersToBoostLowerFollowers = true;
+        private DisenchantItemQuality _maxDisenchantQuality = DisenchantItemQuality.Uncommon;
+        private int _maxDisenchantIlvl = 0;
 
         private GaBSettings()
         {
@@ -603,7 +606,37 @@ namespace GarrisonButler.Config
 
         #endregion
 
+        public string GetDisenchantQualities()
+        {
+                GarrisonButler.Diagnostic("Sending item qualities to interface.");
+            var QualitiesJs = new ArrayList();
+            var Qualities = Enum.GetNames(typeof(DisenchantItemQuality)).ToList();
+            for (int i = 0; i < Qualities.Count; i++)
+            {
+                QualitiesJs.Add(Qualities[i].ToString());
+            }
+            var res = JSON.JsonEncode(QualitiesJs);
+                GarrisonButler.Diagnostic("Json item qualities: " + res);
+            return res;
+        }
 
+        public enum DisenchantItemQuality
+        {
+            Uncommon = 2,
+            Rare = 3,
+            Epic = 4,
+        }
+
+        public string GetDisenchantQuality()
+        {
+            GarrisonButler.Diagnostic("GetDisenchantQuality called.");
+            return MaxDisenchantQuality.ToString();
+        }
+        public void SaveDisenchantQuality(string quality)
+        {
+            GarrisonButler.Diagnostic("SaveDisenchantQuality called with {0}", quality);
+            MaxDisenchantQuality = (DisenchantItemQuality) Enum.Parse(typeof (DisenchantItemQuality), quality);
+        }
 
         public void diagnosticJs(string message)
         {
@@ -716,6 +749,26 @@ namespace GarrisonButler.Config
                 OnPropertyChanged();
             }
         }
+
+        #endregion
+
+        #region Enchanting
+        public bool ShouldDisenchant { get; set; }
+        public bool ShouldDisenchantBoE { get; set; }
+        public bool ShouldDisenchantBoP { get; set; }
+
+        public int MaxDisenchantIlvl
+        {
+            get { return _maxDisenchantIlvl; }
+            set { _maxDisenchantIlvl = value; }
+        }
+
+        public DisenchantItemQuality MaxDisenchantQuality
+        {
+            get { return _maxDisenchantQuality; }
+            set { _maxDisenchantQuality = value; }
+        }
+
 
         #endregion
 

@@ -170,24 +170,38 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic("InitializeMissions");
 
                 _mainSequence = new ActionHelpers.ActionsSequence();
+
                 _mainSequence.AddAction(
                     new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()),
                         ShouldTpToGarrison,
                         5000, 5000));
+
                 if (GarrisonButler.IsIceVersion())
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails, 600000));
+
                 _mainSequence.AddAction(InitializeMineAndGarden());
+
+                if (GarrisonButler.IsIceVersion())
+                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(Enchanting.DisenchantItems, Enchanting.CanDisenchantItems, 1000,
+                        3000));
+
                 _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(DoDailyCd, CanRunDailies, 15000,
                     3000));
+
                 _mainSequence.AddAction(InitializeBuildingsCoroutines());
+
                 _mainSequence.AddAction(InitializeMissionsCoroutines());
 
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
+
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
+
                 if (GarrisonButler.IsIceVersion())
                     _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(MailItem, CanMailItem, 15000,
                         1000));
+
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
+
                 _mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
 
                 LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
@@ -233,7 +247,7 @@ namespace GarrisonButler.ButlerCoroutines
                 var shouldMail = await CanMailItem();
                 
                 if(shouldMail.Status == ActionResult.Running)
-                    if ((await MailItem(shouldMail.Result1)).Status == ActionResult.Running)
+                    if ((await MailItem(shouldMail.content)).Status == ActionResult.Running)
                         return true;
 
                 // Without a timer it will spam Alert messages over and over
@@ -452,7 +466,6 @@ namespace GarrisonButler.ButlerCoroutines
             return false;
         }
 
-        private static bool testDone = false;
         private static void CheckNavigationSystem()
         {
             if (_customNavigation == null)

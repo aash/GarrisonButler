@@ -69,8 +69,8 @@ namespace GarrisonButler.ButlerCoroutines
                     new ActionHelpers.ActionOnTimerCached(
                         HarvestWoWGameObjectCachedLocation,
                         CanRunMine,
-                        5000,
-                        3000,
+                        1000,
+                        15000,
                         // Drink coffee
                         new ActionHelpers.ActionOnTimer(
                             UseItemInbags,
@@ -104,7 +104,7 @@ namespace GarrisonButler.ButlerCoroutines
                 // Harvest garden
                 buildingsActionsSequence.AddAction(
                     new ActionHelpers.ActionOnTimerCached(HarvestWoWGameObjectCachedLocation,
-                        CanRunGarden, 5000));
+                        CanRunGarden, 1000, 10000));
 
                 // Take care of garden shipments
                 buildingsActionsSequence.AddAction(PickUpOrStartSequence(garden));

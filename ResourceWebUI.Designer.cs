@@ -134,6 +134,29 @@ namespace GarrisonButler {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /**
+        /// * Created by Mickaël on 2/1/2015.
+        /// */
+        ///
+        ///// General Tab
+        ///angular.module(&apos;GarrisonButlerApp.enchanting-tab&apos;, [&apos;ngMaterial&apos;, &apos;ngAria&apos;, &apos;smart-table&apos;, &apos;xeditable&apos;])
+        ///
+        ///    .controller(&apos;enchantingListController&apos;, function ($scope) {
+        ///
+        ///        // Represents a variable name, a title and a description
+        ///        $scope.Entry = function Entry(variableName, label, description) {
+        ///            this.variableName = variableName;
+        ///            this.value = false;
+        ///            this.label = label;
+        ///            this.de [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string enchanting_tab_module_js {
+            get {
+                return ResourceManager.GetString("enchanting_tab_module_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to var g_garrison_followers = {
         ///    &quot;32&quot;: {
         ///        &quot;id&quot;: 32,
@@ -177,9 +200,7 @@ namespace GarrisonButler {
         ///            this.value = false;
         ///            this.label = label;
         ///            this.description = description;
-        ///        };
-        ///
-        ///       [rest of string was truncated]&quot;;.
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string general_tab_module_js {
             get {
@@ -292,13 +313,13 @@ namespace GarrisonButler {
         ///        &apos;GarrisonButlerApp.milling-tab&apos;,
         ///        &apos;GarrisonButlerApp.mailing-tab&apos;,
         ///        &apos;GarrisonButlerApp.trading-post-tab&apos;,
-        ///        &apos;GarrisonButlerApp.missions-tab&apos;
+        ///        &apos;GarrisonButlerApp.missions-tab&apos;,
+        ///        &apos;GarrisonButlerApp.enchanting-tab&apos;
         ///    ]);
         ///
         ///angular.module(&apos;GarrisonButlerApp&apos;).controller(&apos;MainController&apos;, function ($scope, $window) {
         ///
-        ///    $scope.lastErrorArray = [];
-        ///    $scope.l [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string mainUI_js {
             get {
