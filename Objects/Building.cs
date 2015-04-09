@@ -982,6 +982,7 @@ namespace GarrisonButler
                         ? new List<int>
                         {
                             87207,
+                            87209,
                             87211,
                             87208,
                             87213,
@@ -989,9 +990,9 @@ namespace GarrisonButler
                             87217,
                             87215,
                             87212,
-                            87209,
                             87216,
-                            87210
+                            87210,
+                            91071
                         }
                         : new List<int>
                         {
@@ -1005,7 +1006,8 @@ namespace GarrisonButler
                             87118,
                             87119,
                             87120,
-                            87121
+                            87121,
+                            91070
                         };
                     Displayids = new List<uint>
                     {
