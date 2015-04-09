@@ -1,12 +1,12 @@
 ﻿<!DOCTYPE html>
 <html ng-app="GarrisonButlerApp">
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <title>GarrisonButler</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="yes"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="yes" />
 
     <script src="./Libraries/Angular/angular.min.js"></script>
     <script src="./Libraries/Angular/angular-animate.min.js"></script>
@@ -31,8 +31,8 @@
     <script src="./Modules/enchanting-tab.module.js"></script>
 
 
-    <link rel="stylesheet" href="./Libraries/angular-xeditable/css/xeditable.css"/>
-    <link rel="stylesheet" href="./mainUI.css"/>
+    <link rel="stylesheet" href="./Libraries/angular-xeditable/css/xeditable.css" />
+    <link rel="stylesheet" href="./mainUI.css" />
 
 
 </head>
@@ -67,54 +67,54 @@
         <style type="text/css">
 
             div.m-app-loading {
-                position: fixed;
+                position: fixed ;
             }
 
             div.m-app-loading div.animated-container {
 
-                background-color: #333333;
-                bottom: 0px;
-                left: 0px;
-                opacity: 1.0;
-                position: fixed;
-                right: 0px;
-                top: 0px;
-                z-index: 999999;
+                background-color: #333333 ;
+                bottom: 0px ;
+                left: 0px ;
+                opacity: 1.0 ;
+                position: fixed ;
+                right: 0px ;
+                top: 0px ;
+                z-index: 999999 ;
             }
 
             /* Used to initialize the ng-leave animation state. */
             div.m-app-loading div.animated-container.ng-leave {
-                opacity: 1.0;
-                transition: all linear 200ms;
-                -webkit-transition: all linear 200ms;
+                opacity: 1.0 ;
+                transition: all linear 200ms ;
+                -webkit-transition: all linear 200ms ;
             }
 
             /* Used to set the end properties of the ng-leave animation state. */
             div.m-app-loading div.animated-container.ng-leave-active {
-                opacity: 0;
+                opacity: 0 ;
             }
 
             div.m-app-loading div.messaging {
-                color: #FFFFFF;
-                font-family: monospace;
-                left: 0px;
-                margin-top: -37px;
-                position: absolute;
-                right: 0px;
-                text-align: center;
-                top: 50%;
+                color: #FFFFFF ;
+                font-family: monospace ;
+                left: 0px ;
+                margin-top: -37px ;
+                position: absolute ;
+                right: 0px ;
+                text-align: center ;
+                top: 50% ;
             }
 
             div.m-app-loading h1 {
-                font-size: 26px;
-                line-height: 35px;
-                margin: 0px 0px 20px 0px;
+                font-size: 26px ;
+                line-height: 35px ;
+                margin: 0px 0px 20px 0px ;
             }
 
             div.m-app-loading p {
-                font-size: 18px;
-                line-height: 14px;
-                margin: 0px 0px 0px 0px;
+                font-size: 18px ;
+                line-height: 14px ;
+                margin: 0px 0px 0px 0px ;
             }
 
         </style>
@@ -141,8 +141,8 @@
 
         <tab heading="GarrisonButler">
             <md-content>
-                <md-card>
 
+                <md-card>
                     <md-card-content>
                         <div layout="row">
                             <div style="max-width: 350px; text-align: center;">
@@ -150,6 +150,24 @@
                             </div>
                             <h1 style="padding-left: 30px; padding-top: 20px;">Change Log</h1>
                         </div>
+                    </md-card-content>
+                </md-card>
+
+                <md-card>
+                    <md-card-content>
+                        <h2>Version 2.6.4.0</h2>
+                        <lu>
+                            <li>Added Fix for UI completely messed up... ;)</li>
+                        </lu>
+                    </md-card-content>
+                </md-card>
+
+                <md-card>
+                    <md-card-content>
+                        <h2>Version 2.6.3.0</h2>
+                        <lu>
+                            <li>Added min ilvl option for disenchanting</li>
+                        </lu>
                     </md-card-content>
                 </md-card>
 
@@ -177,9 +195,7 @@
                     <md-card-content>
                         <h2>Version 2.5.0.0</h2>
                         <lu>
-                            <li>Added Use Weapon/Armor Enhancement Token: Will now use by default(no options) the
-                                Armor/Weapon Enhancement Token to create the uncommon, rare, or epic token.
-                            </li>
+                            <li>Added Use Weapon/Armor Enhancement Token: Will now use by default(no options) the Armor/Weapon Enhancement Token to create the uncommon, rare, or epic token.</li>
                         </lu>
                     </md-card-content>
                 </md-card>
@@ -262,9 +278,7 @@
                         <lu>
                             <li>Added fix for UI not refreshing priorities order.</li>
                             <li>Save settings before HBRelog skip</li>
-                            <li>Refresh building in shipment routine because it was using stale values. Fixes bug where
-                                work orders weren't getting started
-                            </li>
+                            <li>Refresh building in shipment routine because it was using stale values.  Fixes bug where work orders weren't getting started</li>
                         </lu>
                     </md-card-content>
                 </md-card>
@@ -274,9 +288,7 @@
                         <lu>
                             <li>Added fix for UI not refreshing priorities for missions' rewards.</li>
                             <li>Added currency tooltips.</li>
-                            <li>Added behavior enhancement: Don't start Garrison Resource missions if it will put the
-                                player over the cap
-                            </li>
+                            <li>Added behavior enhancement: Don't start Garrison Resource missions if it will put the player over the cap</li>
                             <li>Can use up to 5 Miner's Coffee</li>
                             <li>Fixed bot getting stuck when there are more than 20 active followers</li>
                         </lu>
@@ -308,13 +320,9 @@
                         <lu>
                             <li>Added options in Missions settings. Check them out! :D</li>
                             <li>Added description for default settings in Missions</li>
-                            <li>Replaced drag and drop to set the priority of rewards, will now have to fill a text box
-                                with the number.
-                            </li>
+                            <li>Replaced drag and drop to set the priority of rewards, will now have to fill a text box with the number.</li>
                             <li>Fix incorrect work order getting stuckbug</li>
-                            <li>Upped timer time for cached action to 15 seconds from 10seconds to fix yoyo bug in mine
-                                between ores and carts.
-                            </li>
+                            <li>Upped timer time for cached action to 15 seconds from 10seconds to fix yoyo bug in mine between ores and carts.</li>
                             <li>Added UI design enhancements</li>
                         </lu>
                     </md-card-content>
@@ -351,9 +359,7 @@
                         <lu>
                             <li>Changed "Vendor" Reward action to 9</li>
                             <li>Added "None" Reward action as 0</li>
-                            <li>Fix more mission bugs with Max Level Followers and not honoring Disallowed Mission
-                                Rewards
-                            </li>
+                            <li>Fix more mission bugs with Max Level Followers and not honoring Disallowed Mission Rewards</li>
                         </lu>
                     </md-card-content>
                 </md-card>
@@ -363,9 +369,7 @@
                         <lu>
                             <li>Changed "Vendor" Reward action to 9</li>
                             <li>Added "None" Reward action as 0</li>
-                            <li>Fix more mission bugs with Max Level Followers and not honoring Disallowed Mission
-                                Rewards
-                            </li>
+                            <li>Fix more mission bugs with Max Level Followers and not honoring Disallowed Mission Rewards</li>
                         </lu>
                     </md-card-content>
                 </md-card>
@@ -374,7 +378,7 @@
 
 
         <tab heading="General options">
-            <md-content ng-controller="GeneralOptionsController">
+            <md-content  ng-controller="GeneralOptionsController">
                 <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
                 <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
                 <md-list>
@@ -383,8 +387,7 @@
                             <md-item-content flex="30">
                                 <accordion class="sectionBackground" close-others="oneAtATime">
                                     <div layout="row" class="general-option-header">
-                                        <switch id="enabled" name="enabled" ng-model="item.value"
-                                                class="green"></switch>
+                                        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
                                         <div class="md-tile-content general-item-title">
                                             <h3>
                                                 <b>{{item.label}}</b>
@@ -394,8 +397,7 @@
                                     <accordion-group is-open="status.open">
                                         <accordion-heading>
                                             More info
-                                            <i class="pull-right glyphicon"
-                                               ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                            <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
                                         </accordion-heading>
                                         <p>
                                             {{item.description}}
@@ -405,13 +407,11 @@
                             </md-item-content>
                         </md-item>
 
-                        <md-item ng-if="!isIceVersion()" ng-repeat="item in itemsLite" ng-controller="switchController"
-                                 ng-init="init(item)">
+                        <md-item ng-if="!isIceVersion()" ng-repeat="item in itemsLite" ng-controller="switchController" ng-init="init(item)">
                             <md-item-content flex="30">
                                 <accordion class="sectionBackground" close-others="oneAtATime">
                                     <div layout="row" class="general-option-header">
-                                        <switch id="enabled" name="enabled" ng-model="item.value"
-                                                class="green"></switch>
+                                        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
                                         <div class="md-tile-content general-item-title">
                                             <h3>
                                                 <b>{{item.label}}</b>
@@ -421,8 +421,7 @@
                                     <accordion-group is-open="status.open">
                                         <accordion-heading>
                                             More info
-                                            <i class="pull-right glyphicon"
-                                               ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                            <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
                                         </accordion-heading>
                                         <p>
                                             {{item.description}}
@@ -454,8 +453,7 @@
                     <md-list layout="row" layout-wrap>
                         <md-item ng-repeat="building in itemsAvailable">
                             <md-item-content>
-                                <section class="sectionBackground-work-order" layout="row"
-                                         ng-controller="buildingController" ng-init="init(building)">
+                                <section class="sectionBackground-work-order" layout="row" ng-controller="buildingController" ng-init="init(building)">
                                     <div class="md-tile-content-orders">
                                         <div layout="column">
                                             <div layout="row" layout-align="start center">
@@ -465,24 +463,18 @@
                                             </div>
                                             <div layout="column" style="margin-left: 4px; margin-top: 4px;">
                                                 <div layout="row">
-                                                    <switch ng-model="building.canStartOrder"
-                                                            aria-label="Switch-{{nameNoSpaces}}" class="green"></switch>
+                                                    <switch ng-model="building.canStartOrder" aria-label="Switch-{{nameNoSpaces}}" class="green"></switch>
                                                     <p>Start Orders</p>
                                                 </div>
                                                 <div layout="row">
-                                                    <switch id="enabled" name="enabled"
-                                                            ng-model="building.canCollectOrder" class="green"></switch>
+                                                    <switch id="enabled" name="enabled" ng-model="building.canCollectOrder" class="green"></switch>
                                                     <p>Collect Orders</p>
                                                 </div>
                                             </div>
                                             <div layout="row" style="width: 300px;">
                                                 <h3 style="margin-left: 4px;">Max: </h3>
-                                                <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1"
-                                                        precision="1" ng-model="building.maxCanStartOrder"></slider>
-                                                <input style="width:62px;height: 35px" ng-init="$scope.$apply();"
-                                                       type="number" ng-model="building.maxCanStartOrder"
-                                                       aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0"
-                                                       max="50">
+                                                <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1" precision="1" ng-model="building.maxCanStartOrder"></slider>
+                                                <input style="width:62px;height: 35px" ng-init="$scope.$apply();" type="number" ng-model="building.maxCanStartOrder" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="50">
                                             </div>
                                         </div>
                                     </div>
@@ -497,8 +489,7 @@
                     <md-list layout="row" layout-wrap>
                         <md-item ng-repeat="building in itemsNotAvailable">
                             <md-item-content>
-                                <section class="sectionBackground-work-order" layout="row"
-                                         ng-controller="buildingController" ng-init="init(building)">
+                                <section class="sectionBackground-work-order" layout="row" ng-controller="buildingController" ng-init="init(building)">
                                     <div class="md-tile-content-orders">
                                         <div layout="column">
                                             <div layout="row" layout-align="start center">
@@ -508,24 +499,18 @@
                                             </div>
                                             <div layout="column" style="margin-left: 4px; margin-top: 4px;">
                                                 <div layout="row">
-                                                    <switch ng-model="building.canStartOrder"
-                                                            aria-label="Switch-{{nameNoSpaces}}" class="green"></switch>
+                                                    <switch ng-model="building.canStartOrder" aria-label="Switch-{{nameNoSpaces}}" class="green"></switch>
                                                     <p>Start Orders</p>
                                                 </div>
                                                 <div layout="row">
-                                                    <switch id="enabled" name="enabled"
-                                                            ng-model="building.canCollectOrder" class="green"></switch>
+                                                    <switch id="enabled" name="enabled" ng-model="building.canCollectOrder" class="green"></switch>
                                                     <p>Collect Orders</p>
                                                 </div>
                                             </div>
                                             <div layout="row" style="width: 300px;">
                                                 <h3 style="margin-left: 4px;">Max: </h3>
-                                                <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1"
-                                                        precision="1" ng-model="building.maxCanStartOrder"></slider>
-                                                <input style="width:62px;height: 35px" ng-init="$scope.$apply();"
-                                                       type="number" ng-model="building.maxCanStartOrder"
-                                                       aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0"
-                                                       max="50">
+                                                <slider style="margin-left: 20px;" floor="0" ceiling="100" step="1" precision="1" ng-model="building.maxCanStartOrder"></slider>
+                                                <input style="width:62px;height: 35px" ng-init="$scope.$apply();" type="number" ng-model="building.maxCanStartOrder" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="50">
                                             </div>
                                         </div>
                                     </div>
@@ -598,7 +583,6 @@
                         <h3>
                             <b>Send Disenchantable Green</b>
                         </h3>
-
                         <div>
                             <div>
                                 Recipient for disenchantable green:
@@ -629,30 +613,25 @@
                          </td> -->
                         <td>
                             <!-- editable itemId (text with validation) -->
-                            <span editable-text="row.itemId" e-name="itemId" e-form="rowform"
-                                  onbeforesave="checkItemId($data, row)" e-required>
-                                <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}'>{{ row.itemId ||
-                                    "empty" }}</a>
+                            <span editable-text="row.itemId" e-name="itemId" e-form="rowform" onbeforesave="checkItemId($data, row)" e-required>
+                                <a ng-href='http://www.wowhead.com/item={{ row.itemId || "empty" }}'>{{ row.itemId || "empty" }}</a>
                             </span>
                         </td>
                         <td>
                             <!-- editable recipient (text with validation) -->
-                            <span editable-text="row.recipient" e-name="recipient" e-form="rowform"
-                                  onbeforesave="checkEmpty($data)" e-required>
+                            <span editable-text="row.recipient" e-name="recipient" e-form="rowform" onbeforesave="checkEmpty($data)" e-required>
                               {{ row.recipient || 'empty' }}
                             </span>
                         </td>
                         <td>
                             <!-- editable status (select-local) -->
-                            <span editable-select="row.condition" e-name="condition" e-form="rowform"
-                                  onbeforesave="checkEmpty($data)" e-ng-options="s for s in conditions" e-required>
+                            <span editable-select="row.condition" e-name="condition" e-form="rowform" onbeforesave="checkEmpty($data)" e-ng-options="s for s in conditions" e-required>
                               {{ row.condition }}
                             </span>
                         </td>
                         <td>
                             <!-- editable value (text with validation) -->
-                            <span editable-text="row.value" e-name="value" e-form="rowform"
-                                  onbeforesave="checkEmptyInt($data)" e-required>
+                            <span editable-text="row.value" e-name="value" e-form="rowform" onbeforesave="checkEmptyInt($data)" e-required>
                               {{ row.value || 'empty' }}
                             </span>
                         </td>
@@ -664,13 +643,11 @@
                         </td>
                         <td style="white-space: nowrap">
                             <!-- form -->
-                            <form editable-form name="rowform" onaftersave="saveMailToCSharp($data)"
-                                  ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == row">
+                            <form editable-form name="rowform" onaftersave="saveMailToCSharp($data)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == row">
                                 <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
                                     save
                                 </button>
-                                <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()"
-                                        class="btn btn-default">
+                                <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
                                     cancel
                                 </button>
                             </form>
@@ -686,7 +663,7 @@
         </tab>
 
 
-        <tab heading="Milling" ng-if="isIceVersion()">
+        <tab heading="Milling"  ng-if="isIceVersion()">
             <div ng-controller="millingListController">
                 <div class="tab-intro">
                     <h2>Milling Engine</h2>
@@ -747,7 +724,7 @@
 
 
         <!--Missions rewards tab-->
-        <tab heading="Missions" ng-if="isIceVersion()">
+        <tab heading="Missions"  ng-if="isIceVersion()">
             <div ng-controller="missionsListController">
                 <div class="tab-intro">
                     <h1>Missions Engine</h1>
@@ -769,8 +746,7 @@
                                     <accordion-group is-open="status.open">
                                         <accordion-heading>
                                             {{ row.label }}
-                                            <i class="pull-right glyphicon"
-                                               ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                            <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
                                         </accordion-heading>
                                         <p>
                                             {{row.description}}
@@ -783,8 +759,7 @@
                             <switch id="enabled" name="enabled" ng-model="row.val" class="green"></switch>
                         </td>
                         <td ng-if="row.variableType === 'int'">
-                            <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1"
-                                    precision="1"
+                            <slider style="margin-left: 20px;width: 300px;" floor="0" ceiling="100" step="1" precision="1"
                                     ng-model="row.val"></slider>
                             <input style="width:50px;height: 27px" ng-init="$scope.$apply();" type="number"
                                    ng-model="row.val" aria-label="red" aria-controls="{{nameNoSpaces}}-slider"
@@ -795,18 +770,14 @@
 
 
                 <h1>Detailed settings</h1>
-
                 <p>Here you can decide the priority of categories and specific items.</p>
-
                 <p>You can sort the data by clicking on the columns' headers.</p>
                 <ul>
                     <li><b>Priority:</b> The priority with which to treat rewards. 0 is better than 10.</li>
-                    <li><b>Disallowed:</b> Will not allow a mission with this reward to be started EVER.</li>
-                    <li><b>Player level:</b> The minimum lvl of character to consider this reward.</li>
-                    <li><b>Mission level:</b> The minimum lvl of the mission to consider this reward.</li>
-                    <li><b>Custom Success chances:</b> If enabled, this will override for this reward the success chance
-                        set by default.
-                    </li>
+                    <li><b>Disallowed:</b> Will not allow a mission with this reward to be started EVER. </li>
+                    <li><b>Player level:</b> The minimum lvl of character to consider this reward. </li>
+                    <li><b>Mission level:</b> The minimum lvl of the mission to consider this reward. </li>
+                    <li><b>Custom Success chances:</b> If enabled, this will override for this reward the success chance set by default.</li>
                 </ul>
                 <table st-table="MissionRewards" class="table">
                     <thead>
@@ -821,11 +792,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in MissionRewards" ng-controller="missionRewardController" ng-init="init(row)">
+                    <tr ng-repeat="row in MissionRewards" ng-controller="missionRewardController"  ng-init="init(row)">
                         <td>
 
-                    <span editable-text="row.priorityList" onbeforesave="prepUpdateList(row)"
-                          onaftersave="updateList(row)">
+                    <span editable-text="row.priorityList" onbeforesave="prepUpdateList(row)" onaftersave="updateList(row)">
                     {{ row.priorityList }}
                     </span>
                         </td>
@@ -852,22 +822,21 @@
 
                         <td>
                             <!-- editable value (text with validation) -->
-                <span editable-text="row.playerLevel" onaftersave="updateReward(row)">
+                <span editable-text="row.playerLevel"  onaftersave="updateReward(row)">
                 {{ row.playerLevel }}
                 </span>
                         </td>
 
                         <td>
                             <!-- editable value (text with validation) -->
-                <span editable-text="row.missionLevel" onaftersave="updateReward(row)">
+                <span editable-text="row.missionLevel"  onaftersave="updateReward(row)">
                 {{ row.missionLevel }}
                 </span>
                         </td>
 
                         <td>
                             <div layout="row" style="width: 500px;">
-                                <switch id="enabled" name="enabled" ng-model="row.individualSuccessEnabled"
-                                        class="green"></switch>
+                                <switch id="enabled" name="enabled" ng-model="row.individualSuccessEnabled" class="green"></switch>
                                 <!-- editable value (text with validation) -->
                 <span editable-text="row.successChance">
                 {{ row.successChance }}%
@@ -883,19 +852,17 @@
         </tab>
 
 
-        <tab heading="Enchanting" ng-if="isIceVersion()">
-            <md-content ng-controller="enchantingListController">
+        <tab heading="Enchanting"  ng-if="isIceVersion()">
+            <md-content  ng-controller="enchantingListController">
                 <md-button class="md-raised" ng-click='selectAll(true)'>Select All</md-button>
                 <md-button class="md-raised" ng-click='selectAll(false)'>Select None</md-button>
                 <md-list>
                     <div layout="row" layout-wrap>
-                        <md-item ng-repeat="item in items" ng-controller="enchantingOptionController"
-                                 ng-init="init(item)">
+                        <md-item ng-repeat="item in items" ng-controller="enchantingOptionController" ng-init="init(item)">
                             <md-item-content flex="30">
                                 <accordion class="sectionBackground" close-others="oneAtATime">
                                     <div layout="row" class="general-option-header">
-                                        <switch id="enabled" name="enabled" ng-model="item.value"
-                                                class="green"></switch>
+                                        <switch id="enabled" name="enabled" ng-model="item.value" class="green"></switch>
                                         <div class="md-tile-content general-item-title">
                                             <h3>
                                                 <b>{{item.label}}</b>
@@ -905,8 +872,7 @@
                                     <accordion-group is-open="status.open">
                                         <accordion-heading>
                                             More info
-                                            <i class="pull-right glyphicon"
-                                               ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                            <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
                                         </accordion-heading>
                                         <p>
                                             {{item.description}}
@@ -920,11 +886,8 @@
 
                 <div layout="row">
                     <h3 style="margin-left: 4px;">Maximum Item Level (won't disenchant above this level): </h3>
-                    <input style="width:65px;height:35px;margin-left: 13px;" ng-init="$scope.$apply();" type="number"
-                           ng-model="maxItemILVL" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0"
-                           max="999">
+                    <input style="width:65px;height:35px;margin-left: 13px;" ng-init="$scope.$apply();" type="number" ng-model="maxItemILVL" aria-label="red" aria-controls="{{nameNoSpaces}}-slider" min="0" max="999">
                 </div>
-
                 <div layout="row">
                     <h3 style="margin-left: 4px;">Minimum Item Level (won't disenchant below this level): </h3>
                     <input style="width:65px;height:35px;margin-left: 13px;" ng-init="$scope.$apply();" type="number"
@@ -932,13 +895,11 @@
                            max="999">
                 </div>
                 <div layout="row">
-                    <h3 style="margin-left: 4px;">Maximum item quality to disenchant(won't disenchant above this
-                        quality): </h3>
+                    <h3 style="margin-left: 4px;">Maximum item quality to disenchant(won't disenchant above this quality): </h3>
                     <!-- editable status (select-local) -->
-                    <span style="color: black; margin-left: 13px;" editable-select="itemQuality"
-                          e-ng-options="s for s in itemQualities" onaftersave="saveQuality()" e-required>
-                      {{ itemQuality }} ( Click to edit)
-                    </span>
+                            <span style="color: black; margin-left: 13px;" editable-select="itemQuality" e-ng-options="s for s in itemQualities"  onaftersave="saveQuality()" e-required>
+                              {{ itemQuality }} ( Click to edit)
+                            </span>
                 </div>
             </md-content>
         </tab>
