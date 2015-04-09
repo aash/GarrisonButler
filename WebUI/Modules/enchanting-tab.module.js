@@ -56,11 +56,32 @@ angular.module('GarrisonButlerApp.enchanting-tab', ['ngMaterial', 'ngAria', 'sma
             });
 
         try {
-            $scope.maxItemILVL = JSON.parse($scope.loadCSharpInt("MaxDisenchantIlvl"));
+            $scope.maxItemILVL = $scope.loadCSharpInt("MaxDisenchantIlvl");
         }
         catch (e) {
             $scope.Diagnostic(e);
         }
+
+        $scope.$watch(
+            'minItemILVL',
+            function (newValue, oldValue)
+            {
+                try {
+                    $scope.saveCSharpInt("MinDisenchantIlvl", newValue);
+                }
+                catch(e)
+                {
+                    $scope.Diagnostic(e);
+                }
+            });
+
+        try {
+            $scope.minItemILVL = $scope.loadCSharpInt("MinDisenchantIlvl");
+        }
+        catch (e) {
+            $scope.Diagnostic(e);
+        }
+
         $scope.saveQuality = function()
         {
             $scope.saveDisenchantQuality($scope.itemQuality);

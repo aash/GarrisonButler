@@ -88,7 +88,13 @@ namespace GarrisonButler.ButlerCoroutines
 
             if (item.ItemInfo.Level > settings.MaxDisenchantIlvl)
             {
-                GarrisonButler.Diagnostic("Cannot disenchant {0} because ilvl: {1} > {2}", item.SafeName, item.ItemInfo.Level, item.ItemInfo.Level);
+                GarrisonButler.Diagnostic("Cannot disenchant {0} because ilvl: {1} > {2}", item.SafeName, item.ItemInfo.Level, settings.MaxDisenchantIlvl);
+                return false;
+            }
+
+            if (item.ItemInfo.Level < settings.MinDisenchantIlvl)
+            {
+                GarrisonButler.Diagnostic("Cannot disenchant {0} because ilvl: {1} < {2}", item.SafeName, item.ItemInfo.Level, settings.MinDisenchantIlvl);
                 return false;
             }
 

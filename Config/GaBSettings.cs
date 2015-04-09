@@ -34,6 +34,7 @@ namespace GarrisonButler.Config
         private bool _useEpicMaxLevelFollowersToBoostLowerFollowers = true;
         private DisenchantItemQuality _maxDisenchantQuality = DisenchantItemQuality.Uncommon;
         private int _maxDisenchantIlvl = 0;
+        private int _minDisenchantIlvl = 0;
 
         private GaBSettings()
         {
@@ -761,6 +762,12 @@ namespace GarrisonButler.Config
         {
             get { return _maxDisenchantIlvl; }
             set { _maxDisenchantIlvl = value; }
+        }
+
+        public int MinDisenchantIlvl
+        {
+            get { return _minDisenchantIlvl; }
+            set { _minDisenchantIlvl = value; }
         }
 
         public DisenchantItemQuality MaxDisenchantQuality
