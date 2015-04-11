@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using Buddy.Coroutines;
 using Facet.Combinatorics;
 using GarrisonButler.API;
@@ -17,6 +18,8 @@ using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using Styx.WoWInternals.DB;
+using Styx.WoWInternals.Garrison;
 using Styx.WoWInternals.WoWObjects;
 
 #endregion
@@ -53,6 +56,46 @@ namespace GarrisonButler.ButlerCoroutines
             GarrisonButler.Log("Refreshing Followers database.");
             _followers = FollowersLua.GetAllFollowers();
             RefreshFollowerTimer.Reset();
+        }
+
+        public static bool IsMissionDisallowedHB(GarrisonMission mission)
+        {
+            var disallowedRewardSettings = GaBSettings.Get().MissionRewardSettings.Where(mrs => mrs.DisallowMissionsWithThisReward);
+            var disallowed = disallowedRewardSettings.Any(drs =>
+                drs.IsCategoryReward
+                    ? mission.RewardRecords.Any(r => r.Category() == drs.Category)
+                    : mission.RewardRecords.Any(r => r.Id == drs.Id));
+
+            if (!disallowed)
+            {
+                var missionRewardWithGarrisonResources
+                    = mission.RewardRecords.FirstOrDefault(r => r.IsGarrisonResources());
+
+                if (missionRewardWithGarrisonResources != null)
+                {
+                    var garrsionResourcesCurrency = WoWCurrency.GetCurrencyById(MissionReward.GarrisonResourcesId);
+
+                    if (garrsionResourcesCurrency != null)
+                    {
+                        var cap = garrsionResourcesCurrency.TotalMax;
+                        var missionAmt = missionRewardWithGarrisonResources.CurrencyQuantity;
+                        var playerAmt = garrsionResourcesCurrency.Amount;
+
+                        disallowed = (playerAmt + missionAmt) > cap;
+
+                        GarrisonButler.Diagnostic(
+                            "[Missions] Garrison Resources = {0} for mission ({1}) {2}.  Player has {3} Garrison Resources.  Total max is {4}.  {5} + {6} > {7}?  {8}",
+                            missionAmt, mission.Id, mission.Name, playerAmt, cap, missionAmt, playerAmt, cap,
+                            disallowed);
+                    }
+                }
+            }
+
+            GarrisonButler.Diagnostic(
+            disallowed
+                ? "[Missions] Mission is DISALLOWED id: {0} name: {1}"
+                : "[Missions] Mission is enabled id: {0} name: {1}", mission.Id, mission.Name);
+            return disallowed;
         }
 
         public static bool IsMissionDisallowed(Mission mission)
@@ -96,8 +139,76 @@ namespace GarrisonButler.ButlerCoroutines
             return disallowed;
         }
 
+        public static List<Tuple<GarrisonMission, GarrisonFollower[]>> HBMissionStubCode()
+        {
+            DateTime missionCodeStartedAt = DateTime.Now;
+            GarrisonButler.Diagnostic("[MissionsHB] ------------");
+            var toStart = new List<Tuple<GarrisonMission, GarrisonFollower[]>>();
+
+            var allAvailableMissions = GarrisonInfo.Missions;
+            var missions = allAvailableMissions
+                .GetEmptyIfNull()
+                .SkipWhile(IsMissionDisallowedHB)
+                .Where(m => m.State == MissionState.None)
+                .ToList();
+            var numMissions = missions.Count;
+            if (numMissions == 0)
+            {
+                GarrisonButler.Diagnostic("returning from HBMissionStubCode(): # missions = 0");
+                return toStart;
+            }
+
+            var slots = missions.Sum(m => m.MaxFollowers);
+            if (slots == 0)
+            {
+                GarrisonButler.Diagnostic("returning from HBMissionStubCode(): # slots = 0");
+                return toStart;
+            }
+
+            var followers = GarrisonInfo.Followers;
+            var numFollowers = followers.Count;
+            var totalActiveFollowers = followers.Count(f => f.Status != GarrisonFollowerStatus.Inactive);
+            var ownedBarracksInfo = GarrisonInfo.GetOwnedBuildingByType(GarrisonBuildingType.Barracks);
+            var hasBarracksLevel3 = ownedBarracksInfo.Type != GarrisonBuildingType.Unknown;
+            var maxActiveFollowers = hasBarracksLevel3 ? 25 : 20;
+            //GarrisonInfo.AllBuildings.ForEach(b => GarrisonButler.Diagnostic("[AllBuildings] {0} - Rank={1}", b.Name, b.Rank));
+            // Status 5 is INACTIVE
+            // Make sure there's at least 1 follower
+            // and make sure the number of active followers is less than 20
+            if (numFollowers == 0 || totalActiveFollowers <= maxActiveFollowers)
+            {
+                GarrisonButler.Diagnostic("returning from NewMissionStubCode(): # followers = {0}", followers.Count);
+                return toStart;
+            }
+
+            var rewards = GaBSettings.Get().MissionRewardSettings;
+            var numReward = rewards.Count;
+            long combosTried = 0;
+            var acceptedCombos = 0;
+            double totalSuccessChance = 0;
+
+            missions.ForEach(f =>
+            {
+                GarrisonButler.Diagnostic(">> Mission: " + f.Name);
+                f.RewardRecords.ForEach(r => GarrisonButler.Diagnostic("  >> Reward: " + r.Name()));
+            });
+
+            followers.ForEach(f =>
+            {
+                GarrisonButler.Diagnostic(">> Follower: " + f.Name);
+                GarrisonButler.Diagnostic("  Quality: " + f.Quality);
+                GarrisonButler.Diagnostic("  Level: " + f.Level);
+                GarrisonButler.Diagnostic("  Status: " + f.Status);
+            });
+
+            //TODO - Not done yet
+
+            return toStart;
+        }
+
         public static List<Tuple<Mission, Follower[]>> NewMissionStubCode(List<Follower> followers)
         {
+            HBMissionStubCode();
             var allAvailableMissions = MissionLua.GetAllAvailableMissions();
             allAvailableMissions.ForEach(m => IsMissionDisallowed(m));
             GarrisonButler.Diagnostic("[Missions] ------------");
@@ -116,41 +227,8 @@ namespace GarrisonButler.ButlerCoroutines
             double totalSuccessChance = 0;
             var toStart = new List<Tuple<Mission, Follower[]>>();
 
-            //TEST JSON
+            // Load JSON data from Wowhead
             MissionCalc.LoadJSONData();
-            int count = 0;
-
-
-
-            //var toAdd = new List<Follower>();
-            //while (count < 3)
-            //{
-            //    toAdd.Add(followers[count]);
-            //    count++;
-            //}
-            //MissionCalc.followers = toAdd;
-
-
-            //foreach (Mission m in missions)
-            //{
-            //    MissionCalc.mission = m;
-            //    GarrisonButler.Diagnostic("** Mission = {0} **", m.Name);
-            //    for (int offset = 0; offset < numFollowers; offset += m.NumFollowers)
-            //    {
-            //        MissionCalc.followers = followers.GetRange(offset, m.NumFollowers);
-            //        count = 0;
-            //        while (count < MissionCalc.followers.Count)
-            //        {
-            //            GarrisonButler.Diagnostic("  Follower {0}: {1}", (count + 1).ToString(),
-            //                MissionCalc.followers[count]);
-            //            count++;
-            //        }
-            //        var result = MissionCalc.CalculateSuccessChance();
-            //        GarrisonButler.Diagnostic("  Success: " + result.Item1);
-            //        GarrisonButler.Diagnostic("  ChanceOver: " + result.Item2);
-            //    }
-            //}
-            //TEST JSON
 
             missions.ForEach(f =>
             {
@@ -168,7 +246,7 @@ namespace GarrisonButler.ButlerCoroutines
 
             if (slots == 0)
             {
-                GarrisonButler.Diagnostic("returning from GetAllFollowers(): # slots = 0");
+                GarrisonButler.Diagnostic("returning from NewMissionStubCode(): # slots = 0");
                 return toStart;
             }
 
@@ -177,13 +255,13 @@ namespace GarrisonButler.ButlerCoroutines
             // and make sure the number of active followers is less than 20
             if (numFollowers == 0 || followers.Count(f => f.Status.ToInt32() != 5) <= (_buildings.Any(b => b.Id == (int) global::GarrisonButler.Buildings.BarracksLvl3) ? 25 : 20))
             {
-                GarrisonButler.Diagnostic("returning from GetAllFollowers(): # followers = {0}", followers.Count);
+                GarrisonButler.Diagnostic("returning from NewMissionStubCode(): # followers = {0}", followers.Count);
                 return toStart;
             }
 
             if (numMissions == 0)
             {
-                GarrisonButler.Diagnostic("returning from GetAllFollowers(): # missions = 0");
+                GarrisonButler.Diagnostic("returning from NewMissionStubCode(): # missions = 0");
                 return toStart;
             }
 
