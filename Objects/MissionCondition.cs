@@ -11,6 +11,7 @@ using JetBrains.Annotations;
 using Styx;
 using Styx.CommonBot.Coroutines;
 using Styx.WoWInternals;
+using Styx.WoWInternals.DB;
 using Styx.WoWInternals.WoWObjects;
 
 namespace GarrisonButler.Objects
@@ -191,7 +192,48 @@ namespace GarrisonButler.Objects
                     return true;
 
                 default:
-                    GarrisonButler.Diagnostic("GetCondition: This mission rule has not been implemented! Id: " + reward.Id + " Name: " + reward.Name);
+                    GarrisonButler.Diagnostic("GetCondition: This mission rule has not been implemented! Id: {0} Name: {1}",
+                        reward.Id, reward.Name);
+                    break;
+            }
+            return true;
+        }
+
+        //Honorbuddy API version
+        public bool GetCondition(GarrMissionReward reward)
+        {
+            switch (_condition)
+            {
+                case Conditions.NumberPlayerHasSuperiorTo:
+                    return IsNumberPlayerHasSuperiorTo(reward, _checkValue);
+
+                case Conditions.NumberPlayerHasSuperiorOrEqualTo:
+                    return IsNumberPlayerHasSuperiorOrEqualTo(reward, _checkValue);
+
+                case Conditions.NumberPlayerHasInferiorTo:
+                    return IsNumberPlayerHasInferiorTo(reward, _checkValue);
+
+                case Conditions.NumberPlayerHasInferiorOrEqualTo:
+                    return IsNumberPlayerHasInferiorOrEqualTo(reward, _checkValue);
+
+                case Conditions.NumberRewardSuperiorTo:
+                    return IsNumberRewardSuperiorTo(reward, _checkValue);
+
+                case Conditions.NumberRewardSuperiorOrEqualTo:
+                    return IsNumberRewardSuperiorOrEqualTo(reward, _checkValue);
+
+                case Conditions.NumberRewardInferiorTo:
+                    return IsNumberRewardInferiorTo(reward, _checkValue);
+
+                case Conditions.NumberRewardInferiorOrEqualTo:
+                    return IsNumberRewardInferiorOrEqualTo(reward, _checkValue);
+
+                case Conditions.None:
+                    return true;
+
+                default:
+                    GarrisonButler.Diagnostic("GetCondition(GarrMissionReward): This mission rule has not been implemented! Id: {0} Name: {1}",
+                        reward.GarrisonButlerRewardId(), reward.Name());
                     break;
             }
             return true;
@@ -259,6 +301,55 @@ namespace GarrisonButler.Objects
 
                 default:
                     GarrisonButler.Diagnostic("GetItemsOrNull: This mission rule has not been implemented! Id: " + reward.Id + " Name: " + reward.Name);
+                    break;
+            }
+            return null;
+        }
+
+        //Honorbuddy API version
+        public async Task<IEnumerable<object>> GetItemsOrNull(GarrMissionReward reward)
+        {
+            switch (_condition)
+            {
+                case Conditions.NumberPlayerHasSuperiorTo:
+                    return GetNumberPlayerHasSuperiorTo(reward);
+
+                case Conditions.NumberPlayerHasSuperiorOrEqualTo:
+                    return GetNumberPlayerHasSuperiorOrEqualTo(reward);
+
+                case Conditions.NumberPlayerHasInferiorTo:
+                    return GetNumberPlayerHasInferiorTo(reward);
+
+                case Conditions.NumberPlayerHasInferiorOrEqualTo:
+                    return GetNumberPlayerHasInferiorOrEqualTo(reward);
+
+                case Conditions.NumberRewardSuperiorTo:
+                    return (IEnumerable<object>)GetNumberRewardSuperiorTo(reward);
+
+                case Conditions.NumberRewardSuperiorOrEqualTo:
+                    return GetNumberRewardSuperiorOrEqualTo(reward);
+
+                case Conditions.NumberRewardInferiorTo:
+                    return GetNumberRewardInferiorTo(reward);
+
+                case Conditions.NumberRewardInferiorOrEqualTo:
+                    return GetNumberRewardInferiorOrEqualTo(reward);
+
+                //case Conditions.NumberInBagsSuperiorTo:
+                //    return GetNumberInBagsSuperiorTo(itemId);
+
+                //case Conditions.NumberInBagsSuperiorOrEqualTo:
+                //    return GetNumberInBagsSuperiorOrEqualTo(itemId);
+
+                //case Conditions.KeepNumberInBags:
+                //    return await GetNumberKeepNumberInBags(itemId, _checkValue);
+
+                case Conditions.None:
+                    return null;
+
+                default:
+                    GarrisonButler.Diagnostic("GetItemsOrNull(GarrMissionReward): This mission rule has not been implemented! Id: {0} Name: {1}",
+                        reward.GarrisonButlerRewardId(), reward.Name());
                     break;
             }
             return null;
@@ -354,6 +445,34 @@ namespace GarrisonButler.Objects
             return numCarried > x;
         }
 
+        //Honorbuddy API version
+        private static bool IsNumberPlayerHasSuperiorTo(GarrMissionReward reward, int x)
+        {
+            uint numCarried = 0;
+
+            if (reward.IsItemReward())
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.GarrMissionId);
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currencyInfo = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                if (currencyInfo == null)
+                    numCarried = 0;
+                else
+                    numCarried = currencyInfo.Amount;
+            }
+            else if (reward.IsGold())
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+            //else if (reward.IsFollowerXP)
+            //{
+            //    numCarried = x;
+            //}
+            return numCarried > x;
+        }
+
         /// <summary>
         ///     Return array of items to respect the following rule: if the specified character has more than x count of
         ///     ItemId carried, return everything.
@@ -382,6 +501,30 @@ namespace GarrisonButler.Objects
             return numCarried;
         }
 
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberPlayerHasSuperiorTo(GarrMissionReward reward)
+        {
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward())
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currency = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                numCarried = new List<WoWCurrency>();
+                if(currency != null)
+                    ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold())
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
+        }
+
         /// <summary>
         ///     Return true if the specified character have x or more than x count of ItemId carried.
         /// </summary>
@@ -401,6 +544,31 @@ namespace GarrisonButler.Objects
                 numCarried = reward._CurrencyInfo.Amount;
             }
             else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+
+            return numCarried != 0 && numCarried >= x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberPlayerHasSuperiorOrEqualTo(GarrMissionReward reward, int x)
+        {
+            uint numCarried = 0;
+
+            if (reward.IsItemReward())
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currencyInfo = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                if (currencyInfo == null)
+                    numCarried = 0;
+                else
+                    numCarried = currencyInfo.Amount;
+            }
+            else if (reward.IsGold())
             {
                 numCarried = (uint)StyxWoW.Me.Gold;
             }
@@ -436,6 +604,30 @@ namespace GarrisonButler.Objects
             return numCarried;
         }
 
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberPlayerHasSuperiorOrEqualTo(GarrMissionReward reward)
+        {
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward())
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currency = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                numCarried = new List<WoWCurrency>();
+                if (currency != null)
+                    ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold())
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
+        }
+
         /// <summary>
         ///     Return true if the specified character has less than x count of ItemId carried.
         /// </summary>
@@ -455,6 +647,30 @@ namespace GarrisonButler.Objects
                 numCarried = reward._CurrencyInfo.Amount;
             }
             else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+            return numCarried < x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberPlayerHasInferiorTo(GarrMissionReward reward, int x)
+        {
+            uint numCarried = 0;
+
+            if (reward.IsItemReward())
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currencyInfo = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                if (currencyInfo == null)
+                    numCarried = 0;
+                else
+                    numCarried = currencyInfo.Amount;
+            }
+            else if (reward.IsGold())
             {
                 numCarried = (uint)StyxWoW.Me.Gold;
             }
@@ -489,6 +705,30 @@ namespace GarrisonButler.Objects
             return numCarried;
         }
 
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberPlayerHasInferiorTo(GarrMissionReward reward)
+        {
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward())
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currency = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                numCarried = new List<WoWCurrency>();
+                if (currency != null)
+                    ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold())
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
+        }
+
         /// <summary>
         ///     Return true if the specified character have x or less than x count of ItemId carried.
         /// </summary>
@@ -508,6 +748,30 @@ namespace GarrisonButler.Objects
                 numCarried = reward._CurrencyInfo.Amount;
             }
             else if (reward.IsGold)
+            {
+                numCarried = (uint)StyxWoW.Me.Gold;
+            }
+            return numCarried != 0 && numCarried <= x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberPlayerHasInferiorOrEqualTo(GarrMissionReward reward, int x)
+        {
+            uint numCarried = 0;
+
+            if (reward.IsItemReward())
+            {
+                numCarried = (uint)HbApi.GetNumberItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currencyInfo = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                if (currencyInfo == null)
+                    numCarried = 0;
+                else
+                    numCarried = currencyInfo.Amount;
+            }
+            else if (reward.IsGold())
             {
                 numCarried = (uint)StyxWoW.Me.Gold;
             }
@@ -542,6 +806,30 @@ namespace GarrisonButler.Objects
             return numCarried;
         }
 
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberPlayerHasInferiorOrEqualTo(GarrMissionReward reward)
+        {
+            var numCarried = Enumerable.Empty<object>();
+            if (reward.IsItemReward())
+            {
+                numCarried = HbApi.GetItemCarried((uint)reward.GarrisonButlerRewardId());
+            }
+            else if (reward.IsCurrencyReward())
+            {
+                var currency = WoWCurrency.GetCurrencyByType(reward.CurrencyType);
+                numCarried = new List<WoWCurrency>();
+                if (currency != null)
+                    ((List<WoWCurrency>)numCarried).Add(currency);
+            }
+            else if (reward.IsGold())
+            {
+                var gold = (int)StyxWoW.Me.Gold;
+                numCarried = new List<object>();
+                ((List<object>)numCarried).Add((object)gold);
+            }
+            return numCarried;
+        }
+
         //*****************************
         //*****************************
         //*****************************
@@ -554,6 +842,12 @@ namespace GarrisonButler.Objects
         private static bool IsNumberRewardSuperiorTo(MissionReward reward, int x)
         {
             return reward.Quantity > x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberRewardSuperiorTo(GarrMissionReward reward, int x)
+        {
+            return reward.Quantity() > x;
         }
 
         /// <summary>
@@ -569,6 +863,14 @@ namespace GarrisonButler.Objects
             return retval;
         }
 
+        //Honorbuddy API verison
+        private static IEnumerable<object> GetNumberRewardSuperiorTo(GarrMissionReward reward)
+        {
+            var retval = new List<object>();
+            retval.Add(reward.Quantity());
+            return retval;
+        }
+
         /// <summary>
         ///     Return true if the specified mission has x or more than x count of ItemId as a reward.
         /// </summary>
@@ -578,6 +880,12 @@ namespace GarrisonButler.Objects
         private static bool IsNumberRewardSuperiorOrEqualTo(MissionReward reward, int x)
         {
             return reward.Quantity >= x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberRewardSuperiorOrEqualTo(GarrMissionReward reward, int x)
+        {
+            return reward.Quantity() >= x;
         }
 
         /// <summary>
@@ -593,6 +901,14 @@ namespace GarrisonButler.Objects
             return retval;
         }
 
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberRewardSuperiorOrEqualTo(GarrMissionReward reward)
+        {
+            var retval = new List<object>();
+            retval.Add(reward.Quantity());
+            return retval;
+        }
+
         /// <summary>
         ///     Return true if the specified mission has less than x count of ItemId as a reward.
         /// </summary>
@@ -602,6 +918,12 @@ namespace GarrisonButler.Objects
         private static bool IsNumberRewardInferiorTo(MissionReward reward, int x)
         {
             return reward.Quantity < x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberRewardInferiorTo(GarrMissionReward reward, int x)
+        {
+            return reward.Quantity() < x;
         }
 
         /// <summary>
@@ -617,6 +939,14 @@ namespace GarrisonButler.Objects
             return retval;
         }
 
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberRewardInferiorTo(GarrMissionReward reward)
+        {
+            var retval = new List<object>();
+            retval.Add(reward.Quantity());
+            return retval;
+        }
+
         /// <summary>
         ///     Return true if the specified mission has x or less than x count of ItemId as a reward.
         /// </summary>
@@ -626,6 +956,12 @@ namespace GarrisonButler.Objects
         private static bool IsNumberRewardInferiorOrEqualTo(MissionReward reward, int x)
         {
             return reward.Quantity <= x;
+        }
+
+        //Honorbuddy API version
+        private static bool IsNumberRewardInferiorOrEqualTo(GarrMissionReward reward, int x)
+        {
+            return reward.Quantity() <= x;
         }
 
         /// <summary>
@@ -638,6 +974,14 @@ namespace GarrisonButler.Objects
         {
             var retval = new List<object>();
             retval.Add(reward.Quantity);
+            return retval;
+        }
+
+        //Honorbuddy API version
+        private static IEnumerable<object> GetNumberRewardInferiorOrEqualTo(GarrMissionReward reward)
+        {
+            var retval = new List<object>();
+            retval.Add(reward.Quantity());
             return retval;
         }
 

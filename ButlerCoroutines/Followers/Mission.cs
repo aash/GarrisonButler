@@ -139,12 +139,14 @@ namespace GarrisonButler.ButlerCoroutines
             return disallowed;
         }
 
-        public static List<Tuple<GarrisonMission, GarrisonFollower[]>> HBMissionStubCode()
+        // ReSharper disable once InconsistentNaming
+        public static Tuple<GarrisonMission, GarrisonFollower[]> HBMissionStubCode()
         {
             DateTime missionCodeStartedAt = DateTime.Now;
             GarrisonButler.Diagnostic("[MissionsHB] ------------");
-            var toStart = new List<Tuple<GarrisonMission, GarrisonFollower[]>>();
+            Tuple<GarrisonMission, GarrisonFollower[]> toStart = null;
 
+            // STEP 1 - Gather mission information
             var allAvailableMissions = GarrisonInfo.Missions;
             var missions = allAvailableMissions
                 .GetEmptyIfNull()
@@ -165,34 +167,35 @@ namespace GarrisonButler.ButlerCoroutines
                 return toStart;
             }
 
-            var followers = GarrisonInfo.Followers;
+            // STEP 2 - Gather follower information
+            var followers = GarrisonInfo.Followers
+                .Where(f => f.Status == GarrisonFollowerStatus.Idle)
+                .ToList();
             var numFollowers = followers.Count;
             var totalActiveFollowers = followers.Count(f => f.Status != GarrisonFollowerStatus.Inactive);
-            var ownedBarracksInfo = GarrisonInfo.GetOwnedBuildingByType(GarrisonBuildingType.Barracks);
-            var hasBarracksLevel3 = ownedBarracksInfo.Type != GarrisonBuildingType.Unknown;
+            var barracksInfo = GarrisonInfo.GetBuildingByType(GarrisonBuildingType.Barracks);
+            var hasBarracksLevel3 = barracksInfo != null && barracksInfo.Rank == 3;
             var maxActiveFollowers = hasBarracksLevel3 ? 25 : 20;
-            //GarrisonInfo.AllBuildings.ForEach(b => GarrisonButler.Diagnostic("[AllBuildings] {0} - Rank={1}", b.Name, b.Rank));
-            // Status 5 is INACTIVE
             // Make sure there's at least 1 follower
-            // and make sure the number of active followers is less than 20
-            if (numFollowers == 0 || totalActiveFollowers <= maxActiveFollowers)
+            // and the number of active followers is less than 20
+            if (numFollowers == 0 || totalActiveFollowers > maxActiveFollowers)
             {
                 GarrisonButler.Diagnostic("returning from NewMissionStubCode(): # followers = {0}", followers.Count);
                 return toStart;
             }
 
-            var rewards = GaBSettings.Get().MissionRewardSettings;
-            var numReward = rewards.Count;
             long combosTried = 0;
             var acceptedCombos = 0;
             double totalSuccessChance = 0;
 
+            // STEP 3 - Output diagnostic information about Missions (and their rewards)
             missions.ForEach(f =>
             {
                 GarrisonButler.Diagnostic(">> Mission: " + f.Name);
-                f.RewardRecords.ForEach(r => GarrisonButler.Diagnostic("  >> Reward: " + r.Name()));
+                f.RewardRecords.ForEach(r => GarrisonButler.Diagnostic("  >> Reward: {0} (Category: {1} - Id: {2} - GBId: {3})", r.Name(), r.Category(), r.Id, r.GarrisonButlerRewardId()));
             });
 
+            // STEP 4 - Output diagnostic information about Followers
             followers.ForEach(f =>
             {
                 GarrisonButler.Diagnostic(">> Follower: " + f.Name);
@@ -201,14 +204,190 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic("  Status: " + f.Status);
             });
 
-            //TODO - Not done yet
+            // STEP 5 - Gather GarrisonButler reward information
+            var rewards = GaBSettings.Get().MissionRewardSettings;
+            var numReward = rewards.Count;
+            // STEP 6 - Remove rewards based on different settings
+            rewards.RemoveAll(reward =>
+            {
+                // Insure this reward meets the minimum item level imposed
+                var meetsRewardItemLevel = Me.AverageItemLevelEquipped < (float) reward.MinimumCharacterItemLevel;
+                if (!meetsRewardItemLevel)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward.",
+                        reward.Id, reward.Name, Me.AverageItemLevelEquipped, reward.MinimumCharacterItemLevel);
+                    return true;
+                }
 
+                // Insure this reward meets the minimum item level imposed by the category
+                var category = rewards.FirstOrDefault(s => s.IsCategoryReward && s.Category == reward.Category);
+                var meetsCategoryItemLevel = category != null && Me.AverageItemLevelEquipped < (float)category.MinimumCharacterItemLevel;
+                if (!meetsCategoryItemLevel)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward's category ({4}).",
+                        reward.Id, reward.Name, Me.AverageItemLevelEquipped, reward.MinimumCharacterItemLevel, reward.Category);
+                    return true;
+                }
+
+                // Insure player level meets the reward's required level
+                var meetsPlayerLevel = Me.Level < reward.RequiredPlayerLevel;
+                if (!meetsPlayerLevel)
+                {
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Player level {0} does not meet minimum {1} for this reward: ({2}) {3}",
+                        Me.Level, reward.RequiredPlayerLevel, reward.Id, reward.Name);
+                    return true;
+                }
+
+                // Discard any missions where the reward is set to "disallowed"
+                if (reward.DisallowMissionsWithThisReward)
+                {
+                    missions.RemoveAll(m => m.RewardRecords.Any(mr => mr.GarrisonButlerRewardId() == reward.Id));
+                }
+
+                return false;
+            });
+
+            // STEP 7 - Process rewards
+            foreach(var reward in rewards)
+            {
+                // STEP 8a - Find missions that have this reward
+                var missionsWithCurrentReward = missions
+                    // Pick the missions off the list matching the current reward
+                    .Where(m => m.RewardRecords.Any(mr => mr.GarrisonButlerRewardId() == reward.Id))
+                    // Sort missions by highest quantity of reward
+                    .OrderByDescending(m =>
+                    {
+                        var found = m.RewardRecords.FirstOrDefault(mr => mr.GarrisonButlerRewardId() == reward.Id);
+                        return found == null ? 0 : found.Quantity();
+                    });
+
+                // STEP 8b - Skip this reward if no missions contain it
+                if (!missionsWithCurrentReward.Any())
+                {
+                    GarrisonButler.Diagnostic("  !! No Missions with this reward !!");
+                    continue;
+                }
+
+                // Step 8c - Output diagnostic information about the missions that have this reward
+                missionsWithCurrentReward.ForEach(m =>
+                {
+                    GarrisonButler.Diagnostic("  >> Mission: {0} <<", m.Name);
+                    GarrisonButler.Diagnostic("  Slots: {0}", m.MaxFollowers);
+                    m.RewardRecords.ForEach(r => GarrisonButler.Diagnostic("    ** Reward ({0}): {1} **", r.Quantity(), r.Name()));
+                });
+
+                // Step 9a - Skip any missions that don't meet user requirements (quantity > X for example)
+                var reward1 = reward;   // Can't access foreach variable inside the following closures
+                                        // as it may have different behavior on different compiler verisons.
+                                        // Copy to local variable to workaround
+                var missionsThatMeetRequirement = missionsWithCurrentReward
+                    // Make sure the mission level meets minimum required by global settings OR reward settings
+                    .Where(
+                        m =>
+                            reward1.IndividualMissionLevelEnabled
+                                //TODO - Replace .Level() extension method with a REAL Honorbuddy API
+                                //       equivalent when Honorbuddy implements it
+                                ? m.Level() >= reward1.RequiredMissionLevel
+                                : m.Level() >= GaBSettings.Get().MinimumMissionLevel)
+                    .Where(m => m.RewardRecords
+                        .Where(mr => mr.GarrisonButlerRewardId() == reward.Id
+                            // Handle the case where we are looking at a category of rewards instead of individual rewards
+                                     ||
+                                     (mr.GarrisonButlerRewardId() != reward.Id
+                                     && mr.Category() == reward.Category
+                                     && mr.GarrisonButlerRewardId() == (int) mr.Category()))
+                        // Check both Mission amount conditions & Player amount conditions
+                        .Any(mr =>
+                            (reward.ConditionForMission == null || reward.ConditionForMission.GetCondition(mr))
+                            && (reward.ConditionForPlayer == null || reward.ConditionForPlayer.GetCondition(mr))
+                        )
+                    )
+                    .ToList();
+
+                // Step 9b - Skip this reward if no missions meet requirements
+                if (!missionsThatMeetRequirement.Any())
+                {
+                    GarrisonButler.Diagnostic("  !! No Missions meet user requirements !!");
+                    continue;
+                }
+
+                // Step 10a - Get a list of followers for this particular reward
+                List<GarrisonFollower> followersToConsider;
+
+                if (reward.Category == MissionReward.MissionRewardCategory.FollowerExperience
+                    && !GaBSettings.Get().AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers)
+                {
+                    GarrisonButler.Diagnostic("Going to use reduced follower list");
+                    followersToConsider = new List<GarrisonFollower>();
+                    foreach (var follower in followers)
+                    {
+                        if (follower.IsExperienceCapped)
+                        {
+                            GarrisonButler.Diagnostic("Skipping max level epic 100 follower: " + follower.Name);
+                        }
+                        else
+                        {
+                            GarrisonButler.Diagnostic("Using follower: " + follower.Name);
+                            followersToConsider.Add(follower);
+                        }
+                    }
+                }
+                else
+                {
+                    GarrisonButler.Diagnostic("Using full followers list");
+                    followersToConsider = followers;
+                }
+
+                // Step 10b - Remove followers that don't meet minimum item level requirements
+                followersToConsider.RemoveAll(f => f.ItemLevel < reward.MinimumFollowerItemLevel);
+
+                // Step 10c - Output diagnostic information about followers being considered
+                GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
+                followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
+
+                // Step 11 - Get the best combo
+                var returnedToStart = CalculateBestFollowerComboForReward(followersToConsider, missionsThatMeetRequirement, reward, followers);
+                if (returnedToStart != null)
+                {
+                    toStart = returnedToStart;
+                    break;  // break out of rewards loop to return value found
+                }
+
+                // Step 12 - No combos were found, re-try with boosting
+                GarrisonButler.Diagnostic("[Missions] >>> No combos found normally, attempting with Epic Max Level Boost <<<");
+                returnedToStart = CalculateBestFollowerComboForReward(followers, missionsThatMeetRequirement, reward, followers);
+                if (returnedToStart != null)
+                {
+                    toStart = returnedToStart;
+                    break;  // break out of rewards loop to return value found
+                }
+
+                // Step 13 - No combo found for this reward, let loop continue
+            }
+
+            if (toStart == null)
+            {
+                GarrisonButler.Diagnostic("[Missions] !!! No more missions found to start !!!!");
+            }
             return toStart;
+        }
+
+        public static Tuple<GarrisonMission, GarrisonFollower[]> CalculateBestFollowerComboForReward(
+           IEnumerable<GarrisonFollower> followersToConsider, IEnumerable<GarrisonMission> missions, MissionReward reward, IEnumerable<GarrisonFollower> followers)
+        {
+            Tuple<GarrisonMission, GarrisonFollower[]> returnCombo = null;
+
+            //TODO - Implement this function
+
+            return returnCombo;
         }
 
         public static List<Tuple<Mission, Follower[]>> NewMissionStubCode(List<Follower> followers)
         {
-            HBMissionStubCode();
+            //HBMissionStubCode();
             var allAvailableMissions = MissionLua.GetAllAvailableMissions();
             allAvailableMissions.ForEach(m => IsMissionDisallowed(m));
             GarrisonButler.Diagnostic("[Missions] ------------");
@@ -420,16 +599,6 @@ namespace GarrisonButler.ButlerCoroutines
                 }
 
                 followersToConsider.RemoveAll(f => f.ItemLevel < reward.MinimumFollowerItemLevel);
-
-                // For some reason this code isn't working properly
-                //var followersToConsider =
-                //    // If reward type is FollowerXP, discard all level 100 epic followers
-                //    (
-                //    (reward.Category == MissionReward.MissionRewardCategory.FollowerExperience) && !GaBSettings.Get().IncludeEpicMaxLevelFollowersForExperience
-                //        ? followers.SkipWhile(f => (f.Quality.ToInt32() > 3) && (f.Level >= 100))
-                //        : followers
-                //    )
-                //    .ToList();
 
                 GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
                 followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
