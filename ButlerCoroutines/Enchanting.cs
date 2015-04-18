@@ -13,7 +13,7 @@ namespace GarrisonButler.ButlerCoroutines
 {
     class Enchanting
     {
-        internal static List<WoWGuid> IgnoredItem = new List<WoWGuid>(); 
+        //internal static List<WoWGuid> IgnoredItem = new List<WoWGuid>(); 
 
         /// <summary>
         /// Check if the player has any item which he can disenchant.
@@ -51,7 +51,7 @@ namespace GarrisonButler.ButlerCoroutines
                 return new Result(ActionResult.Failed);
             }
             // Successfuly disenchanted, adding to ignore list
-            IgnoredItem.Add(itemToDisenchant.Guid);
+            AtomsLibrary.Garrison.DisenchantItems.IgnoredItem.Add(itemToDisenchant.Guid);
 
             return new Result(ActionResult.Refresh);
         }

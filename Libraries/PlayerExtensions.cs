@@ -64,7 +64,7 @@ namespace GarrisonButler.Libraries
                     }
 
                     // Check if the item is in ignored list
-                    if (ButlerCoroutines.Enchanting.IgnoredItem.Contains(item.Guid))
+                    if (ButlerCoroutines.AtomsLibrary.Garrison.DisenchantItems.IgnoredItem.Contains(item.Guid))
                         return false;
 
                     // Seems it's a go!
@@ -83,5 +83,21 @@ namespace GarrisonButler.Libraries
             }
             return false;
         }
+
+        public static bool IsInGarrisonMine(this LocalPlayer me)
+        { 
+            return MinesId.Contains(me.SubZoneId);
+        }
+
+        private static readonly List<uint> MinesId = new List<uint>
+        {
+            7324, //ally 1
+            7325, // ally 2
+            7326, // ally 3
+            7327, // horde 1
+            7328, // horde 2
+            7329 // horde 3
+        };
+
     }
 }

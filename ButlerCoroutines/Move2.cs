@@ -33,8 +33,8 @@ namespace GarrisonButler.ButlerCoroutines
 
         public override void OnRemoveAsCurrent()
         {
-            GarrisonButler.Log("Custom navigation System removed!");
-            ButlerCoroutine.CustomNavigationLoaded = false;
+            //GarrisonButler.Log("Custom navigation System removed!");
+            //ButlerCoroutine.CustomNavigationLoaded = false;
             base.OnRemoveAsCurrent();
         }
 
@@ -70,10 +70,10 @@ namespace GarrisonButler.ButlerCoroutines
         public override void OnSetAsCurrent()
         {
             base.OnSetAsCurrent();
-            _stuckHandlerGaB = new StuckHandlerGaB(ButlerCoroutine.NativeNavigation.StuckHandler);
-            StuckHandler = new StuckHandlerDummy();
-            ButlerCoroutine.CustomNavigationLoaded = true;
-            GarrisonButler.Log("Custom navigation System activated!");
+            //_stuckHandlerGaB = new StuckHandlerGaB(ButlerCoroutine.NativeNavigation.StuckHandler);
+            //StuckHandler = new StuckHandlerDummy();
+            //ButlerCoroutine.CustomNavigationLoaded = true;
+            //GarrisonButler.Log("Custom navigation System activated!");
         }
 
         public override bool CanNavigateWithin(WoWPoint @from, WoWPoint to, float distanceTolerance)

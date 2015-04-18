@@ -35,7 +35,7 @@ namespace GarrisonButler.API
             var inBags =
                 StyxWoW.Me.BagItems.GetEmptyIfNull()
                     .Sum(i => i != null && i.IsValid && i.Entry == itemId ? i.StackCount : 0);
-            GarrisonButler.Diagnostic("[HBApi] Get number of item in bags: item={0}, #={1}", itemId, inBags);
+            //GarrisonButler.Diagnostic("[HBApi] Get number of item in bags: item={0}, #={1}", itemId, inBags);
             return inBags;
         }
 
@@ -49,7 +49,7 @@ namespace GarrisonButler.API
             var carried = Me.GetCarriedItemCount(itemId);
                 //StyxWoW.Me.BagItems.GetEmptyIfNull()
                 //    .Sum(i => i != null && i.IsValid && i.Entry == itemId ? i.StackCount : 0);
-            GarrisonButler.Diagnostic("[HBApi] Get number of item carried: item={0}, #={1}", itemId, carried);
+            //GarrisonButler.Diagnostic("[HBApi] Get number of item carried: item={0}, #={1}", itemId, carried);
             return carried;
         }
 
@@ -62,8 +62,8 @@ namespace GarrisonButler.API
         {
             var inReagentBank =
                 StyxWoW.Me.ReagentBankItems.Sum(i => i != null && i.IsValid && i.Entry == itemId ? i.StackCount : 0);
-            GarrisonButler.Diagnostic("[HBApi] Get number of item in reagent bank: item={0}, #={1}", itemId,
-                inReagentBank);
+            //GarrisonButler.Diagnostic("[HBApi] Get number of item in reagent bank: item={0}, #={1}", itemId,
+                //inReagentBank);
             return inReagentBank;
         }
 
@@ -115,9 +115,9 @@ namespace GarrisonButler.API
                     }
                     numByMilling += sum;
                 }
-                GarrisonButler.Diagnostic(
-                    "[HBApi] Found {0} possible pigments from milling bags simulation for pigmentId={1}.", numByMilling,
-                    itemId);
+                //GarrisonButler.Diagnostic(
+                //    "[HBApi] Found {0} possible pigments from milling bags simulation for pigmentId={1}.", numByMilling,
+                //    itemId);
                 return numByMilling;
             }
             GarrisonButler.Diagnostic("[HBApi] Found {0} match in pigments list for ItemId={1}, is it a WoD pigment?", 0,
@@ -145,7 +145,7 @@ namespace GarrisonButler.API
                     .Where(i => i != null && i.IsValid && i.Entry == itemId)
                     .GetEmptyIfNull()
                     .ToList();
-            GarrisonButler.Diagnostic("[HBApi] Get item in bags: item={0}, #Found={1}", itemId, inBags.Count());
+            //GarrisonButler.Diagnostic("[HBApi] Get item in bags: item={0}, #Found={1}", itemId, inBags.Count());
             return inBags;
         }
 
@@ -156,7 +156,7 @@ namespace GarrisonButler.API
                     .Where(i => i != null && i.IsValid && ids.Contains(i.Entry))
                     .GetEmptyIfNull()
                     .ToList();
-            GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from list:", inBags.Count());
+            //GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from list:", inBags.Count());
             ObjectDumper.WriteToHb(ids, 3);
             return inBags;
         }
@@ -168,7 +168,7 @@ namespace GarrisonButler.API
                     .Where(i => i != null && i.IsValid && predicate(i))
                     .GetEmptyIfNull()
                     .ToList();
-            GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from predicate.", inBags.Count());
+            //GarrisonButler.Diagnostic("[HBApi] Get items in bags: #Found={0}, from predicate.", inBags.Count());
             return inBags;
         }
 
@@ -184,7 +184,7 @@ namespace GarrisonButler.API
                     .Where(i => i != null && i.IsValid && i.Entry == itemId)
                     .GetEmptyIfNull()
                     .ToList();
-            GarrisonButler.Diagnostic("[HBApi] Get item carried: item={0}, #Found={1}", itemId, carried.Count());
+            //GarrisonButler.Diagnostic("[HBApi] Get item carried: item={0}, #Found={1}", itemId, carried.Count());
             return carried;
         }
 
@@ -195,7 +195,7 @@ namespace GarrisonButler.API
                     .Where(i => i != null && i.IsValid && ids.Contains(i.Entry))
                     .GetEmptyIfNull()
                     .ToList();
-            GarrisonButler.Diagnostic("[HBApi] Get items carried: #Found={0}, from list:", carried.Count());
+            //GarrisonButler.Diagnostic("[HBApi] Get items carried: #Found={0}, from list:", carried.Count());
             ObjectDumper.WriteToHb(ids, 3);
             return carried;
         }
@@ -207,7 +207,7 @@ namespace GarrisonButler.API
                     .Where(i => i != null && i.IsValid && predicate(i))
                     .GetEmptyIfNull()
                     .ToList();
-            GarrisonButler.Diagnostic("[HBApi] Get items carried: #Found={0}, from predicate.", carried.Count());
+            //GarrisonButler.Diagnostic("[HBApi] Get items carried: #Found={0}, from predicate.", carried.Count());
             return carried;
         }
 

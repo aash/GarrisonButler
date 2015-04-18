@@ -173,6 +173,20 @@ namespace GarrisonButler.API
             var results = await GetReturnValues(lua);
             return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
         }
+        public static bool IsTradeSkillFrameOpenN()
+        {
+            const string lua =
+                @"if not TradeSkillFrame then 
+                      return tostring(false);
+                  else 
+                      if TradeSkillFrame:IsVisible() == true then
+                          return tostring(true);
+                      end;
+                  end;
+                  return tostring(false);";
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToBoolean();
+        }
 
         public static async Task<Tuple<int, int>> GetServerTime()
         {
@@ -238,6 +252,22 @@ namespace GarrisonButler.API
             return new Tuple<int, int>(results[0].ToInt32(), results[1].ToInt32());
         }
 
+        public static Tuple<int, int> GetShipmentReagent()
+        {
+            const string lua =
+                @"local name, texture, quality, needed, quantity, itemID = C_Garrison.GetShipmentReagentInfo(1);
+                    local RetInfo = {};
+                    table.insert(RetInfo,tostring(itemID));
+                    table.insert(RetInfo,tostring(needed));
+                    return unpack(RetInfo);";
+            var results = (Lua.GetReturnValues(lua)).GetEmptyIfNull().ToArray();
+            if (results.Count() < 2)
+            {
+                GarrisonButler.Diagnostic("Error retrieving ShipmentReagentInfo.");
+                return new Tuple<int, int>(-1, -1);
+            }
+            return new Tuple<int, int>(results[0].ToInt32(), results[1].ToInt32());
+        }
         public static async Task<bool> CraftDraenicMortar()
         {
             const string lua =
@@ -292,6 +322,38 @@ namespace GarrisonButler.API
             }
             GarrisonButler.DiagnosticLogTimeTaken("GetAllFromLua (" + typeof(T).Name + ")", startedAt);
             return returnList;
+        }
+
+        public static DateTime GetServerCurrentDate()
+        {
+            var lua = "local todayDate = date(\"*t\");" +
+                      "local ret = {};" +
+                      "for k,v in pairs(todayDate) do table.insert(ret,tostring(v)); end;" +
+                      "return unpack(ret);";
+            var results = Lua.GetReturnValues(lua);
+            var dateServer = results.GetEmptyIfNull().ToArray();
+            if (dateServer.Count() < 6)
+            {
+                GarrisonButler.Diagnostic("Error while loading lua date. size={0}", dateServer.Count());
+                ObjectDumper.WriteToHb(dateServer, 3);
+                return DateTime.Now;
+            }
+            var hour = dateServer[0].ToInt32();
+            var min = dateServer[1].ToInt32();
+            var sec = dateServer[2].ToInt32();
+            var day = dateServer[3].ToInt32();
+            var month = dateServer[4].ToInt32();
+            var year = dateServer[5].ToInt32();
+            var date = new DateTime(year, month, day, hour, min, sec);
+            return date;
+        }
+        public static int GetTimeBeforeServerResetInSec()
+        {
+            const string lua = @"  
+                    local timeInSeconds = GetQuestResetTime();
+                    return tostring(timeInSeconds);";
+            var results = Lua.GetReturnValues(lua);
+            return results.GetEmptyIfNull().FirstOrDefault().ToInt32();
         }
     }
 }

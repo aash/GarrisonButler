@@ -6,9 +6,12 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 using Buddy.Coroutines;
 using GarrisonButler.API;
 using GarrisonButler.ButlerCoroutines;
+using GarrisonButler.ButlerCoroutines.AtomsLibrary;
+using GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
 using Styx;
@@ -31,8 +34,9 @@ namespace GarrisonButler
         public int NumberReagent;
         public WoWPoint Pnj;
         public int PnjId;
-        public List<int> PnjIds;
+        public List<uint> PnjIds;
         public PrepOrderD PrepOrder;
+        public Atom PrepOrderAtom;
         public uint ReagentId;
         public List<uint> ReagentIds;
         private String _buildTime;
@@ -41,6 +45,8 @@ namespace GarrisonButler
 
         public CanCompleteOrderD CanCompleteOrder =
             () => { return new Task<Result>(() => new Result(ActionResult.Done, 0)); };
+
+        public Func<int> maxCanComplete = () => { return 0; }; 
 
         private String _canUpgrade;
         public String CreationTime;
@@ -155,7 +161,32 @@ namespace GarrisonButler
             NumberShipmentLeftToStart = ShipmentCapacity - ShipmentsTotal;
         }
 
+        public bool IsActionForRefreshNeeded()
+        {
+            switch (Id)
+            {
+                case (int) Buildings.TradingPostLvl1:
+                case (int) Buildings.TradingPostLvl2:
+                case (int) Buildings.TradingPostLvl3:
+                    // Before being able to calculate it, we need to know what's today's reagent.
+                    // It can be saved in settings with the date.
+                    var serverTimeLua = ButlerLua.GetServerCurrentDate();
+                    var secBeforeReset = TimeSpan.FromSeconds(ButlerLua.GetTimeBeforeServerResetInSec());
+                    var nextReset = serverTimeLua + secBeforeReset;
+                    var lastReset = nextReset - TimeSpan.FromHours(24);
 
+                    if (GaBSettings.Get().LastCheckTradingPost == default(DateTime)
+                        || GaBSettings.Get().LastCheckTradingPost < lastReset)
+                    {
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        }
+        
         private async Task<Result> CanCompleteOrderItem()
         {
             // add number in bags
@@ -163,10 +194,112 @@ namespace GarrisonButler
             // add number in reagent banks
             count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
-            GarrisonButler.Diagnostic("[CanCompleteOrderItem,{4}] Total found {0} - #{1} - needed #{2} - {3} ", ReagentId,
-                count, NumberReagent, count >= NumberReagent, Id);
+            //GarrisonButler.Diagnostic(
+            //    "[CanCompleteOrderItem,{4}] Total found {0} - #{1} - needed #{2} - ID: {3} - max: {4}", ReagentId,
+            //    count, NumberReagent, count >= NumberReagent, Id, (int)(count / NumberReagent));
 
-            return new Result(ActionResult.Done, (int)count / NumberReagent);
+            return new Result(ActionResult.Done, (int)(count / NumberReagent));
+        }
+
+        private int MaxCanCompleteItem()
+        {
+            // add number in bags
+            var count = HbApi.GetNumberItemInBags(ReagentId);
+            // add number in reagent banks
+            count += HbApi.GetNumberItemInReagentBank(ReagentId);
+
+            //GarrisonButler.Diagnostic(
+            //    "[CanCompleteOrderItem,{4}] Total found {0} - #{1} - needed #{2} - ID: {3} - max: {4}", ReagentId,
+            //    count, NumberReagent, count >= NumberReagent, Id, (int)(count / NumberReagent));
+
+            return (int)(count / NumberReagent);
+        }
+
+        private int MaxCanCompleteItems()
+        {
+            var maxCanStart = 0;
+
+            foreach (var reagentId in ReagentIds)
+            {
+                // add number in bags
+                var count = HbApi.GetNumberItemInBags(reagentId);
+                // add number in reagent banks
+                count += HbApi.GetNumberItemInReagentBank(reagentId);
+
+                //GarrisonButler.Diagnostic("[CanCompleteOrderItems,{3}] Total found {0} - #{1} - needed #{2}", reagentId,
+                //    count,
+                //    NumberReagent, Id);
+                if (count < NumberReagent)
+                {
+                    maxCanStart = 0;
+                    break;
+                }
+                if (maxCanStart == 0)
+                    maxCanStart = (int)count / NumberReagent;
+                else if (count >= NumberReagent)
+                    maxCanStart = Math.Min((int)count / NumberReagent, maxCanStart);
+            }
+
+            //GarrisonButler.Diagnostic("[CanCompleteOrderItems] The max that can be started is {0}: {1}", maxCanStart,
+            //    Name);
+            return maxCanStart;
+        }
+
+        private int MaxCanCompleteOneOfItems()
+        {
+            var maxCanStart = 0;
+            foreach (var reagentId in ReagentIds)
+            {
+                // add number in bags
+                var count = HbApi.GetNumberItemInBags(reagentId);
+                // add number in reagent banks
+                count += HbApi.GetNumberItemInReagentBank(reagentId);
+
+                //GarrisonButler.Diagnostic("[CanCompleteOrderOneOfItems] Total found {0} - #{1} - needed #{2}", reagentId,
+                //    count,
+                //    NumberReagent);
+                if (count >= NumberReagent)
+                    maxCanStart = Math.Max((int)count / NumberReagent, maxCanStart);
+            }
+            return maxCanStart;
+        }
+
+        private int MaxCanCompleteCurrency()
+        {
+            return BuildingsLua.GetGarrisonRessources() / NumberReagent;
+        }
+
+        private int MaxCanCompleteMillable()
+        {
+            var inscription = StyxWoW.Me.GetSkill(SkillLine.Inscription);
+            var mortar = HbApi.GetItemInBags(114942).FirstOrDefault();
+            var oreInBags = HbApi.GetNumberItemInBags(109118);
+            var oreInBank = HbApi.GetNumberItemInReagentBank(109118);
+            if ((inscription == null || inscription.CurrentValue <= 0)
+                && (mortar == default(WoWItem) || mortar.StackCount <= 0)
+                && (oreInBags + oreInBank < 5))
+                return MaxCanCompleteItem();
+
+            // get number in bags
+            var count = HbApi.GetNumberItemInBags(ReagentId);
+
+            // add number in reagent banks
+            count += HbApi.GetNumberItemInReagentBank(ReagentId);
+
+            GarrisonButler.Diagnostic(
+                "[CanCompleteOrderMillable] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ",
+                ReagentId,
+                count,
+                NumberReagent, count >= NumberReagent);
+
+            count += HbApi.GetNumberItemByMillingBags(ReagentId, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
+
+            GarrisonButler.Diagnostic(
+                "[CanCompleteOrderMillable] Total found with milling {0} - #{1} - needed #{2} - {3} ",
+                ReagentId, count,
+                NumberReagent, count >= NumberReagent);
+
+            return (int)count / NumberReagent;
         }
 
         private async Task<Result> CanCompleteOrderItems()
@@ -180,20 +313,22 @@ namespace GarrisonButler
                 // add number in reagent banks
                 count += HbApi.GetNumberItemInReagentBank(reagentId);
 
-                GarrisonButler.Diagnostic("[CanCompleteOrderItems,{3}] Total found {0} - #{1} - needed #{2}", reagentId, count,
-                    NumberReagent, Id);
+                //GarrisonButler.Diagnostic("[CanCompleteOrderItems,{3}] Total found {0} - #{1} - needed #{2}", reagentId,
+                    //count,
+                    //NumberReagent, Id);
                 if (count < NumberReagent)
                 {
                     maxCanStart = 0;
                     break;
                 }
                 if (maxCanStart == 0)
-                    maxCanStart = (int)count / NumberReagent;
+                    maxCanStart = (int) count/NumberReagent;
                 else if (count >= NumberReagent)
-                    maxCanStart = Math.Min((int)count / NumberReagent, maxCanStart);
+                    maxCanStart = Math.Min((int) count/NumberReagent, maxCanStart);
             }
 
-            GarrisonButler.Diagnostic("[CanCompleteOrderItems] The max that can be started is {0}: {1}", maxCanStart, Name);
+            //GarrisonButler.Diagnostic("[CanCompleteOrderItems] The max that can be started is {0}: {1}", maxCanStart,
+            //    Name);
             return new Result(ActionResult.Done, maxCanStart);
         }
 
@@ -207,17 +342,18 @@ namespace GarrisonButler
                 // add number in reagent banks
                 count += HbApi.GetNumberItemInReagentBank(reagentId);
 
-                GarrisonButler.Diagnostic("[CanCompleteOrderOneOfItems] Total found {0} - #{1} - needed #{2}", reagentId, count,
-                    NumberReagent);
+                //GarrisonButler.Diagnostic("[CanCompleteOrderOneOfItems] Total found {0} - #{1} - needed #{2}", reagentId,
+                    //count,
+                    //NumberReagent);
                 if (count >= NumberReagent)
-                    maxCanStart = Math.Max((int)count / NumberReagent, maxCanStart);
+                    maxCanStart = Math.Max((int) count/NumberReagent, maxCanStart);
             }
             return new Result(ActionResult.Done, maxCanStart);
         }
 
         private async Task<Result> CanCompleteOrderCurrency()
         {
-            return new Result(ActionResult.Done, BuildingsLua.GetGarrisonRessources() / NumberReagent);
+            return new Result(ActionResult.Done, BuildingsLua.GetGarrisonRessources()/NumberReagent);
         }
 
         private async Task<Result> CanCompleteOrderMillable()
@@ -237,18 +373,20 @@ namespace GarrisonButler
             // add number in reagent banks
             count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
-            GarrisonButler.Diagnostic(
-                "[CanCompleteOrderMillable] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ", ReagentId,
-                count,
-                NumberReagent, count >= NumberReagent);
+            //GarrisonButler.Diagnostic(
+            //    "[CanCompleteOrderMillable] Sub Total without preProcessing found {0} - #{1} - needed #{2} - {3} ",
+            //    ReagentId,
+            //    count,
+            //    NumberReagent, count >= NumberReagent);
 
             count += HbApi.GetNumberItemByMillingBags(ReagentId, GaBSettings.Get().Pigments.GetEmptyIfNull().ToList());
 
-            GarrisonButler.Diagnostic("[CanCompleteOrderMillable] Total found with milling {0} - #{1} - needed #{2} - {3} ",
-                ReagentId, count,
-                NumberReagent, count >= NumberReagent);
+            //GarrisonButler.Diagnostic(
+            //    "[CanCompleteOrderMillable] Total found with milling {0} - #{1} - needed #{2} - {3} ",
+            //    ReagentId, count,
+            //    NumberReagent, count >= NumberReagent);
 
-            return new Result(ActionResult.Done, (int)count / NumberReagent);
+            return new Result(ActionResult.Done, (int) count/NumberReagent);
         }
 
 
@@ -260,7 +398,7 @@ namespace GarrisonButler
             // add number in reagent banks
             count += HbApi.GetNumberItemInReagentBank(ReagentId);
 
-            if (count / NumberReagent >= numberToStart)
+            if (count/NumberReagent >= numberToStart)
                 return new Result(ActionResult.Done);
 
             // We need to mill
@@ -322,7 +460,7 @@ namespace GarrisonButler
                     }
 
                     // wait for cast
-                    await Buddy.Coroutines.Coroutine.Wait(10000, () =>
+                    await Coroutine.Wait(10000, () =>
                     {
                         ObjectManager.Update();
                         return HbApi.GetNumberItemInBags(114942) > 0;
@@ -343,13 +481,13 @@ namespace GarrisonButler
 
             // Mill until we don't need anymore
             var millable = HbApi.GetAllItemsToMillFrom(ReagentId, GaBSettings.Get().Pigments).ToArray();
-            if (millable.Any() && count / NumberReagent < numberToStart)
+            if (millable.Any() && count/NumberReagent < numberToStart)
             {
                 await millable.First().Mill();
                 return new Result(ActionResult.Running);
             }
 
-            if (count / NumberReagent >= numberToStart)
+            if (count/NumberReagent >= numberToStart)
                 return new Result(ActionResult.Done);
 
             return new Result(ActionResult.Failed);
@@ -368,15 +506,16 @@ namespace GarrisonButler
             {
                 //<Vendor Name="Keyana Tone" Entry="79814" Type="Repair" X="5662.159" Y="4551.546" Z="119.9567" />
                 //Name="Peter Kearie" Entry="77791" X="1829.603" Y="201.3922" Z="72.73963" 
-                case (int)Buildings.AlchemyLabLvl1:
-                case (int)Buildings.AlchemyLabLvl2:
-                case (int)Buildings.AlchemyLabLvl3:
+                case (int) Buildings.AlchemyLabLvl1:
+                case (int) Buildings.AlchemyLabLvl2:
+                case (int) Buildings.AlchemyLabLvl3:
                     PnjId = alliance ? 77791 : 79814;
                     ReagentId = 109124;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -399,15 +538,16 @@ namespace GarrisonButler
                     break;
 
                 // horde   <Vendor Name="Farmer Lok'lub" Entry="85048" Type="Repair" X="5541.159" Y="4516.299" Z="131.7173" />
-                case (int)Buildings.BarnLvl1:
-                case (int)Buildings.BarnLvl2:
-                case (int)Buildings.BarnLvl3:
+                case (int) Buildings.BarnLvl1:
+                case (int) Buildings.BarnLvl2:
+                case (int) Buildings.BarnLvl3:
                     PnjId = alliance ? 84524 : 85048;
-                    ReagentIds = new List<uint> { 119810, 119813, 119814, 119815, 119817, 119819 };
+                    ReagentIds = new List<uint> {119810, 119813, 119814, 119815, 119817, 119819};
                     NumberReagent = 1;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteOneOfItems;
                     CanCompleteOrder = CanCompleteOrderOneOfItems;
                     Displayids = new List<uint>
                     {
@@ -429,9 +569,9 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.BarracksLvl1:
-                case (int)Buildings.BarracksLvl2:
-                case (int)Buildings.BarracksLvl3:
+                case (int) Buildings.BarracksLvl1:
+                case (int) Buildings.BarracksLvl2:
+                case (int) Buildings.BarracksLvl3:
                     Displayids = new List<uint>
                     {
                         14398, // Garrison Building Barracks V1
@@ -455,15 +595,16 @@ namespace GarrisonButler
 
                 //horde 2: <Vendor Name="Magrish" Entry="89066" Type="Repair" X="5569.239" Y="4462.448" Z="132.5624" />
                 //ally 2: <Vendor Name="Dalana Clarke" Entry="89065" Type="Repair" X="1924.622" Y="225.1501" Z="76.96214" />
-                case (int)Buildings.DwarvenBunkerLvl1:
-                case (int)Buildings.DwarvenBunkerLvl2:
-                case (int)Buildings.DwarvenBunkerLvl3:
+                case (int) Buildings.DwarvenBunkerLvl1:
+                case (int) Buildings.DwarvenBunkerLvl2:
+                case (int) Buildings.DwarvenBunkerLvl3:
                     PnjId = alliance ? 89065 : 89066;
                     _currencyId = 824;
                     NumberReagent = 20;
                     Pnj = alliance
                         ? new WoWPoint(1924.622, 225.1501, 76.96214)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteCurrency;
                     CanCompleteOrder = CanCompleteOrderCurrency;
                     Displayids = new List<uint>
                     {
@@ -485,9 +626,9 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.InnTavernLvl1:
-                case (int)Buildings.InnTavernLvl2:
-                case (int)Buildings.InnTavernLvl3:
+                case (int) Buildings.InnTavernLvl1:
+                case (int) Buildings.InnTavernLvl2:
+                case (int) Buildings.InnTavernLvl3:
                     //TODO - Need display ids for tavern for alliance / horde
                     //Displayids = new List<uint>
                     //{
@@ -512,15 +653,16 @@ namespace GarrisonButler
 
                 // horde 1 <Vendor Name="Yukla Greenshadow" Entry="79821" Type="Repair" X="5642.186" Y="4511.771" Z="120.1076" />
                 // ally 2 <Vendor Name="Garm" Entry="77781" Type="Repair" X="1806.123" Y="188.0837" Z="70.84762" />
-                case (int)Buildings.EnchanterStudyLvl1:
-                case (int)Buildings.EnchanterStudyLvl2:
-                case (int)Buildings.EnchanterStudyLvl3:
+                case (int) Buildings.EnchanterStudyLvl1:
+                case (int) Buildings.EnchanterStudyLvl2:
+                case (int) Buildings.EnchanterStudyLvl3:
                     PnjId = alliance ? 77781 : 79820;
                     ReagentId = 109693;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5645.052, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -545,9 +687,9 @@ namespace GarrisonButler
 
                 //Name="Helayn Whent" Entry="77831" X="1828.034" Y="198.3424" Z="72.75751"
                 //horde 1 <Vendor Name="Garbra Fizzwonk" Entry="86696" Type="Repair" X="5669.706" Y="4550.133" Z="120.1031" />
-                case (int)Buildings.EngineeringWorksLvl1:
-                case (int)Buildings.EngineeringWorksLvl2:
-                case (int)Buildings.EngineeringWorksLvl3:
+                case (int) Buildings.EngineeringWorksLvl1:
+                case (int) Buildings.EngineeringWorksLvl2:
+                case (int) Buildings.EngineeringWorksLvl3:
                     PnjId = alliance ? 77831 : 86696;
                     ReagentIds = new List<uint>
                     {
@@ -558,6 +700,7 @@ namespace GarrisonButler
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItems;
                     CanCompleteOrder = CanCompleteOrderItems;
                     Displayids = new List<uint>
                     {
@@ -581,13 +724,14 @@ namespace GarrisonButler
 
                 //ally lvl 2 : <Vendor Name="Olly Nimkip" Entry="85514" Type="Repair" X="1862.214" Y="140" Z="78.29137" />
                 //horde lvl 2 : <Vendor Name="Nali Softsoil" Entry="85783" Type="Repair" X="5410.738" Y="4568.479" Z="138.3254" />
-                case (int)Buildings.GardenLvl1:
-                case (int)Buildings.GardenLvl2:
-                case (int)Buildings.GardenLvl3:
+                case (int) Buildings.GardenLvl1:
+                case (int) Buildings.GardenLvl2:
+                case (int) Buildings.GardenLvl3:
                     PnjId = alliance ? 85514 : 85783;
                     ReagentId = 116053;
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -611,13 +755,14 @@ namespace GarrisonButler
 
                 //<Name="Kaya Solasen" Entry="77775" X="1825.785" Y="196.1163" Z="72.75745" /-->
                 // horde 1 <Vendor Name="Elrondir Surrion" Entry="79830" Type="Repair" X="5649.468" Y="4509.388" Z="120.1563" />
-                case (int)Buildings.GemBoutiqueLvl1:
-                case (int)Buildings.GemBoutiqueLvl2:
-                case (int)Buildings.GemBoutiqueLvl3:
+                case (int) Buildings.GemBoutiqueLvl1:
+                case (int) Buildings.GemBoutiqueLvl2:
+                case (int) Buildings.GemBoutiqueLvl3:
                     PnjId = alliance ? 77775 : 79830;
                     ReagentId = 109118;
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5630.081, 4526.252, 119.2066);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -640,13 +785,14 @@ namespace GarrisonButler
                     break;
 
                 //ally 2 <WoWUnit Name="Altar of Bones" Entry="86639" X="1865.334" Y="313.169" Z="83.95637" />
-                case (int)Buildings.GladiatorSanctumLvl1:
-                case (int)Buildings.GladiatorSanctumLvl2:
-                case (int)Buildings.GladiatorSanctumLvl3:
+                case (int) Buildings.GladiatorSanctumLvl1:
+                case (int) Buildings.GladiatorSanctumLvl2:
+                case (int) Buildings.GladiatorSanctumLvl3:
                     PnjId = 86639;
                     ReagentId = 118043;
                     NumberReagent = 10;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -668,9 +814,9 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.GnomishGearworksLvl1:
-                case (int)Buildings.GnomishGearworksLvl2:
-                case (int)Buildings.GnomishGearworksLvl3:
+                case (int) Buildings.GnomishGearworksLvl1:
+                case (int) Buildings.GnomishGearworksLvl2:
+                case (int) Buildings.GnomishGearworksLvl3:
                     Displayids = new List<uint>
                     {
                         19149, // Garrison Building Horde Workshop V1
@@ -695,15 +841,16 @@ namespace GarrisonButler
                 // Horde default location: 5574.952" Y="4508.236" Z="129.8942
                 //Horde lvl 2 <Vendor Name="Lumber Lord Oktron" Entry="84247" Type="Repair" X="5697.096" Y="4475.479" Z="131.5005" />
                 // ally 2 : <Vendor Name="Justin Timberlord" Entry="84248" Type="Repair" X="1872.647" Y="310.0204" Z="82.61102" />
-                case (int)Buildings.LumberMillLvl1:
-                case (int)Buildings.LumberMillLvl2:
-                case (int)Buildings.LumberMillLvl3:
+                case (int) Buildings.LumberMillLvl1:
+                case (int) Buildings.LumberMillLvl2:
+                case (int) Buildings.LumberMillLvl3:
                     PnjId = alliance ? 84248 : 84247;
                     ReagentId = 114781; // Wood
                     NumberReagent = 10;
                     Pnj = alliance
                         ? new WoWPoint(1872.647, 310.0204, 82.61102)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -725,9 +872,9 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.MageTowerLvl1:
-                case (int)Buildings.MageTowerLvl2:
-                case (int)Buildings.MageTowerLvl3:
+                case (int) Buildings.MageTowerLvl1:
+                case (int) Buildings.MageTowerLvl2:
+                case (int) Buildings.MageTowerLvl3:
                     buildingIDs = new List<uint>
                     {
                         230419,
@@ -741,15 +888,16 @@ namespace GarrisonButler
 
                 //Ally 3 : <Vendor Name="Timothy Leens" Entry="77730" Type="Repair" X="1899.896" Y="101.2778" Z="83.52704" />
                 //horde 3 : <Vendor Name="Gorsol" Entry="81688" Type="Repair" X="5467.965" Y="4449.892" Z="144.6722" />
-                case (int)Buildings.MineLvl1:
-                case (int)Buildings.MineLvl2:
-                case (int)Buildings.MineLvl3:
+                case (int) Buildings.MineLvl1:
+                case (int) Buildings.MineLvl2:
+                case (int) Buildings.MineLvl3:
                     PnjId = alliance ? 77730 : 81688;
                     ReagentId = 115508;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1899.896, 101.2778, 83.52704)
                         : new WoWPoint(5467.965, 4449.892, 144.6722);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -772,9 +920,9 @@ namespace GarrisonButler
                     break;
 
                 //ally <Vendor Name="Hennick Helmsley" Entry="77378" Type="Repair" X="1830.828" Y="199.172" Z="72.71624" />
-                case (int)Buildings.SalvageYardLvl1:
-                case (int)Buildings.SalvageYardLvl2:
-                case (int)Buildings.SalvageYardLvl3:
+                case (int) Buildings.SalvageYardLvl1:
+                case (int) Buildings.SalvageYardLvl2:
+                case (int) Buildings.SalvageYardLvl3:
                     PnjId = alliance ? 77378 : 79857;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
@@ -801,9 +949,9 @@ namespace GarrisonButler
 
                 // Ally lvl 2 <Vendor Name="Kurt Broadoak" Entry="77777" Type="Repair" X="1817.415" Y="232.1284" Z="72.94653" />
                 // Horde lvl 2 <Vendor Name="Y'rogg" Entry="79831" Type="Repair" X="5666.928" Y="4545.664" Z="120.0819" />
-                case (int)Buildings.ScribeQuartersLvl1:
-                case (int)Buildings.ScribeQuartersLvl2:
-                case (int)Buildings.ScribeQuartersLvl3:
+                case (int) Buildings.ScribeQuartersLvl1:
+                case (int) Buildings.ScribeQuartersLvl2:
+                case (int) Buildings.ScribeQuartersLvl3:
                     PnjId = alliance ? 77777 : 79831;
                     ReagentId = 114931; // Cerulean Pigment
                     NumberReagent = 2;
@@ -812,12 +960,26 @@ namespace GarrisonButler
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     if (GarrisonButler.IsIceVersion())
                     {
+                        maxCanComplete = MaxCanCompleteMillable;
                         CanCompleteOrder = CanCompleteOrderMillable;
                         PrepOrder = MillBeforeOrder;
-                        MillItemPnj = 77372;
+                        //PrepOrderAtom = new MillBeforeOrder(this, () =>
+                        //{
+                        //    var maxSettings = GaBSettings.Get().GetBuildingSettings(Id).MaxCanStartOrder;
+                        //    var maxInProgress = maxSettings == 0
+                        //        ? ShipmentCapacity
+                        //        : Math.Min(ShipmentCapacity,
+                        //            maxSettings);
+                        //    var maxToStart = maxInProgress - ShipmentsTotal;
+                        //    var maxCanCompletee = maxCanComplete();
+                        //    maxToStart = Math.Min(maxCanCompletee, maxToStart);
+                        //    return maxToStart;
+                        //});
+                            MillItemPnj = 77372;
                     }
                     else
                     {
+                        maxCanComplete = MaxCanCompleteItem;
                         CanCompleteOrder = CanCompleteOrderItem;
                     }
                     // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
@@ -841,9 +1003,9 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.StablesLvl1:
-                case (int)Buildings.StablesLvl2:
-                case (int)Buildings.StablesLvl3:
+                case (int) Buildings.StablesLvl1:
+                case (int) Buildings.StablesLvl2:
+                case (int) Buildings.StablesLvl3:
                     Displayids = new List<uint>
                     {
                         14625, // Garrison Building  Stable V1
@@ -864,9 +1026,9 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.StorehouseLvl1:
-                case (int)Buildings.StorehouseLvl2:
-                case (int)Buildings.StorehouseLvl3:
+                case (int) Buildings.StorehouseLvl1:
+                case (int) Buildings.StorehouseLvl2:
+                case (int) Buildings.StorehouseLvl3:
                     buildingIDs = new List<uint>
                     {
                         230437,
@@ -879,15 +1041,16 @@ namespace GarrisonButler
                     break;
 
                 // Horde : <Vendor Name="Turga" Entry="79863" Type="Repair" X="5643.418" Y="4507.895" Z="119.9948" />
-                case (int)Buildings.TailoringEmporiumLvl1:
-                case (int)Buildings.TailoringEmporiumLvl2:
-                case (int)Buildings.TailoringEmporiumLvl3:
+                case (int) Buildings.TailoringEmporiumLvl1:
+                case (int) Buildings.TailoringEmporiumLvl2:
+                case (int) Buildings.TailoringEmporiumLvl3:
                     PnjId = alliance ? 77778 : 79863;
                     ReagentId = 111557; // Sumptuous fur
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -909,15 +1072,16 @@ namespace GarrisonButler
                     };
                     break;
                 // <Vendor Name="Kinja" Entry="79817" Type="Repair" X="5641.551" Y="4508.724" Z="119.9587" />
-                case (int)Buildings.TheForgeLvl1:
-                case (int)Buildings.TheForgeLvl2:
-                case (int)Buildings.TheForgeLvl3:
+                case (int) Buildings.TheForgeLvl1:
+                case (int) Buildings.TheForgeLvl2:
+                case (int) Buildings.TheForgeLvl3:
                     PnjId = alliance ? 77792 : 79817;
                     ReagentId = 109119; // True iron ore
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -939,15 +1103,16 @@ namespace GarrisonButler
                     };
                     break;
 
-                case (int)Buildings.TheTanneryLvl1:
-                case (int)Buildings.TheTanneryLvl2:
-                case (int)Buildings.TheTanneryLvl3:
+                case (int) Buildings.TheTanneryLvl1:
+                case (int) Buildings.TheTanneryLvl2:
+                case (int) Buildings.TheTanneryLvl3:
                     PnjId = alliance ? 78207 : 79833;
                     ReagentId = 110609;
                     NumberReagent = 5;
                     Pnj = alliance
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteItem;
                     CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
@@ -971,15 +1136,16 @@ namespace GarrisonButler
 
 
                 // <Vendor Name="Trader Joseph" Entry="87208" Type="Repair" X="1892.497" Y="183.4631" Z="79.72182" />
-                case (int)Buildings.TradingPostLvl1:
-                case (int)Buildings.TradingPostLvl2:
-                case (int)Buildings.TradingPostLvl3:
+                case (int) Buildings.TradingPostLvl1:
+                case (int) Buildings.TradingPostLvl2:
+                case (int) Buildings.TradingPostLvl3:
                     Pnj = alliance
-                        ? new WoWPoint(1872.647, 310.0204, 82.61102)
+                        ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
+                    maxCanComplete = MaxCanCompleteTradingPost;
                     CanCompleteOrder = CanCompleteOrderTradingPost;
                     PnjIds = alliance
-                        ? new List<int>
+                        ? new List<uint>
                         {
                             87207,
                             87209,
@@ -994,7 +1160,7 @@ namespace GarrisonButler
                             87210,
                             91071
                         }
-                        : new List<int>
+                        : new List<uint>
                         {
                             86803,
                             87112,
@@ -1032,6 +1198,51 @@ namespace GarrisonButler
         }
 
 
+        private int MaxCanCompleteTradingPost()
+        {
+            ReagentId = GaBSettings.Get().ItemIdTradingPost;
+            NumberReagent = GaBSettings.Get().NumberReagentTradingPost;
+
+            var rea =
+                GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
+            if (rea == null)
+            {
+                GarrisonButler.Diagnostic(
+                    "[TradingPost] Couldn't find matching reagent activated in settings, reagentId={0}, #={1}",
+                    ReagentId, NumberReagent);
+                ObjectDumper.WriteToHb(GaBSettings.Get().TradingPostReagentsSettings, 3);
+                return 0;
+            }
+            // Done with the check of reagent, so we switch to simple routine.
+            GarrisonButler.Diagnostic("[TradingPost] Calling CanCompleteOrder with reagentId={0}, #={1}", ReagentId,
+                NumberReagent);
+            return MaxCanCompleteItem();
+        }
+
+        /// <summary>
+        /// Needs to have the capacitive frame opened
+        /// </summary>
+        internal void RefreshOrderTradingPost()
+        {
+            var serverTimeLua = ButlerLua.GetServerCurrentDate();
+
+            // Check reagent
+            var reagent = ButlerLua.GetShipmentReagent();
+            if (reagent.Item1 == -1)
+            {
+                GarrisonButler.Warning("[TradingPost] Failed to find reagent id");
+                return;
+            }
+
+            GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1,
+                reagent.Item2, serverTimeLua);
+            // Override value
+            GaBSettings.Get().ItemIdTradingPost = (uint)reagent.Item1;
+            GaBSettings.Get().NumberReagentTradingPost = reagent.Item2;
+            GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
+            GaBSettings.Save();
+        }
+
         private async Task<Result> CanCompleteOrderTradingPost()
         {
             // Before being able to calculate it, we need to know what's today's reagent.
@@ -1062,7 +1273,7 @@ namespace GarrisonButler
                 GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1,
                     reagent.Item2, serverTimeLua);
                 // Override value
-                GaBSettings.Get().ItemIdTradingPost = (uint)reagent.Item1;
+                GaBSettings.Get().ItemIdTradingPost = (uint) reagent.Item1;
                 GaBSettings.Get().NumberReagentTradingPost = reagent.Item2;
                 GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
                 GaBSettings.Save();
@@ -1177,62 +1388,38 @@ namespace GarrisonButler
 
     public enum TradingPostReagents
     {
-        [Description("Draenic Dust")]
-        DraenicDust = 109693,
-        [Description("Sumptuous Fur")]
-        SumptuousFur = 111557,
-        [Description("Raw Beast Hide")]
-        RawBeastHide = 110609,
+        [Description("Draenic Dust")] DraenicDust = 109693,
+        [Description("Sumptuous Fur")] SumptuousFur = 111557,
+        [Description("Raw Beast Hide")] RawBeastHide = 110609,
 
         // Herb
-        [Description("Talador Orchid")]
-        TaladorOrchid = 109129,
-        [Description("Nagrand Arrow Bloom")]
-        NagrandArrowbloom = 109128,
-        [Description("Starflower")]
-        Starflower = 109127,
-        [Description("Gorgrond FlyTrap")]
-        GorgrondFlytrap = 109126,
-        [Description("Fireweed")]
-        Fireweed = 109125,
-        [Description("Frostweed")]
-        Frostweed = 109124,
+        [Description("Talador Orchid")] TaladorOrchid = 109129,
+        [Description("Nagrand Arrow Bloom")] NagrandArrowbloom = 109128,
+        [Description("Starflower")] Starflower = 109127,
+        [Description("Gorgrond FlyTrap")] GorgrondFlytrap = 109126,
+        [Description("Fireweed")] Fireweed = 109125,
+        [Description("Frostweed")] Frostweed = 109124,
 
         // Ore
-        [Description("True Iron Ore")]
-        TrueIronOre = 109119,
-        [Description("Blackrock Ore")]
-        BlackrockOre = 109118,
+        [Description("True Iron Ore")] TrueIronOre = 109119,
+        [Description("Blackrock Ore")] BlackrockOre = 109118,
 
         // Meat
-        [Description("Raw Clefthoof Meat")]
-        RawClefthoofMeat = 109131,
-        [Description("Raw Talbuk Meat")]
-        RawTalbukMeat = 109132,
-        [Description("Rylak Egg")]
-        RylakEgg = 109133,
-        [Description("Raw Elekk Meat")]
-        RawElekkMeat = 109134,
-        [Description("Raw Riverbeast Meat")]
-        RawRiverbeastMeat = 109135,
-        [Description("Raw Boar Meat")]
-        RawBoarMeat = 109136,
+        [Description("Raw Clefthoof Meat")] RawClefthoofMeat = 109131,
+        [Description("Raw Talbuk Meat")] RawTalbukMeat = 109132,
+        [Description("Rylak Egg")] RylakEgg = 109133,
+        [Description("Raw Elekk Meat")] RawElekkMeat = 109134,
+        [Description("Raw Riverbeast Meat")] RawRiverbeastMeat = 109135,
+        [Description("Raw Boar Meat")] RawBoarMeat = 109136,
 
         // Fish
-        [Description("Crescent Saberfish Flesh")]
-        CrescentSaberfishFlesh = 109137,
-        [Description("Jawless Skulker Flesh")]
-        JawlessSkulkerFlesh = 109138,
-        [Description("Fat Sleeper Flesh")]
-        FatSleeperFlesh = 109139,
-        [Description("Blind Lake Sturgeon Flesh")]
-        BlindLakeSturgeonFlesh = 109140,
-        [Description("Fire Ammonite Tentacle")]
-        FireAmmoniteTentacle = 109141,
-        [Description("Sea Scorpion Segment")]
-        SeaScorpionSegment = 109142,
-        [Description("Abyssal Gulper Eel Flesh")]
-        AbyssalGulperEelFlesh = 109143
+        [Description("Crescent Saberfish Flesh")] CrescentSaberfishFlesh = 109137,
+        [Description("Jawless Skulker Flesh")] JawlessSkulkerFlesh = 109138,
+        [Description("Fat Sleeper Flesh")] FatSleeperFlesh = 109139,
+        [Description("Blind Lake Sturgeon Flesh")] BlindLakeSturgeonFlesh = 109140,
+        [Description("Fire Ammonite Tentacle")] FireAmmoniteTentacle = 109141,
+        [Description("Sea Scorpion Segment")] SeaScorpionSegment = 109142,
+        [Description("Abyssal Gulper Eel Flesh")] AbyssalGulperEelFlesh = 109143
     }
 
     public enum Buildings

@@ -27,7 +27,7 @@ namespace GarrisonButler.ButlerCoroutines
         private const int BiggerIsBetterAlliance = 36592;
         private const int BiggerIsBetterHorde = 36567;
 
-        private static readonly List<Shipment> ShipmentsMap = new List<Shipment>
+        internal static readonly List<Shipment> ShipmentsMap = new List<Shipment>
         {
             // Mine
             new Shipment(new List<int>
@@ -386,7 +386,7 @@ namespace GarrisonButler.ButlerCoroutines
                 // Reached limit of tries?
                 if (building.StartWorkOrderTries >= Building.StartWorkOrderMaxTries)
                 {
-                    GarrisonButler.Warning("[ShipmentStart,{0}] Cannot collect shipments due to reaching max tries ({2}): {1}",
+                    GarrisonButler.Warning("[ShipmentStart,{0}] Cannot start shipments due to reaching max tries ({2}): {1}",
                         building.Id, building.Name, Building.StartWorkOrderMaxTries);
                     return new Result(ActionResult.Failed);
                 }
@@ -477,7 +477,7 @@ namespace GarrisonButler.ButlerCoroutines
         {
             var unit = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull()
                 .FirstOrDefault(
-                    u => building.PnjIds != null ? building.PnjIds.Contains((int) u.Entry) : u.Entry == building.PnjId);
+                    u => building.PnjIds != null ? building.PnjIds.Contains(u.Entry) : u.Entry == building.PnjId);
 
             if (unit == null)
             {
@@ -935,7 +935,7 @@ namespace GarrisonButler.ButlerCoroutines
             return new Result(ActionResult.Done); // should never reach that point!
         }
 
-        private struct Shipment
+        internal struct Shipment
         {
             public readonly List<int> BuildingIds;
             public readonly int ShipmentPreQuestIdHorde;

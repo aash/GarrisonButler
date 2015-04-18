@@ -1,5 +1,6 @@
 ﻿#region
 
+using GarrisonButler.ButlerCoroutines.AtomsLibrary;
 using Styx.Helpers;
 using System.Runtime.CompilerServices;
 using Bots.DungeonBuddy.Helpers;
@@ -42,8 +43,8 @@ namespace GarrisonButler.ButlerCoroutines
         private static Composite _vendorBehavior;
         private static readonly WaitTimer ResetAfkTimer = new WaitTimer(TimeSpan.FromMinutes(2));
         public static List<Building> _buildings;
-        private static List<Mission> _missions;
-        private static List<Follower> _followers;
+        private static List<Mission> _missions_old;
+        private static List<Follower> _followers_old;
 
         private static readonly List<WoWPoint> AllyWaitingPoints = new List<WoWPoint>
         {
@@ -237,7 +238,7 @@ namespace GarrisonButler.ButlerCoroutines
                 else
                     return true;
             }
-            if (Me.FreeBagSlots < 3)
+            if (Me.FreeNormalBagSlots < 3)
             {
                 if (await HbApi.StackAllItemsIfPossible())
                     return true;
@@ -319,7 +320,7 @@ namespace GarrisonButler.ButlerCoroutines
             }
             GarrisonButler.Diagnostic("Checking for vendors... Done.");
 
-            VendorCheckTimer.Reset();
+           VendorCheckTimer.Reset();
         }
 
         internal static void OnStop()
@@ -332,8 +333,8 @@ namespace GarrisonButler.ButlerCoroutines
             }
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
             _mainSequence = null;
-            Navigator.NavigationProvider = NativeNavigation;
-            _customNavigation = null;
+            //Navigator.NavigationProvider = NativeNavigation;
+            //_customNavigation = null;
         }
 
         internal static void IncludeTargetsFilter(List<WoWObject> incomingUnits, HashSet<WoWObject> outgoingUnits)
@@ -377,22 +378,15 @@ namespace GarrisonButler.ButlerCoroutines
             }
         }
 
+        private static HashSet<Atom> listOfActions = new HashSet<Atom>();
         public static async Task<bool> RootLogic()
         {
             // Fast checks
             CheckResetAfk();
 
-            CheckNavigationSystem();
+            // CheckNavigationSystem();
 
-            // Record and set auto loot
-            if (_autoLootinit == false)
-            {
-                AutoLootDefaultValue = await ButlerLua.GetAutoLootValue();
-                ButlerLua.SetAutoLootValue(true);
-                _autoLootinit = true;
-            }
-
-            CheckForVendors();
+            // CheckForVendors();
 
             if (await RestoreUiIfNeeded())
                 return true;
@@ -402,7 +396,6 @@ namespace GarrisonButler.ButlerCoroutines
 
             if (await Combat.CombatRoutine())
                 return true;
-
 
             if ((await VendorCoroutineWorkaround()).Status == ActionResult.Running)
                 return true;
@@ -419,73 +412,89 @@ namespace GarrisonButler.ButlerCoroutines
             if (await CheckBagsFull())
                 return true;
 
+
+            //StalkerEngine.Instance.Stalk();
+            return await Sequencer.Instance.Execute();
+
+
+
+
+            //// Record and set auto loot
+            //if (_autoLootinit == false)
+            //{
+            //    AutoLootDefaultValue = await ButlerLua.GetAutoLootValue();
+            //    ButlerLua.SetAutoLootValue(true);
+            //    _autoLootinit = true;
+            //}
+
+
             if (_mainSequence == null)
             {
                 GarrisonButler.Warning("ERROR: mainSequence NULL");
                 return false;
             }
 
-            // Bot will sleep after one full run waiting for new things to do
-            // similar to behavior in MixedMode
-            if (ReadyToSwitch)
-                if (!GarrisonButler.Instance.RequirementsMet)
-                {
-                    await JobDoneSwitch();
-                    return false;
-                }
+            //// Bot will sleep after one full run waiting for new things to do
+            //// similar to behavior in MixedMode
+            //if (ReadyToSwitch)
+            //    if (!GarrisonButler.Instance.RequirementsMet)
+            //    {
+            //        await JobDoneSwitch();
+            //        return false;
+            //    }
 
-            // Reset of mount vendor workaround
-            _mountVendorTimeStart = default(DateTime);
+            //// Reset of mount vendor workaround
+            //_mountVendorTimeStart = default(DateTime);
 
 
-            //// DEBUG TESTS
-            //if (!testDone)
+            ////// DEBUG TESTS
+            ////if (!testDone)
+            ////{
+            ////    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).Status == ActionResult.Running)
+            ////        return true;
+            ////    testDone = true;
+            ////    return true;
+            ////}
+            ////else
+            ////{
+            ////    await MoveTo(new WoWPoint(1873.706, 83.12846, 79.72403));
+            ////    return true;
+            ////}
+
+
+            //// Heavier coroutines on timer
+            ////GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
+            //var resultActions = await _mainSequence.ExecuteAction();
+            //if (resultActions.Status == ActionResult.Running || resultActions.Status == ActionResult.Refresh)
             //{
-            //    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).Status == ActionResult.Running)
-            //        return true;
-            //    testDone = true;
+            //    //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
             //    return true;
             //}
-            //else
-            //{
-            //    await MoveTo(new WoWPoint(1873.706, 83.12846, 79.72403));
-            //    return true;
-            //}
 
-
-            // Heavier coroutines on timer
-            //GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
-            var resultActions = await _mainSequence.ExecuteAction();
-            if (resultActions.Status == ActionResult.Running || resultActions.Status == ActionResult.Refresh)
-            {
-                //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
-                return true;
-            }
-            
-            ReadyToSwitch = true;
-            return false;
+            //ReadyToSwitch = true;
+            //return false;
         }
 
-        private static void CheckNavigationSystem()
-        {
-            if (_customNavigation == null)
-            {
-                NativeNavigation = Navigator.NavigationProvider;
-                _customNavigation = new NavigationGaB();
-            }
-            if (Me.IsInGarrison() && !CustomNavigationLoaded)
-            {
-                Navigator.NavigationProvider = _customNavigation;
-                GarrisonButler.Diagnostic("InitializationMove");
-            }
-            else if (!Me.IsInGarrison() && CustomNavigationLoaded)
-            {
-                Navigator.NavigationProvider = NativeNavigation;
-            }
+        //private static void CheckNavigationSystem()
+        //{
+        //    if (_customNavigation == null)
+        //    {
+        //        NativeNavigation = Navigator.NavigationProvider;
+        //        _customNavigation = new NavigationGaB();
+        //    }
+        //    if (Me.IsInGarrison() && !CustomNavigationLoaded)
+        //    {
+        //        //Navigator.NavigationProvider = _customNavigation;
+        //        //GarrisonButler.Diagnostic("InitializationMove");
+        //    }
+        //    else if (!Me.IsInGarrison() && CustomNavigationLoaded)
+        //    {
+        //        Navigator.NavigationProvider = NativeNavigation;
+        //    }
 
-            if(CustomNavigationLoaded)
-                InitializationMove();
-        }
+        //    if(CustomNavigationLoaded)
+        //        InitializationMove();
+        //}
 
         private static async Task<Result> SellJunk()
         {
@@ -496,6 +505,7 @@ namespace GarrisonButler.ButlerCoroutines
 
         private static async Task<Result> SellJunkCoroutine()
         {
+            CheckForVendors();
             if (HbApi.GetItemsInBags(i =>
             {
                 var res = false;

@@ -26,8 +26,8 @@ namespace GarrisonButler.ButlerCoroutines
         public static Graph MovementGraph { get { return _movementGraph; } }
 
         private static NavigationGaB _customNavigation;
-        internal static bool CustomNavigationLoaded = false;
-        internal static NavigationProvider NativeNavigation;
+        //internal static bool CustomNavigationLoaded = false;
+        //internal static NavigationProvider NativeNavigation;
         internal static List<Buildings> BuildingsLoaded; 
         public static void InitializationMove()
         {            
@@ -264,10 +264,10 @@ namespace GarrisonButler.ButlerCoroutines
                     throw new ArgumentException("Starting node must be in graph.");
 
                 //Generating data
-                var objectsTo = objectsToArray.OrderBy(o=> from.Distance(o.Location)).Take(5).ToArray();
+                var objectsTo = objectsToArray.OrderBy(o => from.Distance(o.Location)).Take(5).ToArray();
                 var objectsCount = objectsTo.Count();
-                var vertics = new int[objectsCount+1];
-                var matrix = new double[objectsCount+1, objectsCount+1];
+                var vertics = new int[objectsCount + 1];
+                var matrix = new double[objectsCount + 1, objectsCount + 1];
 
                 // Adding starting point
                 vertics[0] = 0;
@@ -288,8 +288,8 @@ namespace GarrisonButler.ButlerCoroutines
                 // Adding distances from every points to all others
                 for (int index1 = 0; index1 < objectsTo.Length; index1++)
                 {
-                    vertics[index1+1] = index1+1;
-                    
+                    vertics[index1 + 1] = index1 + 1;
+
                     starting = ClosestToNodes(objectsTo[index1].Location);
                     if (_movementGraph.Nodes.All(n => n.Key != starting))
                         throw new ArgumentException("Starting node must be in graph.");
@@ -297,8 +297,8 @@ namespace GarrisonButler.ButlerCoroutines
 
                     for (int index2 = index1; index2 < objectsTo.Length; index2++)
                     {
-                        if(index1 == index2)
-                            matrix[index1+1, index2+1] = 0.0;
+                        if (index1 == index2)
+                            matrix[index1 + 1, index2 + 1] = 0.0;
                         else
                         {
                             var endPoint = ClosestToNodes(objectsTo[index2].Location);
@@ -317,7 +317,60 @@ namespace GarrisonButler.ButlerCoroutines
 
                 PathGenerationStopwatch.Stop();
                 GarrisonButler.Diagnostic("[Salesman] Tour found in {0}ms, cost={1}, route:", PathGenerationStopwatch.ElapsedMilliseconds, cost);
-                ObjectDumper.WriteToHb(route,3);
+                ObjectDumper.WriteToHb(route, 3);
+
+                return objectsTo[route[1] - 1];
+            }
+            public static WoWGameObject GetClosestObjectSalesmanHB(WoWPoint from, WoWGameObject[] objectsToArray)
+            {
+                PathGenerationStopwatch.Reset();
+                PathGenerationStopwatch.Start();
+
+                GarrisonButler.Diagnostic("Starting salesman algorithm.");
+
+                //Generating data
+                var objectsTo = objectsToArray.OrderBy(o => from.Distance(o.Location)).Take(5).ToArray();
+                var objectsCount = objectsTo.Count();
+                var vertics = new int[objectsCount + 1];
+                var matrix = new double[objectsCount + 1, objectsCount + 1];
+
+                // Adding starting point
+                vertics[0] = 0;
+                matrix[0, 0] = 0;
+                // Adding distance from starting point to all objects
+                for (int index = 0; index < objectsTo.Length; index++)
+                {
+                    var gameObject = objectsTo[index];
+                    var distance = Navigator.PathDistance(@from, gameObject.Location) ?? float.MaxValue;
+                    matrix[0, index + 1] = (float)distance;
+                    matrix[index + 1, 0] = (float)distance;
+                }
+
+                // Adding distances from every points to all others
+                for (int index1 = 0; index1 < objectsTo.Length; index1++)
+                {
+                    vertics[index1 + 1] = index1 + 1;
+
+                    for (int index2 = index1; index2 < objectsTo.Length; index2++)
+                    {
+                        if (index1 == index2)
+                            matrix[index1 + 1, index2 + 1] = 0.0;
+                        else
+                        {
+                            var distance = Navigator.PathDistance(@from, objectsTo[index2].Location) ?? float.MaxValue;
+                            matrix[index1 + 1, index2 + 1] = distance;
+                            matrix[index2 + 1, index1 + 1] = distance;
+                        }
+                    }
+                    GarrisonButler.Diagnostic("[Salesman] Processed node in {0}ms", PathGenerationStopwatch.ElapsedMilliseconds);
+                }
+                double cost;
+                var salesman = new Salesman(vertics, matrix);
+                var route = salesman.Solve(out cost).ToArray();
+
+                PathGenerationStopwatch.Stop();
+                GarrisonButler.Diagnostic("[Salesman] Tour found in {0}ms, cost={1}, route:", PathGenerationStopwatch.ElapsedMilliseconds, cost);
+                ObjectDumper.WriteToHb(route, 3);
 
                 return objectsTo[route[1] - 1];
             }

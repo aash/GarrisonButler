@@ -4,60 +4,193 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Buddy.Coroutines;
 using Facet.Combinatorics;
 using GarrisonButler.API;
+using GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms;
 using GarrisonButler.Config;
 using GarrisonButler.Libraries;
 using GarrisonButler.Libraries.Wowhead;
 using GarrisonButler.Objects;
 using Styx;
 using Styx.Common;
-using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
-namespace GarrisonButler.ButlerCoroutines
+namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
 {
-    partial class ButlerCoroutine
+    internal class StartMissions : Atom
     {
-        public static bool Check = true;
+        private static List<Mission> _missions;
+        private static List<Follower> _followers;
 
+        private List<Tuple<Mission, Follower[]>> toStart;
         private static readonly WoWPoint TableHorde = new WoWPoint(5559, 4599, 140);
         private static readonly WoWPoint TableAlliance = new WoWPoint(1943, 330, 91);
-        private static readonly WaitTimer RefreshMissionsTimer = new WaitTimer(TimeSpan.FromMinutes(5));
-        private static readonly WaitTimer RefreshFollowerTimer = new WaitTimer(TimeSpan.FromMinutes(5));
-        private static WoWPoint _tablePosition = WoWPoint.Empty;
-
-        private static void InitializeMissions()
+        private static readonly List<uint> CommandTables = new List<uint>
         {
-            RefreshMissions(true);
-            RefreshFollowers(true);
+            81661,
+            82507,
+            82601,
+            81546,
+            80432,
+            84224,
+            86062,
+            86031,
+            84698,
+            82600,
+            81649,
+            85805
+        };
+
+
+        public StartMissions()
+        {
+            Dependencies.Add(new MoveToObject(CommandTables, WoWObjectTypeFlag.Unit, StyxWoW.Me.IsAlliance ? TableAlliance : TableHorde));
+            
+            _followers = FollowersLua.GetAllFollowers();
+            _missions = MissionLua.GetAllAvailableMissions();
+            ShouldRepeat = true;
         }
 
-        public static void RefreshMissions(bool forced = false)
+        public override bool RequirementsMet()
         {
-            if (!RefreshMissionsTimer.IsFinished && _missions_old != null && !forced) return;
-            GarrisonButler.Log("Refreshing Missions database.");
-            _missions_old = MissionLua.GetAllAvailableMissions();
-            RefreshMissionsTimer.Reset();
+            if (!GaBSettings.Get().StartMissions)
+            {
+                GarrisonButler.Diagnostic("[Missions] Deactivated in user settings.");
+                return false;
+            }
+            
+            //RefreshMissions();
+            //RefreshFollowers();
+
+            _followers = FollowersLua.GetAllFollowers();
+            _missions = MissionLua.GetAllAvailableMissions();
+
+            var garrisonRessources = BuildingsLua.GetGarrisonRessources();
+            IEnumerable<Mission> missions = _missions.Where(m => m.Cost < garrisonRessources).ToList();
+            if (!missions.Any())
+            {
+                GarrisonButler.Diagnostic("[Missions] Not enough ressources to start a mission.");
+                return false;
+            }
+
+
+            // Enhanced Mission Logic
+            if (GarrisonButler.IsIceVersion())
+            {
+                toStart = NewMissionStubCode(_followers.ToList());
+            }
+            else
+            {
+                toStart = new List<Tuple<Mission, Follower[]>>();
+                var followersTemp = _followers.ToList();
+                foreach (var mission in missions)
+                {
+                    // Make sure that status is Idle or In Party
+                    var match =
+                        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status.ToInt32() <= 1).ToList());
+                    if (match == null)
+                        continue;
+                    toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
+                    break; // let's not calculate all of them right now. 
+                    followersTemp.RemoveAll(match.Contains);
+                }
+            }
+
+            var mess = "Found available missions to complete. " +
+                       "Can successfully complete: " + toStart.Count + " missions.";
+            if (toStart.Count > 0)
+                GarrisonButler.Log(mess);
+            else
+            {
+                GarrisonButler.Diagnostic(mess);
+            }
+            return toStart.Any();
         }
 
-        public static void RefreshFollowers(bool forced = false)
+        public override bool IsFulfilled()
         {
-            if (!RefreshFollowerTimer.IsFinished && _followers_old != null && !forced) return;
-            GarrisonButler.Log("Refreshing Followers database.");
-            _followers_old = FollowersLua.GetAllFollowers();
-            RefreshFollowerTimer.Reset();
+
+            var numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
+
+            // Is there mission available to start
+            if (numberMissionAvailable == 0)
+            {
+                GarrisonButler.Diagnostic("[Missions] No missions available to start.");
+                return true;
+            }
+            return false;
+        }
+
+        public override async Task Action()
+        {
+            if (toStart == null)
+                return; 
+
+            if (!InterfaceLua.IsGarrisonMissionTabVisible())
+            {
+                GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
+                InterfaceLua.ClickTabMission();
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
+                {
+                    GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
+                    return;
+                }
+            }
+
+            var missionToStart = toStart.First();
+
+            if (!InterfaceLua.IsGarrisonMissionVisible())
+            {
+                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId +
+                                          " - " +
+                                          missionToStart.Item1.Name);
+                InterfaceLua.OpenMission(missionToStart.Item1);
+                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
+                {
+                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
+                    return;
+                }
+            }
+            else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
+            {
+                GarrisonButler.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
+                                          missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
+                InterfaceLua.ClickCloseMission();
+                InterfaceLua.OpenMission(missionToStart.Item1);
+                if (
+                    !await
+                        Buddy.Coroutines.Coroutine.Wait(2000,
+                            () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
+                {
+                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                    return;
+                }
+            }
+            GarrisonButler.Diagnostic("Adding followers to mission: " + missionToStart.Item1.Name);
+            missionToStart.Item2.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
+            await missionToStart.Item1.AddFollowersToMission(missionToStart.Item2.ToList());
+            InterfaceLua.StartMission(missionToStart.Item1);
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+            InterfaceLua.ClickCloseMission();
+
+            _followers = FollowersLua.GetAllFollowers();
+            _missions = MissionLua.GetAllAvailableMissions();
+
+        }
+
+        public override string Name()
+        {
+            return "[StartMissions]";
         }
 
         public static bool IsMissionDisallowed(Mission mission)
         {
-            var disallowedRewardSettings = GaBSettings.Get().MissionRewardSettings.Where(mrs => mrs.DisallowMissionsWithThisReward);
+            var disallowedRewardSettings =
+                GaBSettings.Get().MissionRewardSettings.Where(mrs => mrs.DisallowMissionsWithThisReward);
             var disallowed = disallowedRewardSettings.Any(drs =>
                 drs.IsCategoryReward
                     ? mission.Rewards.Any(r => r.Category == drs.Category)
@@ -121,7 +254,6 @@ namespace GarrisonButler.ButlerCoroutines
             int count = 0;
 
 
-
             //var toAdd = new List<Follower>();
             //while (count < 3)
             //{
@@ -175,7 +307,9 @@ namespace GarrisonButler.ButlerCoroutines
             // Status 5 is INACTIVE
             // Make sure there's at least 1 follower
             // and make sure the number of active followers is less than 20
-            if (numFollowers == 0 || followers.Count(f => f.Status.ToInt32() != 5) <= (_buildings.Any(b => b.Id == (int) global::GarrisonButler.Buildings.BarracksLvl3) ? 25 : 20))
+            if (numFollowers == 0 ||
+                followers.Count(f => f.Status.ToInt32() != 5) <=
+                (ButlerCoroutine._buildings.Any(b => b.Id == (int) Buildings.BarracksLvl3) ? 25 : 20))
             {
                 GarrisonButler.Diagnostic("returning from GetAllFollowers(): # followers = {0}", followers.Count);
                 return toStart;
@@ -209,10 +343,11 @@ namespace GarrisonButler.ButlerCoroutines
             // Make sure player meets minimum item level requirements
             foreach (var r in rewards)
             {
-                if (Me.AverageItemLevelEquipped < (float)r.MinimumCharacterItemLevel)
+                if (StyxWoW.Me.AverageItemLevelEquipped < r.MinimumCharacterItemLevel)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward.",
-                        r.Id, r.Name, Me.AverageItemLevelEquipped, r.MinimumCharacterItemLevel);
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward.",
+                        r.Id, r.Name, StyxWoW.Me.AverageItemLevelEquipped, r.MinimumCharacterItemLevel);
                     rewards.Remove(r);
                     continue;
                 }
@@ -222,23 +357,23 @@ namespace GarrisonButler.ButlerCoroutines
                 if (category == null)
                     continue;
 
-                if (Me.AverageItemLevelEquipped < (float)category.MinimumCharacterItemLevel)
+                if (StyxWoW.Me.AverageItemLevelEquipped < category.MinimumCharacterItemLevel)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward's category ({4}).",
-                        r.Id, r.Name, Me.AverageItemLevelEquipped, r.MinimumCharacterItemLevel, r.Category);
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Removing reward ({0}) {1} due to character item level {2} not meeting minimum {3} requirement for this reward's category ({4}).",
+                        r.Id, r.Name, StyxWoW.Me.AverageItemLevelEquipped, r.MinimumCharacterItemLevel, r.Category);
                     rewards.Remove(r);
-                    continue;
                 }
             }
 
             // Get the current top of the list reward
             foreach (var reward in rewards)
             {
-                if (Me.Level < reward.RequiredPlayerLevel)
+                if (StyxWoW.Me.Level < reward.RequiredPlayerLevel)
                 {
                     GarrisonButler.Diagnostic(
                         "[Missions] Player level {0} does not meet minimum {1} for this reward: ({2}) {3}",
-                        Me.Level, reward.RequiredPlayerLevel, reward.Id, reward.Name);
+                        StyxWoW.Me.Level, reward.RequiredPlayerLevel, reward.Id, reward.Name);
                 }
 
                 if (followers.Count <= 0)
@@ -286,11 +421,16 @@ namespace GarrisonButler.ButlerCoroutines
                 // Skip any missions that don't meet user requirements (quantity > X for example)
                 var missionsThatMeetRequirement = missionsWithCurrentReward
                     // Make sure the mission level meets minimum required by global settings OR reward settings
-                    .Where(m => reward.IndividualMissionLevelEnabled ? m.Level >= reward.RequiredMissionLevel : m.Level >= GaBSettings.Get().MinimumMissionLevel )
+                    .Where(
+                        m =>
+                            reward.IndividualMissionLevelEnabled
+                                ? m.Level >= reward.RequiredMissionLevel
+                                : m.Level >= GaBSettings.Get().MinimumMissionLevel)
                     .Where(m => m.Rewards
                         .Where(mr => mr.Id == reward.Id
                             // Handle the case where we are looking at a category of rewards instead of individual rewards
-                            || (mr.Id != reward.Id && mr.Category == reward.Category && mr.Id == (int)mr.Category))
+                                     ||
+                                     (mr.Id != reward.Id && mr.Category == reward.Category && mr.Id == (int) mr.Category))
                         // Check both Mission amount conditions & Player amount conditions
                         .Any(mr =>
                             (reward.ConditionForMission == null || reward.ConditionForMission.GetCondition(mr))
@@ -353,7 +493,8 @@ namespace GarrisonButler.ButlerCoroutines
                 //    )
                 //    .ToList();
 
-                GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count, followers.Count);
+                GarrisonButler.Diagnostic("Only considering {0} of {1} followers", followersToConsider.Count,
+                    followers.Count);
                 followersToConsider.ForEach(f => GarrisonButler.Diagnostic(">> FollowerToConsider: " + f.Name));
 
                 var result = DoMissionCalc(followersToConsider, missionsThatMeetRequirement, reward, followers);
@@ -366,7 +507,8 @@ namespace GarrisonButler.ButlerCoroutines
                 // Attempt boosting (re-run with all followers considered)
                 if (returnedToStart != null && returnedToStart.Count <= 0)
                 {
-                    GarrisonButler.Diagnostic("[Missions] >>> No combos found normally, attempting with Epic Max Level Boost <<<");
+                    GarrisonButler.Diagnostic(
+                        "[Missions] >>> No combos found normally, attempting with Epic Max Level Boost <<<");
                     result = DoMissionCalc(followers, missionsThatMeetRequirement, reward, followers);
                     returnedToStart = result.Item1;
                     returnedCombosTried = result.Item2;
@@ -376,15 +518,17 @@ namespace GarrisonButler.ButlerCoroutines
 
                 if (returnedToStart != null && returnedToStart.Count > 0)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Able to start {0} missions. (unassigned followers = {1}, tried {2} combos, accepted {3} combos, avg success = {4}%",
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Able to start {0} missions. (unassigned followers = {1}, tried {2} combos, accepted {3} combos, avg success = {4}%",
                         returnedToStart.Count, followersToConsider.Count, returnedCombosTried, returnedAcceptedCombos,
-                        returnedAcceptedCombos > 0 ? (returnedAcceptedCombos / (double)returnedAcceptedCombos).ToString() : "0");
+                        returnedAcceptedCombos > 0
+                            ? (returnedAcceptedCombos/(double) returnedAcceptedCombos).ToString()
+                            : "0");
                     toStart.AddRange(returnedToStart);
                     combosTried += returnedCombosTried;
                     acceptedCombos += returnedAcceptedCombos;
                     totalSuccessChance += returnedTotalSuccessChance;
                 }
-
             } // foreach (var reward in rewards)
 
             GarrisonButler.Diagnostic("Done with Mission Calculations");
@@ -392,7 +536,8 @@ namespace GarrisonButler.ButlerCoroutines
             GarrisonButler.Diagnostic("Total combinations accepted = " + acceptedCombos);
             GarrisonButler.Diagnostic("Total missions = " + missions.Count);
             GarrisonButler.Diagnostic("Followers not assigned = " + followers.Count);
-            GarrisonButler.Diagnostic("Average success chance = " + (acceptedCombos > 0 ? (totalSuccessChance / (double)acceptedCombos) : 0d).ToString() + "%");
+            GarrisonButler.Diagnostic("Average success chance = " +
+                                      (acceptedCombos > 0 ? (totalSuccessChance/acceptedCombos) : 0d) + "%");
             GarrisonButler.DiagnosticLogTimeTaken("Mission Stub Code", missionCodeStartedAt);
 
             return toStart;
@@ -470,7 +615,9 @@ namespace GarrisonButler.ButlerCoroutines
         }
 
         // Returns list mission/followers combos with combosTried, acceptedCombos, totalSuccessChance
-        public static Tuple<List<Tuple<Mission, Follower[]>>, long, int, double> DoMissionCalc(List<Follower> followersToConsider, List<Mission> missionsThatMeetRequirement, MissionReward reward, List<Follower> followers  )
+        public static Tuple<List<Tuple<Mission, Follower[]>>, long, int, double> DoMissionCalc(
+            List<Follower> followersToConsider, List<Mission> missionsThatMeetRequirement, MissionReward reward,
+            List<Follower> followers)
         {
             long combosTried = 0;
             var acceptedCombos = 0;
@@ -490,7 +637,8 @@ namespace GarrisonButler.ButlerCoroutines
                     if (!GaBSettings.Get().AllowFollowerXPMissionsToFillAllSlotsWithEpicMaxLevelFollowers
                         && reward.Category == MissionReward.MissionRewardCategory.FollowerExperience)
                     {
-                        followersToRemoveIfFailure = FillFollowersWithEpicLevel100(followersToConsider, followers, mission);
+                        followersToRemoveIfFailure = FillFollowersWithEpicLevel100(followersToConsider, followers,
+                            mission);
                         if (followersToRemoveIfFailure.Count > 0)
                         {
                             shouldBreak = false;
@@ -538,13 +686,15 @@ namespace GarrisonButler.ButlerCoroutines
                 var mingr = GaBSettings.Get().MinimumGarrisonResourcesToStartMissions;
                 if (gr < mingr)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Breaking MissionCalc due to Minimum Required Garrison Resources.  Have {0} and need {1}.",
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Breaking MissionCalc due to Minimum Required Garrison Resources.  Have {0} and need {1}.",
                         gr, mingr);
                 }
 
                 if (mission.Cost > gr)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Breaking MissionCalc due to insufficient Garrison Resources to start mission ({0}) {1}.  Have {2} and need {3}.",
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Breaking MissionCalc due to insufficient Garrison Resources to start mission ({0}) {1}.  Have {2} and need {3}.",
                         mission.MissionId, mission.Name, gr, mission.Cost);
                     break;
                 }
@@ -554,7 +704,8 @@ namespace GarrisonButler.ButlerCoroutines
                 {
                     if (GaBSettings.Get().PreferFollowersWithScavengerForGarrisonResourcesReward)
                     {
-                        GarrisonButler.Diagnostic("[Missions] Mission reward is GARRISON RESOURCES and user settings indicate to prefer followers with Scavenger trait.  {0} followers have Scavenger",
+                        GarrisonButler.Diagnostic(
+                            "[Missions] Mission reward is GARRISON RESOURCES and user settings indicate to prefer followers with Scavenger trait.  {0} followers have Scavenger",
                             followersToConsider.Count(f => f.HasScavenger));
                         followersToConsider = followersToConsider.OrderByDescending(f => f.HasScavenger).ToList();
                     }
@@ -562,8 +713,9 @@ namespace GarrisonButler.ButlerCoroutines
                 // NOT Garrison Resources & user wants to disallow followers with Scavenger on these missions
                 else if (GaBSettings.Get().DisallowScavengerOnNonGarrisonResourcesMissions)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Mission reward is ***NOT*** GARRISON RESOURCES and user settings indicate to NOT allow followers with Scavenger.  {0} followers have Scavenger",
-                            followersToConsider.Count(f => f.HasScavenger));
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Mission reward is ***NOT*** GARRISON RESOURCES and user settings indicate to NOT allow followers with Scavenger.  {0} followers have Scavenger",
+                        followersToConsider.Count(f => f.HasScavenger));
                     excludedFollowers = followersToConsider.Where(f => f.HasScavenger).ToList();
                     followersToConsider.RemoveAll(f => excludedFollowers.Any(e => e.FollowerId == f.FollowerId));
                 }
@@ -573,7 +725,8 @@ namespace GarrisonButler.ButlerCoroutines
                 {
                     if (GaBSettings.Get().PreferFollowersWithTreasureHunterForGoldReward)
                     {
-                        GarrisonButler.Diagnostic("[Missions] Mission reward is GOLD and user settings indicate to prefer followers with Treasure Hunter trait.  {0} followers have Treasure Hunter",
+                        GarrisonButler.Diagnostic(
+                            "[Missions] Mission reward is GOLD and user settings indicate to prefer followers with Treasure Hunter trait.  {0} followers have Treasure Hunter",
                             followersToConsider.Count(f => f.HasTreasureHunter));
                         followersToConsider = followersToConsider.OrderByDescending(f => f.HasTreasureHunter).ToList();
                     }
@@ -581,14 +734,16 @@ namespace GarrisonButler.ButlerCoroutines
                 // NOTGold & user wants to disallow followers with Treasure Hunter on these missions
                 else if (GaBSettings.Get().DisallowTreasureHunterOnNonGoldMissions)
                 {
-                    GarrisonButler.Diagnostic("[Missions] Mission reward is ***NOT*** GOLD and user settings indicate to NOT allow followers with Treasure Hunter.  {0} followers have Treasure Hunter",
+                    GarrisonButler.Diagnostic(
+                        "[Missions] Mission reward is ***NOT*** GOLD and user settings indicate to NOT allow followers with Treasure Hunter.  {0} followers have Treasure Hunter",
                         followersToConsider.Count(f => f.HasTreasureHunter));
                     excludedFollowers = followersToConsider.Where(f => f.HasTreasureHunter).ToList();
                     followersToConsider.RemoveAll(f => excludedFollowers.Any(e => e.FollowerId == f.FollowerId));
                 }
 
                 DateTime startedAt = DateTime.Now;
-                Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider, mission.NumFollowers);
+                Combinations<Follower> followerCombinations = new Combinations<Follower>(followersToConsider,
+                    mission.NumFollowers);
                 MissionCalc.mission = mission;
                 var bestCombo = Enumerable.Empty<Follower>();
                 var bestSuccess = 0.0d;
@@ -624,7 +779,8 @@ namespace GarrisonButler.ButlerCoroutines
                 if (successChances != null && successChances.Count > 0)
                 {
                     GarrisonButler.Diagnostic("Total combinations tried = " + followerCombinations.Count);
-                    GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations", startedAt);
+                    GarrisonButler.DiagnosticLogTimeTaken("Trying all " + followerCombinations.Count + " combinations",
+                        startedAt);
                     var first = successChances.OrderByDescending(sc => sc.Item2).FirstOrDefault();
                     if (first != null)
                     {
@@ -637,7 +793,9 @@ namespace GarrisonButler.ButlerCoroutines
 
                         if (Convert.ToInt32(bestSuccess) < sucChanceToCompareAgainst)
                         {
-                            GarrisonButler.Diagnostic("Best combo doesn't meet minimum success chance requirements!  Need {0}% and only have {1}%", sucChanceToCompareAgainst, Convert.ToInt32(bestSuccess));
+                            GarrisonButler.Diagnostic(
+                                "Best combo doesn't meet minimum success chance requirements!  Need {0}% and only have {1}%",
+                                sucChanceToCompareAgainst, Convert.ToInt32(bestSuccess));
                             bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
                             RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
                             AddExcludedFollowers(followersToConsider, excludedFollowers);
@@ -647,14 +805,16 @@ namespace GarrisonButler.ButlerCoroutines
                     }
                     else
                     {
-                        GarrisonButler.Diagnostic("Error retrieving success chance for best combo: bestCombo.Count={0}, successChances.Count={1}", bestCombo.GetEmptyIfNull().Count(), successChances.GetEmptyIfNull().Count());
+                        GarrisonButler.Diagnostic(
+                            "Error retrieving success chance for best combo: bestCombo.Count={0}, successChances.Count={1}",
+                            bestCombo.GetEmptyIfNull().Count(), successChances.GetEmptyIfNull().Count());
                         RemoveAddedMaxLevelFollowers(followersToConsider, followersToRemoveIfFailure);
                         AddExcludedFollowers(followersToConsider, excludedFollowers);
                         GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
                         continue;
                     }
 
-                    combosTried += (int)followerCombinations.Count;
+                    combosTried += (int) followerCombinations.Count;
 
                     if (bestCombo.IsNullOrEmpty())
                     {
@@ -665,7 +825,8 @@ namespace GarrisonButler.ButlerCoroutines
                         continue;
                     }
                     acceptedCombos++;
-                    GarrisonButler.Diagnostic("[Missions] Best Combination with success=" + bestSuccess + "% for Mission=" + mission.Name + " is ");
+                    GarrisonButler.Diagnostic("[Missions] Best Combination with success=" + bestSuccess +
+                                              "% for Mission=" + mission.Name + " is ");
                     bestCombo.ForEach(c => GarrisonButler.Diagnostic(" -> Follower: " + c.Name));
                     //successChances.ForEach(c =>
                     //{
@@ -686,500 +847,8 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic("************* END Mission=" + mission.Name + "**************");
             } // if (successChances != null && successChances.Any())
 
-            return new Tuple<List<Tuple<Mission, Follower[]>>, long, int, double>(toStart, combosTried, acceptedCombos, totalSuccessChance);
-        }
-
-
-        private static async Task<Result> CanRunStartMission()
-        {
-            if (!GaBSettings.Get().StartMissions)
-            {
-                GarrisonButler.Diagnostic("[Missions] Deactivated in user settings.");
-                return new Result(ActionResult.Failed);
-            }
-
-            var numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
-
-            // Is there mission available to start
-            if (numberMissionAvailable == 0)
-            {
-                GarrisonButler.Diagnostic("[Missions] No missions available to start.");
-                return new Result(ActionResult.Failed);
-            }
-
-            RefreshMissions();
-            RefreshFollowers();
-
-
-            var garrisonRessources = BuildingsLua.GetGarrisonRessources();
-            IEnumerable<Mission> missions = _missions_old.Where(m => m.Cost < garrisonRessources).ToList();
-            if (!missions.Any())
-            {
-                GarrisonButler.Diagnostic("[Missions] Not enough ressources to start a mission.");
-                return new Result(ActionResult.Failed);
-            }
-
-            List<Tuple<Mission, Follower[]>> toStart;
-
-            // Enhanced Mission Logic
-            if (GarrisonButler.IsIceVersion())
-            {
-                toStart = NewMissionStubCode(_followers_old.ToList());
-            }
-            else
-            {
-                toStart = new List<Tuple<Mission, Follower[]>>();
-                var followersTemp = _followers_old.ToList();
-                foreach (var mission in missions)
-                {
-                    // Make sure that status is Idle or In Party
-                    var match =
-                        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status.ToInt32() <= 1).ToList());
-                    if (match == null)
-                        continue;
-                    toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
-                    followersTemp.RemoveAll(match.Contains);
-                }
-            }
-
-            var mess = "Found " + numberMissionAvailable + " available missions to complete. " +
-                       "Can successfully complete: " + toStart.Count + " missions.";
-            if (toStart.Count > 0)
-                GarrisonButler.Log(mess);
-            else
-            {
-                GarrisonButler.Diagnostic(mess);
-            }
-            return !toStart.Any()
-                ? new Result(ActionResult.Failed)
-                : new Result(ActionResult.Running, toStart.First());
-        }
-
-        private static async Task<Result> CanRunPutGearOnFollower()
-        {
-            // Check addon FollowerGearOptimizer
-            const int maxItemLevel = 675;
-            const int minItemLevel = 600;
-            RefreshMissions();
-            RefreshFollowers();
-
-            var rewardSettings = GaBSettings.Get().MissionRewardSettings;
-
-            var allRewardSettingsWithCategory = rewardSettings
-                .Where(f => f.Category == MissionReward.MissionRewardCategory.FollowerGear
-                || f.Category == MissionReward.MissionRewardCategory.FollowerItem)
-                .ToList();
-
-            if (allRewardSettingsWithCategory.Count <= 0)
-            {
-                GarrisonButler.Diagnostic("[Followers] No follower items in user settings.");
-                return new Result(ActionResult.Failed);
-            }
-
-            var categorySettings = allRewardSettingsWithCategory.SkipWhile(f => !f.IsCategoryReward).ToList();
-
-            var followerRewardSettings = allRewardSettingsWithCategory
-                .SkipWhile(
-                    f =>
-                        // Make sure this item isn't a category setting
-                        !f.IsCategoryReward &&
-                        // Make sure category settings exist for this item
-                        categorySettings.Any(c => c.Category == f.Category)
-                        // Check category setting is NOT UseOnFollowers
-                        ? !categorySettings.Any(
-                            r =>
-                                r.IsCategoryReward && r.Category == f.Category &&
-                                r.Action != MissionReward.MissionRewardAction.UseOnFollowers)
-                        // Check individual setting is NOT UseOnFollowers
-                        : f.Action != MissionReward.MissionRewardAction.UseOnFollowers)
-                .SkipWhile(f => f.IsCategoryReward)
-                .ToList();
-
-            if (followerRewardSettings.Count <= 0)
-            {
-                GarrisonButler.Diagnostic("[Followers] No follower tokens in user settings.");
-                return new Result(ActionResult.Failed);
-            }
-
-            // Any items in bags?
-            var tokensAvailable = followerRewardSettings
-                // Transform to array of WoWItem objects in bag
-                // Only keeps first entry found in bags for each item
-                .Select(f => HbApi.GetItemInBags((uint) f.Id).FirstOrDefault())
-                // Start with highest level items (to assign to lowest quality followers)
-                .OrderByDescending(f => f.ItemInfo.Level)
-                .ToList();
-
-            if (tokensAvailable.Count <= 0)
-            {
-                GarrisonButler.Diagnostic("[Followers] No tokens available in user inventory.");
-                return new Result(ActionResult.Failed);
-            }
-
-            // Any actual followers available?
-            var numberFollowersAvailable = _followers_old
-                // Only followers In Party (1) or Doing Nothing (nil = 0)
-                // Only Max Level Epic followers
-                // Only Followers NOT at max item level
-                .Where(f => f.ItemLevel < maxItemLevel || !f.IsMaxLevelEpic || f.Status.ToInt32() < 2)
-                // Prioritize lower ilvl followers
-                .OrderBy(f => f.ItemLevel)
-                .ToList();
-
-            if (numberFollowersAvailable.Count <= 0)
-            {
-                GarrisonButler.Diagnostic("[Followers] No followers eligible to use tokens.");
-                return new Result(ActionResult.Failed);
-            }
-
-            var armorSetsInBags = tokensAvailable
-                .Where(f => Enum.IsDefined(typeof (ArmorSetItemIds), f.Entry))
-                .ToList();
-
-            var armorUpgradesInBags = tokensAvailable
-                .Where(f => Enum.IsDefined(typeof(ArmorUpgradeItemIds), f.Entry))
-                .ToList();
-
-            var weaponSetsInBags = tokensAvailable
-                .Where(f => Enum.IsDefined(typeof(WeaponSetItemIds), f.Entry))
-                .ToList();
-
-            var weaponUpgradesInBags = tokensAvailable
-                .Where(f => Enum.IsDefined(typeof(WeaponUpgradeItemIds), f.Entry))
-                .ToList();
-
-            return new Result(ActionResult.Running,
-                new Tuple<WoWItem, Follower>(tokensAvailable.FirstOrDefault(), numberFollowersAvailable.FirstOrDefault()));
-        }
-
-        public enum ArmorSetItemIds
-        {
-            WarRavagedArmorSet = 114807,
-            BlackRockArmorSet = 114806,
-            GoredrenchedArmorSet = 114746
-        }
-
-        public enum ArmorUpgradeItemIds
-        {
-            BracedArmorEnhancement = 114745,
-            FortifiedArmorEnhancement = 114808,
-            HeavilyReinforcedArmorEnhancement = 114822
-        }
-
-        public enum WeaponSetItemIds
-        {
-            WarRavagedWeaponry = 114616,
-            BlackrockWeaponry = 114081,
-            GoredrenchedWeaponry = 114622
-        }
-
-        public enum WeaponUpgradeItemIds
-        {
-            BalancedWeaponEnhancement = 114128,
-            StrikingWeaponEnhancement = 114129,
-            PowerOverrunWeaponEnhancement = 114131
-        }
-
-        public static async Task<Result> PutGearOnFollower(object obj)
-        {
-            var inventoryAndFollower = obj as Tuple<WoWItem, Follower>;
-
-            if(inventoryAndFollower == null)
-            {
-                GarrisonButler.Diagnostic("[Followers] Passed in obj is null.");
-                return new Result(ActionResult.Failed);
-            }
-
-            var token = inventoryAndFollower.Item1;
-            var follower = inventoryAndFollower.Item2;
-
-            if (token == null)
-            {
-                GarrisonButler.Diagnostic("[Followers] Token is null.");
-                return new Result(ActionResult.Failed);
-            }
-
-            if (follower == null)
-            {
-                GarrisonButler.Diagnostic("[Followers] Follower is null.");
-                return new Result(ActionResult.Failed);
-            }
-
-            if (await MoveToTable())
-                return new Result(ActionResult.Running);
-
-            if (!InterfaceLua.IsGarrisonFollowersTabVisible())
-            {
-                GarrisonButler.Diagnostic("[Followers] Followers tab not visible, clicking.");
-                InterfaceLua.ClickTabFollowers();
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonFollowersTabVisible))
-                {
-                    GarrisonButler.Warning("[Followers] Couldn't display GarrisonFollowerTab.");
-                    return new Result(ActionResult.Running);
-                }
-            }
-
-            //if (!InterfaceLua.IsGarrisonFollowerVisible())
-            //{
-            //    GarrisonButler.Diagnostic("Follower not visible, opening follower: "
-            //                              + follower.FollowerId + " (" + follower.Name + ")");
-            //    InterfaceLua.OpenFollower(follower);
-            //    if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonFollowerVisible))
-            //    {
-            //        GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame.");
-            //        return new Result(ActionResult.Running);
-            //    }
-            //}
-            //else if (!InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId))
-            //{
-            //    GarrisonButler.Diagnostic("Follower not visible or not valid, close and then opening follower: " +
-            //                              follower.FollowerId + " - " + follower.Name);
-            //    //InterfaceLua.ClickCloseFollower();
-            //    InterfaceLua.OpenFollower(follower);
-            //    if (
-            //        !await
-            //            Buddy.Coroutines.Coroutine.Wait(2000,
-            //                () => InterfaceLua.IsGarrisonFollowerVisibleAndValid(follower.FollowerId)))
-            //    {
-            //        GarrisonButler.Warning("Couldn't display GarrisonFollowerFrame or wrong follower opened.");
-            //        return new Result(ActionResult.Running);
-            //    }
-            //}
-
-            GarrisonButler.Diagnostic("Adding item {0} ({1}) to follower {2} ({3}) with item level {4}", token.Entry, token.Name, follower.FollowerId, follower.Name, follower.ItemLevel);
-            await InterfaceLua.UseItemOnFollower(token, follower.UniqueId);
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
-
-            RefreshFollowers(true);
-            RefreshMissions(true);
-            return new Result(ActionResult.Refresh);
-        }
-
-        //public static async Task<Result> HandleTableAndMissionInterface()
-        //{
-            
-        //}
-
-        public static async Task<Result> StartMission(object obj)
-        {
-            var missionToStart = obj as Tuple<Mission, Follower[]>;
-            if (missionToStart == null)
-                return new Result(ActionResult.Failed);
-
-            if (await MoveToTable())
-                return new Result(ActionResult.Running);
-
-            if (!InterfaceLua.IsGarrisonMissionTabVisible())
-            {
-                GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
-                InterfaceLua.ClickTabMission();
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionTabVisible))
-                {
-                    GarrisonButler.Warning("Couldn't display GarrisonMissionTab.");
-                    return new Result(ActionResult.Running);
-                }
-            }
-            if (!InterfaceLua.IsGarrisonMissionVisible())
-            {
-                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId +
-                                          " - " +
-                                          missionToStart.Item1.Name);
-                InterfaceLua.OpenMission(missionToStart.Item1);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
-                {
-                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
-                    return new Result(ActionResult.Running);
-                }
-            }
-            else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
-            {
-                GarrisonButler.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
-                                          missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
-                InterfaceLua.ClickCloseMission();
-                InterfaceLua.OpenMission(missionToStart.Item1);
-                if (
-                    !await
-                        Buddy.Coroutines.Coroutine.Wait(2000,
-                            () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
-                {
-                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
-                    return new Result(ActionResult.Running);
-                }
-            }
-            GarrisonButler.Diagnostic("Adding followers to mission: " + missionToStart.Item1.Name);
-            missionToStart.Item2.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
-            await missionToStart.Item1.AddFollowersToMission(missionToStart.Item2.ToList());
-            InterfaceLua.StartMission(missionToStart.Item1);
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
-            InterfaceLua.ClickCloseMission();
-            RefreshFollowers(true);
-            RefreshMissions(true);
-            return new Result(ActionResult.Refresh);
-        }
-
-
-        public static async Task<bool> MoveToTable()
-        {
-            var tableForLoc = default(WoWObject);
-            if (_tablePosition == WoWPoint.Empty)
-            {
-                tableForLoc = MissionLua.GetCommandTableOrDefault();
-                if (tableForLoc != default(WoWGameObject))
-                {
-                    GarrisonButler.Diagnostic("Found Command table location, not using default anymore.");
-                    _tablePosition = tableForLoc.Location;
-                }
-            }
-
-            if (_tablePosition != WoWPoint.Empty)
-            {
-                if (InterfaceLua.IsGarrisonMissionFrameOpen())
-                    return false;
-
-                tableForLoc = MissionLua.GetCommandTableOrDefault();
-                if (tableForLoc != default(WoWGameObject))
-                {
-                    if ((await MoveToInteract(tableForLoc)).Status == ActionResult.Running)
-                        return true;
-                    if (tableForLoc.WithinInteractRange)
-                    {
-                        WoWMovement.MoveStop();
-                        tableForLoc.Interact();
-                        GarrisonButler.Diagnostic("[Missions] Interacting with mission table.");
-                        return true;
-                    }
-                    GarrisonButler.Diagnostic("[Missions] Can't interaction with mission table, not in range!");
-                    GarrisonButler.Diagnostic("[Missions] Table at: {0}", tableForLoc.Location);
-                    GarrisonButler.Diagnostic("[Missions] Me at: {0}", Me.Location);
-                }
-                else
-                {
-                    if ((await MoveTo(_tablePosition, "[Missions] Moving to command table")).Status ==
-                        ActionResult.Running)
-                        return true;
-                }
-            }
-            else
-            {
-                if (
-                    (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table"))
-                        .Status ==
-                    ActionResult.Running)
-                    return true;
-            }
-
-            if (InterfaceLua.IsGarrisonMissionFrameOpen())
-                return false;
-
-            var table = MissionLua.GetCommandTableOrDefault();
-            if (table == default(WoWObject))
-            {
-                GarrisonButler.Diagnostic("[Missions] Trouble getting command table from LUA.");
-                return false;
-            }
-
-            try
-            {
-                table.Interact();
-                await CommonCoroutines.SleepForLagDuration();
-            }
-            catch (Exception e)
-            {
-                if (e is CoroutineStoppedException)
-                    throw;
-
-                GarrisonButler.Warning(e.ToString());
-            }
-            return true;
-        }
-
-        private static async Task<Result> CanRunTurnInMissions()
-        {
-            var canRun = GaBSettings.Get().CompletedMissions && MissionLua.GetNumberCompletedMissions() != 0;
-            return canRun
-                ? new Result(ActionResult.Running)
-                : new Result(ActionResult.Failed);
-        }
-
-
-        public static async Task<Result> DoTurnInCompletedMissions(object o)
-        {
-            GarrisonButler.Log("Found " + MissionLua.GetNumberCompletedMissions() + " completed missions to turn in.");
-            // are we at the action table?
-            if (await MoveToTable())
-                return new Result(ActionResult.Running);
-
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
-            MissionLua.TurnInAllCompletedMissions();
-            //RestoreCompletedMission = true;
-            // Restore UI
-            Lua.DoString("GarrisonMissionFrame.MissionTab.MissionList.CompleteDialog:Hide();" +
-                         "GarrisonMissionFrame.MissionComplete:Hide();" +
-                         "GarrisonMissionFrame.MissionCompleteBackground:Hide();" +
-                         "GarrisonMissionFrame.MissionComplete.currentIndex = nil;" +
-                         "GarrisonMissionFrame.MissionTab:Show();" +
-                         "GarrisonMissionList_UpdateMissions();");
-
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
-            _turnInMissionsTriggered = false;
-            RefreshFollowers(true);
-            RefreshMissions(true);
-            return new Result(ActionResult.Refresh);
-        }
-
-        public static void GARRISON_MISSION_STARTED(object sender, LuaEventArgs args)
-        {
-            GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED");
-            //GarrisonButler.Diagnostic("LuaEvent: GARRISON_MISSION_STARTED - Removing from ToStart mission " + missionId);
-            //ToStart.RemoveAll(m => m.Key.MissionId == missionId);
-        }
-
-        public static ActionHelpers.ActionsSequence InitializeMissionsCoroutines()
-        {
-            // Initializing coroutines
-            GarrisonButler.Diagnostic("Initialization Missions coroutines...");
-            var missionsActionsSequence = new ActionHelpers.ActionsSequence();
-
-            // Check for tokens and use them is available
-            // Armor : http://www.wowhead.com/item=120301/armor-enhancement-token
-            missionsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer(
-                    UseItemInbags,
-                    async () =>
-                    {
-                        var canUse = CanUseItemInBags(120301)();
-                        return
-                            new Result(canUse.Item1
-                                ? ActionResult.Running
-                                : ActionResult.Failed, canUse.Item2);
-                    }, 0, 0));
-            // Weapon: http://www.wowhead.com/item=120302/weapon-enhancement-token
-            missionsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer(
-                    UseItemInbags,
-                    async () =>
-                    {
-                        var canUse = CanUseItemInBags(120302)();
-                        return
-                            new Result(canUse.Item1
-                                ? ActionResult.Running
-                                : ActionResult.Failed, canUse.Item2);
-                    }, 0, 0));
-
-            // DoTurnInCompletedMissions
-            missionsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer(DoTurnInCompletedMissions, CanRunTurnInMissions, 1000, 1000));
-
-            //// StartMissions
-            missionsActionsSequence.AddAction(
-                new ActionHelpers.ActionOnTimer(StartMission, CanRunStartMission, 3000, 30000));
-
-            // Put gear on followers
-            //missionsActionsSequence.AddAction(
-            //    new ActionHelpers.ActionOnTimer(PutGearOnFollower, CanRunPutGearOnFollower));
-
-            GarrisonButler.Diagnostic("Initialization Missions coroutines done!");
-            return missionsActionsSequence;
+            return new Tuple<List<Tuple<Mission, Follower[]>>, long, int, double>(toStart, combosTried, acceptedCombos,
+                totalSuccessChance);
         }
     }
 }

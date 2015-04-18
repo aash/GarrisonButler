@@ -17,7 +17,7 @@ Version: 0.7.0
 Original Author: Google, Inc.
 Date Obtained: 5-Mar-2015
 Obtained from: https://github.com/angular/material/
-License: The author explicitly made this script available under the MIT License as documented here: https://github.com/angular/material/blob/master/LICENSE
+License: The author explicitly made this script available under the MIT License as documented here: https://github.com/angular/material/blob/master/License
 
 Item: UI Bootstrap
 Version: 0.12.0
@@ -36,15 +36,17 @@ Item: Newtonsoft.Json
 Original Author: James Newton-King
 Date Obtained: 5-Mar-2015
 Obtained from: https://github.com/JamesNK/Newtonsoft.Json/
-License: The author explicitly made this script available under the MIT License as documented here: https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md
+License: The author explicitly made this script available under the MIT License as documented here: https://github.com/JamesNK/Newtonsoft.Json/blob/master/License.md
 
 
 Item: Store graphical content 1 - Background used on store description
 Original Author: Sophia Hilmar
 Obtained from: http://pixabay.com/fr/sterling-ch%C3%A2teau-%C3%A9cosse-sterling-202103/
-LIcense: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication http://creativecommons.org/publicdomain/zero/1.0/
+License: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication http://creativecommons.org/publicdomain/zero/1.0/
 
 Item: Store graphical content 2
 Original Author: OpenClips
 Obtained from: http://pixabay.com/fr/butler-salle-%C3%A0-manger-le-d%C3%AEner-159811/
-LIcense: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication http://creativecommons.org/publicdomain/zero/1.0/
+License: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication http://creativecommons.org/publicdomain/zero/1.0/
+
+Other graphical content not explicited above are either original or derivative worked created by the developper.

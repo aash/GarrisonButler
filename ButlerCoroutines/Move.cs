@@ -15,7 +15,6 @@ namespace GarrisonButler.ButlerCoroutines
     partial class ButlerCoroutine
     {
         private static string _oldDestMessage;
-        private static MoveResult _lastMoveResult;
 
 // ReSharper disable once CSharpWarnings::CS1998
         public static async Task<Result> MoveTo(WoWPoint destination, string destinationMessage = null)
@@ -26,7 +25,7 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Log(destinationMessage);
             }
 
-            _lastMoveResult = Navigator.MoveTo(destination);
+            var _lastMoveResult = Navigator.MoveTo(destination);
 
             Navigator.GetRunStatusFromMoveResult(_lastMoveResult);
             switch (_lastMoveResult)
@@ -79,6 +78,7 @@ namespace GarrisonButler.ButlerCoroutines
             GarrisonButler.Diagnostic("[MoveToInteract] Reached {0}", woWObject.SafeName);
             return new Result(ActionResult.Done);
         }
+
 
         public static float GetGroundZ(WoWPoint p)
         {

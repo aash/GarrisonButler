@@ -52,7 +52,7 @@ namespace GarrisonButler.LuaObjects
         {
             var currentStarted = building.ShipmentsTotal;
             var lua = @"C_Garrison.RequestShipmentCreation();";
-            for (int tryCount = 0; tryCount < Building.StartWorkOrderMaxTries; tryCount++)
+            for (int tryCount = 1; tryCount <= Building.StartWorkOrderMaxTries; tryCount++)
             {
                 Lua.DoString(lua);
                 await CommonCoroutines.SleepForRandomReactionTime();
@@ -77,7 +77,7 @@ namespace GarrisonButler.LuaObjects
             var lua = @"C_Garrison.RequestShipmentCreation(GarrisonCapacitiveDisplayFrame.available);";
 
             Lua.DoString(lua);
-            await CommonCoroutines.SleepForRandomReactionTime();
+            await CommonCoroutines.SleepForLagDuration();
 
             if (await Buddy.Coroutines.Coroutine.Wait(5000, () =>
             {
