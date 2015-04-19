@@ -213,7 +213,7 @@ namespace GarrisonButler.ButlerCoroutines
                     return new Result(ActionResult.Failed);
 
                 var res = await UseItemInbags(wowItem);
-                if (res.Status == ActionResult.Done && conditionExit != null)
+                if (res.State == ActionResult.Done && conditionExit != null)
                     await Buddy.Coroutines.Coroutine.Wait(waitTimeCondition, conditionExit);
 
                 return res;

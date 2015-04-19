@@ -45,9 +45,9 @@ namespace GarrisonButler.ButlerCoroutines
                 return new Result(ActionResult.Failed, "Failed to get an item to disenchant.");
             }
             var result = await itemToDisenchant.Disenchant();
-            if (result.Status == ActionResult.Failed)
+            if (result.State == ActionResult.Failed)
             {
-                GarrisonButler.Diagnostic("DisenchantItems failed to disenchant item {0}, error: {1}", itemToDisenchant.Name, result.content);
+                GarrisonButler.Diagnostic("DisenchantItems failed to disenchant item {0}, error: {1}", itemToDisenchant.Name, result.Content);
                 return new Result(ActionResult.Failed);
             }
             // Successfuly disenchanted, adding to ignore list

@@ -53,8 +53,11 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\CraftDraenicMortarAtNpc.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\InteractWithOrderNpc.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\GetMails.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\MailItems.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\PickUpOrderGarden.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\PickUpOrderMine.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\SalvageCrates.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\SellJunk.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\StartOrdersGarden.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\UseGearTokens.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\UseMiningPick.cs" />

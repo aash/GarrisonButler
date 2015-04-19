@@ -393,11 +393,11 @@ namespace GarrisonButler.ButlerCoroutines
 
                 // max start by user ?
                 var maxToStartCheck = await GetMaxShipmentToStart(building);
-                if (maxToStartCheck.Status == ActionResult.Running)
+                if (maxToStartCheck.State == ActionResult.Running)
                     return new Result(ActionResult.Refresh);
 
-                var maxToStart = maxToStartCheck.Status == ActionResult.Done
-                    ? (int) maxToStartCheck.content
+                var maxToStart = maxToStartCheck.State == ActionResult.Done
+                    ? (int) maxToStartCheck.Content
                     : 0;
 
                 if (maxToStart <= 0)
@@ -488,7 +488,7 @@ namespace GarrisonButler.ButlerCoroutines
                 return new Result(ActionResult.Running);
             }
 
-            if ((await MoveToInteract(unit)).Status == ActionResult.Running)
+            if ((await MoveToInteract(unit)).State == ActionResult.Running)
                 return new Result(ActionResult.Running);
 
             GarrisonButler.Diagnostic("[ShipmentStart,{0}] Interacting with ({1}).",
@@ -579,14 +579,14 @@ namespace GarrisonButler.ButlerCoroutines
 
             var resCheckMax = await GetMaxShipmentToStart(building);
 
-            if (resCheckMax.Status == ActionResult.Done)
-                maxToStart = (int) resCheckMax.content;
+            if (resCheckMax.State == ActionResult.Done)
+                maxToStart = (int) resCheckMax.Content;
 
             if (building.PrepOrder != null)
-                if ((await building.PrepOrder(maxToStart)).Status == ActionResult.Running)
+                if ((await building.PrepOrder(maxToStart)).State == ActionResult.Running)
                     return new Result(ActionResult.Running);
 
-            if ((await MoveToAndOpenCapacitiveFrame(building)).Status == ActionResult.Running)
+            if ((await MoveToAndOpenCapacitiveFrame(building)).State == ActionResult.Running)
                 return new Result(ActionResult.Running);
             
             // if we are in a situation where we can use the create all button
@@ -634,8 +634,8 @@ namespace GarrisonButler.ButlerCoroutines
                     //buildingShipment.Refresh();
                     building.Refresh();
                     var resCheck = await GetMaxShipmentToStart(building);
-                    var max = resCheck.Status == ActionResult.Done
-                        ? (int) resCheck.content
+                    var max = resCheck.State == ActionResult.Done
+                        ? (int) resCheck.Content
                         : 0;
                     if (max == 0)
                     {
@@ -668,12 +668,12 @@ namespace GarrisonButler.ButlerCoroutines
             var maxToStart = maxInProgress - building.ShipmentsTotal;
 
             var canCompleteOrder = await building.CanCompleteOrder();
-            if (canCompleteOrder.Status == ActionResult.Running)
+            if (canCompleteOrder.State == ActionResult.Running)
                 return canCompleteOrder;
 
             int maxCanComplete = 0;
-            if (canCompleteOrder.Status == ActionResult.Done)
-                maxCanComplete = (int)canCompleteOrder.content;
+            if (canCompleteOrder.State == ActionResult.Done)
+                maxCanComplete = (int)canCompleteOrder.Content;
 
             maxToStart = Math.Min(maxCanComplete, maxToStart);
             GarrisonButler.Diagnostic(
@@ -690,12 +690,12 @@ namespace GarrisonButler.ButlerCoroutines
             var maxWishedToStart = maxInProgress - building.ShipmentsTotal;
 
             var canCompleteOrder = await building.CanCompleteOrder();
-            if (canCompleteOrder.Status == ActionResult.Running)
+            if (canCompleteOrder.State == ActionResult.Running)
                 return false;
 
             int maxCanComplete = 0;
-            if (canCompleteOrder.Status == ActionResult.Done)
-                maxCanComplete = (int)canCompleteOrder.content;
+            if (canCompleteOrder.State == ActionResult.Done)
+                maxCanComplete = (int)canCompleteOrder.Content;
 
             var maxToStart = Math.Min(maxCanComplete, maxWishedToStart);
             GarrisonButler.Diagnostic(
@@ -800,7 +800,7 @@ namespace GarrisonButler.ButlerCoroutines
                          frame.GossipOptionEntries.Count <= 0)
                         && !timeoutTimer.IsFinished) || atLeastOne)
                 {
-                    if ((await MoveToInteract(pnj)).Status == ActionResult.Running)
+                    if ((await MoveToInteract(pnj)).State == ActionResult.Running)
                     {
                         await Buddy.Coroutines.Coroutine.Yield(); // return ActionResult.Running;
                         //ActionResult.Runing can happen in these cases:
@@ -892,7 +892,7 @@ namespace GarrisonButler.ButlerCoroutines
                 if (
                     (await
                         MoveTo(building.Location,
-                            "[ShipmentCollect] Moving to Building to search for shipment to pick up.")).Status ==
+                            "[ShipmentCollect] Moving to Building to search for shipment to pick up.")).State ==
                     ActionResult.Running)
                     return new Result(ActionResult.Running);
             }
@@ -900,7 +900,7 @@ namespace GarrisonButler.ButlerCoroutines
             {
                 var buildingShipment = _buildings.FirstOrDefault(b => b.Displayids.Contains(building.DisplayId));
                 var resultHarvesting = await HarvestWoWGameObjectCachedLocation(shipmentToCollect);
-                if (resultHarvesting.Status == ActionResult.Running)
+                if (resultHarvesting.State == ActionResult.Running)
                 {
                     if (buildingShipment != null) buildingShipment.Refresh();
                     return new Result(ActionResult.Running);
@@ -908,7 +908,7 @@ namespace GarrisonButler.ButlerCoroutines
 
                 //await ButlerLua.OpenLandingPage();
 
-                if (resultHarvesting.Status == ActionResult.Refresh)
+                if (resultHarvesting.State == ActionResult.Refresh)
                 {
                     //await ButlerLua.CloseLandingPage(); 
                     if (buildingShipment != null) buildingShipment.Refresh();

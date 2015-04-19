@@ -73,7 +73,7 @@ namespace GarrisonButler.ButlerCoroutines
             }
 
             if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
-                if ((await MoveToInteract(mailbox)).Status == ActionResult.Running)
+                if ((await MoveToInteract(mailbox)).State == ActionResult.Running)
                     return new Result(ActionResult.Running);
 
             mailbox.Interact();
@@ -120,7 +120,7 @@ namespace GarrisonButler.ButlerCoroutines
             // Get to the mailbox
             if (!MailFrame.Instance.IsVisible)
             {
-                if ((await MoveAndInteractWithMailbox()).Status == ActionResult.Running)
+                if ((await MoveAndInteractWithMailbox()).State == ActionResult.Running)
                     return new Result(ActionResult.Running);
             }
 
@@ -368,7 +368,7 @@ namespace GarrisonButler.ButlerCoroutines
                 }
 
                 if (Me.Location.Distance(mailbox.Location) > mailbox.InteractRange)
-                    if ((await MoveToInteract(mailbox)).Status == ActionResult.Running)
+                    if ((await MoveToInteract(mailbox)).State == ActionResult.Running)
                         return new Result(ActionResult.Running);
 
                 mailbox.Interact();

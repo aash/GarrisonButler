@@ -201,7 +201,7 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic(">> Follower: " + f.Name);
                 GarrisonButler.Diagnostic("  Quality: " + f.Quality);
                 GarrisonButler.Diagnostic("  Level: " + f.Level);
-                GarrisonButler.Diagnostic("  Status: " + f.Status);
+                GarrisonButler.Diagnostic("  State: " + f.Status);
             });
 
             // STEP 5 - Gather GarrisonButler reward information
@@ -420,7 +420,7 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Diagnostic(">> Follower: " + f.Name);
                 GarrisonButler.Diagnostic("  Quality: " + f.Quality);
                 GarrisonButler.Diagnostic("  Level: " + f.Level);
-                GarrisonButler.Diagnostic("  Status: " + f.Status);
+                GarrisonButler.Diagnostic("  State: " + f.Status);
             });
 
             if (slots == 0)
@@ -429,7 +429,7 @@ namespace GarrisonButler.ButlerCoroutines
                 return toStart;
             }
 
-            // Status 5 is INACTIVE
+            // State 5 is INACTIVE
             // Make sure there's at least 1 follower
             // and make sure the number of active followers is less than 20
             if (numFollowers == 0 || followers.Count(f => f.Status.ToInt32() != 5) <= (_buildings.Any(b => b.Id == (int) global::GarrisonButler.Buildings.BarracksLvl3) ? 25 : 20))
@@ -1286,7 +1286,7 @@ namespace GarrisonButler.ButlerCoroutines
                 tableForLoc = MissionLua.GetCommandTableOrDefault();
                 if (tableForLoc != default(WoWGameObject))
                 {
-                    if ((await MoveToInteract(tableForLoc)).Status == ActionResult.Running)
+                    if ((await MoveToInteract(tableForLoc)).State == ActionResult.Running)
                         return true;
                     if (tableForLoc.WithinInteractRange)
                     {
@@ -1301,7 +1301,7 @@ namespace GarrisonButler.ButlerCoroutines
                 }
                 else
                 {
-                    if ((await MoveTo(_tablePosition, "[Missions] Moving to command table")).Status ==
+                    if ((await MoveTo(_tablePosition, "[Missions] Moving to command table")).State ==
                         ActionResult.Running)
                         return true;
                 }
@@ -1310,7 +1310,7 @@ namespace GarrisonButler.ButlerCoroutines
             {
                 if (
                     (await MoveTo(Me.IsAlliance ? TableAlliance : TableHorde, "[Missions] Moving to command table"))
-                        .Status ==
+                        .State ==
                     ActionResult.Running)
                     return true;
             }

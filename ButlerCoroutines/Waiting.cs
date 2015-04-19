@@ -54,7 +54,7 @@ namespace GarrisonButler.ButlerCoroutines
             }
 
             if ((await
-                MoveTo(waitingSpot, "Moving to random waiting spot next to mission table.")).Status ==
+                MoveTo(waitingSpot, "Moving to random waiting spot next to mission table.")).State ==
                 ActionResult.Running)
                 return new Result(ActionResult.Running);
 
@@ -100,10 +100,9 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Log(
                     "You Garrison has been taken care of, bot safe. AutoAngler with Mixed Mode has been detected, moving to fishing area. Happy catch! :)");
                 if (!(Me.Location.Distance(fishingSpot) > 2)) return true;
-                if ((await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.")).Status == ActionResult.Running)
+                if ((await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.")).State == ActionResult.Running)
                     return true;
             }
-
             return true;
         }
 

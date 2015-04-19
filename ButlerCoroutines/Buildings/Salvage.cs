@@ -88,7 +88,7 @@ namespace GarrisonButler.ButlerCoroutines
             // unit when it is within 2 yards of the location.  Need to stop and dismount earlier,
             // then call "MoveTo" again after the dismount logic to finish the movement by foot
             if (Me.Location.Distance(unit.Location) > 10)
-                if ((await MoveTo(unit.Location)).Status == ActionResult.Running)
+                if ((await MoveTo(unit.Location)).State == ActionResult.Running)
                     return new Result(ActionResult.Running);
 
             if (Me.Mounted)
@@ -97,7 +97,7 @@ namespace GarrisonButler.ButlerCoroutines
                 await CommonCoroutines.SleepForLagDuration();
             }
 
-            if ((await MoveTo(unit.Location)).Status == ActionResult.Running)
+            if ((await MoveTo(unit.Location)).State == ActionResult.Running)
                 return new Result(ActionResult.Running);
 
             foreach (var salvageCrate in salvageCrates)

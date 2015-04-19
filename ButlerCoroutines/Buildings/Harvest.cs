@@ -25,7 +25,7 @@ namespace GarrisonButler.ButlerCoroutines
                 BotPoi.Clear();
             }
 
-            if ((await MoveToInteract(toHarvest)).Status == ActionResult.Running)
+            if ((await MoveToInteract(toHarvest)).State == ActionResult.Running)
                 return true;
 
             if (node != toHarvest)
@@ -89,7 +89,7 @@ namespace GarrisonButler.ButlerCoroutines
             // STEP 2 - Make sure we are within interact range of the location of toHarvest
             if (_cachedToHarvestLocation != WoWPoint.Empty &&
                 (Me.Location.DistanceSqr(_cachedToHarvestLocation) > _cachedInteractRangeSqr))
-                if ((await MoveToInteract(_cachedToHarvestLocation, _cachedInteractRangeSqr)).Status ==
+                if ((await MoveToInteract(_cachedToHarvestLocation, _cachedInteractRangeSqr)).State ==
                     ActionResult.Running)
                     // returns false for Failed and ReachedDestination
                     return new Result(ActionResult.Running);

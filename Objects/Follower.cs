@@ -115,7 +115,7 @@ namespace GarrisonButler
             var follower = "";
             follower += "  FollowerId: " + FollowerId + "\n";
             follower += "  Name: " + Name + "\n";
-            follower += "  Status: " + Status + "\n";
+            follower += "  State: " + Status + "\n";
             follower += "  Class: " + Class + "\n";
             follower += "  Quality: " + Quality + "\n";
             follower += "  Level: " + Level + "\n";

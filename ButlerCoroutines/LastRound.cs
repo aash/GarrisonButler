@@ -108,7 +108,7 @@ namespace GarrisonButler.ButlerCoroutines
             if (
                 (await
                     MoveTo(myLastRoundPoints[_lastRoundTemp],
-                        "Doing a last round to check if something was not too far to see before.")).Status ==
+                        "Doing a last round to check if something was not too far to see before.")).State ==
                 ActionResult.Running)
             {
                 return new Result(ActionResult.Running);

@@ -154,7 +154,7 @@ namespace GarrisonButler.ButlerCoroutines
             get { return _deathBehavior ?? (_deathBehavior = LevelBot.CreateDeathBehavior()); }
         }
 
-        private static Composite VendorBehavior
+        internal static Composite VendorBehavior
         {
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
         }
@@ -243,12 +243,12 @@ namespace GarrisonButler.ButlerCoroutines
                 if (await HbApi.StackAllItemsIfPossible())
                     return true;
 
-                if ((await SellJunkCoroutine()).Status == ActionResult.Running)
+                if ((await SellJunkCoroutine()).State == ActionResult.Running)
                     return true;
                 var shouldMail = await CanMailItem();
                 
-                if(shouldMail.Status == ActionResult.Running)
-                    if ((await MailItem(shouldMail.content)).Status == ActionResult.Running)
+                if(shouldMail.State == ActionResult.Running)
+                    if ((await MailItem(shouldMail.Content)).State == ActionResult.Running)
                         return true;
 
                 // Without a timer it will spam Alert messages over and over
@@ -397,7 +397,7 @@ namespace GarrisonButler.ButlerCoroutines
             if (await Combat.CombatRoutine())
                 return true;
 
-            if ((await VendorCoroutineWorkaround()).Status == ActionResult.Running)
+            if ((await VendorCoroutineWorkaround()).State == ActionResult.Running)
                 return true;
 
             if (await LootBehavior.ExecuteCoroutine())
@@ -450,7 +450,7 @@ namespace GarrisonButler.ButlerCoroutines
             ////// DEBUG TESTS
             ////if (!testDone)
             ////{
-            ////    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).Status == ActionResult.Running)
+            ////    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).State == ActionResult.Running)
             ////        return true;
             ////    testDone = true;
             ////    return true;
@@ -465,7 +465,7 @@ namespace GarrisonButler.ButlerCoroutines
             //// Heavier coroutines on timer
             ////GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
             //var resultActions = await _mainSequence.ExecuteAction();
-            //if (resultActions.Status == ActionResult.Running || resultActions.Status == ActionResult.Refresh)
+            //if (resultActions.State == ActionResult.Running || resultActions.State == ActionResult.Refresh)
             //{
             //    //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
             //    return true;

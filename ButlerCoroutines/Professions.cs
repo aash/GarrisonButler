@@ -122,7 +122,7 @@ namespace GarrisonButler.ButlerCoroutines
                 return new Result(await MoveToMine());
             }
             GarrisonButler.Log("[Profession] Current CD requires an anvil, moving to the safest one.");
-            if ((await MoveToInteract(anvil)).Status == ActionResult.Running)
+            if ((await MoveToInteract(anvil)).State == ActionResult.Running)
                 return new Result(ActionResult.Running);
 
             if (await DoCd(daily))

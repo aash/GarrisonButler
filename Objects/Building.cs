@@ -441,7 +441,7 @@ namespace GarrisonButler
                         return new Result(ActionResult.Running);
                     }
 
-                    if ((await ButlerCoroutine.MoveToInteract(unit)).Status == ActionResult.Running)
+                    if ((await ButlerCoroutine.MoveToInteract(unit)).State == ActionResult.Running)
                         return new Result(ActionResult.Running);
 
                     unit.Interact();
@@ -1256,7 +1256,7 @@ namespace GarrisonButler
                 || GaBSettings.Get().LastCheckTradingPost < lastReset)
             {
                 // moving to pnj
-                var moveResult = (await ButlerCoroutine.MoveToAndOpenCapacitiveFrame(this)).Status;
+                var moveResult = (await ButlerCoroutine.MoveToAndOpenCapacitiveFrame(this)).State;
                 if (moveResult == ActionResult.Running)
                 {
                     return new Result(ActionResult.Running);

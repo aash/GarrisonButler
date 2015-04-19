@@ -50,7 +50,7 @@ namespace GarrisonButler.ButlerCoroutines
             public override async Task<Result> ExecuteAction()
             {
                 //GarrisonButler.Diagnostic("Execute ExecuteAction.");
-                if (LastResult.Status == ActionResult.Done && !WaitTimer.IsFinished)
+                if (LastResult.State == ActionResult.Done && !WaitTimer.IsFinished)
                 {
                     //GarrisonButler.Diagnostic("Execute ExecuteAction: Return false : {0} || {1}", !_lastResult, !_waitTimer.IsFinished);
                     return new Result(ActionResult.Done);
@@ -109,45 +109,45 @@ namespace GarrisonButler.ButlerCoroutines
             public override async Task<Result> ExecuteAction()
             {
                 // Check time between a recheck once done
-                if ((LastResult.Status == ActionResult.Done || LastResult.Status == ActionResult.Failed)
+                if ((LastResult.State == ActionResult.Done || LastResult.State == ActionResult.Failed)
                     && !WaitTimerAction.IsFinished)
                     return new Result(ActionResult.Done);
 
                 // Check time while running to not overload
-                if (LastResult.Status == ActionResult.Running && !WaitTimerAntiSpamRunning.IsFinished)
+                if (LastResult.State == ActionResult.Running && !WaitTimerAntiSpamRunning.IsFinished)
                     return new Result(ActionResult.Running);
 
                 WaitTimerAntiSpamRunning.Reset();
 
                 // Check action condition, refresh if asked, if not yet ran once, if timer is finished
-                if (LastResult.Status == ActionResult.Refresh
-                    || LastResult.Status == ActionResult.Init
+                if (LastResult.State == ActionResult.Refresh
+                    || LastResult.State == ActionResult.Init
                     || WaitTimerCondition.IsFinished)
                 {
                     ResCondition = await Condition();
-                    if (ResCondition.Status == ActionResult.Refresh)
+                    if (ResCondition.State == ActionResult.Refresh)
                         return new Result(ActionResult.Running);
                     WaitTimerCondition.Reset();
                 }
 
                 // If condition of action verified
-                if (ResCondition.Status == ActionResult.Running)
+                if (ResCondition.State == ActionResult.Running)
                 {
                     // Running preactions with a tick between some
                     foreach (var preAction in PreActions)
                     {
-                        if ((await preAction.ExecuteAction()).Status == ActionResult.Running)
+                        if ((await preAction.ExecuteAction()).State == ActionResult.Running)
                             await Buddy.Coroutines.Coroutine.Yield();
                     }
                     // Running action
-                    LastResult = await CustomAction(ResCondition.content);
+                    LastResult = await CustomAction(ResCondition.Content);
                 }
                 else
-                    LastResult.Status = ActionResult.Done;
+                    LastResult.State = ActionResult.Done;
 
                 WaitTimerAction.Reset();
                 return
-                    (LastResult.Status == ActionResult.Refresh || LastResult.Status == ActionResult.Running)
+                    (LastResult.State == ActionResult.Refresh || LastResult.State == ActionResult.Running)
                         ? new Result(ActionResult.Running)
                         : new Result(ActionResult.Done);
             }
@@ -164,46 +164,46 @@ namespace GarrisonButler.ButlerCoroutines
             public override async Task<Result> ExecuteAction()
             {
                 // Check time between a recheck once done
-                if ((LastResult.Status == ActionResult.Done || LastResult.Status == ActionResult.Failed)
+                if ((LastResult.State == ActionResult.Done || LastResult.State == ActionResult.Failed)
                     && !WaitTimerAction.IsFinished)
                     return new Result(ActionResult.Done);
 
                 // Check time while running to not overload
-                if (LastResult.Status == ActionResult.Running && !WaitTimerAntiSpamRunning.IsFinished)
+                if (LastResult.State == ActionResult.Running && !WaitTimerAntiSpamRunning.IsFinished)
                     return new Result(ActionResult.Running);
 
                 WaitTimerAntiSpamRunning.Reset();
 
                 // Check action condition, refresh if asked, if not yet ran once, if done and timer finished.
-                if (LastResult.Status == ActionResult.Refresh
-                    || LastResult.Status == ActionResult.Init
-                    || (LastResult.Status == ActionResult.Done))
+                if (LastResult.State == ActionResult.Refresh
+                    || LastResult.State == ActionResult.Init
+                    || (LastResult.State == ActionResult.Done))
                 {
                     ResCondition = await Condition();
                     WaitTimerCondition.Reset();
-                    if (ResCondition.Status == ActionResult.Refresh)
+                    if (ResCondition.State == ActionResult.Refresh)
                         return ResCondition;
                 }
 
                 if (WaitTimerCondition.IsFinished)
                 {
                     var tempRes = await Condition();
-                    if (tempRes.Status == ResCondition.Status)
+                    if (tempRes.State == ResCondition.State)
                         ResCondition = tempRes;
                     WaitTimerCondition.Reset();
                 }
 
                 // If condition of action verified
-                if (ResCondition.Status == ActionResult.Running)
+                if (ResCondition.State == ActionResult.Running)
                 {
                     // Running preactions with a tick between some
                     foreach (var preAction in PreActions)
                     {
-                        if ((await preAction.ExecuteAction()).Status == ActionResult.Running)
+                        if ((await preAction.ExecuteAction()).State == ActionResult.Running)
                             await Buddy.Coroutines.Coroutine.Yield();
                     }
                     // Running action
-                    LastResult = await CustomAction(ResCondition.content);
+                    LastResult = await CustomAction(ResCondition.Content);
                 }
                 else
                     LastResult = new Result(ActionResult.Done);
@@ -212,7 +212,7 @@ namespace GarrisonButler.ButlerCoroutines
 
                 // To do for all actions class - add max failed attempts. 
                 return
-                    (LastResult.Status == ActionResult.Refresh || LastResult.Status == ActionResult.Running)
+                    (LastResult.State == ActionResult.Refresh || LastResult.State == ActionResult.Running)
                         ? new Result(ActionResult.Running)
                         : new Result(ActionResult.Done);
             }
@@ -258,7 +258,7 @@ namespace GarrisonButler.ButlerCoroutines
                         continue;
 
                     var res = await action.Condition();
-                    if (res.Status == ActionResult.Running)
+                    if (res.State == ActionResult.Running)
                     {
                         GarrisonButler.Diagnostic("[ActionSequence] Found an action to fire.");
                         return true;
@@ -276,7 +276,7 @@ namespace GarrisonButler.ButlerCoroutines
                     //count++;
                     //GarrisonButler.Diagnostic("ActionSequence.ExecuteAction():   #" + count + " - " + actionBasic.ToString());
                     var result = await actionBasic.ExecuteAction();
-                    switch (result.Status)
+                    switch (result.State)
                     {
                         case ActionResult.Running:
                             return new Result(ActionResult.Running);
@@ -291,21 +291,26 @@ namespace GarrisonButler.ButlerCoroutines
 
     public class Result
     {
-        public Result(ActionResult status, object result = null)
+        public Result(ActionResult state, object result = null)
         {
-            Status = status;
-            content = result;
+            State = state;
+            Content = result;
         }
 
         public Result(Result result)
         {
-            Status = result.Status;
-            content = result.content;
+            State = result.State;
+            Content = result.Content;
         }
 
-        public ActionResult Status { get; set; }
+        public ActionResult State { get; set; }
 
-        public object content { get; set; }
+        public object Content { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} - {1}", State, Content);
+        }
     }
 
     public enum ActionResult

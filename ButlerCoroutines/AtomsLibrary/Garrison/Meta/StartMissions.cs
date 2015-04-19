@@ -52,7 +52,10 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
             
             _followers = FollowersLua.GetAllFollowers();
             _missions = MissionLua.GetAllAvailableMissions();
-            ShouldRepeat = true;
+            ShouldRepeat = false;
+
+            // Events to subscribe to  == what would make the requirements be positive now? 
+            // A new mission has been turned in
         }
 
         public override bool RequirementsMet()
@@ -66,18 +69,31 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
             //RefreshMissions();
             //RefreshFollowers();
 
-            _followers = FollowersLua.GetAllFollowers();
-            _missions = MissionLua.GetAllAvailableMissions();
+            return true;
+        }
+
+        public override bool IsFulfilled()
+        {
+            var numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
+
+            // Is there mission available to start
+            if (numberMissionAvailable == 0)
+            {
+                GarrisonButler.Diagnostic("[Missions] No missions available to start.");
+                return true;
+            }
 
             var garrisonRessources = BuildingsLua.GetGarrisonRessources();
             IEnumerable<Mission> missions = _missions.Where(m => m.Cost < garrisonRessources).ToList();
             if (!missions.Any())
             {
                 GarrisonButler.Diagnostic("[Missions] Not enough ressources to start a mission.");
-                return false;
+                return true;
             }
 
 
+            _followers = FollowersLua.GetAllFollowers();
+            _missions = MissionLua.GetAllAvailableMissions();
             // Enhanced Mission Logic
             if (GarrisonButler.IsIceVersion())
             {
@@ -95,7 +111,6 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                     if (match == null)
                         continue;
                     toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
-                    break; // let's not calculate all of them right now. 
                     followersTemp.RemoveAll(match.Contains);
                 }
             }
@@ -108,28 +123,11 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
             {
                 GarrisonButler.Diagnostic(mess);
             }
-            return toStart.Any();
-        }
-
-        public override bool IsFulfilled()
-        {
-
-            var numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
-
-            // Is there mission available to start
-            if (numberMissionAvailable == 0)
-            {
-                GarrisonButler.Diagnostic("[Missions] No missions available to start.");
-                return true;
-            }
-            return false;
+            return !toStart.Any();
         }
 
         public override async Task Action()
         {
-            if (toStart == null)
-                return; 
-
             if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
                 GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
@@ -141,41 +139,42 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 }
             }
 
-            var missionToStart = toStart.First();
-
-            if (!InterfaceLua.IsGarrisonMissionVisible())
+            foreach (var missionToStart in toStart)
             {
-                GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId +
-                                          " - " +
-                                          missionToStart.Item1.Name);
-                InterfaceLua.OpenMission(missionToStart.Item1);
-                if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
+                if (!InterfaceLua.IsGarrisonMissionVisible())
                 {
-                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
-                    return;
+                    GarrisonButler.Diagnostic("Mission not visible, opening mission: " + missionToStart.Item1.MissionId +
+                                              " - " +
+                                              missionToStart.Item1.Name);
+                    InterfaceLua.OpenMission(missionToStart.Item1);
+                    if (!await Buddy.Coroutines.Coroutine.Wait(2000, InterfaceLua.IsGarrisonMissionVisible))
+                    {
+                        GarrisonButler.Warning("Couldn't display GarrisonMissionFrame.");
+                        return;
+                    }
                 }
-            }
-            else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
-            {
-                GarrisonButler.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
-                                          missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
+                else if (!InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId))
+                {
+                    GarrisonButler.Diagnostic("Mission not visible or not valid, close and then opening mission: " +
+                                              missionToStart.Item1.MissionId + " - " + missionToStart.Item1.Name);
+                    InterfaceLua.ClickCloseMission();
+                    InterfaceLua.OpenMission(missionToStart.Item1);
+                    if (
+                        !await
+                            Buddy.Coroutines.Coroutine.Wait(2000,
+                                () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
+                    {
+                        GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
+                        return;
+                    }
+                }
+                GarrisonButler.Diagnostic("Adding followers to mission: " + missionToStart.Item1.Name);
+                missionToStart.Item2.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
+                await missionToStart.Item1.AddFollowersToMission(missionToStart.Item2.ToList());
+                InterfaceLua.StartMission(missionToStart.Item1);
+                await CommonCoroutines.SleepForRandomUiInteractionTime();
                 InterfaceLua.ClickCloseMission();
-                InterfaceLua.OpenMission(missionToStart.Item1);
-                if (
-                    !await
-                        Buddy.Coroutines.Coroutine.Wait(2000,
-                            () => InterfaceLua.IsGarrisonMissionVisibleAndValid(missionToStart.Item1.MissionId)))
-                {
-                    GarrisonButler.Warning("Couldn't display GarrisonMissionFrame or wrong mission opened.");
-                    return;
-                }
             }
-            GarrisonButler.Diagnostic("Adding followers to mission: " + missionToStart.Item1.Name);
-            missionToStart.Item2.ForEach(f => GarrisonButler.Diagnostic(" -> " + f.Name));
-            await missionToStart.Item1.AddFollowersToMission(missionToStart.Item2.ToList());
-            InterfaceLua.StartMission(missionToStart.Item1);
-            await CommonCoroutines.SleepForRandomUiInteractionTime();
-            InterfaceLua.ClickCloseMission();
 
             _followers = FollowersLua.GetAllFollowers();
             _missions = MissionLua.GetAllAvailableMissions();
@@ -295,7 +294,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 GarrisonButler.Diagnostic(">> Follower: " + f.Name);
                 GarrisonButler.Diagnostic("  Quality: " + f.Quality);
                 GarrisonButler.Diagnostic("  Level: " + f.Level);
-                GarrisonButler.Diagnostic("  Status: " + f.Status);
+                GarrisonButler.Diagnostic("  State: " + f.Status);
             });
 
             if (slots == 0)
@@ -304,7 +303,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 return toStart;
             }
 
-            // Status 5 is INACTIVE
+            // State 5 is INACTIVE
             // Make sure there's at least 1 follower
             // and make sure the number of active followers is less than 20
             if (numFollowers == 0 ||

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
@@ -1706,7 +1706,7 @@ angular.module('ui.bootstrap.dropdown', [])
             return scope.isOpen = arguments.length ? !!open : !scope.isOpen;
         };
 
-        // Allow other directives to watch status
+        // Allow other directives to watch State
         this.isOpen = function() {
             return scope.isOpen;
         };
