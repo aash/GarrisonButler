@@ -72,7 +72,7 @@ namespace GarrisonButler.ButlerCoroutines
         public static bool ReadyToSwitch;
 
         private static bool _restoreCompletedMission;
-        private static ActionHelpers.ActionsSequence _mainSequence;
+        //private static ActionHelpers.ActionsSequence _mainSequence;
 
         #region MixedModeTimers
 
@@ -159,68 +159,8 @@ namespace GarrisonButler.ButlerCoroutines
             get { return _vendorBehavior ?? (_vendorBehavior = LevelBot.CreateVendorBehavior()); }
         }
 
-        public static bool AutoLootDefaultValue { get; set; }
-
-        internal static void OnStart()
-        {
-            try
-            {
-                InitializeShipments();
-                GarrisonButler.Diagnostic("InitializeShipments");
-                InitializeMissions();
-                GarrisonButler.Diagnostic("InitializeMissions");
-
-                _mainSequence = new ActionHelpers.ActionsSequence();
-
-                _mainSequence.AddAction(
-                    new ActionHelpers.ActionOnTimer(UseItemInbagsWithTimer(60000, () => Me.IsInGarrison()),
-                        ShouldTpToGarrison,
-                        5000, 5000));
-
-                if (GarrisonButler.IsIceVersion())
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(GetMails, HasMails, 600000));
-
-                _mainSequence.AddAction(InitializeMineAndGarden());
-
-                if (GarrisonButler.IsIceVersion())
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(Enchanting.DisenchantItems, Enchanting.CanDisenchantItems, 1000,
-                        3000));
-
-                _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(DoDailyCd, CanRunDailies, 15000,
-                    3000));
-
-                _mainSequence.AddAction(InitializeBuildingsCoroutines());
-
-                _mainSequence.AddAction(InitializeMissionsCoroutines());
-
-                _mainSequence.AddAction(new ActionHelpers.ActionBasic(DoSalvages));
-
-                _mainSequence.AddAction(new ActionHelpers.ActionBasic(SellJunk));
-
-                if (GarrisonButler.IsIceVersion())
-                    _mainSequence.AddAction(new ActionHelpers.ActionOnTimer(MailItem, CanMailItem, 15000,
-                        1000));
-
-                _mainSequence.AddAction(new ActionHelpers.ActionBasic(LastRound));
-
-                _mainSequence.AddAction(new ActionHelpers.ActionBasic(Waiting));
-
-                LootTargeting.Instance.IncludeTargetsFilter += IncludeTargetsFilter;
-
-                if (InterfaceLua.IsSplashFrame())
-                    GarrisonButler.Log("OnStart(): Splash Frame was open, closing now");
-
-                InterfaceLua.CloseSplashFrame();
-            }
-            catch (Exception e)
-            {
-                if (e is CoroutineStoppedException)
-                    throw;
-
-                GarrisonButler.Warning(e.ToString());
-            }
-        }
-
+        private static bool AutoLootDefaultValue { get; set; }
+        
         private static readonly WaitTimer VendorCheckTimer = new WaitTimer(TimeSpan.FromSeconds(30));
         private static Profile _currentProfile;
         private static readonly WaitTimer CheckBagsFullTimer = new WaitTimer(TimeSpan.FromSeconds(15));
@@ -245,11 +185,14 @@ namespace GarrisonButler.ButlerCoroutines
 
                 if ((await SellJunkCoroutine()).State == ActionResult.Running)
                     return true;
-                var shouldMail = await CanMailItem();
+
+                // TODO Add mailing feature before saying bags are full 
+
+                //var shouldMail = await CanMailItem();
                 
-                if(shouldMail.State == ActionResult.Running)
-                    if ((await MailItem(shouldMail.Content)).State == ActionResult.Running)
-                        return true;
+                //if(shouldMail.State == ActionResult.Running)
+                //    if ((await MailItem(shouldMail.Content)).State == ActionResult.Running)
+                //        return true;
 
                 // Without a timer it will spam Alert messages over and over
                 // Should probably have a way to hook in to the "ok" button
@@ -268,6 +211,17 @@ namespace GarrisonButler.ButlerCoroutines
             return false;
         }
 
+        private static readonly WaitTimer RefreshBuildingsTimer = new WaitTimer(TimeSpan.FromMinutes(5));
+
+        public static void RefreshBuildings(bool forced = false)
+        {
+            if (!RefreshBuildingsTimer.IsFinished && !_buildings.IsNullOrEmpty() && !forced) return;
+
+            GarrisonButler.Log("Refreshing Buildings database.");
+
+            _buildings = BuildingsLua.GetAllBuildings();
+            RefreshBuildingsTimer.Reset();
+        }
         private static void CheckForVendors()
         {
             if (!VendorCheckTimer.IsFinished) return;
@@ -293,7 +247,7 @@ namespace GarrisonButler.ButlerCoroutines
             // get all visible vendors
             var vendors =
                 ObjectManager.GetObjectsOfTypeFast<WoWUnit>()
-                    .Where(u => u.IsVendor && Dijkstra.ClosestToNodes(u.Location).Distance(u.Location) < 5)
+                    .Where(u => u.IsVendor)
                     .GetEmptyIfNull();
             var units = vendors as WoWUnit[] ?? vendors.ToArray();
             foreach (
@@ -332,7 +286,7 @@ namespace GarrisonButler.ButlerCoroutines
                 _autoLootinit = false;
             }
             LootTargeting.Instance.IncludeTargetsFilter -= IncludeTargetsFilter;
-            _mainSequence = null;
+            //_mainSequence = null;
             //Navigator.NavigationProvider = NativeNavigation;
             //_customNavigation = null;
         }
@@ -412,98 +366,11 @@ namespace GarrisonButler.ButlerCoroutines
             if (await CheckBagsFull())
                 return true;
 
-
-            //StalkerEngine.Instance.Stalk();
             if (await Sequencer.Instance.Execute())
                 return true;
 
-
             return await JobDoneSwitch();
-
-
-            //// Record and set auto loot
-            //if (_autoLootinit == false)
-            //{
-            //    AutoLootDefaultValue = await ButlerLua.GetAutoLootValue();
-            //    ButlerLua.SetAutoLootValue(true);
-            //    _autoLootinit = true;
-            //}
-
-
-            if (_mainSequence == null)
-            {
-                GarrisonButler.Warning("ERROR: mainSequence NULL");
-                return false;
-            }
-            //// Bot will sleep after one full run waiting for new things to do
-            //// similar to behavior in MixedMode
-            //if (ReadyToSwitch)
-            //    if (!GarrisonButler.Instance.RequirementsMet)
-            //    {
-            //        await JobDoneSwitch();
-            //        return false;
-            //    }
-
-            //// Reset of mount vendor workaround
-            //_mountVendorTimeStart = default(DateTime);
-
-
-            ////// DEBUG TESTS
-            ////if (!testDone)
-            ////{
-            ////    if ((await MoveTo(new WoWPoint(1920.481, 76.45966, 33.48617))).State == ActionResult.Running)
-            ////        return true;
-            ////    testDone = true;
-            ////    return true;
-            ////}
-            ////else
-            ////{
-            ////    await MoveTo(new WoWPoint(1873.706, 83.12846, 79.72403));
-            ////    return true;
-            ////}
-
-
-            //// Heavier coroutines on timer
-            ////GarrisonButler.Diagnostic("Calling await mainSequence.ExecuteAction()");
-            //var resultActions = await _mainSequence.ExecuteAction();
-            //if (resultActions.State == ActionResult.Running || resultActions.State == ActionResult.Refresh)
-            //{
-            //    //GarrisonButler.Diagnostic("Returning true from mainSequence.ExecuteAction()");
-            //    return true;
-            //}
-
-            //ReadyToSwitch = true;
-            //return false;
         }
-
-        //private static void CheckNavigationSystem()
-        //{
-        //    if (_customNavigation == null)
-        //    {
-        //        NativeNavigation = Navigator.NavigationProvider;
-        //        _customNavigation = new NavigationGaB();
-        //    }
-        //    if (Me.IsInGarrison() && !CustomNavigationLoaded)
-        //    {
-        //        //Navigator.NavigationProvider = _customNavigation;
-        //        //GarrisonButler.Diagnostic("InitializationMove");
-        //    }
-        //    else if (!Me.IsInGarrison() && CustomNavigationLoaded)
-        //    {
-        //        Navigator.NavigationProvider = NativeNavigation;
-        //    }
-
-        //    if(CustomNavigationLoaded)
-        //        InitializationMove();
-        //}
-
-        private static async Task<Result> SellJunk()
-        {
-            if (GaBSettings.Get().ForceJunkSell) return await SellJunkCoroutine();
-            GarrisonButler.Diagnostic("[Vendor] Force junk behavior deactivated in User settings.");
-            return new Result(ActionResult.Done);
-        }
-
         private static async Task<Result> SellJunkCoroutine()
         {
             CheckForVendors();
@@ -537,22 +404,6 @@ namespace GarrisonButler.ButlerCoroutines
 
         private static async Task<Result> VendorCoroutineWorkaround()
         {
-            //if (!Vendors.ForceSell &&
-            //    (ProfileManager.CurrentProfile.MinFreeBagSlots <= 0 ||
-            //     StyxWoW.Me.FreeNormalBagSlots > ProfileManager.CurrentProfile.MinFreeBagSlots))
-            //    return new Result(ActionResult.Done);
-
-            //if (_mountVendorTimeStart == default(DateTime))
-            //    _mountVendorTimeStart = DateTime.Now;
-
-            //while ((DateTime.Now - _mountVendorTimeStart).TotalSeconds < 5)
-            //{
-            //    if (!await MoveToTable())
-            //        break;
-            //}
-
-            //_mountVendorTimeStart = DateTime.Now - TimeSpan.FromMinutes(1);
-
             var resultCoroutine = await VendorBehavior.ExecuteCoroutine()
                 ? new Result(ActionResult.Running)
                 : new Result(ActionResult.Done);

@@ -80,12 +80,14 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\MoveToInteract.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\OpenAllContainers.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\TurnInMissions.cs" />
-    <Compile Include="ButlerCoroutines\Enchanting.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\CleanGarden.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\CleanMine.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\OpenSalvageCrates.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Sequencer.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\StalkerEngine.cs" />
+    <Compile Include="ButlerCoroutines\Shipments.cs" />
+    <Compile Include="ButlerCoroutines\Followers\Mission.cs" />
+    <Compile Include="ButlerCoroutines\Waiting.cs" />
     <Compile Include="Config\OldSettings\DailyProfession.cs" />
     <Compile Include="Config\OldSettings\GaBSettings.Building.cs" />
     <Compile Include="Config\OldSettings\GabSettings.cs" />
@@ -142,24 +144,8 @@
     <Compile Include="Config\GaBSettings.Building.cs" />
     <Compile Include="Config\GaBSettings.cs" />
     <Compile Include="ButlerCoroutines\ActionHelpers.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Shipments.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Cache.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Salvage.cs" />
-    <Compile Include="ButlerCoroutines\LastRound.cs" />
-    <Compile Include="ButlerCoroutines\Dijkstra.cs" />
-    <Compile Include="ButlerCoroutines\Move2.cs" />
-    <Compile Include="ButlerCoroutines\Mailing.cs" />
-    <Compile Include="ButlerCoroutines\Waiting.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Harvest.cs" />
-    <Compile Include="ButlerCoroutines\Professions.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Garden.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Mine.cs" />
-    <Compile Include="ButlerCoroutines\Move.data.cs" />
-    <Compile Include="ButlerCoroutines\Buildings\Buildings.cs" />
-    <Compile Include="ButlerCoroutines\Followers\Mission.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ButlerCoroutines\Move.cs" />
     <Compile Include="GarrisonButler.cs" />
     <Compile Include="Libraries\FreshDesk.cs" />
     <Compile Include="Libraries\HeapPriorityQueue.cs" />
@@ -243,6 +229,7 @@
     <Content Include="WebUI\Libraries\MissonCalcSimple.js" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="ButlerCoroutines\Buildings\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

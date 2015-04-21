@@ -33,7 +33,6 @@ namespace GarrisonButler
 
         public GarrisonButler()
         {
-            Instance = this ;
             CurrentHonorbuddyLog = StyxLog.GetLogs().GetEmptyIfNull().FirstOrDefault();
         }
 
@@ -41,9 +40,6 @@ namespace GarrisonButler
         {
             get { return "GarrisonButler ICE"; }
         }
-
-        // internal AutoAnglerProfile Profile { get; private set; }
-        internal static GarrisonButler Instance { get; private set; }
 
         internal static bool IsIceVersion()
         {
@@ -172,8 +168,6 @@ namespace GarrisonButler
 
         #region overrides
         private Composite _root;
-        public DateTime _lastRunTime = DateTime.MinValue;
-
         public override string Name
         {
             get { return NameStatic; }
@@ -202,21 +196,6 @@ namespace GarrisonButler
         {
             get
             {
-                if (ButlerCoroutine.ReadyToSwitch)
-                {
-                    var timeElapsed = DateTime.Now - _lastRunTime;
-                    if (!(timeElapsed.TotalSeconds > GaBSettings.Get().TimeMinBetweenRun)) return false;
-                    _lastRunTime = DateTime.Now;
-                    int timeBetweenRuns = GaBSettings.Get().TimeMinBetweenRun;
-                    uint remainingTime = Instance._lastRunTime == DateTime.MinValue
-                        ? (uint) timeBetweenRuns
-                        : (uint) (timeBetweenRuns - (DateTime.Now - Instance._lastRunTime).TotalSeconds);
-
-                    Log("One more check and then taking a break for {0}s", timeBetweenRuns);
-                }
-                ButlerCoroutine.SomethingToDo();
-                if (!ButlerCoroutine.AnyTodo) return false;
-                ButlerCoroutine.ReadyToSwitch = false;
                 return true;
             }
         }
@@ -272,8 +251,10 @@ namespace GarrisonButler
         {
             try
             {
-                Diagnostic("Coroutine OnStart");
-                ButlerCoroutine.OnStart();
+                ButlerCoroutine.InitializeShipments();
+                GarrisonButler.Diagnostic("InitializeShipments");
+                ButlerCoroutine.InitializeMissions();
+                GarrisonButler.Diagnostic("InitializeMissions");
             }
             catch (Exception e)
             {

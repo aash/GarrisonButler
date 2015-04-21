@@ -16,6 +16,7 @@ using GarrisonButler.Config;
 using GarrisonButler.Libraries;
 using Styx;
 using Styx.CommonBot.Coroutines;
+using Styx.Pathing;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
@@ -42,9 +43,6 @@ namespace GarrisonButler
         private String _buildTime;
         private String _buildingLevel;
         internal bool CanActivate;
-
-        public CanCompleteOrderD CanCompleteOrder =
-            () => { return new Task<Result>(() => new Result(ActionResult.Done, 0)); };
 
         public Func<int> maxCanComplete = () => { return 0; }; 
 
@@ -433,16 +431,15 @@ namespace GarrisonButler
 
                     if (unit == null)
                     {
-                        await
-                            ButlerCoroutine.MoveTo(Pnj,
-                                String.Format(
-                                    "[MillBeforeOrder,{0}] Could not find unit ({1}), moving to default location.",
-                                    Id, PnjId));
+                        Navigator.MoveTo(Pnj);
                         return new Result(ActionResult.Running);
                     }
 
-                    if ((await ButlerCoroutine.MoveToInteract(unit)).State == ActionResult.Running)
+                    if (StyxWoW.Me.Location.Distance(unit.Location) > unit.InteractRange)
+                    {
+                        Navigator.MoveTo(unit.Location);
                         return new Result(ActionResult.Running);
+                    }
 
                     unit.Interact();
 
@@ -516,7 +513,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         15377, // Garrison Building Alchemy Level 1
@@ -548,7 +544,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteOneOfItems;
-                    CanCompleteOrder = CanCompleteOrderOneOfItems;
                     Displayids = new List<uint>
                     {
                         14609, // Garrison Building Barn V1
@@ -605,7 +600,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1924.622, 225.1501, 76.96214)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteCurrency;
-                    CanCompleteOrder = CanCompleteOrderCurrency;
                     Displayids = new List<uint>
                     {
                         14474, // Garrison Building Armory V1
@@ -663,7 +657,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5645.052, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         15384, // Garrison Building Enchanting Level 1
@@ -701,7 +694,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItems;
-                    CanCompleteOrder = CanCompleteOrderItems;
                     Displayids = new List<uint>
                     {
                         15142, // Garrison Building Engineering Level 3
@@ -732,7 +724,6 @@ namespace GarrisonButler
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         20785, // Garrison Building Farm V3
@@ -763,7 +754,6 @@ namespace GarrisonButler
                     NumberReagent = 5;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5630.081, 4526.252, 119.2066);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         15390, // Garrison Building  Jewelcrafting V1
@@ -793,7 +783,6 @@ namespace GarrisonButler
                     NumberReagent = 10;
                     Pnj = alliance ? new WoWPoint(1862.214, 140, 78.29137) : new WoWPoint(5410.738, 4568.479, 138.3254);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         14597, // Garrison Building Alliance Sparring Arena V1
@@ -851,7 +840,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1872.647, 310.0204, 82.61102)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         14620, // Garrison Building  Mill V1
@@ -898,7 +886,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1899.896, 101.2778, 83.52704)
                         : new WoWPoint(5467.965, 4449.892, 144.6722);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         14622, // Garrison Building  Mine V1
@@ -961,7 +948,6 @@ namespace GarrisonButler
                     if (GarrisonButler.IsIceVersion())
                     {
                         maxCanComplete = MaxCanCompleteMillable;
-                        CanCompleteOrder = CanCompleteOrderMillable;
                         PrepOrder = MillBeforeOrder;
                         //PrepOrderAtom = new MillBeforeOrder(this, () =>
                         //{
@@ -980,7 +966,6 @@ namespace GarrisonButler
                     else
                     {
                         maxCanComplete = MaxCanCompleteItem;
-                        CanCompleteOrder = CanCompleteOrderItem;
                     }
                     // <Vendor Name="Eric Broadoak" Entry="77372" Type="Repair" X="1817.415" Y="232.1284" Z="72.94568" />
                     Displayids = new List<uint>
@@ -1051,7 +1036,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         15386, // Garrison Building  Tailoring V1
@@ -1082,7 +1066,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1830.828, 199.172, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         15375, // Garrison Building Blacksmith Level 1
@@ -1113,7 +1096,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteItem;
-                    CanCompleteOrder = CanCompleteOrderItem;
                     Displayids = new List<uint>
                     {
                         15379, // Garrison Building  Leatherworking V1
@@ -1143,7 +1125,6 @@ namespace GarrisonButler
                         ? new WoWPoint(1816.578, 225.9814, 72.71624)
                         : new WoWPoint(5574.952, 4508.236, 129.8942);
                     maxCanComplete = MaxCanCompleteTradingPost;
-                    CanCompleteOrder = CanCompleteOrderTradingPost;
                     PnjIds = alliance
                         ? new List<uint>
                         {
@@ -1242,67 +1223,7 @@ namespace GarrisonButler
             GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
             GaBSettings.Save();
         }
-
-        private async Task<Result> CanCompleteOrderTradingPost()
-        {
-            // Before being able to calculate it, we need to know what's today's reagent.
-            // It can be saved in settings with the date.
-            var serverTimeLua = await ButlerLua.GetServerDate();
-            var secBeforeReset = TimeSpan.FromSeconds(await ButlerLua.GetTimeBeforeResetInSec());
-            var nextReset = serverTimeLua + secBeforeReset;
-            var lastReset = nextReset - TimeSpan.FromHours(24);
-
-            if (GaBSettings.Get().LastCheckTradingPost == default(DateTime)
-                || GaBSettings.Get().LastCheckTradingPost < lastReset)
-            {
-                // moving to pnj
-                var moveResult = (await ButlerCoroutine.MoveToAndOpenCapacitiveFrame(this)).State;
-                if (moveResult == ActionResult.Running)
-                {
-                    return new Result(ActionResult.Running);
-                }
-
-                // Check reagent
-                var reagent = await ButlerLua.GetShipmentReagentInfo();
-                if (reagent.Item1 == -1)
-                {
-                    GarrisonButler.Diagnostic("[TradingPost] Failed to find reagent id");
-                    return new Result(ActionResult.Failed);
-                }
-
-                GarrisonButler.Log("[TradingPost] Found reagentId for trading post :{0}, #={1}, time={2}", reagent.Item1,
-                    reagent.Item2, serverTimeLua);
-                // Override value
-                GaBSettings.Get().ItemIdTradingPost = (uint) reagent.Item1;
-                GaBSettings.Get().NumberReagentTradingPost = reagent.Item2;
-                GaBSettings.Get().LastCheckTradingPost = serverTimeLua;
-                GaBSettings.Save();
-            }
-            ReagentId = GaBSettings.Get().ItemIdTradingPost;
-            NumberReagent = GaBSettings.Get().NumberReagentTradingPost;
-
-            CanCompleteOrder = CanCompleteOrderTradingPostSimple;
-            return await CanCompleteOrderTradingPostSimple();
-        }
-
-        private async Task<Result> CanCompleteOrderTradingPostSimple()
-        {
-            var rea =
-                GaBSettings.Get().TradingPostReagentsSettings.FirstOrDefault(i => i.Activated && i.ItemId == ReagentId);
-            if (rea == null)
-            {
-                GarrisonButler.Diagnostic(
-                    "[TradingPost] Couldn't find matching reagent activated in settings, reagentId={0}, #={1}",
-                    ReagentId, NumberReagent);
-                ObjectDumper.WriteToHb(GaBSettings.Get().TradingPostReagentsSettings, 3);
-                return new Result(ActionResult.Failed);
-            }
-            // Done with the check of reagent, so we switch to simple routine.
-            GarrisonButler.Diagnostic("[TradingPost] Calling CanCompleteOrder with reagentId={0}, #={1}", ReagentId,
-                NumberReagent);
-            return await CanCompleteOrderItem();
-        }
-
+        
         public static bool HasOrder(Buildings b)
         {
             switch (b)
