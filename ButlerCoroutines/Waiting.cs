@@ -91,8 +91,10 @@ namespace GarrisonButler.ButlerCoroutines
                     _hbRelogSkippedCounter++;
                     GarrisonButler.Diagnostic("[HBRelogMode] Task skipped, waiting...");
                 }
+                return true; 
             }
-            else if (BotManager.Current.Name == "Mixed Mode")
+            
+            if (BotManager.Current.Name == "Mixed Mode")
             {
                 var botBase = (MixedModeEx) BotManager.Current;
                 if (!botBase.PrimaryBot.Name.ToLower().Contains("angler")) return true;
@@ -103,7 +105,7 @@ namespace GarrisonButler.ButlerCoroutines
                 if ((await MoveTo(fishingSpot, "[Waiting] Moving to fishing spot.")).State == ActionResult.Running)
                     return true;
             }
-            return true;
+            return false;
         }
 
         public static async Task SomethingToDo()

@@ -1210,7 +1210,7 @@ namespace GarrisonButler
                 GarrisonButler.Diagnostic(
                     "[TradingPost] Couldn't find matching reagent activated in settings, reagentId={0}, #={1}",
                     ReagentId, NumberReagent);
-                ObjectDumper.WriteToHb(GaBSettings.Get().TradingPostReagentsSettings, 3);
+                //ObjectDumper.WriteToHb(GaBSettings.Get().TradingPostReagentsSettings, 3);
                 return 0;
             }
             // Done with the check of reagent, so we switch to simple routine.

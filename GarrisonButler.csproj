@@ -43,6 +43,7 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\Mill.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\PreCraftOperation.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\Stack.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\ActivateBuildings.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\CleanMissions.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\DisenchantItems.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\MoveToObject.cs" />
@@ -53,6 +54,8 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\CraftDraenicMortarAtNpc.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\InteractWithOrderNpc.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\GetMails.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\HarvestCache.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\LastRound.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\MailItems.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\PickUpOrderGarden.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\PickUpOrderMine.cs" />
@@ -62,6 +65,7 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\UseGearTokens.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\UseMiningPick.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\UseMinerCoffee.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\Waiting.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\MillBeforeOrder.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\PickUpWorkOrders.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\StartOrdersMine.cs" />

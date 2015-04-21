@@ -414,9 +414,11 @@ namespace GarrisonButler.ButlerCoroutines
 
 
             //StalkerEngine.Instance.Stalk();
-            return await Sequencer.Instance.Execute();
+            if (await Sequencer.Instance.Execute())
+                return true;
 
 
+            return await JobDoneSwitch();
 
 
             //// Record and set auto loot
@@ -433,7 +435,6 @@ namespace GarrisonButler.ButlerCoroutines
                 GarrisonButler.Warning("ERROR: mainSequence NULL");
                 return false;
             }
-
             //// Bot will sleep after one full run waiting for new things to do
             //// similar to behavior in MixedMode
             //if (ReadyToSwitch)

@@ -13,9 +13,11 @@ using GarrisonButler.Libraries.Wowhead;
 using GarrisonButler.Objects;
 using Styx;
 using Styx.Common;
+using Styx.Common.Helpers;
 using Styx.CommonBot.Coroutines;
 using Styx.Helpers;
 using Styx.WoWInternals;
+using Styx.WoWInternals.WoWObjects;
 
 #endregion
 
@@ -26,7 +28,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
         private static List<Mission> _missions;
         private static List<Follower> _followers;
 
-        private List<Tuple<Mission, Follower[]>> toStart;
+        private List<Tuple<Mission, Follower[]>> toStart = new List<Tuple<Mission, Follower[]>>();
         private static readonly WoWPoint TableHorde = new WoWPoint(5559, 4599, 140);
         private static readonly WoWPoint TableAlliance = new WoWPoint(1943, 330, 91);
         private static readonly List<uint> CommandTables = new List<uint>
@@ -45,7 +47,14 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
             85805
         };
 
+        private WaitTimer _timeOut;
 
+        public static WoWObject GetCommandTableOrDefault()
+        {
+            return
+                ObjectManager.ObjectList.GetEmptyIfNull()
+                    .FirstOrDefault(o => CommandTables.GetEmptyIfNull().Contains(o.Entry));
+        }
         public StartMissions()
         {
             Dependencies.Add(new MoveToObject(CommandTables, WoWObjectTypeFlag.Unit, StyxWoW.Me.IsAlliance ? TableAlliance : TableHorde));
@@ -60,12 +69,6 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
 
         public override bool RequirementsMet()
         {
-            if (!GaBSettings.Get().StartMissions)
-            {
-                GarrisonButler.Diagnostic("[Missions] Deactivated in user settings.");
-                return false;
-            }
-            
             //RefreshMissions();
             //RefreshFollowers();
 
@@ -74,6 +77,12 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
 
         public override bool IsFulfilled()
         {
+            if (!GaBSettings.Get().StartMissions)
+            {
+                GarrisonButler.Diagnostic("[Missions] Deactivated in user settings.");
+                return true;
+            }
+
             var numberMissionAvailable = MissionLua.GetNumberAvailableMissions();
 
             // Is there mission available to start
@@ -91,43 +100,56 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 return true;
             }
 
-
-            _followers = FollowersLua.GetAllFollowers();
-            _missions = MissionLua.GetAllAvailableMissions();
-            // Enhanced Mission Logic
-            if (GarrisonButler.IsIceVersion())
+            if (_timeOut == null || _timeOut.IsFinished)
             {
-                toStart = NewMissionStubCode(_followers.ToList());
-            }
-            else
-            {
-                toStart = new List<Tuple<Mission, Follower[]>>();
-                var followersTemp = _followers.ToList();
-                foreach (var mission in missions)
+                _timeOut = new WaitTimer(TimeSpan.FromSeconds(30));
+                _timeOut.Reset();
+                GarrisonButler.Diagnostic("Checking for missions.");
+                _followers = FollowersLua.GetAllFollowers();
+                _missions = MissionLua.GetAllAvailableMissions();
+                // Enhanced Mission Logic
+                if (GarrisonButler.IsIceVersion())
                 {
-                    // Make sure that status is Idle or In Party
-                    var match =
-                        mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status.ToInt32() <= 1).ToList());
-                    if (match == null)
-                        continue;
-                    toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
-                    followersTemp.RemoveAll(match.Contains);
+                    toStart = NewMissionStubCode(_followers.ToList());
                 }
-            }
+                else
+                {
+                    toStart = new List<Tuple<Mission, Follower[]>>();
+                    var followersTemp = _followers.ToList();
+                    foreach (var mission in missions)
+                    {
+                        // Make sure that status is Idle or In Party
+                        var match =
+                            mission.FindMatch(followersTemp.Where(f => f.IsCollected && f.Status.ToInt32() <= 1).ToList());
+                        if (match == null)
+                            continue;
+                        toStart.Add(new Tuple<Mission, Follower[]>(mission, match));
+                        followersTemp.RemoveAll(match.Contains);
+                    }
+                }
 
-            var mess = "Found available missions to complete. " +
-                       "Can successfully complete: " + toStart.Count + " missions.";
-            if (toStart.Count > 0)
-                GarrisonButler.Log(mess);
-            else
-            {
-                GarrisonButler.Diagnostic(mess);
+                var mess = "Found available missions to complete. " +
+                           "Can successfully complete: " + toStart.Count + " missions.";
+                if (toStart.Count > 0)
+                    GarrisonButler.Log(mess);
+                else
+                {
+                    GarrisonButler.Diagnostic(mess);
+                }
+                return !toStart.Any();
             }
             return !toStart.Any();
         }
 
         public override async Task Action()
         {
+            var table = GetCommandTableOrDefault();
+            if (table == default(WoWObject))
+                return;
+
+            table.Interact();
+            await CommonCoroutines.SleepForRandomUiInteractionTime();
+
             if (!InterfaceLua.IsGarrisonMissionTabVisible())
             {
                 GarrisonButler.Diagnostic("Mission tab not visible, clicking.");
@@ -175,7 +197,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 await CommonCoroutines.SleepForRandomUiInteractionTime();
                 InterfaceLua.ClickCloseMission();
             }
-
+            toStart.Clear();
             _followers = FollowersLua.GetAllFollowers();
             _missions = MissionLua.GetAllAvailableMissions();
 
