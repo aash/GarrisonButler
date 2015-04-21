@@ -85,7 +85,8 @@ namespace GarrisonButler.Objects
         {
             // Make sure we meet the condition & we're not trying to mail this item to the same character that is already logged in
             return _condition.GetCondition(ItemId)
-                && _recipient.Value != StyxWoW.Me.Name;
+                && _recipient.Value != StyxWoW.Me.Name
+                && _recipient.Value != StyxWoW.Me.Name + "@" + StyxWoW.Me.RealmName;
         }
 
         public async Task<IEnumerable<WoWItem>> GetItemsToSend()

@@ -155,6 +155,13 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 return false;
             }
 
+            if (sendTo.Value == StyxWoW.Me.Name
+                || sendTo.Value == StyxWoW.Me.Name + "@" + StyxWoW.Me.RealmName)
+            {
+                GarrisonButler.Warning("[Mailing] Sending greens enabled but recipient is set to current character.");
+                return false;
+            }
+            
             var items = HbApi.GetItemsInBags(i => i != null && i.IsValid).ToList();
             // TODO remove later as this list is just used for diagnostic
             var greenItems = new List<WoWItem>();
@@ -234,7 +241,13 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 GarrisonButler.Warning("[Mailing] Sending greens enabled but send to character is invalid");
                 return new Tuple<bool, List<MailItem>>(false, null);
             }
-
+            if (sendTo.Value == StyxWoW.Me.Name
+                || sendTo.Value == StyxWoW.Me.Name + "@" + StyxWoW.Me.RealmName)
+            {
+                GarrisonButler.Warning("[Mailing] Sending greens enabled but recipient is set to current character.");
+                return new Tuple<bool, List<MailItem>>(false, null);
+            }
+            
             var items = HbApi.GetItemsInBags(i => i != null && i.IsValid).ToList();
             // TODO remove later as this list is just used for diagnostic
             var greenItems = new List<WoWItem>();
