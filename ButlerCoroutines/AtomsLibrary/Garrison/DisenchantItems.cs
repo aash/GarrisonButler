@@ -33,7 +33,10 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
 
         public override bool IsFulfilled()
         {
-            return GaBSettings.Get().ShouldDisenchant && !GetItemsToDisenchant().Any();
+            if (!GaBSettings.Get().ShouldDisenchant)
+                return true;
+
+            return !GetItemsToDisenchant().Any();
         }
 
         public async override Task Action()
