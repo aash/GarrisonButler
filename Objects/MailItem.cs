@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -85,8 +86,10 @@ namespace GarrisonButler.Objects
         {
             // Make sure we meet the condition & we're not trying to mail this item to the same character that is already logged in
             return _condition.GetCondition(ItemId)
-                && _recipient.Value != StyxWoW.Me.Name
-                && _recipient.Value != StyxWoW.Me.Name + "@" + StyxWoW.Me.RealmName;
+                   && !String.Equals(_recipient.Value, StyxWoW.Me.Name, StringComparison.CurrentCultureIgnoreCase)
+                   &&
+                   !String.Equals(_recipient.Value, StyxWoW.Me.Name + "-" + StyxWoW.Me.RealmName,
+                       StringComparison.CurrentCultureIgnoreCase);
         }
 
         public async Task<IEnumerable<WoWItem>> GetItemsToSend()

@@ -155,8 +155,8 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 return false;
             }
 
-            if (sendTo.Value == StyxWoW.Me.Name
-                || sendTo.Value == StyxWoW.Me.Name + "@" + StyxWoW.Me.RealmName)
+            if (String.Equals(sendTo.Value, StyxWoW.Me.Name, StringComparison.CurrentCultureIgnoreCase)
+                || String.Equals(sendTo.Value, StyxWoW.Me.Name + "-" + StyxWoW.Me.RealmName, StringComparison.CurrentCultureIgnoreCase))
             {
                 GarrisonButler.Warning("[Mailing] Sending greens enabled but recipient is set to current character.");
                 return false;

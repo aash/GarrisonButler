@@ -21,6 +21,7 @@ namespace GarrisonButler.LuaObjects
 
         internal static void LootOpened(object sender, LuaEventArgs args)
         {
+            GarrisonButler.Log("[Loot] Opened");
             var currenPoi = BotPoi.Current.AsObject as WoWGameObject;
             if (currenPoi != null && currenPoi.IsValid)
             {
