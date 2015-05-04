@@ -121,6 +121,9 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
 
         public override bool IsFulfilled()
         {
+            if (_building == null)
+                return true;
+
             var buildingsettings = GaBSettings.Get().GetBuildingSettings(_building.Id);
 
             if (buildingsettings == null)

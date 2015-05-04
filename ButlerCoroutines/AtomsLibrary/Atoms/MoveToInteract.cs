@@ -63,11 +63,8 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
         /// <returns></returns>
         public override bool RequirementsMet()
         {
-            GarrisonButler.Diagnostic("Checking requirement for MoveToInteract with {0}", _object.SafeName);
             //Should test to generate path
-            if (Navigator.CanNavigateWithin(StyxWoW.Me.Location, Location, _object.InteractRange))
-                return true;
-            return false;
+            return true;
         }
 
         /// <summary>
@@ -88,6 +85,11 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
         {
             GarrisonButler.Diagnostic("Running Action for MoveToInteract with {0}", _object.SafeName);
             await base.Action();
+        }
+
+        public override string Name()
+        {
+            return "[MoveToInteract|" + Location + "]";
         }
     }
 }
