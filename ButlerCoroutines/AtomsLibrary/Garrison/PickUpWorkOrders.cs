@@ -74,20 +74,21 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
 
         public override bool IsFulfilled()
         {
-            _building.Refresh();
-
-
+            if (_building == null)
+                return true; 
+            
             // Activated by user ?
             var buildingsettings = GaBSettings.Get().GetBuildingSettings(_building.Id);
             if (buildingsettings == null)
                 return true;
-
+            
             if (!buildingsettings.CanCollectOrder)
             {
                 GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", _building.Name);
                 return true;
             }
 
+            _building.Refresh();
             return _building.ShipmentsReady == 0 && (_currentAction == null || _currentAction.IsFulfilled());
         }
 

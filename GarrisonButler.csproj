@@ -84,7 +84,6 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\CleanMine.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\OpenSalvageCrates.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Sequencer.cs" />
-    <Compile Include="ButlerCoroutines\AtomsLibrary\StalkerEngine.cs" />
     <Compile Include="ButlerCoroutines\Shipments.cs" />
     <Compile Include="ButlerCoroutines\Followers\Mission.cs" />
     <Compile Include="ButlerCoroutines\Waiting.cs" />
