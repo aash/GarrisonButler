@@ -124,9 +124,10 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
                 {
                     GarrisonButler.Diagnostic("[MoveToObject] Refreshing location. old: {0}, new:{1}", _target, objectsFound.First().Location);
                     _target = objectsFound.First();
-                    Location.X = objectsFound.First().Location.X;
-                    Location.Y = objectsFound.First().Location.Y;
-                    Location.Z = objectsFound.First().Location.Z;
+                    Location.X = _target.Location.X;
+                    Location.Y = _target.Location.Y;
+                    Location.Z = _target.Location.Z;
+                    this._precision = _target.InteractRange - 0.2f * _target.InteractRange;
                 }
             }
             await base.Action();

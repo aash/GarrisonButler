@@ -24,7 +24,7 @@ namespace GarrisonButler
 {
     public class GarrisonButler : BotBase
     {
-        internal static readonly ModuleVersion Version = new ModuleVersion(2, 7, 15, 0);
+        internal static readonly ModuleVersion Version = new ModuleVersion(2, 7, 15, 1);
 
         internal static List<Follower> Followers;
         internal static List<Mission> Missions;
@@ -189,9 +189,6 @@ namespace GarrisonButler
             get { return false; }
         }
 
-        /// <summary>
-        /// Returns false in 2 conditions - #1 time is less than 60s(default) from last run or #2 nothing to do
-        /// </summary>
         public override bool RequirementsMet
         {
             get
@@ -233,12 +230,16 @@ namespace GarrisonButler
         {
             Diagnostic("Detaching from GARRISON_MISSION_BONUS_ROLL_COMPLETE");
             Lua.Events.DetachEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE", GARRISON_MISSION_BONUS_ROLL_COMPLETE);
+
             Diagnostic("Detaching from GARRISON_MISSION_COMPLETE_RESPONSE");
             Lua.Events.DetachEvent("GARRISON_MISSION_COMPLETE_RESPONSE", GARRISON_MISSION_COMPLETE_RESPONSE);
+
             Diagnostic("Detaching from GARRISON_MISSION_STARTED");
             Lua.Events.DetachEvent("GARRISON_MISSION_STARTED", ButlerCoroutine.GARRISON_MISSION_STARTED);
+
             Diagnostic("Detaching from LOOT_OPENED");
             Lua.Events.DetachEvent("LOOT_OPENED", LuaEvents.LootOpened);
+
             Diagnostic("Detaching from LOOT_CLOSED");
             Lua.Events.DetachEvent("LOOT_CLOSED", LuaEvents.LootClosed);
 
@@ -251,10 +252,11 @@ namespace GarrisonButler
         {
             try
             {
+                GarrisonButler.Diagnostic("Initializing Shipments");
                 ButlerCoroutine.InitializeShipments();
-                GarrisonButler.Diagnostic("InitializeShipments");
+
+                GarrisonButler.Diagnostic("Initializing Missions");
                 ButlerCoroutine.InitializeMissions();
-                GarrisonButler.Diagnostic("InitializeMissions");
             }
             catch (Exception e)
             {

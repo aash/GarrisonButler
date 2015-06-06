@@ -85,17 +85,19 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
                 // Do Dependencies first
                 foreach (var dependency in Dependencies)
                 {
-                    //GarrisonButler.Diagnostic("{0} Dependencies - Executing {1}", Name(), dependency.Name());
-                    await dependency.Execute();
-                    //GarrisonButler.Diagnostic("{0} Dependencies - Executing {1} Done, State: {2} - Reason: {3}", Name(), dependency.Name(), dependency.Status.State, dependency.Status.Content);
-
-                    switch (dependency.Status.State)
+                    if (!dependency.IsFulfilled())
                     {
-                        case ActionResult.Failed:
-                            return;
-                        case ActionResult.Running:
-                            Status = dependency.Status;
-                            return;
+                        await dependency.Execute();
+                        //GarrisonButler.Diagnostic("{0} Dependencies - Executing {1} Done, State: {2} - Reason: {3}", Name(), dependency.Name(), dependency.Status.State, dependency.Status.Content);
+
+                        switch (dependency.Status.State)
+                        {
+                            case ActionResult.Failed:
+                                return;
+                            case ActionResult.Running:
+                                Status = dependency.Status;
+                                return;
+                        }
                     }
                 }
 

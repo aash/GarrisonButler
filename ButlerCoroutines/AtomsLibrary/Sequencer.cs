@@ -46,8 +46,6 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
             if (GarrisonButler.IsIceVersion())
                 _actions.Add(new Molecule(new GetMails(), 100));
             _actions.Add(new Molecule(new ActivateBuildings(), 150));
-            //_actions.Add(new Molecule(new UseMinerCoffee(), 200));
-            //_actions.Add(new Molecule(new UseMiningPick(), 201));
             _actions.Add(new Molecule(new CleanMine(), 202));
             _actions.Add(new Molecule(new PickUpOrderMine(), 203));
             _actions.Add(new Molecule(new StartOrdersMine(), 204));
@@ -95,7 +93,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
 
         private List<Molecule> _toDelete;
 
-        private Atom _currentAction = null; 
+        private static Atom _currentAction = null; 
         public async Task<bool> Execute()
         {
             // Timer anti spam
@@ -114,8 +112,6 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
                 _toDelete.Clear();
             }
 
-
-            // NEW ---------------------
             if (_currentAction != null)
             {
                 switch (_currentAction.Status.State)
@@ -129,11 +125,13 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
 
                     case ActionResult.Done:
                     case ActionResult.Failed:
+                        GarrisonButler.Diagnostic("[Sequencer] Failed Action {0}, status => {1}", _currentAction.Name(), _currentAction.Status);
                         _currentAction = null;
                         break;
                 }
             }
 
+            GarrisonButler.Diagnostic("[Sequencer] Action empty, looking for new one.");
 
             // Find new action to perform
             foreach (var mol in _actions)
@@ -157,48 +155,11 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
                     continue;
                 }
 
-                //GarrisonButler.Diagnostic("[Sequencer] Executing Action {0}, Status: ", action.Name());
-                //await action.Execute();
-
                 _currentAction = action;
                 GarrisonButler.Diagnostic("[Sequencer] new Action {0}", action.Name());
                 return true; 
             }
 
-            // NEW FIN ++++++++++++++++++++++
-
-            //// Main pulse
-            ////GarrisonButler.Diagnostic("[Sequencer] ************************************ Beginning Cycle ************************************ ");
-            //foreach (var mol in _actions)
-            //{
-            //    var action = mol.BigAction;
-            //    if (action.IsFulfilled())
-            //    {
-            //        //GarrisonButler.Diagnostic("[Sequencer] Skipping Action {0} since Fullfilled ****************************************************** ", action.Name());
-
-            //        if (!action.ShouldRepeat)
-            //        {
-            //            GarrisonButler.Diagnostic("[Sequencer] Action {0} will be deleted since Fullfilled ****************************************************** ", action.Name());
-            //            _toDelete.Add(mol);
-            //        }
-            //        continue;
-            //    }
-
-            //    if (!action.RequirementsMet())
-            //    {
-            //        //GarrisonButler.Diagnostic("[Sequencer] Skipping Action {0} since Requirements not met ****************************************************** ", action.Name());
-            //        continue;
-            //    }
-
-            //    //GarrisonButler.Diagnostic("[Sequencer] Executing Action {0}, Status: ", action.Name());
-            //    await action.Execute();
-            //    GarrisonButler.Diagnostic("[Sequencer] Pulsed {0}, Status: {1}", action.Name(), action.Status);
-
-            //    if (action.Status.State != ActionResult.Failed)
-            //    {
-            //        return true;
-            //    }
-            //} 
             GarrisonButler.Log("[Sequencer] All actions fulfilled, Nothing left to do.");
             return false;
         }

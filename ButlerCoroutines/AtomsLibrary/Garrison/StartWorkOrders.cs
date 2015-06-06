@@ -32,7 +32,6 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
         {
             _building = null;
         }
-
         public override bool RequirementsMet()
         {
             if (_building == null)
@@ -173,20 +172,19 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
                     _preOrderOps = new PreCraftOperation(_building.ReagentId, maxToStart*_building.NumberReagent);
                 }
 
-                Status = new Result(ActionResult.Running, String.Format("Executing prep order!")); 
                 
                 if (!_preOrderOps.IsFulfilled())
                 {
-                    await _preOrderOps.Execute(); 
+                    await _preOrderOps.Execute();
+                    Status = new Result(ActionResult.Running, String.Format("Executing prep order - {0}", _preOrderOps.Status)); 
                     return;
                 }
-
-                Status = new Result(ActionResult.Running, String.Format("prep order fulfilled!")); 
 
                 _currentAction = new StartShipment(_building);
             }
 
             await _currentAction.Execute();
+            Status = new Result(ActionResult.Running, String.Format("Executing main routine - {0}", _currentAction.Status)); 
         }
     }
 }

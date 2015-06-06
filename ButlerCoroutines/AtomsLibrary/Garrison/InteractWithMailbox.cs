@@ -29,7 +29,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
         {
             var mailboxLocation = StyxWoW.Me.IsAlliance ? AllyMailbox : HordeMailbox;
             GarrisonButler.Diagnostic("[Mailing] Moving to mailbox at default location" + mailboxLocation);
-            Dependencies.Add(new MoveToObject(WoWGameObjectType.Mailbox, mailboxLocation));
+            Dependencies.Add(new MoveToObject(WoWGameObjectType.Mailbox, mailboxLocation, 1.0f));
         }
         /// <summary>
         /// Must have the building?
@@ -57,7 +57,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
             // Search mailbox item
             var mailboxList = ObjectManager.GetObjectsOfType<WoWGameObject>()
                 .GetEmptyIfNull()
-                .Where(o => o.SubType == WoWGameObjectType.Mailbox).ToList();
+                .Where(o => o.SubType == WoWGameObjectType.Mailbox && o != default(WoWGameObject)).ToList();
 
             var mailbox = mailboxList.GetEmptyIfNull().FirstOrDefault();
 

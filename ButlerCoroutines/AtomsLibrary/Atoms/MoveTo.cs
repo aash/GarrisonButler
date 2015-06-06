@@ -17,7 +17,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
     public class MoveTo : Atom
     {
         protected WoWPoint Location;
-        private readonly float _precision;
+        protected float _precision;
 
         /// <summary>
         /// Location is cached.
@@ -77,32 +77,32 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
             switch (lastMoveResult)
             {
                 case MoveResult.UnstuckAttempt:
-                    GarrisonButler.Diagnostic("MoveResult: UnstuckAttempt.");
+                    GarrisonButler.Diagnostic("MoveResult [{0} -> {1}]: UnstuckAttempt", StyxWoW.Me.Location, Location);
                     Status = new Result(ActionResult.Running, "MoveResult: UnstuckAttempt.");
                     return;
 
                 case MoveResult.Failed:
-                    GarrisonButler.Diagnostic("MoveResult: Failed.");
+                    GarrisonButler.Diagnostic("MoveResult [{0} -> {1}]: Failed", StyxWoW.Me.Location, Location);
                     Status = new Result(ActionResult.Failed, "MoveResult: Failed.");
                     return;
 
                 case MoveResult.ReachedDestination:
-                    GarrisonButler.Diagnostic("MoveResult: ReachedDestination.");
+                    GarrisonButler.Diagnostic("MoveResult [{0} -> {1}]: ReachedDestination", StyxWoW.Me.Location, Location);
                     Status = new Result(ActionResult.Done);
                     return;
 
                 case MoveResult.Moved:
                     //GarrisonButler.Diagnostic("MoveResult: Moved.");
-                    Status = new Result(ActionResult.Running);
+                    Status = new Result(ActionResult.Running, "MoveResult: Moved");
                     return;
 
                 case MoveResult.PathGenerationFailed:
-                    GarrisonButler.Diagnostic("MoveResult: PathGenerationFailed.");
-                    Status = new Result(ActionResult.Failed, "MoveResult: PathGenerationFailed.");
+                    GarrisonButler.Diagnostic("MoveResult [{0} -> {1}]: PathGenerationFailed", StyxWoW.Me.Location, Location);
+                    Status = new Result(ActionResult.Failed, "MoveResult: PathGenerationFailed");
                     return;
 
                 case MoveResult.PathGenerated:
-                    GarrisonButler.Diagnostic("MoveResult: PathGenerated.");
+                    GarrisonButler.Diagnostic("MoveResult [{0} -> {1}]: PathGenerated", StyxWoW.Me.Location, Location);
                     Status = new Result(ActionResult.Running, "MoveResult: PathGenerated");
                     return;
             }
