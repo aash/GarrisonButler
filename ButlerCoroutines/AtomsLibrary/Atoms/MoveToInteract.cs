@@ -73,7 +73,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
         /// <returns></returns>
         public override bool IsFulfilled()
         {
-            GarrisonButler.Diagnostic("Checking IsFulfilled for MoveToInteract with {0}", _object.SafeName);
+            //GarrisonButler.Diagnostic("Checking IsFulfilled for MoveToInteract with {0}", _object.SafeName);
             return _object.WithinInteractRange;
         }
 
@@ -83,7 +83,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
         /// <returns></returns>
         public override async Task Action()
         {
-            GarrisonButler.Diagnostic("Running Action for MoveToInteract with {0}", _object.SafeName);
+            //GarrisonButler.Diagnostic("Running Action for MoveToInteract with {0}", _object.SafeName);
             await base.Action();
         }
 

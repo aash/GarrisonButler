@@ -50,6 +50,8 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
         public CleanMine()
         {
             ShouldRepeat = true;
+            Dependencies.Add(new UseMinerCoffee());
+            Dependencies.Add(new UseMiningPick());
         }
 
 

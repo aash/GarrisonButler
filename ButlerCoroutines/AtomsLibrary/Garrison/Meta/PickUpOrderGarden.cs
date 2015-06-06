@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms;
 using GarrisonButler.Libraries;
 
 namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
@@ -24,6 +25,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
             if (garden != default(Building))
             {
                 _building = garden;
+                Dependencies.Add(new MoveToShipment(_building));
             }
         }
         public override bool RequirementsMet()
@@ -41,6 +43,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
                 {
                     GarrisonButler.Diagnostic("[PickUpOrderGarden] Building Found!");
                     _building = garden;
+                    Dependencies.Add(new MoveToShipment(_building));
                 }
                 else
                 {

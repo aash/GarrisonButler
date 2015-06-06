@@ -23,6 +23,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
         public PickUpWorkOrders(Building building)
         {
             _building = building;
+            Dependencies.Add(new MoveToShipment(_building));
         }
         public PickUpWorkOrders()
         {
@@ -87,7 +88,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
                 GarrisonButler.Diagnostic("[ShipmentPickUp] Deactivated in user settings: {0}", _building.Name);
                 return true;
             }
-
+    
             _building.Refresh();
             return _building.ShipmentsReady == 0 && (_currentAction == null || _currentAction.IsFulfilled());
         }
@@ -119,12 +120,6 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison
 
                 if (_shipmentToCollect != default(WoWGameObject))
                     _currentAction = new HarvestShipment(_building, _shipmentToCollect);
-
-                else if (_buildingAsObject != null)
-                    _currentAction = new MoveTo(_locationToLookAt, 10);
-
-                else
-                    _currentAction = new MoveTo(_building.Pnj, 10);
             }
 
             if (_currentAction != null)

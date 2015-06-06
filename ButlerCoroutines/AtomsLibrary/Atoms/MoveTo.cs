@@ -60,7 +60,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
         /// <returns></returns>
         public override bool IsFulfilled()
         {
-            GarrisonButler.Diagnostic("Checking IsFulfilled for MoveTo at {0} (p={1})", Location.ToString(), _precision);
+            //GarrisonButler.Diagnostic("Checking IsFulfilled for MoveTo at {0} (p={1})", Location.ToString(), _precision);
             return StyxWoW.Me.Location.Distance(Location) <= _precision;
         }
 
@@ -71,7 +71,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
         /// <returns></returns>
         public override async Task Action()
         {
-            GarrisonButler.Diagnostic("Running Action for MoveTo at {0} (p={1})", Location.ToString(), _precision);
+            //GarrisonButler.Diagnostic("Running Action for MoveTo at {0} (p={1})", Location.ToString(), _precision);
             var lastMoveResult = Navigator.MoveTo(Location);
             Navigator.GetRunStatusFromMoveResult(lastMoveResult);
             switch (lastMoveResult)
@@ -88,12 +88,11 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Atoms
 
                 case MoveResult.ReachedDestination:
                     GarrisonButler.Diagnostic("MoveResult: ReachedDestination.");
-                    GarrisonButler.Diagnostic("MoveResult: ReachedDestination.");
                     Status = new Result(ActionResult.Done);
                     return;
 
                 case MoveResult.Moved:
-                    GarrisonButler.Diagnostic("MoveResult: Moved.");
+                    //GarrisonButler.Diagnostic("MoveResult: Moved.");
                     Status = new Result(ActionResult.Running);
                     return;
 

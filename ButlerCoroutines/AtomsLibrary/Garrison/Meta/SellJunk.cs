@@ -46,7 +46,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
         public async override Task Action()
         {
             Vendors.ForceSell = true;
-            await ButlerCoroutine.VendorBehavior.ExecuteCoroutine();
+            await ButlerCoroutine.SellJunkCoroutine();
         }
 
         public override string Name()

@@ -52,10 +52,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
 
         public override bool RequirementsMet()
         {
-            if (!StyxWoW.Me.IsInGarrisonMine())
-                return false;
-
-            return base.RequirementsMet();
+            return true; 
         }
 
         public override bool IsFulfilled()
@@ -63,9 +60,15 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary.Garrison.Meta
             if (!GaBSettings.Get().UseMiningPick)
                 return true;
 
+            if (!StyxWoW.Me.IsInGarrisonMine())
+                return true; 
+
             var item = StyxWoW.Me.BagItems.FirstOrDefault(i => i.Entry == PreserverdMiningPickItemId);
             if (item == default(WoWItem))
                 return true;
+
+            if (!base.RequirementsMet())
+                return true; 
 
             return base.IsFulfilled();
         }

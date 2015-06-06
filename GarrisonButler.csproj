@@ -41,6 +41,7 @@
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atom.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\CraftItem.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\Mill.cs" />
+    <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\MoveToShipment.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\PreCraftOperation.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Atoms\Stack.cs" />
     <Compile Include="ButlerCoroutines\AtomsLibrary\Garrison\Meta\ActivateBuildings.cs" />

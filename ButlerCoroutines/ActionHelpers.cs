@@ -34,7 +34,7 @@ namespace GarrisonButler.ButlerCoroutines
 
         public override string ToString()
         {
-            return string.Format("{0} - {1}", State, Content);
+            return string.Format("{0} - {1}", Enum.GetName(typeof(ActionResult), State), Content);
         }
     }
 

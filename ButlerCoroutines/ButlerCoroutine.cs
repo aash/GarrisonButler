@@ -354,14 +354,20 @@ namespace GarrisonButler.ButlerCoroutines
             if ((await VendorCoroutineWorkaround()).State == ActionResult.Running)
                 return true;
 
-            if (await LootBehavior.ExecuteCoroutine())
-                return true;
-
             if (!StyxWoW.Me.IsAlive || StyxWoW.Me.Combat || RoutineManager.Current.NeedRest)
                 return false;
 
-            if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
+            if (await CustomLootBehavior())
+                return true; 
+
+            //if (BotPoi.Current.Type == PoiType.None && LootTargeting.Instance.FirstObject != null)
+            if (LootTargeting.Instance.FirstObject != null)
                 SetLootPoi(LootTargeting.Instance.FirstObject);
+
+            // check if there is 
+
+            if (await LootBehavior.ExecuteCoroutine())
+                return true; 
 
             if (await CheckBagsFull())
                 return true;
@@ -371,7 +377,30 @@ namespace GarrisonButler.ButlerCoroutines
 
             return await JobDoneSwitch();
         }
-        private static async Task<Result> SellJunkCoroutine()
+
+        private static async Task<bool> CustomLootBehavior()
+        {
+            var toLoot = ObjectManager.GetObjectsOfTypeFast<WoWUnit>().GetEmptyIfNull().Where(u => u.Location.Distance(Me.Location) < 25 &&  u.CanLoot).ToArray();
+            if (toLoot.Any())
+            {
+                var unitToLoot = toLoot.First();
+                GarrisonButler.Diagnostic("Found unit to loot {0}", unitToLoot.SafeName);
+                if (!unitToLoot.WithinInteractRange)
+                {
+                    GarrisonButler.Diagnostic("Moving to loot {0}", unitToLoot.Location);
+                    Navigator.MoveTo(toLoot.First().Location);
+                    return true; 
+                }
+
+                GarrisonButler.Log("Looting {0}", unitToLoot.Location);
+                unitToLoot.Interact();
+                await CommonCoroutines.SleepForLagDuration();
+                return true;
+            }
+            return false;
+        }
+
+        internal static async Task<Result> SellJunkCoroutine()
         {
             CheckForVendors();
             if (HbApi.GetItemsInBags(i =>

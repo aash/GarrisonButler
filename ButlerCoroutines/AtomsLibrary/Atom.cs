@@ -52,18 +52,74 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
         public abstract string Name();
         public async Task Execute()
         {
-            GarrisonButler.Diagnostic("{0} Execute Called.", Name()); 
+            //GarrisonButler.Diagnostic("{0} Execute Called.", Name()); 
 
             // If job done
             if (IsFulfilled())
             {
-                GarrisonButler.Diagnostic("{0} is fulfilled. Setting Atom as Done.", Name()); 
+                GarrisonButler.Diagnostic("{0} is fulfilled. Setting Atom as Done.", Name());
+                Status = new Result(ActionResult.Done, "Fulfilled");
+                Running = false;
+                return; 
+            }
+
+            // if not job done and requirements met
+            
+            if (timer.IsFinished)
+            {
+                timer.Reset();
+
+                if (!RequirementsMet())
+                {
+                    GarrisonButler.Diagnostic("{0} Requirements not met, setting status as Failed. State: {1} - Reason: {2}", Name(), Status.State, Status.Content);
+                    Status = new Result(ActionResult.Failed, "Requirements not met.");
+                    return;
+                }
+
+                //GarrisonButler.Diagnostic("{0} Requirements met, setting status as Running. State: {1} - Reason: {2}", Name(), Status.State, Status.Content);
+                Status = new Result(ActionResult.Running, "Running");
+                Running = true;
+            }
+            if (Running)
+            {
+                // Do Dependencies first
+                foreach (var dependency in Dependencies)
+                {
+                    //GarrisonButler.Diagnostic("{0} Dependencies - Executing {1}", Name(), dependency.Name());
+                    await dependency.Execute();
+                    //GarrisonButler.Diagnostic("{0} Dependencies - Executing {1} Done, State: {2} - Reason: {3}", Name(), dependency.Name(), dependency.Status.State, dependency.Status.Content);
+
+                    switch (dependency.Status.State)
+                    {
+                        case ActionResult.Failed:
+                            return;
+                        case ActionResult.Running:
+                            Status = dependency.Status;
+                            return;
+                    }
+                }
+
+                // Do action, now the action is in charge of the status
+                //GarrisonButler.Diagnostic("{0} Executing Action", Name());
+                await Action();
+                //GarrisonButler.Diagnostic("{0} Executing Action - Done, State: {1} - Reason: {2}", Name(), Status.State, Status.Content);
+            }
+            
+        }
+        public async Task ExecuteOld()
+        {
+            //GarrisonButler.Diagnostic("{0} Execute Called.", Name()); 
+
+            // If job done
+            if (IsFulfilled())
+            {
+                GarrisonButler.Diagnostic("{0} is fulfilled. Setting Atom as Done.", Name());
                 Status = new Result(ActionResult.Done, "Fulfilled");
                 Running = false;
             }
 
             //COMMENTED OUT BECAUSE: Requirements are checked externally to know if a task should be added to the current list of task. But once added, it is kept until failed or done. 
-            
+
             //{
             //    State = new Result(ActionResult.Failed);
             //}
@@ -74,17 +130,17 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
                 if (timer.IsFinished)
                 {
                     timer.Reset();
-                    
+
                     if (!RequirementsMet())
                     {
-                        GarrisonButler.Diagnostic("{0} Requirements not met, setting status as Failed. State: {1} - Reason: {2}", Name(), Status.State, Status.Content);  
+                        GarrisonButler.Diagnostic("{0} Requirements not met, setting status as Failed. State: {1} - Reason: {2}", Name(), Status.State, Status.Content);
                         Status = new Result(ActionResult.Failed, "Requirements not met.");
                         return;
                     }
 
-                    GarrisonButler.Diagnostic("{0} Requirements met, setting status as Running. State: {1} - Reason: {2}", Name(), Status.State, Status.Content); 
+                    GarrisonButler.Diagnostic("{0} Requirements met, setting status as Running. State: {1} - Reason: {2}", Name(), Status.State, Status.Content);
                     Status = new Result(ActionResult.Running, "Running");
-                    Running = true; 
+                    Running = true;
                 }
                 if (Running)
                 {
@@ -93,7 +149,7 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
                     {
                         GarrisonButler.Diagnostic("{0} Dependencies - Executing {1}", Name(), dependency.Name());
                         await dependency.Execute();
-                        GarrisonButler.Diagnostic("{0} Dependencies - Executing {1} Done, State: {2} - Reason: {3}", Name(), dependency.Name(), dependency.Status.State, dependency.Status.Content); 
+                        GarrisonButler.Diagnostic("{0} Dependencies - Executing {1} Done, State: {2} - Reason: {3}", Name(), dependency.Name(), dependency.Status.State, dependency.Status.Content);
 
                         switch (dependency.Status.State)
                         {
@@ -108,17 +164,16 @@ namespace GarrisonButler.ButlerCoroutines.AtomsLibrary
                     // Do action, now the action is in charge of the status
                     GarrisonButler.Diagnostic("{0} Executing Action", Name());
                     await Action();
-                    GarrisonButler.Diagnostic("{0} Executing Action - Done, State: {1} - Reason: {2}", Name(), Status.State, Status.Content); 
+                    GarrisonButler.Diagnostic("{0} Executing Action - Done, State: {1} - Reason: {2}", Name(), Status.State, Status.Content);
                 }
             }
         }
 
         public Atom()
         {
-            Status = new Result(ActionResult.Init);
+            Status = new Result(ActionResult.Init, "Initialized");
             Dependencies = new List<Atom>();
             timer = new WaitTimer(TimeSpan.FromMilliseconds(5000));
         }
-
     }
 }
